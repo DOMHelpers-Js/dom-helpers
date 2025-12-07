@@ -18,18 +18,19 @@
   <div class="card">Card 3</div>
 
   <script src="src/Core/01_dh-core.js"></script>
-  <script src="src2/Enhancers/04_dh-indexed-collection-updates.js"></script>
+  <script src="src/bundled/02_dh-enhancers.js"></script>
+  <script src="src/Enhancers/10_dh-array-based-updates.js"></script>
   
   <script>
     console.log('Testing array-based updates...');
     
     // Use Selector.queryAll (from 01_dh-core.js)
-    const cards = Selector.queryAll('.card');
+    const cards = ClassName.card;
     console.log('Found cards:', cards.length);
     
     // Test 1: Array syntax
     cards.update({
-      textContent: ['First Card', 'Second Card', 'Third Card'],
+      textContent: ['First Card', 'Second Card'],
       style: {
         backgroundColor: ['#ffebee', '#e8f5e9', '#e3f2fd'],
         color: ['#c62828', '#2e7d32', '#1565c0'],
