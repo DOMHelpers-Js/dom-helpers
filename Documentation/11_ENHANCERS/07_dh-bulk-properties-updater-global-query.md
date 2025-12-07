@@ -186,7 +186,6 @@ paragraphs.textContent({
   2: "Third paragraph",
 });
 ```
-
 ---
 
 ### 8. `collection.innerHTML(updates)`
