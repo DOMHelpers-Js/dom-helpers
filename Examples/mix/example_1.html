@@ -30,8 +30,8 @@
 
     <!-- Load DOM Helpers from CDN -->
    
-  <script src="../../src/Core/01_dh-core.js"></script>
-  <script src="../../src/bundled/02_dh-enhancers.js"></script>
+  <script src="../../src/modular/elements.js"></script>
+  <script src="../../src/modular/collections.js"></script>
         <script>
         // Style the buttons
         Elements.primaryBtn.update({
@@ -43,7 +43,7 @@
                 click: () => {
                     Elements.output.update({
                         textContent: 'Primary button clicked!',
-                        style: { color: '#007bff' }
+                        style: { color: '#6c757d' }
                     });
                 }
             }

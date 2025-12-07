@@ -72,17 +72,12 @@
     <button class="mixed-btn">Mixed 3</button>
     <button onclick="testMixed()">Apply Mixed Updates</button>
   </div>
-<script src="../../src/Core/01_dom-helpers.js"></script>
-  <script src="../../src/Core/02_dh-bulk-property-updaters.js"></script>
-  <script src="../../src/Core/03_dh-collection-shortcuts.js"></script>
-  <script src="../../src/Core/04_dh-global-query.js"></script>
-  <script src="../../src/Core/05_dh-indexed-collection-updates.js"></script>
-  <script src="../../src/Core/06_dh-index-selection.js"></script>
-  <script src="../../src/Core/07_dh-global-collection-indexed-updates.js"></script>
-  <script src="../../src/Core/08_dh-conditional-rendering.js"></script>
-  <script src="../../src/Core/09_dh-conditions-default.js"></script>
-  <script src="../../src/Core/10_dh-selector-update-patch.js"></script>
-  <script src="../../src/Core/11_dh-bulk-properties-updater-global-query.js"></script>
+<script src="../../src/modular/core.js"></script>
+
+    <!-- Load Elements Module -->
+    <script src="../../src/modular/elements.js"></script>
+    <script src="../../src/modular/collections.js"></script>
+    <script src="../../src/modular/selector.js"></script>
   <script>
     // Test 1: Collections.ClassName
     function testClassName() {
