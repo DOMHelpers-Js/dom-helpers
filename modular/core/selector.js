@@ -15,6 +15,7 @@
  *   - Smart caching with change detection
  *   - Enhanced .update() on results
  *   - Scoped queries within containers
+ *   - Enhanced syntax: Selector.query.myButton
  */
 
 (function (global, factory) {
@@ -364,6 +365,7 @@
         maxCacheSize: options.maxCacheSize ?? 1000,
         debounceDelay: options.debounceDelay ?? 16,
         enableSmartCaching: options.enableSmartCaching ?? true,
+        enableEnhancedSyntax: options.enableEnhancedSyntax ?? true,
         ...options
       };
 
@@ -378,15 +380,32 @@
       this.pendingUpdates = new Set();
       this.cleanupTimer = null;
       this.isDestroyed = false;
+      this.selectorPatterns = this._buildSelectorPatterns();
 
       this._initProxies();
       this._initMutationObserver();
       this._scheduleCleanup();
     }
 
+    _buildSelectorPatterns() {
+      return {
+        id: /^#([a-zA-Z][\w-]*)$/,
+        class: /^\.([a-zA-Z][\w-]*)$/,
+        tag: /^([a-zA-Z][a-zA-Z0-9]*)$/,
+        attribute: /^\[([^\]]+)\]$/,
+        descendant: /^(\w+)\s+(\w+)$/,
+        child: /^(\w+)\s*>\s*(\w+)$/,
+        pseudo: /^(\w+):([a-zA-Z-]+)$/
+      };
+    }
+
     _initProxies() {
-      this.query = (selector) => this._getQuery('single', selector);
-      this.queryAll = (selector) => this._getQuery('multiple', selector);
+      this.query = this._createQueryFunction('single');
+      this.queryAll = this._createQueryFunction('multiple');
+
+      if (this.options.enableEnhancedSyntax) {
+        this._initEnhancedSyntax();
+      }
 
       this.Scoped = {
         within: (container, selector) => {
@@ -411,6 +430,149 @@
           return this._getScopedQuery(containerEl, selector, 'multiple', cacheKey);
         }
       };
+    }
+
+    _createQueryFunction(type) {
+      const func = (selector) => this._getQuery(type, selector);
+      func._queryType = type;
+      func._helper = this;
+      return func;
+    }
+
+    _initEnhancedSyntax() {
+      const originalQuery = this.query;
+      this.query = new Proxy(originalQuery, {
+        get: (target, prop) => {
+          if (typeof prop === 'symbol' || prop === 'constructor' || prop === 'prototype' || 
+              prop === 'apply' || prop === 'call' || prop === 'bind' || 
+              typeof target[prop] === 'function') {
+            return target[prop];
+          }
+
+          const selector = this._normalizeSelector(prop);
+          const element = this._getQuery('single', selector);
+
+          if (element) {
+            return this._createElementProxy(element);
+          }
+
+          return element;
+        },
+
+        apply: (target, thisArg, args) => {
+          if (args.length > 0) {
+            return this._getQuery('single', args[0]);
+          }
+          return null;
+        }
+      });
+
+      const originalQueryAll = this.queryAll;
+      this.queryAll = new Proxy(originalQueryAll, {
+        get: (target, prop) => {
+          if (typeof prop === 'symbol' || prop === 'constructor' || prop === 'prototype' || 
+              prop === 'apply' || prop === 'call' || prop === 'bind' || 
+              typeof target[prop] === 'function') {
+            return target[prop];
+          }
+
+          const selector = this._normalizeSelector(prop);
+          const collection = this._getQuery('multiple', selector);
+
+          return this._createCollectionProxy(collection);
+        },
+
+        apply: (target, thisArg, args) => {
+          if (args.length > 0) {
+            return this._getQuery('multiple', args[0]);
+          }
+          return this._createEmptyCollection();
+        }
+      });
+    }
+
+    _normalizeSelector(prop) {
+      const propStr = prop.toString();
+
+      const conversions = {
+        id: (str) => `#${this._camelToKebab(str)}`,
+        class: (str) => `.${this._camelToKebab(str)}`,
+        direct: (str) => str
+      };
+
+      if (propStr.startsWith('id') && propStr.length > 2) {
+        return conversions.id(propStr.slice(2));
+      }
+
+      if (propStr.startsWith('class') && propStr.length > 5) {
+        return conversions.class(propStr.slice(5));
+      }
+
+      if (/^[a-z][a-zA-Z]*$/.test(propStr) && /[A-Z]/.test(propStr)) {
+        return conversions.class(propStr);
+      }
+
+      if (/^[a-z]+$/.test(propStr) && propStr.length < 10) {
+        return propStr;
+      }
+
+      if (propStr.match(/^[a-zA-Z][\w-]*$/)) {
+        return `#${propStr}`;
+      }
+
+      return propStr;
+    }
+
+    _camelToKebab(str) {
+      return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+    }
+
+    _createElementProxy(element) {
+      if (!element || !this.options.enableEnhancedSyntax) return element;
+
+      return new Proxy(element, {
+        get: (target, prop) => {
+          return target[prop];
+        },
+        set: (target, prop, value) => {
+          try {
+            target[prop] = value;
+            return true;
+          } catch (e) {
+            this._warn(`Failed to set property ${prop}: ${e.message}`);
+            return false;
+          }
+        }
+      });
+    }
+
+    _createCollectionProxy(collection) {
+      if (!collection || !this.options.enableEnhancedSyntax) return collection;
+
+      return new Proxy(collection, {
+        get: (target, prop) => {
+          if (!isNaN(prop) && parseInt(prop) >= 0) {
+            const index = parseInt(prop);
+            const element = target[index];
+
+            if (element) {
+              return this._createElementProxy(element);
+            }
+            return element;
+          }
+
+          return target[prop];
+        },
+        set: (target, prop, value) => {
+          try {
+            target[prop] = value;
+            return true;
+          } catch (e) {
+            this._warn(`Failed to set collection property ${prop}: ${e.message}`);
+            return false;
+          }
+        }
+      });
     }
 
     _createCacheKey(type, selector) {
@@ -612,6 +774,41 @@
         off(event, handler) {
           this.forEach(el => el.removeEventListener(event, handler));
           return this;
+        },
+
+        visible() {
+          return this.filter(el => {
+            const style = window.getComputedStyle(el);
+            return style.display !== 'none' && 
+                   style.visibility !== 'hidden' && 
+                   style.opacity !== '0';
+          });
+        },
+
+        hidden() {
+          return this.filter(el => {
+            const style = window.getComputedStyle(el);
+            return style.display === 'none' || 
+                   style.visibility === 'hidden' || 
+                   style.opacity === '0';
+          });
+        },
+
+        enabled() {
+          return this.filter(el => !el.disabled && !el.hasAttribute('disabled'));
+        },
+
+        disabled() {
+          return this.filter(el => el.disabled || el.hasAttribute('disabled'));
+        },
+
+        within(selector) {
+          const results = [];
+          this.forEach(el => {
+            const found = el.querySelectorAll(selector);
+            results.push(...Array.from(found));
+          });
+          return this._helper._enhanceNodeList(results, `${this._selector} ${selector}`);
         }
       };
 
@@ -645,10 +842,13 @@
     }
 
     _classifySelector(selector) {
-      if (/^#[a-zA-Z][\w-]*$/.test(selector)) return 'id';
-      if (/^\.[a-zA-Z][\w-]*$/.test(selector)) return 'class';
-      if (/^[a-zA-Z][a-zA-Z0-9]*$/.test(selector)) return 'tag';
-      if (/^\[[^\]]+\]$/.test(selector)) return 'attribute';
+      if (this.selectorPatterns.id.test(selector)) return 'id';
+      if (this.selectorPatterns.class.test(selector)) return 'class';
+      if (this.selectorPatterns.tag.test(selector)) return 'tag';
+      if (this.selectorPatterns.attribute.test(selector)) return 'attribute';
+      if (this.selectorPatterns.descendant.test(selector)) return 'descendant';
+      if (this.selectorPatterns.child.test(selector)) return 'child';
+      if (this.selectorPatterns.pseudo.test(selector)) return 'pseudo';
       return 'complex';
     }
 
@@ -802,6 +1002,7 @@
       }
     }
 
+    // Public API Methods
     getStats() {
       return {
         ...this.stats,
@@ -862,6 +1063,19 @@
 
       throw new Error(`Timeout waiting for selector: ${selector} (min: ${minCount})`);
     }
+
+    enableEnhancedSyntax() {
+      this.options.enableEnhancedSyntax = true;
+      this._initEnhancedSyntax();
+      return this;
+    }
+
+    disableEnhancedSyntax() {
+      this.options.enableEnhancedSyntax = false;
+      this.query = this._createQueryFunction('single');
+      this.queryAll = this._createQueryFunction('multiple');
+      return this;
+    }
   }
 
   // Initialize helper
@@ -870,7 +1084,8 @@
     autoCleanup: true,
     cleanupInterval: 30000,
     maxCacheSize: 1000,
-    enableSmartCaching: true
+    enableSmartCaching: true,
+    enableEnhancedSyntax: true
   });
 
   const Selector = {
@@ -884,12 +1099,21 @@
     destroy: () => SelectorHelper.destroy(),
     waitFor: (selector, timeout) => SelectorHelper.waitForSelector(selector, timeout),
     waitForAll: (selector, minCount, timeout) => SelectorHelper.waitForSelectorAll(selector, minCount, timeout),
+    enableEnhancedSyntax: () => SelectorHelper.enableEnhancedSyntax(),
+    disableEnhancedSyntax: () => SelectorHelper.disableEnhancedSyntax(),
     configure: (options) => {
       Object.assign(SelectorHelper.options, options);
       return Selector;
     }
   };
 
+  /**
+   * Bulk update method for Selector helper
+   * Allows updating multiple elements/collections using CSS selectors in a single call
+   *
+   * @param {Object} updates - Object where keys are CSS selectors and values are update objects
+   * @returns {Object} - Object with results for each selector
+   */
   Selector.update = (updates = {}) => {
     if (!updates || typeof updates !== 'object' || Array.isArray(updates)) {
       console.warn('[DOM Helpers] Selector.update() requires an object with CSS selectors as keys');
@@ -897,6 +1121,8 @@
     }
 
     const results = {};
+    const successful = [];
+    const failed = [];
 
     Object.entries(updates).forEach(([selector, updateData]) => {
       try {
@@ -910,6 +1136,7 @@
               elements,
               elementsUpdated: elements.length
             };
+            successful.push(selector);
           } else {
             const elementsArray = Array.from(elements);
             elementsArray.forEach(element => {
@@ -924,6 +1151,7 @@
               elements,
               elementsUpdated: elementsArray.length
             };
+            successful.push(selector);
           }
         } else {
           results[selector] = {
@@ -932,14 +1160,27 @@
             elementsUpdated: 0,
             warning: 'No elements found matching selector'
           };
+          successful.push(selector);
         }
       } catch (error) {
         results[selector] = {
           success: false,
           error: error.message
         };
+        failed.push(selector);
       }
     });
+
+    // Log summary if logging is enabled
+    if (SelectorHelper.options.enableLogging) {
+      const totalElements = successful.reduce((sum, sel) => {
+        return sum + (results[sel].elementsUpdated || 0);
+      }, 0);
+      console.log(`[Selector] Bulk update completed: ${successful.length} selectors (${totalElements} elements), ${failed.length} failed`);
+      if (failed.length > 0) {
+        console.warn(`[Selector] Failed selectors:`, failed);
+      }
+    }
 
     return results;
   };

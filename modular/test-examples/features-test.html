@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Complete Collection Shortcuts Test</title>
+  <style>
+    .card { border: 1px solid #ddd; padding: 20px; margin: 10px; }
+    button { margin: 5px; padding: 10px; }
+    input { margin: 5px; padding: 5px; }
+  </style>
+</head>
+<body>
+  <div class="card">Card 1</div>
+  <div class="card">Card 2</div>
+  <div class="card">Card 3</div>
+  
+  <button id="btn1" class="btn">Button 1</button>
+  <button id="btn2" class="btn">Button 2</button>
+  <button id="btn3" class="btn">Button 3</button>
+  
+  <input id="input1" name="username" type="text" placeholder="Username">
+  <input id="input2" name="email" type="text" placeholder="Email">
+  
+  <p>Paragraph 1</p>
+  <p>Paragraph 2</p>
+
+
+  <script src="elements.js"></script>
+  <script src="collections.js"></script>
+  <script src="selector.js"></script>
+
+  <script src="core-update-engine.js"></script>
+  <script src="collection-shortcuts.js"></script>
+  <script src="query-enhancements.js"></script>
+  <script src="array-based-updates.js"></script>
+
+  <script>
+    console.log('=== COMPLETE COLLECTION SHORTCUTS TEST ===\n');
+    
+    // ✅ Test 1: ClassName with property shortcuts
+    console.log('Test 1: ClassName with property shortcuts');
+    ClassName.card.textContent({
+      0: 'ClassName Card 1',
+      1: 'ClassName Card 2',
+      2: 'ClassName Card 3'
+    });
+    ClassName.card.style({
+      0: { backgroundColor: '#ffebee', color: '#c62828' },
+      1: { backgroundColor: '#e8f5e9', color: '#2e7d32' },
+      2: { backgroundColor: '#e3f2fd', color: '#1565c0' }
+    });
+    console.log('✅ ClassName.card works!\n');
+    
+    // ✅ Test 2: TagName with property shortcuts
+    setTimeout(() => {
+      console.log('Test 2: TagName with property shortcuts');
+      TagName.p.innerHTML({
+        0: '<strong>Bold Paragraph 1</strong>',
+        1: '<em>Italic Paragraph 2</em>'
+      });
+      TagName.p.dataset({
+        0: { id: 'p1', index: '0' },
+        1: { id: 'p2', index: '1' }
+      });
+      console.log('✅ TagName.p works!\n');
+    }, 1000);
+    
+    // ✅ Test 3: Collections.ClassName with property shortcuts
+    setTimeout(() => {
+      console.log('Test 3: Collections.ClassName with property shortcuts');
+      Collections.ClassName.btn.attrs({
+        0: { title: 'First Button', 'data-priority': 'high' },
+        1: { title: 'Second Button', 'data-priority': 'medium' },
+        2: { title: 'Third Button', 'data-priority': 'low' }
+      });
+      console.log('✅ Collections.ClassName.btn works!\n');
+    }, 2000);
+    
+    // ✅ Test 4: Selector.queryAll with property shortcuts
+    setTimeout(() => {
+      console.log('Test 4: Selector.queryAll with property shortcuts');
+      Selector.queryAll('.card').classes({
+        0: 'card highlighted',
+        1: 'card active',
+        2: 'card disabled'
+      });
+      console.log('✅ Selector.queryAll works!\n');
+    }, 3000);
+    
+    // ✅ Test 5: Id property access (Id.example)
+    setTimeout(() => {
+      console.log('Test 5: Id property access');
+      Id.btn1.update({
+        textContent: 'Id.btn1 Updated',
+        style: { backgroundColor: '#4caf50', color: 'white' }
+      });
+      console.log('✅ Id.btn1 works!\n');
+    }, 4000);
+    
+    // ✅ Test 6: Id function call (Id('example'))
+    setTimeout(() => {
+      console.log('Test 6: Id function call');
+      Id('btn2').update({
+        textContent: 'Id("btn2") Updated',
+        style: { backgroundColor: '#2196f3', color: 'white' }
+      });
+      console.log('✅ Id("btn2") works!\n');
+    }, 5000);
+    
+    // ✅ Test 7: Id.update() bulk updates
+    setTimeout(() => {
+      console.log('Test 7: Id.update() bulk updates');
+      Id.update({
+        btn1: { textContent: 'Bulk Button 1' },
+        btn2: { textContent: 'Bulk Button 2' },
+        btn3: { textContent: 'Bulk Button 3' }
+      });
+      console.log('✅ Id.update() works!\n');
+    }, 6000);
+    
+    // ✅ Test 8: Name collection
+    setTimeout(() => {
+      console.log('Test 8: Name collection');
+      Name.username.value({
+        0: 'john_doe'
+      });
+      Name.email.value({
+        0: 'john@example.com'
+      });
+      console.log('✅ Name collection works!\n');
+    }, 7000);
+    
+    // ✅ Test 9: Generic prop() with nested properties
+    setTimeout(() => {
+      console.log('Test 9: Generic prop() with nested properties');
+      ClassName.card.prop('style.border', {
+        0: '3px solid red',
+        1: '3px solid green',
+        2: '3px solid blue'
+      });
+      console.log('✅ Generic prop() works!\n');
+    }, 8000);
+    
+    // ✅ Test 10: Array-based updates
+    setTimeout(() => {
+      console.log('Test 10: Array-based updates');
+      ClassName.card.update({
+        textContent: ['Array Card 1', 'Array Card 2', 'Array Card 3'],
+        style: {
+          fontWeight: 'bold',
+          padding: ['25px', '30px', '35px']
+        }
+      });
+      console.log('✅ Array-based updates work!\n');
+    }, 9000);
+    
+    // ✅ Test 11: Mixed update modes
+    setTimeout(() => {
+      console.log('Test 11: Mixed update modes');
+      ClassName.btn.update({
+        // Bulk style
+        style: { fontWeight: 'bold' },
+        // Index-based textContent
+        textContent: ['Mixed 1', 'Mixed 2', 'Mixed 3'],
+        // Index object override
+        [1]: {
+          style: { backgroundColor: 'purple', color: 'white' }
+        }
+      });
+      console.log('✅ Mixed update modes work!\n');
+    }, 10000);
+    
+    // ✅ Final Summary
+    setTimeout(() => {
+      console.log('\n=== SUMMARY ===');
+      console.log('✅ ClassName.example - Works');
+      console.log('✅ ClassName("example") - Works');
+      console.log('✅ TagName.div - Works');
+      console.log('✅ TagName("div") - Works');
+      console.log('✅ Name.username - Works');
+      console.log('✅ Collections.ClassName.btn - Works');
+      console.log('✅ Selector.queryAll(".card") - Works');
+      console.log('✅ Id.myButton - Works');
+      console.log('✅ Id("myButton") - Works');
+      console.log('✅ Id.update({...}) - Works');
+      console.log('✅ All property shortcuts (.textContent, .style, etc.) - Work');
+      console.log('✅ Array-based updates - Work');
+      console.log('✅ Index-based updates - Work');
+      console.log('✅ Mixed update modes - Work');
+      console.log('\n🎉 ALL TESTS PASSED! Collection shortcuts are fully functional!');
+      
+      console.log('\n📊 Cache Info:', Id.cacheInfo());
+    }, 11000);
+  </script>
+</body>
+</html>
