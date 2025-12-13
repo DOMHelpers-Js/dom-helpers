@@ -20,17 +20,22 @@
     .card-container {
         display: flex;
     }
-
  
 
-</style>>
+     
+ 
+
+</style>
 <body>
     <div class="card-container">
         <div class="card"></div>
         <div class="card"></div>
         <div class="card"></div>
     </div>
-    
+  
+     <button onclick="setStatus('loaded')">Set Loaded</button>
+     <button onclick="setStatus('processing')">Set Processing</button>
+
     <!-- Core DOM Helpers -->
 <script src="../../src/Core/01_dh-core.js"></script>
 
@@ -54,16 +59,39 @@
 <script>
 
 
+function setStatus(status) {
 
-Conditions.apply('loaded', {
+Conditions.apply( status , {
   'loaded': {
     textContent: ['First', 'Second', 'Third'],
     style: {
       color: ['red', 'blue', 'green'],
-      fontSize: ['16px', '18px', '20px']
-    }
-  }
+      fontSize: ['16px', '18px', '20px'],
+      fontWeight: 'bold',
+      backgroundColor: '#e0f7fa'
+    },
+    onclick: [
+      () => alert('First card clicked!'),
+      () => alert('Second card clicked!'),
+      () => alert('Third card clicked!')
+    ]
+  },
+  'processing': {
+    textContent: 'Loading...',
+    style: {
+      color: 'gray',
+      fontStyle: 'italic',
+      fontSize: '16px',
+      backgroundColor: '#fff3e0'
+    },
+   onclick: null  // ✅ Explicitly remove click handlers
+  },
+
+
+
 }, '.card');
+}
+setStatus('loaded');
 
 </script>
 </body>

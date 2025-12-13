@@ -334,8 +334,16 @@ Multiple state changes trigger updates efficiently:
 state.user.name = "Bob";
 state.user.age = 30;
 state.user.email = "bob@example.com";
-```
 
+// or use
+state.user = { 
+  name: "Bob", 
+  age: 30, 
+  email: "bob@example.com" 
+  };
+
+
+```
 ---
 
 ## API Reference
