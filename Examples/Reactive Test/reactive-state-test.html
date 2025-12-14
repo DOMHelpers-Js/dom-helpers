@@ -206,13 +206,13 @@
   </div>
 
   <!-- Load Scripts -->
-<script src="../../src/Core/01_dom-helpers.js"></script>
-<script src="../../src/Reactive/dh-reactivity.js" ></script>
+<script src="../../src/Core/01_dh-core.js"></script>
+<script src="../../src/Reactive/modular-reactive/01_dh-reactive.js" ></script>
 
   <script>
     // ===== REACTIVE STATE =====
     
-    const state = Elements.state({
+    const state = ReactiveUtils.state({
       // Basic counter
       count: 0,
       
