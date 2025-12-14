@@ -16,13 +16,13 @@ The builder pattern needs a final step to create the object:
 
 ```javascript
 // ❌ Incomplete - no build()
-const builder = ReactiveUtils.builder()
+const builder = ReactiveUtils.builder() 
   .state({ count: 0 })
   .action('increment', function() { this.count++; });
 // builder is not usable yet!
 
 // ✅ Complete - with build()
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ count: 0 })
   .action('increment', function() { this.count++; })
   .build(); // Now it's a reactive state!
@@ -43,7 +43,7 @@ state.increment(); // Works!
 ### The Builder Chain
 
 ```javascript
-ReactiveUtils.builder()          // Start builder
+ReactiveUtils.builder()           // Start builder
   .state({ count: 0 })      // Configure
   .action('increment', ...) // Configure more
   .build();                 // Finalize and return state
@@ -56,7 +56,7 @@ ReactiveUtils.builder()          // Start builder
 ### Simple Build
 
 ```javascript
-const counter = ReactiveUtils.builder()
+const counter = ReactiveUtils.builder() 
   .state({ count: 0 })
   .build();
 
@@ -68,7 +68,7 @@ console.log(counter.count); // 5
 ### Build with Features
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ value: 0 })
   .computed('double', (s) => s.value * 2)
   .action('increment', function() { this.value++; })
@@ -81,7 +81,7 @@ console.log(state.double); // 2
 ### Complete Builder
 
 ```javascript
-const app = ReactiveUtils.builder()
+const app = ReactiveUtils.builder() 
   .state({ count: 0 })
   .computed('double', (s) => s.count * 2)
   .actions({
@@ -106,7 +106,7 @@ app.increment(); // Everything works!
 ### Example 1: Counter with All Features
 
 ```javascript
-const counter = ReactiveUtils.builder()
+const counter = ReactiveUtils.builder() 
   .state({
     count: 0,
     step: 1
@@ -146,7 +146,7 @@ counter.increment(); // 6
 ### Example 2: Form with Validation
 
 ```javascript
-const loginForm = ReactiveUtils.builder()
+const loginForm = ReactiveUtils.builder() 
   .state({
     email: '',
     password: '',
@@ -226,7 +226,7 @@ document.getElementById('login-form').onsubmit = async (e) => {
 ### Example 3: Data Fetcher
 
 ```javascript
-const userLoader = ReactiveUtils.builder()
+const userLoader = ReactiveUtils.builder() 
   .state({
     user: null,
     loading: false,
@@ -284,7 +284,7 @@ await userLoader.load(123);
 ## Real-World Example: Todo Application
 
 ```javascript
-const todoApp = ReactiveUtils.builder()
+const todoApp = ReactiveUtils.builder() 
   .state({
     todos: [],
     filter: 'all',
@@ -373,7 +373,7 @@ window.todoApp = todoApp;
 ### Pattern 1: Simple Build
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ value: 0 })
   .build();
 ```
@@ -381,7 +381,7 @@ const state = ReactiveUtils.builder()
 ### Pattern 2: Full Featured
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ data: {} })
   .computed('derived', (s) => s.data.value)
   .actions({ method() {} })
@@ -393,7 +393,7 @@ const state = ReactiveUtils.builder()
 ### Pattern 3: Save Reference
 
 ```javascript
-const myApp = ReactiveUtils.builder()
+const myApp = ReactiveUtils.builder() 
   .state({ count: 0 })
   .actions({ increment() { this.count++; }})
   .build();
@@ -412,11 +412,11 @@ myApp.increment();
 
 ```javascript
 // ❌ Without build - can't use
-const builder = ReactiveUtils.builder().state({ count: 0 });
+const builder = ReactiveUtils.builder() .state({ count: 0 });
 builder.count; // undefined
 
 // ✅ With build - works
-const state = ReactiveUtils.builder().state({ count: 0 }).build();
+const state = ReactiveUtils.builder() .state({ count: 0 }).build();
 state.count; // 0
 ```
 
@@ -425,7 +425,7 @@ state.count; // 0
 **Answer:** Each call creates a new independent state:
 
 ```javascript
-const builder = ReactiveUtils.builder().state({ count: 0 });
+const builder = ReactiveUtils.builder() .state({ count: 0 });
 
 const state1 = builder.build();
 const state2 = builder.build();
@@ -439,7 +439,7 @@ console.log(state2.count); // 0 (separate state)
 **Answer:** A reactive state object:
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ value: 0 })
   .build();
 
@@ -454,7 +454,7 @@ const state = ReactiveUtils.builder()
 
 ```javascript
 // ✅ build() at the end
-ReactiveUtils.builder()
+ReactiveUtils.builder() 
   .state({})
   .actions({})
   .build(); // Last!
@@ -464,7 +464,7 @@ ReactiveUtils.builder()
 
 ```javascript
 // ✅ Save the result
-const myState = ReactiveUtils.builder()
+const myState = ReactiveUtils.builder() 
   .state({})
   .build();
 ```
@@ -473,7 +473,7 @@ const myState = ReactiveUtils.builder()
 
 ```javascript
 // ✅ Configure everything first
-ReactiveUtils.builder()
+ReactiveUtils.builder() 
   .state({})
   .computed()
   .actions()
@@ -503,7 +503,7 @@ ReactiveUtils.builder()
 ### The Basic Pattern:
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ value: 0 })
   .computed('double', (s) => s.value * 2)
   .actions({ increment() { this.value++; }})

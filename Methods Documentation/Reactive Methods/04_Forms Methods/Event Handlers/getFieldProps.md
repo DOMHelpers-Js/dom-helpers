@@ -75,6 +75,52 @@ Returns: {
 Apply to input → Fully connected!
 ```
 
+
+
+### Field Name in Props Object
+
+The props object returned by `getFieldProps()` includes handlers that use the same field name detection as `handleChange()` and `handleBlur()`:
+
+```javascript
+// What getFieldProps() returns:
+getFieldProps(field) {
+  return {
+    name: field,
+    value: this.values[field] || '',
+    onChange: (e) => this.handleChange(e),  // Uses name || id
+    onBlur: (e) => this.handleBlur(e)       // Uses name || id
+  };
+}
+```
+
+**This means the input needs EITHER `name` OR `id` attribute:**
+
+```javascript
+const props = form.getFieldProps('email');
+
+// Option 1: Input has name attribute
+const input1 = document.createElement('input');
+input1.name = 'email';  // ← handleChange/handleBlur will find this
+Object.assign(input1, props);
+
+// Option 2: Input has id attribute
+const input2 = document.createElement('input');
+input2.id = 'email';    // ← handleChange/handleBlur will fall back to this
+Object.assign(input2, props);
+
+// Both work!
+```
+
+**Best practice when using getFieldProps():**
+
+```javascript
+// ✅ Always set name attribute when creating inputs
+const input = document.createElement('input');
+input.name = fieldName;  // Clear and explicit
+Object.assign(input, form.getFieldProps(fieldName));
+```
+
+---
 ---
 
 ## Basic Usage

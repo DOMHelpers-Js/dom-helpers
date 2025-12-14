@@ -23,7 +23,7 @@ ReactiveUtils.effect(() => {
 });
 
 // ✅ With builder - all in one
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ count: 0 })
   .effect(() => {
     console.log('Count is:', state.count);
@@ -44,7 +44,7 @@ const state = ReactiveUtils.builder()
 ### The Builder Chain
 
 ```javascript
-ReactiveUtils.builder()
+ReactiveUtils.builder() 
   .state({ message: 'Hello' })
   .effect(() => {
     console.log(state.message);
@@ -59,7 +59,7 @@ ReactiveUtils.builder()
 ### Single Effect
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ count: 0 })
   .effect(() => {
     document.getElementById('count').textContent = state.count;
@@ -72,7 +72,7 @@ state.count = 5; // DOM updates automatically
 ### Multiple Effects
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ name: 'John', age: 30 })
   .effect(() => {
     console.log('Name:', state.name);
@@ -89,7 +89,7 @@ state.age = 31;      // Second effect runs
 ### Effect with Dependencies
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ x: 0, y: 0 })
   .computed('sum', (s) => s.x + s.y)
   .effect(() => {
@@ -107,7 +107,7 @@ state.x = 10; // Effect runs
 ### Example 1: DOM Updates
 
 ```javascript
-const counter = ReactiveUtils.builder()
+const counter = ReactiveUtils.builder() 
   .state({ count: 0 })
   .effect(() => {
     const display = document.getElementById('display');
@@ -127,7 +127,7 @@ document.getElementById('increment').onclick = () => {
 ### Example 2: Debug Logger
 
 ```javascript
-const app = ReactiveUtils.builder()
+const app = ReactiveUtils.builder() 
   .state({
     user: null,
     loading: false,
@@ -153,7 +153,7 @@ app.loading = false;
 ### Example 3: Sync to LocalStorage
 
 ```javascript
-const settings = ReactiveUtils.builder()
+const settings = ReactiveUtils.builder() 
   .state({
     theme: 'light',
     fontSize: 16,
@@ -177,7 +177,7 @@ settings.theme = 'dark'; // Auto-saves to localStorage
 ## Real-World Example: Todo List
 
 ```javascript
-const todoApp = ReactiveUtils.builder()
+const todoApp = ReactiveUtils.builder() 
   .state({
     todos: [],
     filter: 'all', // 'all', 'active', 'completed'
@@ -262,7 +262,7 @@ window.removeTodo = function(id) {
 ### Pattern 1: DOM Update
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ value: 0 })
   .effect(() => {
     document.getElementById('output').textContent = state.value;
@@ -273,7 +273,7 @@ const state = ReactiveUtils.builder()
 ### Pattern 2: Multiple Effects
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ data: {} })
   .effect(() => console.log('Effect 1:', state.data))
   .effect(() => console.log('Effect 2:', state.data))
@@ -283,7 +283,7 @@ const state = ReactiveUtils.builder()
 ### Pattern 3: Effect with Computed
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ a: 1, b: 2 })
   .computed('sum', (s) => s.a + s.b)
   .effect(() => console.log('Sum:', state.sum))
@@ -385,7 +385,7 @@ cleanup(); // Stop effect
 ### The Basic Pattern:
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ value: 0 })
   .effect(() => {
     console.log('Value:', state.value);

@@ -76,6 +76,100 @@ All inputs connected!
 
 ---
 
+
+### Automatic Array Reactivity
+
+If you have the **Reactive Array Patch** extension loaded (`02_dh-reactive-array-patch.js`), `bindToInputs()` automatically makes array fields reactive:
+
+```javascript
+// Load order matters:
+// 1. Load reactive library (01_dh-reactive.js)
+// 2. Load array patch (02_dh-reactive-array-patch.js)  ← Makes arrays reactive
+// 3. Load forms extension (04_dh-reactive-form.js)
+
+const form = ReactiveUtils.form({
+  tags: ['javascript', 'react'],  // Array field
+  email: ''
+});
+
+// With array patch loaded, array methods are reactive!
+form.bindToInputs('#form');
+
+form.values.tags.push('vue');  // ✅ Reactive! UI updates automatically
+form.values.tags.sort();       // ✅ Reactive! UI updates automatically
+```
+
+**Without array patch:**
+
+```javascript
+// Without 02_dh-reactive-array-patch.js loaded:
+form.values.tags.push('vue');  // ❌ Not reactive, UI doesn't update
+
+// You'd need to reassign:
+form.values.tags = [...form.values.tags, 'vue'];  // ✅ This works
+```
+
+**When do you need array reactivity?**
+
+```javascript
+// If your form has array fields and you use array methods:
+const form = ReactiveUtils.form({
+  todos: [],      // Array field
+  items: [],      // Array field
+  selected: []    // Array field
+});
+
+// And you use array methods:
+form.values.todos.push(newTodo);
+form.values.items.sort();
+form.values.selected.splice(0, 1);
+
+// Load the array patch extension for reactivity!
+```
+
+**Loading the array patch:**
+
+```html
+
+
+  
+
+
+
+  // Now arrays are reactive!
+  const form = ReactiveUtils.form({
+    tags: ['javascript']
+  });
+  
+  form.values.tags.push('react');  // Works! Reactive!
+
+```
+
+**How to check if array patch is loaded:**
+
+```javascript
+// Check if arrays are reactive
+const form = ReactiveUtils.form({ items: [] });
+
+form.values.items.push('test');
+// If UI updates, array patch is loaded
+// If UI doesn't update, array patch is not loaded
+```
+
+**Best Practice:**
+
+```javascript
+// ✅ Always load array patch if you use arrays
+// 
+
+// ✅ Or use array reassignment (works without patch)
+form.values.tags = [...form.values.tags, 'new-tag'];
+
+// ❌ Don't use array methods without the patch
+form.values.tags.push('new-tag');  // Won't update UI without patch!
+```
+
+
 ## Basic Usage
 
 ### Bind Entire Form

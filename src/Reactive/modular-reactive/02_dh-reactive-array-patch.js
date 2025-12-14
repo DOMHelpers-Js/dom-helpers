@@ -1,7 +1,7 @@
 /**
  * 02_dh-reactive-array-patch
  * 
- * Reactive Array Patch v1.0.0
+ * Reactive Array Patch v1.0.1
  * Makes array methods (push, pop, sort, etc.) work with reactive state
  * Load this AFTER reactive-state.js
  * @license MIT
@@ -156,16 +156,42 @@
     global.Selector.state = createReactiveWithArraySupport;
   }
 
-  // Provide manual patching function
-  global.patchReactiveArray = function(state, key) {
+  // ============================================================
+  // MAIN FIX: Create the manual patching function
+  // ============================================================
+  function patchReactiveArray(state, key) {
     if (!state || !state[key]) {
       console.error('[Reactive Array Patch] Invalid state or key');
       return;
     }
     patchArrayMethods(state, key, key);
-  };
+  }
 
-  console.log('[Reactive Array Patch] v1.0.0 loaded successfully');
+  // Provide manual patching function as global
+  global.patchReactiveArray = patchReactiveArray;
+
+  // ============================================================
+  // NEW: Add alias to ReactiveUtils for better API consistency
+  // ============================================================
+  if (ReactiveUtils) {
+    ReactiveUtils.patchArray = patchReactiveArray;
+  }
+
+  // Also add to Elements, Collections, Selector for consistency
+  if (global.Elements) {
+    global.Elements.patchArray = patchReactiveArray;
+  }
+  if (global.Collections) {
+    global.Collections.patchArray = patchReactiveArray;
+  }
+  if (global.Selector) {
+    global.Selector.patchArray = patchReactiveArray;
+  }
+
+  console.log('[Reactive Array Patch] v1.0.1 loaded successfully');
   console.log('[Reactive Array Patch] Array methods (push, pop, sort, etc.) are now reactive!');
+  console.log('[Reactive Array Patch] Manual patching available via:');
+  console.log('  - ReactiveUtils.patchArray(state, key)');
+  console.log('  - patchReactiveArray(state, key) [legacy]');
 
 })(typeof window !== 'undefined' ? window : global);

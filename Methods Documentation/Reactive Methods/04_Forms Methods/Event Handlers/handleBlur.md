@@ -71,6 +71,34 @@ Returns: (event) => {
 User leaves field → Event fires → Field marked touched → Errors show
 ```
 
+
+1. First tries `event.target.name`
+2. Falls back to `event.target.id` if name doesn't exist
+
+```javascript
+// What handleBlur() does internally:
+handleBlur(event) {
+  const target = event.target;
+  const field = target.name || target.id;  // ← Fallback to id!
+  
+  this.setTouched(field);
+  
+  if (validators[field]) {
+    this.validateField(field);
+  }
+}
+```
+
+**Works with either attribute:**
+
+```javascript
+const form = ReactiveUtils.form({ email: '' });
+
+// Both work!
+document.getElementById('email').onblur = form.handleBlur('email');
+```
+
+
 ---
 
 ## Basic Usage

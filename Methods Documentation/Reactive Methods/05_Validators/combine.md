@@ -18,18 +18,28 @@ You need to apply several validation rules to a single field:
 
 ```javascript
 // ❌ Without combine - can only use one validator
-const form = ReactiveUtils.form({
-  password: ['', v.required()] // Can't add minLength too
-});
+const form = ReactiveUtils.form(
+  { password: '' },
+  {
+    validators: {
+      password: v.required() // Can't add minLength too
+    }
+  }
+);
 
 // ✅ With combine() - multiple validators
-const form = ReactiveUtils.form({
-  password: ['', v.combine([
-    v.required('Password is required'),
-    v.minLength(8, 'Password must be at least 8 characters'),
-    v.pattern(/[A-Z]/, 'Must contain uppercase letter')
-  ])]
-});
+const form = ReactiveUtils.form(
+  { password: '' },
+  {
+    validators: {
+      password: v.combine([
+        v.required('Password is required'),
+        v.minLength(8, 'Password must be at least 8 characters'),
+        v.pattern(/[A-Z]/, 'Must contain uppercase letter')
+      ])
+    }
+  }
+);
 ```
 
 ---
@@ -53,37 +63,52 @@ Returns first error found, or null if all pass
 ### Password Validation
 
 ```javascript
-const form = ReactiveUtils.form({
-  password: ['', v.combine([
-    v.required(),
-    v.minLength(8),
-    v.maxLength(50)
-  ])]
-});
+const form = ReactiveUtils.form(
+  { password: '' },
+  {
+    validators: {
+      password: v.combine([
+        v.required(),
+        v.minLength(8),
+        v.maxLength(50)
+      ])
+    }
+  }
+);
 ```
 
 ### Email with Required
 
 ```javascript
-const form = ReactiveUtils.form({
-  email: ['', v.combine([
-    v.required('Email is required'),
-    v.email('Invalid email format')
-  ])]
-});
+const form = ReactiveUtils.form(
+  { email: '' },
+  {
+    validators: {
+      email: v.combine([
+        v.required('Email is required'),
+        v.email('Invalid email format')
+      ])
+    }
+  }
+);
 ```
 
 ### Complete Field Validation
 
 ```javascript
-const form = ReactiveUtils.form({
-  username: ['', v.combine([
-    v.required('Username is required'),
-    v.minLength(3, 'At least 3 characters'),
-    v.maxLength(20, 'Maximum 20 characters'),
-    v.pattern(/^[a-zA-Z0-9_]+$/, 'Letters, numbers, underscores only')
-  ])]
-});
+const form = ReactiveUtils.form(
+  { username: '' },
+  {
+    validators: {
+      username: v.combine([
+        v.required('Username is required'),
+        v.minLength(3, 'At least 3 characters'),
+        v.maxLength(20, 'Maximum 20 characters'),
+        v.pattern(/^[a-zA-Z0-9_]+$/, 'Letters, numbers, underscores only')
+      ])
+    }
+  }
+);
 ```
 
 ---
@@ -93,33 +118,43 @@ const form = ReactiveUtils.form({
 ### Example 1: Registration Form
 
 ```javascript
-const registrationForm = ReactiveUtils.form({
-  username: ['', v.combine([
-    v.required('Username is required'),
-    v.minLength(3, 'Username must be at least 3 characters'),
-    v.maxLength(20, 'Username must be 20 characters or less'),
-    v.pattern(/^[a-zA-Z0-9_]+$/, 'Only letters, numbers, and underscores allowed')
-  ])],
+const registrationForm = ReactiveUtils.form(
+  {
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  },
+  {
+    validators: {
+      username: v.combine([
+        v.required('Username is required'),
+        v.minLength(3, 'Username must be at least 3 characters'),
+        v.maxLength(20, 'Username must be 20 characters or less'),
+        v.pattern(/^[a-zA-Z0-9_]+$/, 'Only letters, numbers, and underscores allowed')
+      ]),
 
-  email: ['', v.combine([
-    v.required('Email is required'),
-    v.email('Please enter a valid email address')
-  ])],
+      email: v.combine([
+        v.required('Email is required'),
+        v.email('Please enter a valid email address')
+      ]),
 
-  password: ['', v.combine([
-    v.required('Password is required'),
-    v.minLength(8, 'Password must be at least 8 characters'),
-    v.pattern(/[A-Z]/, 'Password must contain at least one uppercase letter'),
-    v.pattern(/[a-z]/, 'Password must contain at least one lowercase letter'),
-    v.pattern(/[0-9]/, 'Password must contain at least one number'),
-    v.pattern(/[!@#$%^&*]/, 'Password must contain at least one special character')
-  ])],
+      password: v.combine([
+        v.required('Password is required'),
+        v.minLength(8, 'Password must be at least 8 characters'),
+        v.pattern(/[A-Z]/, 'Password must contain at least one uppercase letter'),
+        v.pattern(/[a-z]/, 'Password must contain at least one lowercase letter'),
+        v.pattern(/[0-9]/, 'Password must contain at least one number'),
+        v.pattern(/[!@#$%^&*]/, 'Password must contain at least one special character')
+      ]),
 
-  confirmPassword: ['', v.combine([
-    v.required('Please confirm your password'),
-    v.match('password', 'Passwords must match')
-  ])]
-});
+      confirmPassword: v.combine([
+        v.required('Please confirm your password'),
+        v.match('password', 'Passwords must match')
+      ])
+    }
+  }
+);
 ```
 
 ---
@@ -127,32 +162,42 @@ const registrationForm = ReactiveUtils.form({
 ### Example 2: Product Form
 
 ```javascript
-const productForm = ReactiveUtils.form({
-  name: ['', v.combine([
-    v.required('Product name is required'),
-    v.minLength(3, 'Product name must be at least 3 characters'),
-    v.maxLength(100, 'Product name must be 100 characters or less')
-  ])],
+const productForm = ReactiveUtils.form(
+  {
+    name: '',
+    price: 0,
+    sku: '',
+    stock: 0
+  },
+  {
+    validators: {
+      name: v.combine([
+        v.required('Product name is required'),
+        v.minLength(3, 'Product name must be at least 3 characters'),
+        v.maxLength(100, 'Product name must be 100 characters or less')
+      ]),
 
-  price: [0, v.combine([
-    v.required('Price is required'),
-    v.min(0.01, 'Price must be at least $0.01'),
-    v.max(999999.99, 'Price must be less than $1,000,000')
-  ])],
+      price: v.combine([
+        v.required('Price is required'),
+        v.min(0.01, 'Price must be at least $0.01'),
+        v.max(999999.99, 'Price must be less than $1,000,000')
+      ]),
 
-  sku: ['', v.combine([
-    v.required('SKU is required'),
-    v.pattern(/^[A-Z0-9-]+$/, 'SKU must contain only uppercase letters, numbers, and hyphens'),
-    v.minLength(6, 'SKU must be at least 6 characters'),
-    v.maxLength(20, 'SKU must be 20 characters or less')
-  ])],
+      sku: v.combine([
+        v.required('SKU is required'),
+        v.pattern(/^[A-Z0-9-]+$/, 'SKU must contain only uppercase letters, numbers, and hyphens'),
+        v.minLength(6, 'SKU must be at least 6 characters'),
+        v.maxLength(20, 'SKU must be 20 characters or less')
+      ]),
 
-  stock: [0, v.combine([
-    v.required('Stock quantity is required'),
-    v.min(0, 'Stock cannot be negative'),
-    v.max(10000, 'Stock cannot exceed 10,000')
-  ])]
-});
+      stock: v.combine([
+        v.required('Stock quantity is required'),
+        v.min(0, 'Stock cannot be negative'),
+        v.max(10000, 'Stock cannot exceed 10,000')
+      ])
+    }
+  }
+);
 ```
 
 ---
@@ -160,77 +205,93 @@ const productForm = ReactiveUtils.form({
 ## Real-World Example: Complex User Profile Form
 
 ```javascript
-const profileForm = ReactiveUtils.form({
-  // Personal Information
-  firstName: ['', v.combine([
-    v.required('First name is required'),
-    v.minLength(2, 'First name must be at least 2 characters'),
-    v.maxLength(50, 'First name must be 50 characters or less'),
-    v.pattern(/^[a-zA-Z\s'-]+$/, 'Only letters, spaces, hyphens, and apostrophes allowed')
-  ])],
+const profileForm = ReactiveUtils.form(
+  {
+    // Personal Information
+    firstName: '',
+    lastName: '',
+    // Contact Information
+    phone: '',
+    email: '',
+    // Address
+    zipCode: '',
+    // Bio
+    bio: '',
+    // Age
+    age: 0,
+    // Website
+    website: '',
+    // Password Change
+    newPassword: '',
+    confirmNewPassword: ''
+  },
+  {
+    validators: {
+      firstName: v.combine([
+        v.required('First name is required'),
+        v.minLength(2, 'First name must be at least 2 characters'),
+        v.maxLength(50, 'First name must be 50 characters or less'),
+        v.pattern(/^[a-zA-Z\s'-]+$/, 'Only letters, spaces, hyphens, and apostrophes allowed')
+      ]),
 
-  lastName: ['', v.combine([
-    v.required('Last name is required'),
-    v.minLength(2, 'Last name must be at least 2 characters'),
-    v.maxLength(50, 'Last name must be 50 characters or less'),
-    v.pattern(/^[a-zA-Z\s'-]+$/, 'Only letters, spaces, hyphens, and apostrophes allowed')
-  ])],
+      lastName: v.combine([
+        v.required('Last name is required'),
+        v.minLength(2, 'Last name must be at least 2 characters'),
+        v.maxLength(50, 'Last name must be 50 characters or less'),
+        v.pattern(/^[a-zA-Z\s'-]+$/, 'Only letters, spaces, hyphens, and apostrophes allowed')
+      ]),
 
-  // Contact Information
-  phone: ['', v.combine([
-    v.required('Phone number is required'),
-    v.pattern(/^\(\d{3}\) \d{3}-\d{4}$/, 'Format: (123) 456-7890')
-  ])],
+      phone: v.combine([
+        v.required('Phone number is required'),
+        v.pattern(/^\(\d{3}\) \d{3}-\d{4}$/, 'Format: (123) 456-7890')
+      ]),
 
-  email: ['', v.combine([
-    v.required('Email is required'),
-    v.email('Please enter a valid email address'),
-    v.custom(async (value) => {
-      // Check if email is available
-      const response = await fetch(`/api/check-email?email=${value}`);
-      const { available } = await response.json();
-      return available ? null : 'Email is already in use';
-    })
-  ])],
+      email: v.combine([
+        v.required('Email is required'),
+        v.email('Please enter a valid email address'),
+        v.custom(async (value) => {
+          // Check if email is available
+          const response = await fetch(`/api/check-email?email=${value}`);
+          const { available } = await response.json();
+          return available ? null : 'Email is already in use';
+        })
+      ]),
 
-  // Address
-  zipCode: ['', v.combine([
-    v.required('ZIP code is required'),
-    v.pattern(/^\d{5}(-\d{4})?$/, 'Format: 12345 or 12345-6789')
-  ])],
+      zipCode: v.combine([
+        v.required('ZIP code is required'),
+        v.pattern(/^\d{5}(-\d{4})?$/, 'Format: 12345 or 12345-6789')
+      ]),
 
-  // Bio
-  bio: ['', v.combine([
-    v.minLength(10, 'Bio must be at least 10 characters'),
-    v.maxLength(500, 'Bio must be 500 characters or less')
-  ])],
+      bio: v.combine([
+        v.minLength(10, 'Bio must be at least 10 characters'),
+        v.maxLength(500, 'Bio must be 500 characters or less')
+      ]),
 
-  // Age
-  age: [0, v.combine([
-    v.required('Age is required'),
-    v.min(18, 'You must be at least 18 years old'),
-    v.max(120, 'Please enter a valid age')
-  ])],
+      age: v.combine([
+        v.required('Age is required'),
+        v.min(18, 'You must be at least 18 years old'),
+        v.max(120, 'Please enter a valid age')
+      ]),
 
-  // Website
-  website: ['', v.combine([
-    v.pattern(/^https?:\/\/.+\..+/, 'Please enter a valid URL'),
-    v.maxLength(200, 'URL must be 200 characters or less')
-  ])],
+      website: v.combine([
+        v.pattern(/^https?:\/\/.+\..+/, 'Please enter a valid URL'),
+        v.maxLength(200, 'URL must be 200 characters or less')
+      ]),
 
-  // Password Change (optional section)
-  newPassword: ['', v.combine([
-    v.minLength(8, 'Password must be at least 8 characters'),
-    v.pattern(/[A-Z]/, 'Must contain at least one uppercase letter'),
-    v.pattern(/[a-z]/, 'Must contain at least one lowercase letter'),
-    v.pattern(/[0-9]/, 'Must contain at least one number'),
-    v.pattern(/[!@#$%^&*]/, 'Must contain at least one special character (!@#$%^&*)')
-  ])],
+      newPassword: v.combine([
+        v.minLength(8, 'Password must be at least 8 characters'),
+        v.pattern(/[A-Z]/, 'Must contain at least one uppercase letter'),
+        v.pattern(/[a-z]/, 'Must contain at least one lowercase letter'),
+        v.pattern(/[0-9]/, 'Must contain at least one number'),
+        v.pattern(/[!@#$%^&*]/, 'Must contain at least one special character (!@#$%^&*)')
+      ]),
 
-  confirmNewPassword: ['', v.combine([
-    v.match('newPassword', 'Passwords must match')
-  ])]
-});
+      confirmNewPassword: v.combine([
+        v.match('newPassword', 'Passwords must match')
+      ])
+    }
+  }
+);
 
 // Display form with validation
 ReactiveUtils.effect(() => {
@@ -244,8 +305,8 @@ ReactiveUtils.effect(() => {
           <label>First Name *</label>
           <input type="text"
                  value="${profileForm.values.firstName}"
-                 oninput="profileForm.values.firstName = this.value"
-                 onblur="profileForm.touch('firstName')">
+                 oninput="profileForm.setValue('firstName', this.value)"
+                 onblur="profileForm.setTouched('firstName')">
           ${profileForm.touched.firstName && profileForm.errors.firstName ? `
             <span class="error">${profileForm.errors.firstName}</span>
           ` : ''}
@@ -255,7 +316,7 @@ ReactiveUtils.effect(() => {
           <label>Age *</label>
           <input type="number"
                  value="${profileForm.values.age}"
-                 oninput="profileForm.values.age = parseInt(this.value) || 0">
+                 oninput="profileForm.setValue('age', parseInt(this.value) || 0)">
           ${profileForm.errors.age ? `
             <span class="error">${profileForm.errors.age}</span>
           ` : ''}
@@ -268,8 +329,8 @@ ReactiveUtils.effect(() => {
           <label>Email *</label>
           <input type="email"
                  value="${profileForm.values.email}"
-                 oninput="profileForm.values.email = this.value"
-                 onblur="profileForm.touch('email')">
+                 oninput="profileForm.setValue('email', this.value)"
+                 onblur="profileForm.setTouched('email')">
           ${profileForm.touched.email && profileForm.errors.email ? `
             <span class="error">${profileForm.errors.email}</span>
           ` : ''}
@@ -280,7 +341,7 @@ ReactiveUtils.effect(() => {
           <input type="tel"
                  placeholder="(123) 456-7890"
                  value="${profileForm.values.phone}"
-                 oninput="profileForm.values.phone = this.value">
+                 oninput="profileForm.setValue('phone', this.value)">
           ${profileForm.errors.phone ? `
             <span class="error">${profileForm.errors.phone}</span>
           ` : ''}
@@ -297,10 +358,11 @@ ReactiveUtils.effect(() => {
 async function saveProfile(event) {
   event.preventDefault();
 
-  profileForm.submit(async () => {
+  await profileForm.submit(async (values) => {
     const response = await fetch('/api/profile', {
       method: 'PUT',
-      body: JSON.stringify(profileForm.values)
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(values)
     });
 
     if (response.ok) {
@@ -317,39 +379,47 @@ async function saveProfile(event) {
 ### Pattern 1: Required + Format
 
 ```javascript
-v.combine([
-  v.required(),
-  v.email()
-])
+validators: {
+  field: v.combine([
+    v.required(),
+    v.email()
+  ])
+}
 ```
 
 ### Pattern 2: Length Range
 
 ```javascript
-v.combine([
-  v.minLength(3),
-  v.maxLength(20)
-])
+validators: {
+  field: v.combine([
+    v.minLength(3),
+    v.maxLength(20)
+  ])
+}
 ```
 
 ### Pattern 3: Value Range
 
 ```javascript
-v.combine([
-  v.min(0),
-  v.max(100)
-])
+validators: {
+  field: v.combine([
+    v.min(0),
+    v.max(100)
+  ])
+}
 ```
 
 ### Pattern 4: Multiple Rules
 
 ```javascript
-v.combine([
-  v.required(),
-  v.minLength(8),
-  v.pattern(/[A-Z]/),
-  v.pattern(/[0-9]/)
-])
+validators: {
+  field: v.combine([
+    v.required(),
+    v.minLength(8),
+    v.pattern(/[A-Z]/),
+    v.pattern(/[0-9]/)
+  ])
+}
 ```
 
 ---
@@ -413,14 +483,19 @@ v.combine([
 ### The Basic Pattern:
 
 ```javascript
-const form = ReactiveUtils.form({
-  field: ['', v.combine([
-    v.required(),
-    v.minLength(5),
-    v.maxLength(20),
-    v.pattern(/regex/)
-  ])]
-});
+const form = ReactiveUtils.form(
+  { field: '' },
+  {
+    validators: {
+      field: v.combine([
+        v.required(),
+        v.minLength(5),
+        v.maxLength(20),
+        v.pattern(/regex/)
+      ])
+    }
+  }
+);
 ```
 
 ---

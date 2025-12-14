@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DOM Helpers - Reactive State Test</title>
+  <title>DOM Helpers - Reactive stateTest</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -98,7 +98,7 @@
   </style>
 </head>
 <body>
-  <h1>🚀 DOM Helpers - Reactive State System Test</h1>
+  <h1>🚀 DOM Helpers - Reactive stateSystem Test</h1>
 
   <!-- Test 1: Basic Reactivity -->
   <div class="container">
@@ -208,11 +208,12 @@
   <!-- Load Scripts -->
 <script src="../../src/Core/01_dh-core.js"></script>
 <script src="../../src/Reactive/modular-reactive/01_dh-reactive.js" ></script>
+<script src="../../src/Reactive/modular-reactive/05_dh-reactive-global.js" ></script>
 
   <script>
-    // ===== REACTIVE STATE =====
+    // ===== REACTIVE state=====
     
-    const state = ReactiveUtils.state({
+    const state= ReactiveUtils.state({
       // Basic counter
       count: 0,
       
@@ -404,9 +405,9 @@
 
     // ===== INITIAL LOG =====
     
-    console.log('✅ Reactive State System Initialized');
-    console.log('State object:', state);
-    console.log('Try modifying state in console: state.count++');
+    console.log('✅ Reactive stateSystem Initialized');
+    console.log('stateobject:', state);
+    console.log('Try modifying statein console: state.count++');
   </script>
 </body>
 </html>

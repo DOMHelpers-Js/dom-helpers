@@ -23,7 +23,7 @@ state.$watch('count', (newVal, oldVal) => {
 });
 
 // ✅ With builder - all in one
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ count: 0 })
   .watch('count', (newVal, oldVal) => {
     console.log(`Count changed from ${oldVal} to ${newVal}`);
@@ -44,7 +44,7 @@ const state = ReactiveUtils.builder()
 ### The Builder Chain
 
 ```javascript
-ReactiveUtils.builder()
+ReactiveUtils.builder() 
   .state({ name: 'John' })
   .watch('name', (newVal, oldVal) => {
     console.log(`Name: ${oldVal} → ${newVal}`);
@@ -59,7 +59,7 @@ ReactiveUtils.builder()
 ### Watch Single Property
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ count: 0 })
   .watch('count', (newVal, oldVal) => {
     console.log(`Count: ${oldVal} → ${newVal}`);
@@ -72,7 +72,7 @@ state.count = 5; // Logs: "Count: 0 → 5"
 ### Watch Multiple Properties
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ x: 0, y: 0 })
   .watch('x', (newVal) => console.log('X changed:', newVal))
   .watch('y', (newVal) => console.log('Y changed:', newVal))
@@ -85,7 +85,7 @@ state.y = 20; // Logs: "Y changed: 20"
 ### Watch with Side Effects
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ username: '' })
   .watch('username', async (newVal) => {
     if (newVal) {
@@ -103,7 +103,7 @@ const state = ReactiveUtils.builder()
 ### Example 1: Auto-Save
 
 ```javascript
-const document = ReactiveUtils.builder()
+const document = ReactiveUtils.builder() 
   .state({
     title: '',
     content: '',
@@ -132,7 +132,7 @@ document.content = 'Some content';
 ### Example 2: Validation on Change
 
 ```javascript
-const form = ReactiveUtils.builder()
+const form = ReactiveUtils.builder() 
   .state({
     email: '',
     emailError: null
@@ -157,7 +157,7 @@ form.email = 'test@example.com'; // Clears error
 ### Example 3: Analytics Tracking
 
 ```javascript
-const page = ReactiveUtils.builder()
+const page = ReactiveUtils.builder() 
   .state({
     currentRoute: '/',
     scrollPosition: 0,
@@ -187,7 +187,7 @@ function trackEvent(name, data) {
 ## Real-World Example: Settings Manager
 
 ```javascript
-const settings = ReactiveUtils.builder()
+const settings = ReactiveUtils.builder() 
   .state({
     theme: 'light',
     fontSize: 16,
@@ -237,7 +237,7 @@ function requestNotificationPermission() {
 ### Pattern 1: Simple Watch
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ value: 0 })
   .watch('value', (newVal) => console.log(newVal))
   .build();
@@ -246,7 +246,7 @@ const state = ReactiveUtils.builder()
 ### Pattern 2: Watch with Old Value
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ status: 'idle' })
   .watch('status', (newVal, oldVal) => {
     console.log(`Status: ${oldVal} → ${newVal}`);
@@ -257,7 +257,7 @@ const state = ReactiveUtils.builder()
 ### Pattern 3: Multiple Watchers
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ a: 1, b: 2 })
   .watch('a', () => console.log('A changed'))
   .watch('b', () => console.log('B changed'))
@@ -273,7 +273,7 @@ const state = ReactiveUtils.builder()
 **Answer:** Yes!
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ a: 1, b: 2 })
   .computed('sum', (s) => s.a + s.b)
   .watch('sum', (newSum) => console.log('Sum:', newSum))
@@ -357,7 +357,7 @@ state.count = 10; // Watcher runs immediately after
 ### The Basic Pattern:
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ value: 0 })
   .watch('value', (newVal, oldVal) => {
     console.log(`Changed: ${oldVal} → ${newVal}`);

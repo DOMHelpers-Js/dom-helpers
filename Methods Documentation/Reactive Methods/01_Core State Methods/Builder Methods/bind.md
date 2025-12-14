@@ -27,7 +27,7 @@ ReactiveUtils.effect(() => {
 });
 
 // ✅ With bind - automatic
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ name: '' })
   .bind('name', '#name')
   .build();
@@ -46,7 +46,7 @@ const state = ReactiveUtils.builder()
 ### The Binding
 
 ```javascript
-ReactiveUtils.builder()
+ReactiveUtils.builder() 
   .state({ value: '' })
   .bind('value', '#input')  // Binds state.value to #input
   .build();
@@ -59,7 +59,7 @@ ReactiveUtils.builder()
 ### Bind Input
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ username: '' })
   .bind('username', '#username-input')
   .build();
@@ -71,7 +71,7 @@ const state = ReactiveUtils.builder()
 ### Multiple Bindings
 
 ```javascript
-const form = ReactiveUtils.builder()
+const form = ReactiveUtils.builder() 
   .state({
     email: '',
     password: ''
@@ -84,7 +84,7 @@ const form = ReactiveUtils.builder()
 ### Bind Checkbox
 
 ```javascript
-const settings = ReactiveUtils.builder()
+const settings = ReactiveUtils.builder() 
   .state({ notifications: false })
   .bind('notifications', '#notifications-checkbox')
   .build();
@@ -100,7 +100,7 @@ const settings = ReactiveUtils.builder()
 ### Example 1: Live Preview
 
 ```javascript
-const editor = ReactiveUtils.builder()
+const editor = ReactiveUtils.builder() 
   .state({
     title: '',
     content: ''
@@ -121,7 +121,7 @@ const editor = ReactiveUtils.builder()
 ### Example 2: Settings Form
 
 ```javascript
-const settings = ReactiveUtils.builder()
+const settings = ReactiveUtils.builder() 
   .state({
     theme: 'light',
     fontSize: 16,
@@ -144,7 +144,7 @@ const settings = ReactiveUtils.builder()
 ### Example 3: Calculator
 
 ```javascript
-const calc = ReactiveUtils.builder()
+const calc = ReactiveUtils.builder() 
   .state({
     num1: 0,
     num2: 0
@@ -167,7 +167,7 @@ const calc = ReactiveUtils.builder()
 ## Real-World Example: User Profile Form
 
 ```javascript
-const profile = ReactiveUtils.builder()
+const profile = ReactiveUtils.builder() 
   .state({
     firstName: '',
     lastName: '',
@@ -340,7 +340,7 @@ state.value = 'Hello'; // Updates input
 ### The Basic Pattern:
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ value: '' })
   .bind('value', '#input')
   .build();

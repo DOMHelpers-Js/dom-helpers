@@ -23,7 +23,7 @@ state.increment = function() {
 };
 
 // ✅ With builder - all in one
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ count: 0 })
   .action('increment', function() {
     this.count++;
@@ -44,7 +44,7 @@ const state = ReactiveUtils.builder()
 ### The Builder Chain
 
 ```javascript
-ReactiveUtils.builder()
+ReactiveUtils.builder() 
   .state({ count: 0 })
   .action('increment', function() {
     this.count++;
@@ -59,7 +59,7 @@ ReactiveUtils.builder()
 ### Single Action
 
 ```javascript
-const counter = ReactiveUtils.builder()
+const counter = ReactiveUtils.builder() 
   .state({ count: 0 })
   .action('increment', function() {
     this.count++;
@@ -72,7 +72,7 @@ counter.increment(); // count becomes 1
 ### Multiple Actions
 
 ```javascript
-const counter = ReactiveUtils.builder()
+const counter = ReactiveUtils.builder() 
   .state({ count: 0 })
   .action('increment', function() {
     this.count++;
@@ -94,7 +94,7 @@ counter.reset();     // 0
 ### Action with Parameters
 
 ```javascript
-const counter = ReactiveUtils.builder()
+const counter = ReactiveUtils.builder() 
   .state({ count: 0 })
   .action('add', function(amount) {
     this.count += amount;
@@ -112,7 +112,7 @@ counter.add(10); // count becomes 15
 ### Example 1: Todo List
 
 ```javascript
-const todos = ReactiveUtils.builder()
+const todos = ReactiveUtils.builder() 
   .state({
     items: [],
     nextId: 1
@@ -146,7 +146,7 @@ console.log(todos.activeCount); // 1
 ### Example 2: Shopping Cart
 
 ```javascript
-const cart = ReactiveUtils.builder()
+const cart = ReactiveUtils.builder() 
   .state({ items: [] })
   .action('addItem', function(product, quantity = 1) {
     const existing = this.items.find(i => i.id === product.id);
@@ -182,7 +182,7 @@ console.log(cart.total); // 7.0
 ### Example 3: User Authentication
 
 ```javascript
-const auth = ReactiveUtils.builder()
+const auth = ReactiveUtils.builder() 
   .state({
     user: null,
     loading: false,
@@ -225,7 +225,7 @@ console.log(auth.isAuthenticated); // true
 ## Real-World Example: Form Manager
 
 ```javascript
-const formManager = ReactiveUtils.builder()
+const formManager = ReactiveUtils.builder() 
   .state({
     fields: {
       username: '',
@@ -458,7 +458,7 @@ if (success) {
 ### The Basic Pattern:
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ count: 0 })
   .action('increment', function() {
     this.count++;

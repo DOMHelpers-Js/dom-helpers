@@ -16,7 +16,7 @@ Without `actions()`, you call `action()` multiple times:
 
 ```javascript
 // ❌ Repetitive - many action() calls
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ count: 0 })
   .action('increment', function() { this.count++; })
   .action('decrement', function() { this.count--; })
@@ -24,7 +24,7 @@ const state = ReactiveUtils.builder()
   .build();
 
 // ✅ With actions() - all at once
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ count: 0 })
   .actions({
     increment() { this.count++; },
@@ -47,7 +47,7 @@ const state = ReactiveUtils.builder()
 ### The Builder Chain
 
 ```javascript
-ReactiveUtils.builder()
+ReactiveUtils.builder() 
   .state({ count: 0 })
   .actions({
     increment() { this.count++; },
@@ -63,7 +63,7 @@ ReactiveUtils.builder()
 ### Multiple Actions Object
 
 ```javascript
-const counter = ReactiveUtils.builder()
+const counter = ReactiveUtils.builder() 
   .state({ count: 0 })
   .actions({
     increment() {
@@ -90,7 +90,7 @@ counter.reset();     // 0
 ### Mix with Single Actions
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ value: 0 })
   .actions({
     increment() { this.value++; },
@@ -109,7 +109,7 @@ const state = ReactiveUtils.builder()
 ### Example 1: Todo Manager
 
 ```javascript
-const todos = ReactiveUtils.builder()
+const todos = ReactiveUtils.builder() 
   .state({
     items: [],
     filter: 'all',
@@ -160,7 +160,7 @@ todos.setFilter('active');
 ### Example 2: Shopping Cart
 
 ```javascript
-const cart = ReactiveUtils.builder()
+const cart = ReactiveUtils.builder() 
   .state({
     items: [],
     couponCode: '',
@@ -220,7 +220,7 @@ const cart = ReactiveUtils.builder()
 ### Example 3: User Profile
 
 ```javascript
-const profile = ReactiveUtils.builder()
+const profile = ReactiveUtils.builder() 
   .state({
     user: null,
     editing: false,
@@ -284,7 +284,7 @@ const profile = ReactiveUtils.builder()
 ## Real-World Example: Game State
 
 ```javascript
-const game = ReactiveUtils.builder()
+const game = ReactiveUtils.builder() 
   .state({
     score: 0,
     level: 1,
@@ -522,7 +522,7 @@ if (savedHighScore) {
 ### The Basic Pattern:
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ count: 0 })
   .actions({
     increment() {

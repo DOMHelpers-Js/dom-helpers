@@ -817,6 +817,7 @@
     store,
     component,
     reactive,
+    builder: reactive, //alias for builder
     bindings,
     list: collection,
     batch,

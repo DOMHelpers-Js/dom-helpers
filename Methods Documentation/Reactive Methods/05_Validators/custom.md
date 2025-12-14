@@ -21,14 +21,19 @@ You need validation rules that aren't covered by built-in validators:
 // Need to manually check and set errors
 
 // ✅ With custom() - clean integration
-const form = ReactiveUtils.form({
-  username: ['', v.custom((value) => {
-    if (value.includes(' ')) {
-      return 'Username cannot contain spaces';
+const form = ReactiveUtils.form(
+  { username: '' },
+  {
+    validators: {
+      username: v.custom((value) => {
+        if (value.includes(' ')) {
+          return 'Username cannot contain spaces';
+        }
+        return null; // Valid
+      })
     }
-    return null; // Valid
-  })]
-});
+  }
+);
 ```
 
 ---
@@ -38,7 +43,7 @@ const form = ReactiveUtils.form({
 ```javascript
 validators.custom(validatorFn)
     ↓
-Calls validatorFn(value)
+Calls validatorFn(value, allValues)
     ↓
 Returns error message (string) or null (valid)
 ```
@@ -50,26 +55,36 @@ Returns error message (string) or null (valid)
 ### Simple Custom Validator
 
 ```javascript
-const form = ReactiveUtils.form({
-  username: ['', v.custom((value) => {
-    if (value.startsWith('_')) {
-      return 'Username cannot start with underscore';
+const form = ReactiveUtils.form(
+  { username: '' },
+  {
+    validators: {
+      username: v.custom((value) => {
+        if (value.startsWith('_')) {
+          return 'Username cannot start with underscore';
+        }
+        return null;
+      })
     }
-    return null;
-  })]
-});
+  }
+);
 ```
 
 ### Async Validation
 
 ```javascript
-const form = ReactiveUtils.form({
-  username: ['', v.custom(async (value) => {
-    const response = await fetch(`/api/check-username?username=${value}`);
-    const { available } = await response.json();
-    return available ? null : 'Username already taken';
-  })]
-});
+const form = ReactiveUtils.form(
+  { username: '' },
+  {
+    validators: {
+      username: v.custom(async (value) => {
+        const response = await fetch(`/api/check-username?username=${value}`);
+        const { available } = await response.json();
+        return available ? null : 'Username already taken';
+      })
+    }
+  }
+);
 ```
 
 ---
@@ -79,64 +94,79 @@ const form = ReactiveUtils.form({
 ### Example 1: Password Strength
 
 ```javascript
-const form = ReactiveUtils.form({
-  password: ['', v.custom((value) => {
-    const hasUpperCase = /[A-Z]/.test(value);
-    const hasLowerCase = /[a-z]/.test(value);
-    const hasNumber = /[0-9]/.test(value);
-    const hasSpecial = /[!@#$%^&*]/.test(value);
+const form = ReactiveUtils.form(
+  { password: '' },
+  {
+    validators: {
+      password: v.custom((value) => {
+        const hasUpperCase = /[A-Z]/.test(value);
+        const hasLowerCase = /[a-z]/.test(value);
+        const hasNumber = /[0-9]/.test(value);
+        const hasSpecial = /[!@#$%^&*]/.test(value);
 
-    if (!hasUpperCase) return 'Must contain uppercase letter';
-    if (!hasLowerCase) return 'Must contain lowercase letter';
-    if (!hasNumber) return 'Must contain number';
-    if (!hasSpecial) return 'Must contain special character';
+        if (!hasUpperCase) return 'Must contain uppercase letter';
+        if (!hasLowerCase) return 'Must contain lowercase letter';
+        if (!hasNumber) return 'Must contain number';
+        if (!hasSpecial) return 'Must contain special character';
 
-    return null;
-  })]
-});
+        return null;
+      })
+    }
+  }
+);
 ```
 
 ### Example 2: Date Validation
 
 ```javascript
-const form = ReactiveUtils.form({
-  birthDate: ['', v.custom((value) => {
-    const date = new Date(value);
-    const today = new Date();
-    const age = today.getFullYear() - date.getFullYear();
+const form = ReactiveUtils.form(
+  { birthDate: '' },
+  {
+    validators: {
+      birthDate: v.custom((value) => {
+        const date = new Date(value);
+        const today = new Date();
+        const age = today.getFullYear() - date.getFullYear();
 
-    if (age < 18) {
-      return 'Must be 18 or older';
-    }
-    if (age > 120) {
-      return 'Please enter a valid date';
-    }
+        if (age < 18) {
+          return 'Must be 18 or older';
+        }
+        if (age > 120) {
+          return 'Please enter a valid date';
+        }
 
-    return null;
-  })]
-});
+        return null;
+      })
+    }
+  }
+);
 ```
 
 ### Example 3: File Upload Validation
 
 ```javascript
-const form = ReactiveUtils.form({
-  avatar: [null, v.custom((file) => {
-    if (!file) return null;
+const form = ReactiveUtils.form(
+  { avatar: null },
+  {
+    validators: {
+      avatar: v.custom((file) => {
+        if (!file) return null;
 
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    if (file.size > maxSize) {
-      return 'File must be less than 5MB';
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (file.size > maxSize) {
+          return 'File must be less than 5MB';
+        }
+
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!allowedTypes.includes(file.type)) {
+          return 'Only JPG, PNG, and GIF files allowed';
+        }
+
+        return null;
+      })
     }
-
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-    if (!allowedTypes.includes(file.type)) {
-      return 'Only JPG, PNG, and GIF files allowed';
-    }
-
-    return null;
-  })]
-});
+  }
+);
 ```
 
 ---
@@ -144,42 +174,50 @@ const form = ReactiveUtils.form({
 ## Real-World Example: Username Availability Check
 
 ```javascript
-const registrationForm = ReactiveUtils.form({
-  username: ['', v.combine([
-    v.required('Username is required'),
-    v.minLength(3, 'Username must be at least 3 characters'),
-    v.pattern(/^[a-zA-Z0-9_]+$/, 'Only letters, numbers, and underscores'),
-    v.custom(async (value) => {
-      if (value.length < 3) return null; // Skip if too short
+const registrationForm = ReactiveUtils.form(
+  {
+    username: '',
+    email: ''
+  },
+  {
+    validators: {
+      username: v.combine([
+        v.required('Username is required'),
+        v.minLength(3, 'Username must be at least 3 characters'),
+        v.pattern(/^[a-zA-Z0-9_]+$/, 'Only letters, numbers, and underscores'),
+        v.custom(async (value) => {
+          if (value.length < 3) return null; // Skip if too short
 
-      // Debounce API call
-      await new Promise(resolve => setTimeout(resolve, 300));
+          // Debounce API call
+          await new Promise(resolve => setTimeout(resolve, 300));
 
-      const response = await fetch(`/api/check-username?username=${value}`);
-      const { available, suggestions } = await response.json();
+          const response = await fetch(`/api/check-username?username=${value}`);
+          const { available, suggestions } = await response.json();
 
-      if (!available) {
-        return suggestions
-          ? `Username taken. Try: ${suggestions.join(', ')}`
-          : 'Username is already taken';
-      }
+          if (!available) {
+            return suggestions
+              ? `Username taken. Try: ${suggestions.join(', ')}`
+              : 'Username is already taken';
+          }
 
-      return null;
-    })
-  ])],
+          return null;
+        })
+      ]),
 
-  email: ['', v.combine([
-    v.required(),
-    v.email(),
-    v.custom(async (value) => {
-      // Check if email is already registered
-      const response = await fetch(`/api/check-email?email=${value}`);
-      const { registered } = await response.json();
+      email: v.combine([
+        v.required(),
+        v.email(),
+        v.custom(async (value) => {
+          // Check if email is already registered
+          const response = await fetch(`/api/check-email?email=${value}`);
+          const { registered } = await response.json();
 
-      return registered ? 'Email already registered' : null;
-    })
-  ])]
-});
+          return registered ? 'Email already registered' : null;
+        })
+      ])
+    }
+  }
+);
 
 // Display username status
 ReactiveUtils.effect(() => {
@@ -294,15 +332,20 @@ v.custom((value, allValues) => {
 ### The Basic Pattern:
 
 ```javascript
-const form = ReactiveUtils.form({
-  field: ['', v.custom((value) => {
-    // Your validation logic
-    if (invalid) {
-      return 'Error message';
+const form = ReactiveUtils.form(
+  { field: '' },
+  {
+    validators: {
+      field: v.custom((value) => {
+        // Your validation logic
+        if (invalid) {
+          return 'Error message';
+        }
+        return null;
+      })
     }
-    return null;
-  })]
-});
+  }
+);
 ```
 
 ---

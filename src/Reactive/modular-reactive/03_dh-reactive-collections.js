@@ -280,3 +280,65 @@
   console.log('  - Plus: find, filter, map, forEach, sort, toggle, and more!');
 
 })(typeof window !== 'undefined' ? window : global);
+
+
+/**
+ * toggleAll() Method Extension
+ * 
+  * Adds a toggleAll method to reactive collections
+ */
+
+(function(global) {
+  'use strict';
+
+  // Check if ReactiveUtils exists
+  if (!global.ReactiveUtils || !global.ReactiveUtils.collection) {
+    console.error('[toggleAll Extension] ReactiveUtils.collection not found.');
+    return;
+  }
+
+  // Store the original collection creation function
+  const originalCreateCollection = global.ReactiveUtils.collection;
+
+  // Enhanced collection creation with toggleAll
+  function createCollectionWithToggleAll(items = []) {
+    const collection = originalCreateCollection(items);
+
+    // Add toggleAll method
+    collection.toggleAll = function(predicate, field = 'done') {
+      let count = 0;
+
+      this.items.forEach((item, index) => {
+        // Check if item matches predicate
+        const matches = typeof predicate === 'function'
+          ? predicate(item, index)
+          : item === predicate;
+
+        if (matches && this.items[index]) {
+          this.items[index][field] = !this.items[index][field];
+          count++;
+        }
+      });
+
+      return count; // Return number of items toggled
+    };
+
+    return collection;
+  }
+
+  // Replace the collection creation function
+  global.ReactiveUtils.collection = createCollectionWithToggleAll;
+  global.ReactiveUtils.list = createCollectionWithToggleAll;
+  global.ReactiveUtils.createCollection = createCollectionWithToggleAll;
+
+  // Also update Collections if it exists
+  if (global.Collections) {
+    global.Collections.create = createCollectionWithToggleAll;
+    global.Collections.collection = createCollectionWithToggleAll;
+    global.Collections.list = createCollectionWithToggleAll;
+  }
+
+  console.log('[toggleAll Extension] v1.0.0 loaded successfully');
+  console.log('  - collection.toggleAll(predicate, field)');
+
+})(typeof window !== 'undefined' ? window : global);

@@ -26,7 +26,7 @@ state.destroy = function() {
 };
 
 // ✅ With builder - define upfront
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ connection: null })
   .destroy(function() {
     if (this.connection) {
@@ -49,7 +49,7 @@ const state = ReactiveUtils.builder()
 ### The Builder Chain
 
 ```javascript
-ReactiveUtils.builder()
+ReactiveUtils.builder() 
   .state({ resource: null })
   .destroy(function() {
     // Custom cleanup
@@ -65,7 +65,7 @@ ReactiveUtils.builder()
 ### Simple Cleanup
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ timer: null })
   .destroy(function() {
     if (this.timer) {
@@ -83,7 +83,7 @@ state.destroy(); // Clears timer
 ### Multiple Cleanups
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({
     subscription: null,
     connection: null
@@ -102,7 +102,7 @@ const state = ReactiveUtils.builder()
 ### Example 1: WebSocket Connection
 
 ```javascript
-const chat = ReactiveUtils.builder()
+const chat = ReactiveUtils.builder() 
   .state({
     socket: null,
     messages: [],
@@ -150,7 +150,7 @@ chat.destroy(); // Closes WebSocket
 ### Example 2: Event Listeners
 
 ```javascript
-const interactive = ReactiveUtils.builder()
+const interactive = ReactiveUtils.builder() 
   .state({
     x: 0,
     y: 0,
@@ -196,7 +196,7 @@ interactive.destroy(); // Removes all listeners
 ### Example 3: Animation Loop
 
 ```javascript
-const animator = ReactiveUtils.builder()
+const animator = ReactiveUtils.builder() 
   .state({
     position: 0,
     animationId: null,
@@ -240,7 +240,7 @@ animator.destroy(); // Stops animation
 ## Real-World Example: Media Player
 
 ```javascript
-const player = ReactiveUtils.builder()
+const player = ReactiveUtils.builder() 
   .state({
     audio: null,
     playing: false,
@@ -377,7 +377,7 @@ player.destroy(); // Stops playback, clears resources
 - **`$destroy()`** (built-in) = Framework cleanup
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .destroy(function() {
     // Your cleanup
     this.socket?.close();
@@ -491,7 +491,7 @@ state.$destroy();
 ### The Basic Pattern:
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ timer: null })
   .destroy(function() {
     // Custom cleanup

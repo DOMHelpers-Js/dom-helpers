@@ -18,18 +18,23 @@ You need to ensure users fill out important fields:
 
 ```javascript
 // ❌ Without validator - manual checking
-const form = ReactiveUtils.form({
-  username: ''
-});
+const form = ReactiveUtils.form(
+  { username: '' }
+);
 
 if (!form.values.username || form.values.username.trim() === '') {
-  form.errors.username = 'Username is required';
+  form.setError('username', 'Username is required');
 }
 
 // ✅ With required() - automatic
-const form = ReactiveUtils.form({
-  username: ['', validators.required()]
-});
+const form = ReactiveUtils.form(
+  { username: '' },
+  {
+    validators: {
+      username: v.required()
+    }
+  }
+);
 ```
 
 **Why this matters:**
@@ -61,24 +66,37 @@ Returns error message or null
 ### Simple Required Field
 
 ```javascript
-const form = ReactiveUtils.form({
-  username: ['', validators.required()],
-  email: ['', validators.required()]
-});
+const form = ReactiveUtils.form(
+  {
+    username: '',
+    email: ''
+  },
+  {
+    validators: {
+      username: v.required(),
+      email: v.required()
+    }
+  }
+);
 
 // Check validation
 console.log(form.isValid); // false (empty fields)
 
-form.values.username = 'john';
+form.setValue('username', 'john');
 console.log(form.errors.username); // null (valid)
 ```
 
 ### Custom Error Message
 
 ```javascript
-const form = ReactiveUtils.form({
-  username: ['', validators.required('Please enter your username')]
-});
+const form = ReactiveUtils.form(
+  { username: '' },
+  {
+    validators: {
+      username: v.required('Please enter your username')
+    }
+  }
+);
 
 console.log(form.errors.username); // 'Please enter your username'
 ```
@@ -87,13 +105,23 @@ console.log(form.errors.username); // 'Please enter your username'
 
 ```javascript
 // Both are identical
-const form1 = ReactiveUtils.form({
-  name: ['', validators.required()]
-});
+const form1 = ReactiveUtils.form(
+  { name: '' },
+  {
+    validators: {
+      name: validators.required()
+    }
+  }
+);
 
-const form2 = ReactiveUtils.form({
-  name: ['', v.required()] // Shorter alias
-});
+const form2 = ReactiveUtils.form(
+  { name: '' },
+  {
+    validators: {
+      name: v.required() // Shorter alias
+    }
+  }
+);
 ```
 
 ---
@@ -103,10 +131,18 @@ const form2 = ReactiveUtils.form({
 ### Example 1: Login Form
 
 ```javascript
-const loginForm = ReactiveUtils.form({
-  username: ['', v.required('Username is required')],
-  password: ['', v.required('Password is required')]
-});
+const loginForm = ReactiveUtils.form(
+  {
+    username: '',
+    password: ''
+  },
+  {
+    validators: {
+      username: v.required('Username is required'),
+      password: v.required('Password is required')
+    }
+  }
+);
 
 // Display form
 ReactiveUtils.effect(() => {
@@ -118,8 +154,8 @@ ReactiveUtils.effect(() => {
         <label>Username</label>
         <input type="text"
                value="${loginForm.values.username}"
-               oninput="loginForm.values.username = this.value"
-               onblur="loginForm.touch('username')">
+               oninput="loginForm.setValue('username', this.value)"
+               onblur="loginForm.setTouched('username')">
         ${loginForm.touched.username && loginForm.errors.username ? `
           <span class="error">${loginForm.errors.username}</span>
         ` : ''}
@@ -129,8 +165,8 @@ ReactiveUtils.effect(() => {
         <label>Password</label>
         <input type="password"
                value="${loginForm.values.password}"
-               oninput="loginForm.values.password = this.value"
-               onblur="loginForm.touch('password')">
+               oninput="loginForm.setValue('password', this.value)"
+               onblur="loginForm.setTouched('password')">
         ${loginForm.touched.password && loginForm.errors.password ? `
           <span class="error">${loginForm.errors.password}</span>
         ` : ''}
@@ -157,15 +193,25 @@ function handleLogin(event) {
 ### Example 2: Contact Form
 
 ```javascript
-const contactForm = ReactiveUtils.form({
-  name: ['', v.required()],
-  email: ['', v.required()],
-  subject: ['', v.required()],
-  message: ['', v.required('Please enter your message')]
-});
+const contactForm = ReactiveUtils.form(
+  {
+    name: '',
+    email: '',
+    subject: '',
+    message: ''
+  },
+  {
+    validators: {
+      name: v.required(),
+      email: v.required(),
+      subject: v.required(),
+      message: v.required('Please enter your message')
+    }
+  }
+);
 
 // Bind to inputs
-contactForm.bindToInputs('#contact-form');
+contactForm.bindToInputs('#contact-form input, #contact-form textarea');
 
 // Display error summary
 ReactiveUtils.effect(() => {
@@ -190,15 +236,20 @@ ReactiveUtils.effect(() => {
 });
 
 // Submit handler
-function submitContact(event) {
+async function submitContact(event) {
   event.preventDefault();
 
-  contactForm.submit(async () => {
-    await fetch('/api/contact', {
+  await contactForm.submit(async (values) => {
+    const response = await fetch('/api/contact', {
       method: 'POST',
-      body: JSON.stringify(contactForm.values)
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(values)
     });
-    alert('Message sent!');
+    
+    if (response.ok) {
+      alert('Message sent!');
+      contactForm.reset();
+    }
   });
 }
 ```
@@ -208,19 +259,29 @@ function submitContact(event) {
 ### Example 3: Multi-Step Form
 
 ```javascript
-const registrationForm = ReactiveUtils.form({
-  // Step 1: Personal Info
-  firstName: ['', v.required('First name is required')],
-  lastName: ['', v.required('Last name is required')],
-
-  // Step 2: Contact Info
-  email: ['', v.required('Email is required')],
-  phone: ['', v.required('Phone is required')],
-
-  // Step 3: Account
-  username: ['', v.required('Username is required')],
-  password: ['', v.required('Password is required')]
-});
+const registrationForm = ReactiveUtils.form(
+  {
+    // Step 1: Personal Info
+    firstName: '',
+    lastName: '',
+    // Step 2: Contact Info
+    email: '',
+    phone: '',
+    // Step 3: Account
+    username: '',
+    password: ''
+  },
+  {
+    validators: {
+      firstName: v.required('First name is required'),
+      lastName: v.required('Last name is required'),
+      email: v.required('Email is required'),
+      phone: v.required('Phone is required'),
+      username: v.required('Username is required'),
+      password: v.required('Password is required')
+    }
+  }
+);
 
 const stepState = ReactiveUtils.state({
   currentStep: 1,
@@ -228,14 +289,23 @@ const stepState = ReactiveUtils.state({
 });
 
 // Check if current step is valid
-const currentStepValid = ReactiveUtils.computed(() => {
-  switch (stepState.currentStep) {
+stepState.$computed('currentStepValid', function() {
+  switch (this.currentStep) {
     case 1:
-      return !registrationForm.errors.firstName && !registrationForm.errors.lastName;
+      return !registrationForm.errors.firstName && 
+             !registrationForm.errors.lastName &&
+             registrationForm.values.firstName &&
+             registrationForm.values.lastName;
     case 2:
-      return !registrationForm.errors.email && !registrationForm.errors.phone;
+      return !registrationForm.errors.email && 
+             !registrationForm.errors.phone &&
+             registrationForm.values.email &&
+             registrationForm.values.phone;
     case 3:
-      return !registrationForm.errors.username && !registrationForm.errors.password;
+      return !registrationForm.errors.username && 
+             !registrationForm.errors.password &&
+             registrationForm.values.username &&
+             registrationForm.values.password;
     default:
       return false;
   }
@@ -244,11 +314,14 @@ const currentStepValid = ReactiveUtils.computed(() => {
 function nextStep() {
   // Touch current step fields
   if (stepState.currentStep === 1) {
-    registrationForm.touch('firstName');
-    registrationForm.touch('lastName');
+    registrationForm.setTouched('firstName');
+    registrationForm.setTouched('lastName');
+  } else if (stepState.currentStep === 2) {
+    registrationForm.setTouched('email');
+    registrationForm.setTouched('phone');
   }
 
-  if (currentStepValid) {
+  if (stepState.currentStepValid) {
     stepState.currentStep++;
   }
 }
@@ -271,13 +344,51 @@ ReactiveUtils.effect(() => {
       <h3>Step 1: Personal Information</h3>
       <input type="text" placeholder="First Name"
              value="${registrationForm.values.firstName}"
-             oninput="registrationForm.values.firstName = this.value">
-      ${registrationForm.errors.firstName ? `<span class="error">${registrationForm.errors.firstName}</span>` : ''}
+             oninput="registrationForm.setValue('firstName', this.value)">
+      ${registrationForm.errors.firstName ? `
+        <span class="error">${registrationForm.errors.firstName}</span>
+      ` : ''}
 
       <input type="text" placeholder="Last Name"
              value="${registrationForm.values.lastName}"
-             oninput="registrationForm.values.lastName = this.value">
-      ${registrationForm.errors.lastName ? `<span class="error">${registrationForm.errors.lastName}</span>` : ''}
+             oninput="registrationForm.setValue('lastName', this.value)">
+      ${registrationForm.errors.lastName ? `
+        <span class="error">${registrationForm.errors.lastName}</span>
+      ` : ''}
+    `;
+  } else if (step === 2) {
+    stepContent = `
+      <h3>Step 2: Contact Information</h3>
+      <input type="email" placeholder="Email"
+             value="${registrationForm.values.email}"
+             oninput="registrationForm.setValue('email', this.value)">
+      ${registrationForm.errors.email ? `
+        <span class="error">${registrationForm.errors.email}</span>
+      ` : ''}
+
+      <input type="tel" placeholder="Phone"
+             value="${registrationForm.values.phone}"
+             oninput="registrationForm.setValue('phone', this.value)">
+      ${registrationForm.errors.phone ? `
+        <span class="error">${registrationForm.errors.phone}</span>
+      ` : ''}
+    `;
+  } else if (step === 3) {
+    stepContent = `
+      <h3>Step 3: Account</h3>
+      <input type="text" placeholder="Username"
+             value="${registrationForm.values.username}"
+             oninput="registrationForm.setValue('username', this.value)">
+      ${registrationForm.errors.username ? `
+        <span class="error">${registrationForm.errors.username}</span>
+      ` : ''}
+
+      <input type="password" placeholder="Password"
+             value="${registrationForm.values.password}"
+             oninput="registrationForm.setValue('password', this.value)">
+      ${registrationForm.errors.password ? `
+        <span class="error">${registrationForm.errors.password}</span>
+      ` : ''}
     `;
   }
 
@@ -286,7 +397,8 @@ ReactiveUtils.effect(() => {
     <div class="step-navigation">
       <button onclick="prevStep()" ${step === 1 ? 'disabled' : ''}>Previous</button>
       <span>Step ${step} of ${stepState.totalSteps}</span>
-      <button onclick="nextStep()" ${!currentStepValid ? 'disabled' : ''}>
+      <button onclick="${step === stepState.totalSteps ? 'submitForm()' : 'nextStep()'}" 
+              ${!stepState.currentStepValid ? 'disabled' : ''}>
         ${step === stepState.totalSteps ? 'Submit' : 'Next'}
       </button>
     </div>
@@ -299,31 +411,42 @@ ReactiveUtils.effect(() => {
 ## Real-World Example: Job Application Form
 
 ```javascript
-const jobApplicationForm = ReactiveUtils.form({
-  // Personal Information
-  fullName: ['', v.required('Full name is required')],
-  email: ['', v.required('Email address is required')],
-  phone: ['', v.required('Phone number is required')],
-
-  // Position
-  position: ['', v.required('Please select a position')],
-  department: ['', v.required('Please select a department')],
-
-  // Experience
-  yearsExperience: ['', v.required('Years of experience is required')],
-  currentCompany: [''],
-
-  // Documents
-  resume: [null, v.required('Resume is required')],
-  coverLetter: [null],
-
-  // Additional
-  startDate: ['', v.required('Available start date is required')],
-  references: ['', v.required('At least one reference is required')]
-});
+const jobApplicationForm = ReactiveUtils.form(
+  {
+    // Personal Information
+    fullName: '',
+    email: '',
+    phone: '',
+    // Position
+    position: '',
+    department: '',
+    // Experience
+    yearsExperience: '',
+    currentCompany: '',
+    // Documents
+    resume: null,
+    coverLetter: null,
+    // Additional
+    startDate: '',
+    references: ''
+  },
+  {
+    validators: {
+      fullName: v.required('Full name is required'),
+      email: v.required('Email address is required'),
+      phone: v.required('Phone number is required'),
+      position: v.required('Please select a position'),
+      department: v.required('Please select a department'),
+      yearsExperience: v.required('Years of experience is required'),
+      resume: v.required('Resume is required'),
+      startDate: v.required('Available start date is required'),
+      references: v.required('At least one reference is required')
+    }
+  }
+);
 
 const appState = ReactiveUtils.state({
-  section: 'personal', // 'personal', 'position', 'experience', 'documents', 'additional'
+  section: 'personal',
   isSubmitting: false
 });
 
@@ -342,8 +465,8 @@ ReactiveUtils.effect(() => {
           <label>Full Name *</label>
           <input type="text"
                  value="${jobApplicationForm.values.fullName}"
-                 oninput="jobApplicationForm.values.fullName = this.value"
-                 onblur="jobApplicationForm.touch('fullName')">
+                 oninput="jobApplicationForm.setValue('fullName', this.value)"
+                 onblur="jobApplicationForm.setTouched('fullName')">
           ${jobApplicationForm.touched.fullName && jobApplicationForm.errors.fullName ? `
             <span class="error">${jobApplicationForm.errors.fullName}</span>
           ` : ''}
@@ -352,8 +475,8 @@ ReactiveUtils.effect(() => {
           <label>Email *</label>
           <input type="email"
                  value="${jobApplicationForm.values.email}"
-                 oninput="jobApplicationForm.values.email = this.value"
-                 onblur="jobApplicationForm.touch('email')">
+                 oninput="jobApplicationForm.setValue('email', this.value)"
+                 onblur="jobApplicationForm.setTouched('email')">
           ${jobApplicationForm.touched.email && jobApplicationForm.errors.email ? `
             <span class="error">${jobApplicationForm.errors.email}</span>
           ` : ''}
@@ -362,8 +485,8 @@ ReactiveUtils.effect(() => {
           <label>Phone *</label>
           <input type="tel"
                  value="${jobApplicationForm.values.phone}"
-                 oninput="jobApplicationForm.values.phone = this.value"
-                 onblur="jobApplicationForm.touch('phone')">
+                 oninput="jobApplicationForm.setValue('phone', this.value)"
+                 onblur="jobApplicationForm.setTouched('phone')">
           ${jobApplicationForm.touched.phone && jobApplicationForm.errors.phone ? `
             <span class="error">${jobApplicationForm.errors.phone}</span>
           ` : ''}
@@ -376,12 +499,17 @@ ReactiveUtils.effect(() => {
         <h3>Position Information</h3>
         <div class="form-group">
           <label>Position *</label>
-          <select value="${jobApplicationForm.values.position}"
-                  onchange="jobApplicationForm.values.position = this.value">
+          <select onchange="jobApplicationForm.setValue('position', this.value)">
             <option value="">Select position...</option>
-            <option value="developer">Software Developer</option>
-            <option value="designer">UI/UX Designer</option>
-            <option value="manager">Project Manager</option>
+            <option value="developer" ${jobApplicationForm.values.position === 'developer' ? 'selected' : ''}>
+              Software Developer
+            </option>
+            <option value="designer" ${jobApplicationForm.values.position === 'designer' ? 'selected' : ''}>
+              UI/UX Designer
+            </option>
+            <option value="manager" ${jobApplicationForm.values.position === 'manager' ? 'selected' : ''}>
+              Project Manager
+            </option>
           </select>
           ${jobApplicationForm.errors.position ? `
             <span class="error">${jobApplicationForm.errors.position}</span>
@@ -397,10 +525,15 @@ ReactiveUtils.effect(() => {
 // Display progress
 ReactiveUtils.effect(() => {
   const progress = document.getElementById('progress');
-  const requiredFields = ['fullName', 'email', 'phone', 'position', 'department', 'yearsExperience', 'resume', 'startDate', 'references'];
+  const requiredFields = [
+    'fullName', 'email', 'phone', 'position', 'department',
+    'yearsExperience', 'resume', 'startDate', 'references'
+  ];
+  
   const filledFields = requiredFields.filter(field =>
     jobApplicationForm.values[field] && jobApplicationForm.values[field] !== ''
   ).length;
+  
   const percentage = Math.round((filledFields / requiredFields.length) * 100);
 
   progress.innerHTML = `
@@ -425,6 +558,7 @@ async function submitApplication() {
   try {
     const response = await fetch('/api/applications', {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(jobApplicationForm.values)
     });
 
@@ -447,27 +581,46 @@ async function submitApplication() {
 ### Pattern 1: Basic Required
 
 ```javascript
-const form = ReactiveUtils.form({
-  field: ['', v.required()]
-});
+const form = ReactiveUtils.form(
+  { field: '' },
+  {
+    validators: {
+      field: v.required()
+    }
+  }
+);
 ```
 
 ### Pattern 2: Custom Message
 
 ```javascript
-const form = ReactiveUtils.form({
-  field: ['', v.required('This field is required')]
-});
+const form = ReactiveUtils.form(
+  { field: '' },
+  {
+    validators: {
+      field: v.required('This field is required')
+    }
+  }
+);
 ```
 
 ### Pattern 3: Multiple Fields
 
 ```javascript
-const form = ReactiveUtils.form({
-  name: ['', v.required()],
-  email: ['', v.required()],
-  message: ['', v.required()]
-});
+const form = ReactiveUtils.form(
+  {
+    name: '',
+    email: '',
+    message: ''
+  },
+  {
+    validators: {
+      name: v.required(),
+      email: v.required(),
+      message: v.required()
+    }
+  }
+);
 ```
 
 ### Pattern 4: Conditional Display
@@ -489,7 +642,7 @@ ReactiveUtils.effect(() => {
 **Answer:** Yes, empty strings and whitespace-only values fail:
 
 ```javascript
-form.values.name = '   ';
+form.setValue('name', '   ');
 console.log(form.errors.name); // Error: field is required
 ```
 
@@ -498,8 +651,8 @@ console.log(form.errors.name); // Error: field is required
 **Answer:** Both fail validation:
 
 ```javascript
-form.values.field = null; // Invalid
-form.values.field = undefined; // Invalid
+form.setValue('field', null); // Invalid
+form.setValue('field', undefined); // Invalid
 ```
 
 ### Q: Can I customize the message?
@@ -533,11 +686,20 @@ v.required('Please enter your name')
 ### The Basic Pattern:
 
 ```javascript
-const form = ReactiveUtils.form({
-  username: ['', v.required()],
-  email: ['', v.required('Email is required')],
-  message: ['', v.required()]
-});
+const form = ReactiveUtils.form(
+  {
+    username: '',
+    email: '',
+    message: ''
+  },
+  {
+    validators: {
+      username: v.required(),
+      email: v.required('Email is required'),
+      message: v.required()
+    }
+  }
+);
 
 // Check validation
 if (form.isValid) {

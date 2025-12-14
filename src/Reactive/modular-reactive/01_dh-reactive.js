@@ -817,6 +817,7 @@
     store,
     component,
     reactive,
+    builder: reactive,
     bindings,
     list: collection,
     batch,

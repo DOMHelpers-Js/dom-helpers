@@ -18,19 +18,24 @@ You need to ensure users enter valid email addresses:
 
 ```javascript
 // ❌ Without validator - complex regex
-const form = ReactiveUtils.form({
-  email: ''
-});
+const form = ReactiveUtils.form(
+  { email: '' }
+);
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 if (!emailRegex.test(form.values.email)) {
-  form.errors.email = 'Invalid email';
+  form.setError('email', 'Invalid email');
 }
 
 // ✅ With email() - automatic
-const form = ReactiveUtils.form({
-  email: ['', v.email()]
-});
+const form = ReactiveUtils.form(
+  { email: '' },
+  {
+    validators: {
+      email: v.email()
+    }
+  }
+);
 ```
 
 **Why this matters:**
@@ -61,34 +66,49 @@ Returns error message or null
 ### Simple Email Validation
 
 ```javascript
-const form = ReactiveUtils.form({
-  email: ['', v.email()]
-});
+const form = ReactiveUtils.form(
+  { email: '' },
+  {
+    validators: {
+      email: v.email()
+    }
+  }
+);
 
-form.values.email = 'invalid';
+form.setValue('email', 'invalid');
 console.log(form.errors.email); // 'Invalid email address'
 
-form.values.email = 'user@example.com';
+form.setValue('email', 'user@example.com');
 console.log(form.errors.email); // null (valid)
 ```
 
 ### Custom Error Message
 
 ```javascript
-const form = ReactiveUtils.form({
-  email: ['', v.email('Please enter a valid email address')]
-});
+const form = ReactiveUtils.form(
+  { email: '' },
+  {
+    validators: {
+      email: v.email('Please enter a valid email address')
+    }
+  }
+);
 ```
 
 ### Combined with Required
 
 ```javascript
-const form = ReactiveUtils.form({
-  email: ['', v.combine([
-    v.required('Email is required'),
-    v.email('Invalid email format')
-  ])]
-});
+const form = ReactiveUtils.form(
+  { email: '' },
+  {
+    validators: {
+      email: v.combine([
+        v.required('Email is required'),
+        v.email('Invalid email format')
+      ])
+    }
+  }
+);
 ```
 
 ---
@@ -98,12 +118,17 @@ const form = ReactiveUtils.form({
 ### Example 1: Newsletter Signup
 
 ```javascript
-const signupForm = ReactiveUtils.form({
-  email: ['', v.combine([
-    v.required('Email is required'),
-    v.email('Please enter a valid email')
-  ])]
-});
+const signupForm = ReactiveUtils.form(
+  { email: '' },
+  {
+    validators: {
+      email: v.combine([
+        v.required('Email is required'),
+        v.email('Please enter a valid email')
+      ])
+    }
+  }
+);
 
 // Display form
 ReactiveUtils.effect(() => {
@@ -114,8 +139,8 @@ ReactiveUtils.effect(() => {
       <input type="email"
              placeholder="Enter your email"
              value="${signupForm.values.email}"
-             oninput="signupForm.values.email = this.value"
-             onblur="signupForm.touch('email')">
+             oninput="signupForm.setValue('email', this.value)"
+             onblur="signupForm.setTouched('email')">
       ${signupForm.touched.email && signupForm.errors.email ? `
         <span class="error">${signupForm.errors.email}</span>
       ` : ''}
@@ -132,6 +157,7 @@ async function handleSignup(event) {
   if (signupForm.isValid) {
     await fetch('/api/subscribe', {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: signupForm.values.email })
     });
     alert('Subscribed!');
@@ -144,21 +170,30 @@ async function handleSignup(event) {
 ### Example 2: Registration Form
 
 ```javascript
-const registrationForm = ReactiveUtils.form({
-  name: ['', v.required()],
-  email: ['', v.combine([
-    v.required(),
-    v.email()
-  ])],
-  confirmEmail: ['', v.combine([
-    v.required(),
-    v.email(),
-    v.match('email', 'Emails must match')
-  ])]
-});
+const registrationForm = ReactiveUtils.form(
+  {
+    name: '',
+    email: '',
+    confirmEmail: ''
+  },
+  {
+    validators: {
+      name: v.required(),
+      email: v.combine([
+        v.required(),
+        v.email()
+      ]),
+      confirmEmail: v.combine([
+        v.required(),
+        v.email(),
+        v.match('email', 'Emails must match')
+      ])
+    }
+  }
+);
 
 // Bind to form
-registrationForm.bindToInputs('#registration-form');
+registrationForm.bindToInputs('#registration-form input');
 
 // Display validation status
 ReactiveUtils.effect(() => {
@@ -181,16 +216,27 @@ ReactiveUtils.effect(() => {
 ## Real-World Example: Contact Form with Multiple Emails
 
 ```javascript
-const contactForm = ReactiveUtils.form({
-  name: ['', v.required('Name is required')],
-  primaryEmail: ['', v.combine([
-    v.required('Primary email is required'),
-    v.email('Invalid primary email')
-  ])],
-  ccEmail: ['', v.email('Invalid CC email')], // Optional but must be valid if provided
-  subject: ['', v.required('Subject is required')],
-  message: ['', v.required('Message is required')]
-});
+const contactForm = ReactiveUtils.form(
+  {
+    name: '',
+    primaryEmail: '',
+    ccEmail: '',
+    subject: '',
+    message: ''
+  },
+  {
+    validators: {
+      name: v.required('Name is required'),
+      primaryEmail: v.combine([
+        v.required('Primary email is required'),
+        v.email('Invalid primary email')
+      ]),
+      ccEmail: v.email('Invalid CC email'), // Optional but must be valid if provided
+      subject: v.required('Subject is required'),
+      message: v.required('Message is required')
+    }
+  }
+);
 
 // Display form
 ReactiveUtils.effect(() => {
@@ -202,7 +248,7 @@ ReactiveUtils.effect(() => {
         <label>Name *</label>
         <input type="text"
                value="${contactForm.values.name}"
-               oninput="contactForm.values.name = this.value">
+               oninput="contactForm.setValue('name', this.value)">
         ${contactForm.errors.name ? `<span class="error">${contactForm.errors.name}</span>` : ''}
       </div>
 
@@ -210,8 +256,8 @@ ReactiveUtils.effect(() => {
         <label>Email *</label>
         <input type="email"
                value="${contactForm.values.primaryEmail}"
-               oninput="contactForm.values.primaryEmail = this.value"
-               onblur="contactForm.touch('primaryEmail')">
+               oninput="contactForm.setValue('primaryEmail', this.value)"
+               onblur="contactForm.setTouched('primaryEmail')">
         ${contactForm.touched.primaryEmail && contactForm.errors.primaryEmail ? `
           <span class="error">${contactForm.errors.primaryEmail}</span>
         ` : ''}
@@ -221,8 +267,8 @@ ReactiveUtils.effect(() => {
         <label>CC Email (optional)</label>
         <input type="email"
                value="${contactForm.values.ccEmail}"
-               oninput="contactForm.values.ccEmail = this.value"
-               onblur="contactForm.touch('ccEmail')">
+               oninput="contactForm.setValue('ccEmail', this.value)"
+               onblur="contactForm.setTouched('ccEmail')">
         ${contactForm.touched.ccEmail && contactForm.errors.ccEmail ? `
           <span class="error">${contactForm.errors.ccEmail}</span>
         ` : ''}
@@ -233,14 +279,14 @@ ReactiveUtils.effect(() => {
         <label>Subject *</label>
         <input type="text"
                value="${contactForm.values.subject}"
-               oninput="contactForm.values.subject = this.value">
+               oninput="contactForm.setValue('subject', this.value)">
         ${contactForm.errors.subject ? `<span class="error">${contactForm.errors.subject}</span>` : ''}
       </div>
 
       <div class="field">
         <label>Message *</label>
         <textarea rows="5"
-                  oninput="contactForm.values.message = this.value">${contactForm.values.message}</textarea>
+                  oninput="contactForm.setValue('message', this.value)">${contactForm.values.message}</textarea>
         ${contactForm.errors.message ? `<span class="error">${contactForm.errors.message}</span>` : ''}
       </div>
 
@@ -254,10 +300,11 @@ ReactiveUtils.effect(() => {
 async function handleContact(event) {
   event.preventDefault();
 
-  contactForm.submit(async () => {
+  await contactForm.submit(async (values) => {
     const response = await fetch('/api/contact', {
       method: 'POST',
-      body: JSON.stringify(contactForm.values)
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(values)
     });
 
     if (response.ok) {
@@ -275,37 +322,60 @@ async function handleContact(event) {
 ### Pattern 1: Basic Email
 
 ```javascript
-const form = ReactiveUtils.form({
-  email: ['', v.email()]
-});
+const form = ReactiveUtils.form(
+  { email: '' },
+  {
+    validators: {
+      email: v.email()
+    }
+  }
+);
 ```
 
 ### Pattern 2: Required Email
 
 ```javascript
-const form = ReactiveUtils.form({
-  email: ['', v.combine([
-    v.required(),
-    v.email()
-  ])]
-});
+const form = ReactiveUtils.form(
+  { email: '' },
+  {
+    validators: {
+      email: v.combine([
+        v.required(),
+        v.email()
+      ])
+    }
+  }
+);
 ```
 
 ### Pattern 3: Optional but Valid
 
 ```javascript
-const form = ReactiveUtils.form({
-  optionalEmail: ['', v.email()] // Empty is OK, but if filled must be valid
-});
+const form = ReactiveUtils.form(
+  { optionalEmail: '' },
+  {
+    validators: {
+      optionalEmail: v.email() // Empty is OK, but if filled must be valid
+    }
+  }
+);
 ```
 
 ### Pattern 4: Email Confirmation
 
 ```javascript
-const form = ReactiveUtils.form({
-  email: ['', v.combine([v.required(), v.email()])],
-  confirmEmail: ['', v.combine([v.required(), v.email(), v.match('email')])]
-});
+const form = ReactiveUtils.form(
+  {
+    email: '',
+    confirmEmail: ''
+  },
+  {
+    validators: {
+      email: v.combine([v.required(), v.email()]),
+      confirmEmail: v.combine([v.required(), v.email(), v.match('email')])
+    }
+  }
+);
 ```
 
 ---
@@ -335,7 +405,7 @@ const form = ReactiveUtils.form({
 
 ```javascript
 // Format is valid, but email might not exist
-form.values.email = 'fake@nonexistent.com';
+form.setValue('email', 'fake@nonexistent.com');
 console.log(form.errors.email); // null (format is valid)
 ```
 
@@ -370,12 +440,17 @@ v.pattern(/your-regex/, 'Custom email error')
 ### The Basic Pattern:
 
 ```javascript
-const form = ReactiveUtils.form({
-  email: ['', v.combine([
-    v.required('Email is required'),
-    v.email('Invalid email format')
-  ])]
-});
+const form = ReactiveUtils.form(
+  { email: '' },
+  {
+    validators: {
+      email: v.combine([
+        v.required('Email is required'),
+        v.email('Invalid email format')
+      ])
+    }
+  }
+);
 
 // Check validation
 if (!form.errors.email) {

@@ -75,6 +75,59 @@ Returns: (event) => {
 User types → Event fires → Field updates
 ```
 
+
+---
+
+### Field Name Detection
+
+`handleChange()` automatically detects the field name from the event in this order:
+
+1. First tries `event.target.name`
+2. Falls back to `event.target.id` if name doesn't exist
+
+```javascript
+// What handleChange() does internally:
+handleChange(event) {
+  const target = event.target;
+  const field = target.name || target.id;  // ← Fallback to id!
+  const value = target.type === 'checkbox' ? target.checked : target.value;
+  
+  this.setValue(field, value);
+}
+```
+
+**Why this matters:**
+- Works even if you only have `id` attribute
+- More flexible input binding
+- Less strict requirements
+- Backwards compatible
+
+**Example - Works with either attribute:**
+
+```javascript
+const form = ReactiveUtils.form({ email: '' });
+
+// All three inputs above work with handleChange!
+document.querySelectorAll('input').forEach(input => {
+  input.oninput = form.handleChange('email');
+});
+```
+
+**Priority when both exist:**
+
+```html
+
+```
+
+```javascript
+// When both exist, name takes priority
+// This input updates form.values.email (from name attribute)
+// Not form.values.userEmail (id is ignored when name exists)
+```
+
+**Best Practice:**
+
+
 ---
 
 ## Basic Usage

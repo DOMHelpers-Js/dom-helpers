@@ -2,30 +2,28 @@
 
 ## What is `isDirty`?
 
-`isDirty` is a computed property that tells you if the form has been modified from its initial state. It returns `true` if any field value has changed, `false` if all fields match their initial values.
+`isDirty` is a computed property that tells you if the user has **interacted with the form**. It returns `true` if any field has been touched (interacted with), `false` if no fields have been touched yet.
 
-Think of it as your **form modification detector** - it knows if the user has made changes.
+Think of it as your **form interaction detector** - it knows if the user has started filling the form.
 
 ---
 
 ## Why Does This Exist?
 
-### The Problem: Detecting Changes
+### The Problem: Detecting User Interaction
 
-You need to know if the user has modified the form to warn them before leaving or enable save buttons:
+You need to know if the user has started interacting with the form to warn them before leaving or enable save buttons:
 
 ```javascript
 const form = ReactiveUtils.form({
-  name: 'John',
-  email: 'john@example.com'
+  name: '',
+  email: ''
 });
 
-// ❌ Manual check - compare all fields
-const nameChanged = form.values.name !== 'John';
-const emailChanged = form.values.email !== 'john@example.com';
-const isModified = nameChanged || emailChanged;
+// ❌ Manual check - check touched object
+const hasTouched = Object.keys(form.touched).length > 0;
 
-if (isModified) {
+if (hasTouched) {
   warnBeforeLeaving();
 }
 
@@ -36,9 +34,8 @@ if (form.isDirty) {
 ```
 
 **Why this matters:**
-- Single property to check modifications
-- No manual field comparison needed
-- Automatically tracks initial values
+- Single property to check user interaction
+- No manual touched state checking needed
 - Perfect for unsaved changes warnings
 - Clean and readable
 
@@ -48,47 +45,46 @@ if (form.isDirty) {
 
 ### The Simple Truth
 
-`isDirty` compares current values with initial values:
+`isDirty` checks if any fields have been touched:
 
 ```javascript
 // What isDirty does internally:
 get isDirty() {
-  return Object.keys(this.values).some(key =>
-    this.values[key] !== this.initialValues[key]
-  );
+  return Object.keys(this.touched).length > 0;
 }
 ```
+
+**Important:** This checks if the user has **interacted** with any field, not whether values have changed from their initial state.
 
 Think of it like this:
 
 ```
 form.isDirty
     ↓
-Compare each field:
-  current value vs initial value
+Check form.touched
     ↓
-Any different? → Yes → Return true
-               → No → Return false
+Any fields touched? → Yes → Return true
+                   → No → Return false
 ```
 
 ---
 
 ## Basic Usage
 
-### Check if Form Modified
+### Check if User Has Interacted
 
 ```javascript
 const form = ReactiveUtils.form({
-  username: 'john',
-  email: 'john@example.com'
+  username: '',
+  email: ''
 });
 
-console.log(form.isDirty); // false (no changes yet)
+console.log(form.isDirty); // false (no interaction yet)
 
-// User changes username
-form.setValue('username', 'jane');
+// User types in username
+form.setValue('username', 'john');
 
-console.log(form.isDirty); // true (modified!)
+console.log(form.isDirty); // true (field was touched)
 ```
 
 ### Warn Before Leaving
@@ -99,7 +95,7 @@ const form = ReactiveUtils.form({ message: '' });
 window.onbeforeunload = (e) => {
   if (form.isDirty) {
     e.preventDefault();
-    return 'You have unsaved changes. Leave anyway?';
+    return 'You have started filling the form. Leave anyway?';
   }
 };
 ```
@@ -117,169 +113,212 @@ ReactiveUtils.effect(() => {
 
 ---
 
-## Simple Examples Explained
+## Important: isDirty vs Value Changes
 
-### Example 1: Unsaved Changes Warning
+### What isDirty Actually Checks
+
+`isDirty` checks **touched state**, not whether values have changed:
 
 ```javascript
-const profileForm = ReactiveUtils.form({
-  name: 'John Doe',
-  email: 'john@example.com',
-  bio: 'Software developer',
-  website: 'https://johndoe.com'
+const form = ReactiveUtils.form({
+  name: 'John'  // Initial value
 });
 
-// Bind inputs
-profileForm.bindToInputs('#profile-form');
+console.log(form.isDirty); // false
 
-// Show unsaved changes indicator
+// User clicks field but doesn't change value
+form.setTouched('name');
+
+console.log(form.isDirty); // true (field was touched!)
+console.log(form.values.name); // 'John' (value unchanged)
+```
+
+### If You Need to Check Value Changes
+
+To check if values have actually changed from initial state, you need to compare manually:
+
+```javascript
+function hasValueChanged(form, field) {
+  return form.values[field] !== form.initialValues[field];
+}
+
+function hasAnyValueChanged(form) {
+  return Object.keys(form.values).some(field => 
+    form.values[field] !== form.initialValues[field]
+  );
+}
+
+// Usage
+const form = ReactiveUtils.form({ name: 'John' });
+form.setValue('name', 'Jane');
+
+console.log(form.isDirty); // true (touched)
+console.log(hasValueChanged(form, 'name')); // true (value changed)
+
+// Reset to original value
+form.setValue('name', 'John');
+
+console.log(form.isDirty); // true (still touched!)
+console.log(hasValueChanged(form, 'name')); // false (value back to initial)
+```
+
+---
+
+## Simple Examples Explained
+
+### Example 1: Unsaved Interaction Warning
+
+```javascript
+const form = ReactiveUtils.form({
+  name: '',
+  email: '',
+  message: ''
+});
+
+// Show warning indicator when user starts interacting
 ReactiveUtils.effect(() => {
   const indicator = document.getElementById('unsaved-indicator');
 
-  if (profileForm.isDirty) {
-    indicator.textContent = '⚠️ You have unsaved changes';
+  if (form.isDirty) {
+    indicator.textContent = '⚠️ You have started filling the form';
     indicator.style.display = 'block';
   } else {
     indicator.style.display = 'none';
   }
 });
 
-// Warn before leaving page
+// Warn before leaving
 window.onbeforeunload = (e) => {
-  if (profileForm.isDirty) {
+  if (form.isDirty) {
     e.preventDefault();
-    return 'You have unsaved changes. Are you sure you want to leave?';
+    return 'You have started filling the form. Are you sure you want to leave?';
   }
 };
-
-// Warn before navigation
-document.querySelectorAll('a').forEach(link => {
-  link.onclick = (e) => {
-    if (profileForm.isDirty) {
-      if (!confirm('You have unsaved changes. Leave anyway?')) {
-        e.preventDefault();
-      }
-    }
-  };
-});
 ```
 
 **What happens:**
 
-1. Form loaded with initial values
+1. Form starts pristine
 2. `isDirty` is `false`
-3. User changes name field
-4. `isDirty` becomes `true`
-5. Warning indicator appears
-6. Browser warns before leaving
-7. User can't accidentally lose changes
+3. User clicks any field
+4. Field marked as touched via `setValue()` or `setTouched()`
+5. `isDirty` becomes `true`
+6. Warning indicator appears
+7. Browser warns before leaving
 
 ---
 
-### Example 2: Save/Reset Button States
+### Example 2: Save Button State
 
 ```javascript
-const settingsForm = ReactiveUtils.form({
-  theme: 'light',
-  fontSize: 16,
-  notifications: true,
-  autoSave: false
+const noteForm = ReactiveUtils.form({
+  title: '',
+  content: '',
+  tags: ''
 });
 
-// Bind inputs
-settingsForm.bindToInputs('#settings-form');
-
-// Save button state
+// Enable save button only when user has interacted
 ReactiveUtils.effect(() => {
   const saveBtn = document.getElementById('save-btn');
 
-  if (settingsForm.isDirty && settingsForm.isValid) {
+  if (form.isDirty && form.isValid) {
     saveBtn.disabled = false;
-    saveBtn.textContent = 'Save Changes';
+    saveBtn.textContent = 'Save Note';
     saveBtn.classList.add('btn-primary');
-  } else if (settingsForm.isDirty) {
+  } else if (form.isDirty) {
     saveBtn.disabled = true;
     saveBtn.textContent = 'Fix Errors';
     saveBtn.classList.remove('btn-primary');
   } else {
     saveBtn.disabled = true;
-    saveBtn.textContent = 'No Changes';
+    saveBtn.textContent = 'No Changes Yet';
     saveBtn.classList.remove('btn-primary');
   }
 });
-
-// Reset button state
-ReactiveUtils.effect(() => {
-  const resetBtn = document.getElementById('reset-btn');
-
-  if (settingsForm.isDirty) {
-    resetBtn.disabled = false;
-    resetBtn.style.display = 'inline-block';
-  } else {
-    resetBtn.disabled = true;
-    resetBtn.style.display = 'none';
-  }
-});
-
-// Save changes
-document.getElementById('save-btn').onclick = async () => {
-  if (!settingsForm.isDirty) return;
-
-  try {
-    await fetch('/api/settings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(settingsForm.values)
-    });
-
-    // Update initial values after save
-    settingsForm.initialValues = { ...settingsForm.values };
-
-    alert('Settings saved!');
-  } catch (err) {
-    alert('Failed to save settings');
-  }
-};
-
-// Reset to initial values
-document.getElementById('reset-btn').onclick = () => {
-  if (confirm('Reset all changes?')) {
-    settingsForm.reset();
-  }
-};
 ```
 
 **What happens:**
 
-1. Settings loaded with defaults
-2. Save and reset buttons disabled (`isDirty` is `false`)
-3. User changes theme
-4. `isDirty` becomes `true`
-5. Save button enables
-6. Reset button appears
-7. User can save or reset
-8. After save, `isDirty` becomes `false` again
+1. Save button initially disabled (`isDirty` is `false`)
+2. User starts typing
+3. `isDirty` becomes `true`
+4. Button enables if valid
+5. Shows "Fix Errors" if invalid
+6. User knows when they can save
 
 ---
 
-### Example 3: Auto-Save Draft
+### Example 3: Form Progress Tracking
 
 ```javascript
-const postForm = ReactiveUtils.form({
+const surveyForm = ReactiveUtils.form({
+  question1: '',
+  question2: '',
+  question3: '',
+  question4: '',
+  question5: ''
+});
+
+// Track if user has started the survey
+ReactiveUtils.effect(() => {
+  const statusElement = document.getElementById('survey-status');
+
+  if (!surveyForm.isDirty) {
+    statusElement.textContent = 'Survey not started';
+    statusElement.className = 'status-not-started';
+  } else {
+    const touchedCount = surveyForm.touchedFields.length;
+    const totalFields = Object.keys(surveyForm.values).length;
+    const percentage = Math.round((touchedCount / totalFields) * 100);
+
+    statusElement.textContent = `Survey in progress: ${percentage}% fields visited`;
+    statusElement.className = 'status-in-progress';
+  }
+});
+
+// Encourage completion
+ReactiveUtils.effect(() => {
+  const encouragement = document.getElementById('encouragement');
+
+  if (surveyForm.isDirty && surveyForm.touchedFields.length < 5) {
+    encouragement.textContent = `Great start! ${5 - surveyForm.touchedFields.length} more questions to go.`;
+    encouragement.style.display = 'block';
+  } else if (surveyForm.touchedFields.length === 5) {
+    encouragement.textContent = '🎉 All questions answered!';
+    encouragement.style.display = 'block';
+  } else {
+    encouragement.style.display = 'none';
+  }
+});
+```
+
+**What happens:**
+
+1. Shows "Survey not started" initially
+2. User clicks first field
+3. Status changes to "Survey in progress"
+4. Tracks percentage of fields visited
+5. Shows encouragement messages
+6. Helps user complete survey
+
+---
+
+## Real-World Example: Draft Auto-Save
+
+```javascript
+const articleForm = ReactiveUtils.form({
   title: '',
   content: '',
   category: 'general',
-  tags: ''
+  tags: '',
+  publishDate: ''
 });
 
-// Bind inputs
-postForm.bindToInputs('#post-form');
-
-// Auto-save draft when dirty
+// Auto-save draft when user has started writing
 let autoSaveTimeout;
 
 ReactiveUtils.effect(() => {
-  if (postForm.isDirty) {
+  if (articleForm.isDirty) {
     clearTimeout(autoSaveTimeout);
 
     autoSaveTimeout = setTimeout(() => {
@@ -292,12 +331,12 @@ ReactiveUtils.effect(() => {
 ReactiveUtils.effect(() => {
   const statusElement = document.getElementById('draft-status');
 
-  if (postForm.isDirty) {
-    statusElement.textContent = '📝 Unsaved changes...';
-    statusElement.className = 'status-unsaved';
+  if (!articleForm.isDirty) {
+    statusElement.textContent = 'No draft saved';
+    statusElement.className = 'status-no-draft';
   } else {
-    statusElement.textContent = '✓ All changes saved';
-    statusElement.className = 'status-saved';
+    statusElement.textContent = '📝 Draft auto-saving...';
+    statusElement.className = 'status-saving';
   }
 });
 
@@ -307,255 +346,59 @@ async function saveDraft() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        ...postForm.values,
+        ...articleForm.values,
         savedAt: new Date().toISOString()
       })
     });
 
-    // Update initial values after save
-    postForm.initialValues = { ...postForm.values };
+    const statusElement = document.getElementById('draft-status');
+    statusElement.textContent = '✓ Draft saved';
+    statusElement.className = 'status-saved';
 
-    showNotification('Draft saved');
+    setTimeout(() => {
+      statusElement.textContent = '📝 Editing...';
+      statusElement.className = 'status-editing';
+    }, 2000);
+
   } catch (err) {
     console.error('Failed to save draft:', err);
   }
 }
 
-function showNotification(message) {
-  const notification = document.getElementById('notification');
-  notification.textContent = message;
-  notification.style.display = 'block';
-
-  setTimeout(() => {
-    notification.style.display = 'none';
-  }, 2000);
-}
-
-// Publish post
+// Publish button
 document.getElementById('publish-btn').onclick = async () => {
-  postForm.touchAll();
+  articleForm.touchAll();
 
-  if (!postForm.isValid) {
+  if (!articleForm.isValid) {
     alert('Please fix errors before publishing');
     return;
   }
 
   try {
-    await fetch('/api/posts', {
+    await fetch('/api/articles', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(postForm.values)
+      body: JSON.stringify(articleForm.values)
     });
 
-    alert('Post published!');
-
-    // Clear form and reset dirty state
-    postForm.reset();
-
-    window.location.href = '/posts';
+    alert('Article published!');
+    
+    // Reset form
+    articleForm.reset();
+    window.location.href = '/articles';
   } catch (err) {
-    alert('Failed to publish post');
+    alert('Failed to publish article');
   }
 };
 ```
 
 **What happens:**
-
-1. User starts typing
-2. `isDirty` becomes `true`
-3. Shows "Unsaved changes" status
-4. After 2 seconds of inactivity, auto-saves
-5. Updates initial values after save
-6. `isDirty` becomes `false`
-7. Shows "All changes saved" status
-8. Continues for each change
-9. User never loses work
-
----
-
-## Real-World Example: Complete Editor Form
-
-```javascript
-const editorForm = ReactiveUtils.form({
-  documentName: 'Untitled',
-  content: '',
-  author: currentUser.name,
-  isPublic: false,
-  allowComments: true,
-  category: 'draft'
-});
-
-// Bind inputs
-editorForm.bindToInputs('#editor-form');
-
-// Show dirty indicator in title
-ReactiveUtils.effect(() => {
-  const titleElement = document.querySelector('title');
-  const documentName = editorForm.values.documentName || 'Untitled';
-
-  if (editorForm.isDirty) {
-    titleElement.textContent = `● ${documentName} - Unsaved`;
-  } else {
-    titleElement.textContent = `${documentName}`;
-  }
-});
-
-// Show save button state
-ReactiveUtils.effect(() => {
-  const saveBtn = document.getElementById('save-btn');
-  const saveIcon = document.getElementById('save-icon');
-
-  if (editorForm.isDirty) {
-    saveBtn.disabled = !editorForm.isValid;
-    saveBtn.classList.add('btn-highlight');
-    saveIcon.textContent = '💾';
-    saveBtn.textContent = 'Save';
-  } else {
-    saveBtn.disabled = true;
-    saveBtn.classList.remove('btn-highlight');
-    saveIcon.textContent = '✓';
-    saveBtn.textContent = 'Saved';
-  }
-});
-
-// Keyboard shortcut: Ctrl+S / Cmd+S
-document.addEventListener('keydown', (e) => {
-  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-    e.preventDefault();
-
-    if (editorForm.isDirty && editorForm.isValid) {
-      saveDocument();
-    }
-  }
-});
-
-// Warn before closing
-window.onbeforeunload = (e) => {
-  if (editorForm.isDirty) {
-    e.preventDefault();
-    return 'You have unsaved changes.';
-  }
-};
-
-// Auto-save every 30 seconds if dirty
-setInterval(() => {
-  if (editorForm.isDirty && editorForm.isValid) {
-    autoSave();
-  }
-}, 30000);
-
-// Show last saved time
-let lastSavedTime = null;
-
-ReactiveUtils.effect(() => {
-  const lastSavedElement = document.getElementById('last-saved');
-
-  if (!editorForm.isDirty && lastSavedTime) {
-    const timeAgo = getTimeAgo(lastSavedTime);
-    lastSavedElement.textContent = `Last saved ${timeAgo}`;
-    lastSavedElement.style.display = 'block';
-  } else if (editorForm.isDirty) {
-    lastSavedElement.textContent = 'Unsaved changes';
-    lastSavedElement.style.display = 'block';
-  } else {
-    lastSavedElement.style.display = 'none';
-  }
-});
-
-// Update time ago every minute
-setInterval(() => {
-  if (lastSavedTime) {
-    const lastSavedElement = document.getElementById('last-saved');
-    const timeAgo = getTimeAgo(lastSavedTime);
-    lastSavedElement.textContent = `Last saved ${timeAgo}`;
-  }
-}, 60000);
-
-// Save document
-async function saveDocument() {
-  if (!editorForm.isValid) {
-    alert('Please fix errors before saving');
-    return;
-  }
-
-  try {
-    const response = await fetch('/api/documents', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...editorForm.values,
-        savedAt: new Date().toISOString()
-      })
-    });
-
-    if (response.ok) {
-      // Update initial values after successful save
-      editorForm.initialValues = { ...editorForm.values };
-      lastSavedTime = new Date();
-
-      showToast('Document saved successfully');
-    } else {
-      throw new Error('Save failed');
-    }
-  } catch (err) {
-    alert('Failed to save document');
-  }
-}
-
-// Auto-save (silent)
-async function autoSave() {
-  try {
-    await fetch('/api/documents/autosave', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(editorForm.values)
-    });
-
-    editorForm.initialValues = { ...editorForm.values };
-    lastSavedTime = new Date();
-
-    console.log('Auto-saved at', lastSavedTime);
-  } catch (err) {
-    console.error('Auto-save failed:', err);
-  }
-}
-
-function getTimeAgo(date) {
-  const seconds = Math.floor((new Date() - date) / 1000);
-
-  if (seconds < 60) return 'just now';
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-  return `${Math.floor(seconds / 86400)}d ago`;
-}
-
-function showToast(message) {
-  const toast = document.getElementById('toast');
-  toast.textContent = message;
-  toast.classList.add('show');
-
-  setTimeout(() => {
-    toast.classList.remove('show');
-  }, 3000);
-}
-
-// Save button
-document.getElementById('save-btn').onclick = () => {
-  if (editorForm.isDirty) {
-    saveDocument();
-  }
-};
-```
-
-**What happens:**
-- Page title shows unsaved indicator (●) when dirty
-- Save button highlights when dirty
-- Ctrl+S/Cmd+S keyboard shortcut saves
-- Warns before closing with unsaved changes
-- Auto-saves every 30 seconds if dirty
-- Shows "last saved" timestamp
-- After save, initial values updated, isDirty becomes false
-- Professional editor experience
+- No auto-save until user interacts
+- `isDirty` triggers auto-save logic
+- Saves draft 2 seconds after last change
+- Shows appropriate status messages
+- Only starts saving once interaction begins
+- Professional draft system
 
 ---
 
@@ -567,7 +410,7 @@ document.getElementById('save-btn').onclick = () => {
 window.onbeforeunload = (e) => {
   if (form.isDirty) {
     e.preventDefault();
-    return 'Unsaved changes';
+    return 'Unsaved interaction';
   }
 };
 ```
@@ -604,67 +447,77 @@ ReactiveUtils.effect(() => {
 
 **Answer:**
 
-When any field value differs from its initial value:
+When any field is touched (via `setValue()`, `setTouched()`, or user interaction):
+
+```javascript
+const form = ReactiveUtils.form({ name: '' });
+
+console.log(form.isDirty); // false
+
+form.setValue('name', 'John');
+console.log(form.isDirty); // true (setValue marks as touched)
+
+// OR
+
+form.setTouched('name');
+console.log(form.isDirty); // true (explicitly marked)
+```
+
+### Q: Does `isDirty` check if values changed?
+
+**Answer:**
+
+**No!** It only checks if fields were touched:
 
 ```javascript
 const form = ReactiveUtils.form({ name: 'John' });
 
-console.log(form.isDirty); // false
+// User clicks field but doesn't change value
+form.setTouched('name');
 
-form.setValue('name', 'Jane');
-console.log(form.isDirty); // true
-
-form.setValue('name', 'John'); // Back to initial
-console.log(form.isDirty); // false again!
+console.log(form.isDirty); // true (touched)
+console.log(form.values.name); // 'John' (unchanged!)
 ```
+
+To check value changes, compare with `initialValues` manually.
 
 ### Q: How do I reset `isDirty`?
 
 **Answer:**
 
-Use `reset()` or update `initialValues`:
+Use `reset()` to clear touched state:
 
 ```javascript
-// Method 1: Reset form
-form.reset(); // Values and isDirty reset
+form.setValue('name', 'John');
+console.log(form.isDirty); // true
 
-// Method 2: Update initial values after save
-form.initialValues = { ...form.values };
-// Now isDirty is false with current values as baseline
+form.reset();
+console.log(form.isDirty); // false (touched state cleared)
 ```
 
-### Q: Does `isDirty` check touched state?
+### Q: What if I want to check actual value changes?
 
 **Answer:**
 
-No! Only checks if values changed:
+Create a helper function:
 
 ```javascript
-const form = ReactiveUtils.form({ email: '' });
+function hasFormChanged(form) {
+  return Object.keys(form.values).some(field =>
+    form.values[field] !== form.initialValues[field]
+  );
+}
 
-console.log(form.isDirty); // false
-console.log(form.isTouched('email')); // false
+const form = ReactiveUtils.form({ name: 'John' });
+form.setValue('name', 'Jane');
 
-// These are independent!
-```
+console.log(form.isDirty); // true (touched)
+console.log(hasFormChanged(form)); // true (value changed)
 
-### Q: What if I load data from server?
+form.setValue('name', 'John'); // Back to initial
 
-**Answer:**
-
-Set values with `setValues()`, then update initialValues:
-
-```javascript
-// Load from server
-const data = await fetchUserProfile();
-
-// Set form values
-form.setValues(data);
-
-// Update initial values to match
-form.initialValues = { ...data };
-
-// Now isDirty is false with loaded data as baseline
+console.log(form.isDirty); // true (still touched)
+console.log(hasFormChanged(form)); // false (value matches initial)
 ```
 
 ### Q: Is `isDirty` reactive?
@@ -676,7 +529,7 @@ Yes! Updates automatically:
 ```javascript
 ReactiveUtils.effect(() => {
   console.log('Form dirty:', form.isDirty);
-  // Re-runs when values change
+  // Re-runs when touched state changes
 });
 ```
 
@@ -684,55 +537,75 @@ ReactiveUtils.effect(() => {
 
 ## Tips for Success
 
-### 1. Always Warn Before Leaving
+### 1. Use for Interaction Detection
 
 ```javascript
-// ✅ Prevent accidental data loss
-window.onbeforeunload = (e) => {
-  if (form.isDirty) {
-    e.preventDefault();
-    return 'Unsaved changes';
-  }
-};
+// ✅ Detect if user started filling form
+if (form.isDirty) {
+  warnBeforeLeaving();
+}
 ```
 
-### 2. Show Save Button Only When Dirty
+### 2. Combine with Validation
 
 ```javascript
-// ✅ Clean UI
-ReactiveUtils.effect(() => {
-  saveBtn.style.display = form.isDirty ? 'block' : 'none';
-});
-```
-
-### 3. Update initialValues After Save
-
-```javascript
-// ✅ Reset dirty state after save
-await saveData();
-form.initialValues = { ...form.values };
-// Now isDirty is false
-```
-
-### 4. Combine with isValid
-
-```javascript
-// ✅ Enable save only if dirty AND valid
+// ✅ Enable save only if interacted AND valid
 ReactiveUtils.effect(() => {
   saveBtn.disabled = !form.isDirty || !form.isValid;
 });
 ```
 
-### 5. Use for Auto-Save
+### 3. Use for Auto-Save Trigger
 
 ```javascript
-// ✅ Save only when changes exist
+// ✅ Only auto-save if user has interacted
 ReactiveUtils.effect(() => {
   if (form.isDirty) {
-    autoSaveTimeout = setTimeout(save, 2000);
+    triggerAutoSave();
   }
 });
 ```
+
+### 4. Show Status Indicators
+
+```javascript
+// ✅ Show different messages based on interaction
+ReactiveUtils.effect(() => {
+  if (!form.isDirty) {
+    status.textContent = 'Start filling the form';
+  } else {
+    status.textContent = 'Form in progress';
+  }
+});
+```
+
+### 5. For Value Changes, Use Custom Check
+
+```javascript
+// ✅ Check actual value changes separately
+function hasUnsavedChanges(form) {
+  return Object.keys(form.values).some(field =>
+    form.values[field] !== form.initialValues[field]
+  );
+}
+
+if (hasUnsavedChanges(form)) {
+  saveBtn.classList.add('has-changes');
+}
+```
+
+---
+
+## Key Differences: isDirty vs Value Changes
+
+| Aspect | `isDirty` | Value Changes |
+|--------|-----------|---------------|
+| What it checks | Touched state | Value comparison |
+| When it's true | Any field touched | Values differ from initial |
+| User clicks field (no change) | `true` | `false` |
+| User changes then reverts | `true` | `false` |
+| Use for | Interaction detection | Actual changes |
+| Built-in? | Yes | No (manual check) |
 
 ---
 
@@ -740,37 +613,43 @@ ReactiveUtils.effect(() => {
 
 ### What `isDirty` Does:
 
-1. ✅ Computed property (not a method)
-2. ✅ Returns `true` if form modified
-3. ✅ Returns `false` if matches initial values
-4. ✅ Reactive - updates automatically
-5. ✅ Compares all field values
-6. ✅ Perfect for unsaved changes detection
+1. ✅ Checks if any field has been touched
+2. ✅ Returns `true` if user has interacted
+3. ✅ Returns `false` if form is pristine
+4. ✅ Does NOT check if values changed
+5. ✅ Reactive - updates automatically
+6. ✅ Perfect for interaction detection
 
 ### When to Use It:
 
-- Warn before leaving page (most common)
-- Enable/disable save buttons
-- Show unsaved changes indicators
+- Warning before leaving page
+- Enabling save buttons
+- Showing "form started" indicators
 - Auto-save triggers
-- Form state tracking
-- Any modification detection
+- Form progress tracking
+- Interaction analytics
+
+### When NOT to Use It:
+
+- Checking if values actually changed (use manual comparison with `initialValues`)
+- Detecting specific value modifications
+- Comparing current vs initial state
 
 ### The Basic Pattern:
 
 ```javascript
-const form = ReactiveUtils.form({ field: 'initial' });
+const form = ReactiveUtils.form({ field: '' });
 
-// Check if modified
+// Check if user has interacted
 if (form.isDirty) {
-  console.log('Form has changes!');
+  console.log('User has touched the form!');
 }
 
 // Warn before leaving
 window.onbeforeunload = (e) => {
   if (form.isDirty) {
     e.preventDefault();
-    return 'Unsaved changes';
+    return 'Unsaved interaction';
   }
 };
 
@@ -782,4 +661,4 @@ ReactiveUtils.effect(() => {
 
 ---
 
-**Remember:** `isDirty` tells you if the form has been modified from its initial state. Use it to warn users about unsaved changes and control save button states. It's reactive and updates automatically! 🎉
+**Remember:** `isDirty` tells you if the user has **interacted** with the form (touched any field), not whether values have changed from their initial state. For value change detection, compare with `initialValues` manually! 🎉

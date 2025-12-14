@@ -74,6 +74,62 @@ Any invalid? → Return false
 
 ---
 
+
+---
+
+### Performance: Automatic Batching
+
+`validate()` automatically uses `batch()` internally for optimal performance:
+
+```javascript
+// What validate() does internally:
+validate() {
+  return batch(() => {  // ← Batched for performance!
+    let isValid = true;
+    
+    Object.keys(validators).forEach(field => {
+      const valid = this.validateField(field);
+      if (!valid) isValid = false;
+    });
+    
+    return isValid;
+  });
+}
+```
+
+**Why this matters:**
+- All field validations grouped into single UI update
+- More efficient than validating fields individually
+- No performance penalty for large forms
+- Automatic - you don't need to do anything
+
+**Example with many fields:**
+
+```javascript
+const form = ReactiveUtils.form(
+  {
+    field1: '', field2: '', field3: '', field4: '', field5: '',
+    field6: '', field7: '', field8: '', field9: '', field10: ''
+  },
+  {
+    validators: {
+      field1: ReactiveUtils.validators.required(),
+      field2: ReactiveUtils.validators.required(),
+      field3: ReactiveUtils.validators.required(),
+      // ... 10 validators total
+    }
+  }
+);
+
+// Validates all 10 fields, but only triggers ONE UI update
+form.validate();
+
+// Without batching, this would trigger 10 separate UI updates!
+```
+
+---
+
+
 ## Basic Usage
 
 ### Validate Entire Form

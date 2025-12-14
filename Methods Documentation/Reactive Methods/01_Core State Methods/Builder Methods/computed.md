@@ -23,7 +23,7 @@ ReactiveUtils.computed(() => {
 });
 
 // ✅ With builder - all in one
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ firstName: 'John', lastName: 'Doe' })
   .computed('fullName', (s) => `${s.firstName} ${s.lastName}`)
   .build();
@@ -42,7 +42,7 @@ const state = ReactiveUtils.builder()
 ### The Builder Chain
 
 ```javascript
-ReactiveUtils.builder()
+ReactiveUtils.builder() 
   .state({ count: 0 })
   .computed('double', (s) => s.count * 2)  // Add computed
   .build();  // Create final state
@@ -55,7 +55,7 @@ ReactiveUtils.builder()
 ### Single Computed Property
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ radius: 5 })
   .computed('area', (s) => Math.PI * s.radius ** 2)
   .build();
@@ -66,7 +66,7 @@ console.log(state.area); // Computed automatically
 ### Multiple Computed Properties
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ width: 10, height: 20 })
   .computed('area', (s) => s.width * s.height)
   .computed('perimeter', (s) => 2 * (s.width + s.height))
@@ -79,7 +79,7 @@ console.log(state.perimeter); // 60
 ### Computed Depending on Other Computed
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ price: 100, quantity: 3 })
   .computed('subtotal', (s) => s.price * s.quantity)
   .computed('tax', (s) => s.subtotal * 0.1)
@@ -96,7 +96,7 @@ console.log(state.total); // 330
 ### Example 1: User Profile
 
 ```javascript
-const user = ReactiveUtils.builder()
+const user = ReactiveUtils.builder() 
   .state({
     firstName: 'John',
     lastName: 'Doe',
@@ -120,7 +120,7 @@ console.log(user.fullName);  // 'Jane Doe' (auto-updates!)
 ### Example 2: Shopping Cart
 
 ```javascript
-const cart = ReactiveUtils.builder()
+const cart = ReactiveUtils.builder() 
   .state({
     items: [
       { name: 'Apple', price: 1.5, qty: 3 },
@@ -148,7 +148,7 @@ console.log(cart.itemCount); // 2
 ### Example 3: Form Validation
 
 ```javascript
-const form = ReactiveUtils.builder()
+const form = ReactiveUtils.builder() 
   .state({
     email: '',
     password: '',
@@ -174,7 +174,7 @@ console.log(form.isFormValid); // true
 ## Real-World Example: Dashboard Stats
 
 ```javascript
-const dashboard = ReactiveUtils.builder()
+const dashboard = ReactiveUtils.builder() 
   .state({
     users: [
       { name: 'John', role: 'admin', active: true },
@@ -212,7 +212,7 @@ ReactiveUtils.effect(() => {
 ### Pattern 1: Simple Computed
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ value: 10 })
   .computed('double', (s) => s.value * 2)
   .build();
@@ -221,7 +221,7 @@ const state = ReactiveUtils.builder()
 ### Pattern 2: Multiple Computed
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ a: 1, b: 2 })
   .computed('sum', (s) => s.a + s.b)
   .computed('product', (s) => s.a * s.b)
@@ -231,7 +231,7 @@ const state = ReactiveUtils.builder()
 ### Pattern 3: Chained Computed
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ n: 5 })
   .computed('squared', (s) => s.n ** 2)
   .computed('cubed', (s) => s.squared * s.n)
@@ -247,7 +247,7 @@ const state = ReactiveUtils.builder()
 **Answer:** Yes!
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ price: 100 })
   .computed('subtotal', (s) => s.price * 2)
   .computed('total', (s) => s.subtotal * 1.1)
@@ -328,7 +328,7 @@ console.log(state.total); // Updates automatically
 ### The Basic Pattern:
 
 ```javascript
-const state = ReactiveUtils.builder()
+const state = ReactiveUtils.builder() 
   .state({ value: 10 })
   .computed('double', (s) => s.value * 2)
   .build();
