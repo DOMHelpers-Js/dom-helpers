@@ -1,0 +1,682 @@
+# DOM Helpers - Reactive State Extension v2.0.2 - Complete API Reference
+
+## Module Overview
+
+- **Core:** `01_dh-reactive.js` - Base reactive system
+- **Array Patch:** `02_dh-reactive-array-patch.js` - Reactive array methods
+- **Collections:** `03_dh-reactive-collections.js` - Extended collection management
+- **Forms:** `04_dh-reactive-form.js` - Form state and validation
+- **Cleanup:** `05_dh-reactive-cleanup.js` - Memory leak prevention and lifecycle management
+- **Enhancements:** `06_dh-reactive-enhancements.js` - Production features (error handling, async, DevTools)
+- **Shortcuts:** `dh-reactiveUtils-shortcut.js` - Global function aliases
+
+---
+
+## Core State Creation (Module 01)
+
+### ReactiveUtils Namespace
+
+- **`ReactiveUtils.state(initialState)`** - Create a reactive state object
+- **`ReactiveUtils.createState(initialState, bindingDefs)`** - Create state with auto-bindings
+- **`ReactiveUtils.ref(value)`** - Create a reactive reference with `.value` property
+- **`ReactiveUtils.refs(defs)`** - Create multiple refs from object definition
+- **`ReactiveUtils.collection(items)`** - Create a reactive collection (core version with $-prefixed methods)
+- **`ReactiveUtils.list(items)`** - Alias for collection()
+- **`ReactiveUtils.form(initialValues)`** - Create a basic form state manager
+- **`ReactiveUtils.async(initialValue)`** - Create async operation state (basic version)
+- **`ReactiveUtils.store(initialState, options)`** - Create a store with getters/actions
+- **`ReactiveUtils.component(config)`** - Create a component with full lifecycle
+- **`ReactiveUtils.reactive(initialState)`** - Fluent builder pattern for state
+
+### ReactiveState Namespace
+
+- **`ReactiveState.create(initialState)`** - Create reactive state
+- **`ReactiveState.form(initialValues)`** - Create form state
+- **`ReactiveState.async(initialValue)`** - Create async state
+- **`ReactiveState.collection(items)`** - Create collection
+
+---
+
+## State Instance Methods (Module 01)
+
+### State Management
+
+- **`state.$computed(key, fn)`** - Add computed property to instance
+- **`state.$watch(keyOrFn, callback)`** - Watch for changes (returns cleanup function)
+- **`state.$batch(fn)`** - Batch multiple updates
+- **`state.$notify(key)`** - Manually trigger updates for a key (or all if no key)
+- **`state.$raw`** - Property getter to access non-reactive raw object
+- **`state.$update(updates)`** - Mixed state + DOM updates (supports selectors and nested paths)
+- **`state.$set(updates)`** - Functional updates with callbacks
+- **`state.$bind(bindingDefs)`** - Create reactive DOM bindings (returns cleanup function)
+
+### Cleanup (Added by Module 05)
+
+- **`state.$cleanup()`** - Remove all effects, watchers, and computed properties associated with the state
+
+---
+
+## Core Collection Methods (Module 01)
+
+When using `ReactiveUtils.collection()` or `ReactiveUtils.list()`:
+
+- **`collection.$add(item)`** - Add item to collection
+- **`collection.$remove(predicate)`** - Remove item by predicate function or direct value
+- **`collection.$update(predicate, updates)`** - Update item in collection by predicate or value
+- **`collection.$clear()`** - Clear all items from collection
+- **`collection.items`** - Property containing the reactive array
+
+---
+
+## Collections Extension Methods (Module 03)
+
+When using `Collections.create()`, `Collections.collection()`, or `Collections.list()`:
+
+### Basic Operations
+
+- **`add(item)`** - Add item to collection (returns this for chaining)
+- **`remove(predicate)`** - Remove item by predicate or value (returns this)
+- **`update(predicate, updates)`** - Update item by predicate or value (returns this)
+- **`clear()`** - Clear all items (returns this)
+
+### Search & Filter
+
+- **`find(predicate)`** - Find item in collection
+- **`filter(predicate)`** - Filter items and return new array
+- **`map(fn)`** - Map over items and return new array
+- **`forEach(fn)`** - Iterate over items (returns this)
+
+### Sorting & Ordering
+
+- **`sort(compareFn)`** - Sort items in place (returns this)
+- **`reverse()`** - Reverse items in place (returns this)
+
+### Getters
+
+- **`length`** - Get collection length (getter property)
+- **`first`** - Get first item (getter property)
+- **`last`** - Get last item (getter property)
+
+### Array Methods
+
+- **`at(index)`** - Get item at index
+- **`includes(item)`** - Check if includes item
+- **`indexOf(item)`** - Get index of item
+- **`slice(start, end)`** - Get slice of items
+- **`splice(start, deleteCount, ...items)`** - Splice items (returns this)
+- **`push(...items)`** - Push items to end (returns this)
+- **`pop()`** - Pop item from end
+- **`shift()`** - Shift item from start
+- **`unshift(...items)`** - Unshift items to start (returns this)
+
+### Advanced Operations
+
+- **`toggle(predicate, field)`** - Toggle boolean field on single item (returns this)
+- **`toggleAll(predicate, field)`** - Toggle boolean field on all matching items (returns count)
+- **`removeWhere(predicate)`** - Remove all matching items (returns this)
+- **`updateWhere(predicate, updates)`** - Update all matching items (returns this)
+- **`reset(newItems)`** - Reset collection with new items (returns this)
+- **`toArray()`** - Convert to plain array
+- **`isEmpty()`** - Check if empty
+
+### Collections Extension Namespace
+
+- **`Collections.create(items)`** - Create collection with extended methods
+- **`Collections.createWithComputed(items, computed)`** - Create collection with computed properties
+- **`Collections.createFiltered(collection, predicate)`** - Create filtered view that syncs with source
+- **`Collections.collection(items)`** - Alias for create
+- **`Collections.list(items)`** - Alias for create
+
+---
+
+## Form Instance Methods (Module 01 - Basic)
+
+Basic form from `ReactiveUtils.form()`:
+
+- **`$setValue(field, value)`** - Set form field value and mark as touched
+- **`$setError(field, error)`** - Set or clear field error
+- **`$reset(newValues)`** - Reset form to initial or new values
+- **`values`** - Property containing form values
+- **`errors`** - Property containing form errors
+- **`touched`** - Property containing touched fields
+- **`isSubmitting`** - Property for submission state
+- **`isValid`** - Computed property for form validity
+- **`isDirty`** - Computed property for form dirty state
+
+---
+
+## Forms Extension Methods (Module 04)
+
+When using `Forms.create()` or `Forms.form()`:
+
+### Value Management
+
+- **`setValue(field, value)`** - Set single field value (returns this)
+- **`setValues(values)`** - Set multiple field values in batch (returns this)
+- **`getValue(field)`** - Get field value
+
+### Error Management
+
+- **`setError(field, error)`** - Set field error (returns this)
+- **`setErrors(errors)`** - Set multiple errors in batch (returns this)
+- **`clearError(field)`** - Clear field error (returns this)
+- **`clearErrors()`** - Clear all errors (returns this)
+- **`hasError(field)`** - Check if field has error
+- **`getError(field)`** - Get field error message
+
+### Touched State Management
+
+- **`setTouched(field, touched)`** - Mark field as touched (returns this)
+- **`setTouchedFields(fields)`** - Mark multiple fields as touched (returns this)
+- **`touchAll()`** - Mark all fields as touched (returns this)
+- **`isTouched(field)`** - Check if field is touched
+- **`shouldShowError(field)`** - Check if should show error (touched + has error)
+
+### Validation
+
+- **`validateField(field)`** - Validate single field (returns boolean)
+- **`validate()`** - Validate all fields (returns boolean)
+
+### Reset
+
+- **`reset(newValues)`** - Reset form to initial or new values (returns this)
+- **`resetField(field)`** - Reset single field (returns this)
+
+### Submission
+
+- **`submit(customHandler)`** - Handle form submission (async, returns result object)
+
+### Event Handlers
+
+- **`handleChange(event)`** - Handle input change event
+- **`handleBlur(event)`** - Handle input blur event
+- **`getFieldProps(field)`** - Get field props for binding (returns object with name, value, onChange, onBlur)
+
+### DOM Binding
+
+- **`bindToInputs(selector)`** - Bind form to DOM inputs (returns this)
+
+### Serialization
+
+- **`toObject()`** - Convert to plain object
+
+### Computed Properties (Forms Extension)
+
+- **`isValid`** - Check if form is valid (computed property)
+- **`isDirty`** - Check if form is dirty (computed property)
+- **`hasErrors`** - Check if has errors (computed property)
+- **`touchedFields`** - Get touched fields array (computed property)
+- **`errorFields`** - Get error fields array (computed property)
+
+### Forms Extension Namespace
+
+- **`Forms.create(initialValues, options)`** - Create reactive form
+- **`Forms.form(initialValues, options)`** - Alias for create
+- **`Forms.validators`** - Object containing all validators
+- **`Forms.v`** - Shorthand alias for validators
+
+---
+
+## Validators (Module 04)
+
+### Built-in Validators
+
+- **`Validators.required(message)`** - Required field validator
+- **`Validators.email(message)`** - Email format validator
+- **`Validators.minLength(min, message)`** - Minimum length validator
+- **`Validators.maxLength(max, message)`** - Maximum length validator
+- **`Validators.pattern(regex, message)`** - Pattern/regex validator
+- **`Validators.min(min, message)`** - Minimum value validator
+- **`Validators.max(max, message)`** - Maximum value validator
+- **`Validators.match(fieldName, message)`** - Match field validator
+- **`Validators.custom(validatorFn)`** - Custom validator function
+- **`Validators.combine(...validators)`** - Combine multiple validators
+
+### Validator Access
+
+- **`ReactiveUtils.validators`** - Access validators via ReactiveUtils
+- **`Forms.validators`** - Access validators via Forms namespace
+- **`Forms.v`** - Shorthand access to validators
+
+---
+
+## Async State Instance Methods (Module 01 - Basic)
+
+Basic async state from `ReactiveUtils.async()`:
+
+- **`$execute(fn)`** - Execute async operation and update state
+- **`$reset()`** - Reset async state to initial values
+- **`data`** - Property containing async data
+- **`loading`** - Property for loading state
+- **`error`** - Property containing error if any
+- **`isSuccess`** - Computed property (data loaded, no error)
+- **`isError`** - Computed property (has error, not loading)
+
+---
+
+## Enhanced Async State (Module 06)
+
+When using `ReactiveUtils.asyncState()` from enhancements module:
+
+### Enhanced Methods
+
+- **`$execute(fn)`** - Execute async with automatic cancellation (receives AbortSignal)
+- **`$abort()`** - Manually abort current request
+- **`$reset()`** - Reset to initial state
+- **`$refetch()`** - Re-execute last function
+
+### Enhanced Properties
+
+- **`data`** - Property containing async data
+- **`loading`** - Property for loading state
+- **`error`** - Property containing error if any
+- **`requestId`** - Property tracking request sequence
+- **`abortController`** - Property containing current AbortController
+
+### Enhanced Computed Properties
+
+- **`isSuccess`** - Computed property (data loaded, no error)
+- **`isError`** - Computed property (has error, not loading)
+- **`isIdle`** - Computed property (no data, no error, not loading)
+
+---
+
+## Component Instance Methods (Module 01)
+
+- **`$destroy()`** - Clean up all effects, watchers, and bindings
+
+---
+
+## Ref Instance Methods (Module 01)
+
+- **`value`** - Property to get/set the ref value
+- **`valueOf()`** - Get primitive value
+- **`toString()`** - Convert to string
+
+---
+
+## Reactivity Functions (Module 01)
+
+- **`ReactiveUtils.computed(state, defs)`** - Add multiple computed properties to state (returns state)
+- **`ReactiveUtils.watch(state, defs)`** - Add multiple watchers to state (returns cleanup function)
+- **`ReactiveUtils.effect(fn)`** - Create single reactive effect (returns cleanup function)
+- **`ReactiveUtils.effects(defs)`** - Create multiple effects from object (returns cleanup function)
+- **`ReactiveUtils.bindings(defs)`** - Create DOM bindings with selectors (returns cleanup function)
+
+---
+
+## Enhanced Reactivity Functions (Module 05 & 06)
+
+### Safe Effects (Module 06)
+
+- **`ReactiveUtils.safeEffect(fn, options)`** - Create effect with error boundary (returns cleanup function)
+- **`ReactiveUtils.safeWatch(state, keyOrFn, callback, options)`** - Create watch with error boundary (returns cleanup function)
+
+### Async Effects (Module 06)
+
+- **`ReactiveUtils.asyncEffect(fn, options)`** - Create async effect with AbortSignal support (returns cleanup function)
+
+### Error Boundaries (Module 06)
+
+- **`ReactiveUtils.ErrorBoundary`** - Error boundary class constructor
+- **`new ErrorBoundary(options)`** - Create error boundary instance
+- **`errorBoundary.wrap(fn, context)`** - Wrap function with error handling
+
+---
+
+## Batch Operations (Module 01)
+
+- **`ReactiveUtils.batch(fn)`** - Batch updates manually (executes fn and flushes after)
+- **`ReactiveUtils.pause()`** - Pause reactivity (increment batch depth)
+- **`ReactiveUtils.resume(flush)`** - Resume reactivity (decrement batch depth, optionally flush)
+- **`ReactiveUtils.untrack(fn)`** - Run function without tracking dependencies
+
+---
+
+## Utility Functions (Module 01)
+
+- **`ReactiveUtils.isReactive(value)`** - Check if value is reactive
+- **`ReactiveUtils.toRaw(value)`** - Get raw non-reactive value
+- **`ReactiveUtils.notify(state, key)`** - Manually notify dependencies for a key or all keys
+- **`ReactiveUtils.updateAll(state, updates)`** - Unified state + DOM updates
+- **`updateAll(state, updates)`** - Global function for unified updates
+
+---
+
+## Array Patch Methods (Module 02)
+
+When array patch extension is loaded, these array methods become reactive:
+
+- **`push(...items)`** - Add items to end (triggers reactivity)
+- **`pop()`** - Remove item from end (triggers reactivity)
+- **`shift()`** - Remove item from start (triggers reactivity)
+- **`unshift(...items)`** - Add items to start (triggers reactivity)
+- **`splice(start, deleteCount, ...items)`** - Add/remove items (triggers reactivity)
+- **`sort(compareFn)`** - Sort in place (triggers reactivity)
+- **`reverse()`** - Reverse in place (triggers reactivity)
+- **`fill(value, start, end)`** - Fill with value (triggers reactivity)
+- **`copyWithin(target, start, end)`** - Copy within array (triggers reactivity)
+
+### Array Patch Functions
+
+- **`ReactiveUtils.patchArray(state, key)`** - Manually patch array property (current API)
+- **`patchReactiveArray(state, key)`** - Legacy global function name
+- **`Elements.patchArray(state, key)`** - Array patch via Elements namespace
+- **`Collections.patchArray(state, key)`** - Array patch via Collections namespace
+- **`Selector.patchArray(state, key)`** - Array patch via Selector namespace
+
+---
+
+## Cleanup System (Module 05)
+
+### Cleanup Namespace
+
+- **`ReactiveCleanup.collector()`** - Create cleanup collector for managing multiple cleanups
+- **`ReactiveCleanup.scope(fn)`** - Create cleanup scope that auto-collects and cleans up
+- **`ReactiveCleanup.patchState(state)`** - Manually patch existing state to use cleanup system
+- **`ReactiveCleanup.isActive(effectFn)`** - Check if an effect is still active (not disposed)
+- **`ReactiveCleanup.getStats()`** - Get diagnostic information about cleanup system
+- **`ReactiveCleanup.debug(enable)`** - Enable or disable debug mode for cleanup operations
+- **`ReactiveCleanup.test()`** - Run test to verify cleanup system is working properly
+
+### Cleanup via ReactiveUtils
+
+- **`ReactiveUtils.cleanup`** - Reference to ReactiveCleanup API
+- **`ReactiveUtils.collector`** - Create cleanup collector
+- **`ReactiveUtils.scope`** - Create cleanup scope
+
+### Cleanup Collector Methods
+
+Returned by `ReactiveCleanup.collector()`:
+
+- **`collector.add(cleanup)`** - Add cleanup function to collector (returns collector)
+- **`collector.cleanup()`** - Execute all cleanup functions
+- **`collector.size`** - Get number of cleanup functions (getter property)
+- **`collector.disposed`** - Check if collector is disposed (getter property)
+
+---
+
+## Development Tools (Module 06)
+
+### DevTools Namespace
+
+- **`ReactiveUtils.DevTools`** - Development tools object
+- **`DevTools.enable()`** - Enable DevTools and expose globally
+- **`DevTools.disable()`** - Disable DevTools and remove global reference
+- **`DevTools.trackState(state, name)`** - Register state for tracking
+- **`DevTools.trackEffect(effect, name)`** - Register effect for tracking
+- **`DevTools.getStates()`** - Get array of all tracked states with metadata
+- **`DevTools.getHistory()`** - Get array of all logged state changes
+- **`DevTools.clearHistory()`** - Clear DevTools history
+- **`DevTools.enabled`** - Property indicating if DevTools is enabled
+- **`DevTools.states`** - Map of tracked states
+- **`DevTools.effects`** - Map of tracked effects
+- **`DevTools.history`** - Array of change history
+- **`DevTools.maxHistory`** - Maximum history size
+
+---
+
+## Builder Pattern Methods (Module 01)
+
+Returned by `ReactiveUtils.reactive()`:
+
+- **`builder.state`** - Access to the created reactive state
+- **`builder.computed(defs)`** - Add computed properties (returns builder)
+- **`builder.watch(defs)`** - Add watchers (returns builder)
+- **`builder.effect(fn)`** - Add effect (returns builder)
+- **`builder.bind(defs)`** - Add bindings (returns builder)
+- **`builder.action(name, fn)`** - Add single action (returns builder)
+- **`builder.actions(defs)`** - Add multiple actions (returns builder)
+- **`builder.build()`** - Build and return state with destroy method
+- **`builder.destroy()`** - Clean up all effects
+
+---
+
+## Store Options (Module 01)
+
+Options object for `ReactiveUtils.store()`:
+
+- **`getters`** - Object of getter functions (become computed properties)
+- **`actions`** - Object of action functions
+
+---
+
+## Component Config (Module 01)
+
+Config object for `ReactiveUtils.component()`:
+
+- **`state`** - Initial state object
+- **`computed`** - Object of computed property functions
+- **`watch`** - Object of watcher functions
+- **`effects`** - Object/array of effect functions
+- **`bindings`** - Object of DOM bindings
+- **`actions`** - Object of action functions
+- **`mounted`** - Lifecycle hook called after setup
+- **`unmounted`** - Lifecycle hook called on destroy
+
+---
+
+## Elements Namespace Integration
+
+All core methods available via `Elements.*`:
+
+### Core Methods
+
+- **`Elements.state()`** - Create reactive state
+- **`Elements.createState(initialState, bindingDefs)`** - Create state with bindings
+- **`Elements.updateAll(state, updates)`** - Unified updates
+- **`Elements.computed(state, defs)`** - Add computed properties
+- **`Elements.watch(state, defs)`** - Add watchers
+- **`Elements.effect(fn)`** - Create effect
+- **`Elements.effects(defs)`** - Create multiple effects
+- **`Elements.ref(value)`** - Create ref
+- **`Elements.refs(defs)`** - Create multiple refs
+- **`Elements.store(initialState, options)`** - Create store
+- **`Elements.component(config)`** - Create component
+- **`Elements.reactive(initialState)`** - Fluent builder
+- **`Elements.bindings(defs)`** - Create bindings
+- **`Elements.list(items)`** - Create collection
+- **`Elements.batch(fn)`** - Batch updates
+- **`Elements.isReactive(value)`** - Check reactive
+- **`Elements.toRaw(value)`** - Get raw value
+- **`Elements.notify(state, key)`** - Notify dependencies
+- **`Elements.pause()`** - Pause reactivity
+- **`Elements.resume(flush)`** - Resume reactivity
+- **`Elements.untrack(fn)`** - Untrack dependencies
+
+### Special Elements Method
+
+- **`Elements.bind(bindingDefs)`** - ID-based bindings (uses getElementById)
+
+### Array Patch (Module 02)
+
+- **`Elements.patchArray(state, key)`** - Array patching via Elements
+
+---
+
+## Collections Namespace Integration
+
+All core methods available via `Collections.*`:
+
+### Core Methods
+
+- **`Collections.state()`** - Create reactive state
+- **`Collections.createState(initialState, bindingDefs)`** - Create state with bindings
+- **`Collections.updateAll(state, updates)`** - Unified updates
+- **`Collections.computed(state, defs)`** - Add computed properties
+- **`Collections.watch(state, defs)`** - Add watchers
+- **`Collections.effect(fn)`** - Create effect
+- **`Collections.effects(defs)`** - Create multiple effects
+- **`Collections.ref(value)`** - Create ref
+- **`Collections.refs(defs)`** - Create multiple refs
+- **`Collections.store(initialState, options)`** - Create store
+- **`Collections.component(config)`** - Create component
+- **`Collections.reactive(initialState)`** - Fluent builder
+- **`Collections.bindings(defs)`** - Create bindings
+- **`Collections.list(items)`** - Create collection
+- **`Collections.batch(fn)`** - Batch updates
+- **`Collections.isReactive(value)`** - Check reactive
+- **`Collections.toRaw(value)`** - Get raw value
+- **`Collections.notify(state, key)`** - Notify dependencies
+- **`Collections.pause()`** - Pause reactivity
+- **`Collections.resume(flush)`** - Resume reactivity
+- **`Collections.untrack(fn)`** - Untrack dependencies
+
+### Special Collections Method
+
+- **`Collections.bind(bindingDefs)`** - Class-based bindings (uses getElementsByClassName)
+
+### Array Patch (Module 02)
+
+- **`Collections.patchArray(state, key)`** - Array patching via Collections
+
+---
+
+## Selector Namespace Integration
+
+All core methods available via `Selector.*`:
+
+### Core Methods
+
+- **`Selector.state()`** - Create reactive state
+- **`Selector.createState(initialState, bindingDefs)`** - Create state with bindings
+- **`Selector.updateAll(state, updates)`** - Unified updates
+- **`Selector.computed(state, defs)`** - Add computed properties
+- **`Selector.watch(state, defs)`** - Add watchers
+- **`Selector.effect(fn)`** - Create effect
+- **`Selector.effects(defs)`** - Create multiple effects
+- **`Selector.ref(value)`** - Create ref
+- **`Selector.refs(defs)`** - Create multiple refs
+- **`Selector.store(initialState, options)`** - Create store
+- **`Selector.component(config)`** - Create component
+- **`Selector.reactive(initialState)`** - Fluent builder
+- **`Selector.bindings(defs)`** - Create bindings
+- **`Selector.list(items)`** - Create collection
+- **`Selector.batch(fn)`** - Batch updates
+- **`Selector.isReactive(value)`** - Check reactive
+- **`Selector.toRaw(value)`** - Get raw value
+- **`Selector.notify(state, key)`** - Notify dependencies
+- **`Selector.pause()`** - Pause reactivity
+- **`Selector.resume(flush)`** - Resume reactivity
+- **`Selector.untrack(fn)`** - Untrack dependencies
+
+### Array Patch (Module 02)
+
+- **`Selector.patchArray(state, key)`** - Array patching via Selector
+
+### Selector.query Methods
+
+All core methods plus:
+
+- **`Selector.query.state()`** - All core methods
+- **`Selector.query.bind(bindingDefs)`** - Single element bindings (uses querySelector)
+
+### Selector.queryAll Methods
+
+All core methods plus:
+
+- **`Selector.queryAll.state()`** - All core methods
+- **`Selector.queryAll.bind(bindingDefs)`** - Multiple element bindings (uses querySelectorAll)
+
+---
+
+## Global Shortcuts (Shortcut Module)
+
+When `dh-reactiveUtils-shortcut.js` is loaded, all methods available as globals:
+
+### Core State
+
+- **`state(initialState)`** - Global shortcut for ReactiveUtils.state
+- **`createState(initialState, bindingDefs)`** - Global shortcut
+- **`effect(fn)`** - Global shortcut
+- **`batch(fn)`** - Global shortcut
+- **`computed(state, defs)`** - Global shortcut
+- **`watch(state, defs)`** - Global shortcut
+- **`effects(defs)`** - Global shortcut
+
+### References & Collections
+
+- **`ref(value)`** - Global shortcut
+- **`refs(defs)`** - Global shortcut
+- **`collection(items)`** - Global shortcut
+- **`list(items)`** - Global shortcut
+- **`createCollection(items)`** - Global shortcut (from Collections extension)
+- **`createFilteredCollection(collection, predicate)`** - Global shortcut (from Collections extension)
+
+### Forms
+
+- **`form(initialValues, options)`** - Global shortcut
+- **`createForm(initialValues, options)`** - Global shortcut
+- **`validators`** - Global shortcut to validators object
+
+### Advanced
+
+- **`store(initialState, options)`** - Global shortcut
+- **`component(config)`** - Global shortcut
+- **`reactive(initialState)`** - Global shortcut
+- **`bindings(defs)`** - Global shortcut
+- **`updateAll(state, updates)`** - Global shortcut
+
+### Async
+
+- **`asyncState(initialValue)`** - Global shortcut (if enhancements loaded)
+
+### Utilities
+
+- **`isReactive(value)`** - Global shortcut
+- **`toRaw(value)`** - Global shortcut
+- **`notify(state, key)`** - Global shortcut
+- **`pause()`** - Global shortcut
+- **`resume(flush)`** - Global shortcut
+- **`untrack(fn)`** - Global shortcut
+
+### Array Patching
+
+- **`patchArray(state, key)`** - Global shortcut
+
+---
+
+## Internal Symbols
+
+Not for direct use, but useful to know:
+
+- **`RAW`** - Symbol for accessing raw object internally
+- **`IS_REACTIVE`** - Symbol for checking reactivity internally
+
+---
+
+## Priority Constants (Module 06)
+
+Available as `ReactiveEnhancements.PRIORITY`:
+
+- **`PRIORITY.COMPUTED`** - Priority level 1 (computed properties run first)
+- **`PRIORITY.WATCH`** - Priority level 2 (watchers run second)
+- **`PRIORITY.EFFECT`** - Priority level 3 (effects run last)
+
+---
+
+## Summary
+
+**Total Public Methods:** 200+ methods across all modules and namespaces
+
+**Module Breakdown:**
+- **Core (01):** ~50 methods - Base reactive system
+- **Array Patch (02):** ~15 methods - Reactive array operations
+- **Collections (03):** ~40 methods - Extended collection management
+- **Forms (04):** ~40 methods - Form state and validation
+- **Cleanup (05):** ~10 methods - Memory management
+- **Enhancements (06):** ~20 methods - Production features
+- **Shortcuts:** All methods available globally
+- **Integration:** 3 namespaces × core methods
+
+**Key Features:**
+- ✅ Fine-grained reactivity
+- ✅ Automatic dependency tracking
+- ✅ DOM bindings
+- ✅ Form validation
+- ✅ Async state management
+- ✅ Memory leak prevention
+- ✅ Error boundaries
+- ✅ Development tools
+- ✅ Collection management
+- ✅ Builder patterns
