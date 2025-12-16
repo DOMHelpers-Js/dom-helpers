@@ -817,7 +817,7 @@
     store,
     component,
     reactive,
-    builder: reactive, //alias for builder
+    builder: reactive,
     bindings,
     list: collection,
     batch,
@@ -948,22 +948,25 @@
   console.log('  - Elements/Collections/Selector.updateAll() - Unified updates');
   console.log('  - Global updateAll() method');
 
-})(typeof window !== 'undefined' ? window : global);
+})(typeof window !== 'undefined' ? window : global);(typeof window !== 'undefined' ? window : global);
+
 /**
  * 02_dh-reactive-array-patch
- * 
+ *
  * Reactive Array Patch v1.0.0
  * Makes array methods (push, pop, sort, etc.) work with reactive state
  * Load this AFTER reactive-state.js
  * @license MIT
  */
 
-(function(global) {
-  'use strict';
+(function (global) {
+  "use strict";
 
   // Check if ReactiveUtils exists
   if (!global.ReactiveUtils) {
-    console.error('[Reactive Array Patch] ReactiveUtils not found. Load reactive-state.js first.');
+    console.error(
+      "[Reactive Array Patch] ReactiveUtils not found. Load reactive-state.js first."
+    );
     return;
   }
 
@@ -972,8 +975,15 @@
 
   // Array methods that mutate the array
   const ARRAY_MUTATIONS = [
-    'push', 'pop', 'shift', 'unshift', 'splice',
-    'sort', 'reverse', 'fill', 'copyWithin'
+    "push",
+    "pop",
+    "shift",
+    "unshift",
+    "splice",
+    "sort",
+    "reverse",
+    "fill",
+    "copyWithin",
   ];
 
   /**
@@ -981,24 +991,28 @@
    */
   function createReactiveWithArraySupport(target) {
     const state = originalCreate(target);
-    
+
     // Patch array properties
     patchArrayProperties(state, target);
-    
+
     return state;
   }
 
   /**
    * Recursively patch all array properties in an object
    */
-  function patchArrayProperties(state, obj, path = '') {
-    Object.keys(obj).forEach(key => {
+  function patchArrayProperties(state, obj, path = "") {
+    Object.keys(obj).forEach((key) => {
       const value = obj[key];
       const fullPath = path ? `${path}.${key}` : key;
-      
+
       if (Array.isArray(value)) {
         patchArrayMethods(state, key, fullPath);
-      } else if (value && typeof value === 'object' && value.constructor === Object) {
+      } else if (
+        value &&
+        typeof value === "object" &&
+        value.constructor === Object
+      ) {
         // Recursively patch nested objects
         patchArrayProperties(state, value, fullPath);
       }
@@ -1010,14 +1024,14 @@
    */
   function patchArrayMethods(state, key, fullPath) {
     const getArray = () => {
-      if (fullPath.includes('.')) {
+      if (fullPath.includes(".")) {
         return getNestedProperty(state, fullPath);
       }
       return state[key];
     };
 
     const setArray = (newValue) => {
-      if (fullPath.includes('.')) {
+      if (fullPath.includes(".")) {
         setNestedProperty(state, fullPath, newValue);
       } else {
         state[key] = newValue;
@@ -1030,29 +1044,29 @@
       if (!arr || !Array.isArray(arr) || arr.__patched) return;
 
       // Mark as patched to avoid double-patching
-      Object.defineProperty(arr, '__patched', {
+      Object.defineProperty(arr, "__patched", {
         value: true,
         enumerable: false,
-        configurable: false
+        configurable: false,
       });
 
-      ARRAY_MUTATIONS.forEach(method => {
+      ARRAY_MUTATIONS.forEach((method) => {
         const original = Array.prototype[method];
-        
+
         Object.defineProperty(arr, method, {
-          value: function(...args) {
+          value: function (...args) {
             // Call original method
             const result = original.apply(this, args);
-            
+
             // Trigger reactivity by reassigning
             const updatedArray = [...this];
             setArray(updatedArray);
-            
+
             return result;
           },
           enumerable: false,
           configurable: true,
-          writable: true
+          writable: true,
         });
       });
     };
@@ -1072,24 +1086,24 @@
    * Get nested property value
    */
   function getNestedProperty(obj, path) {
-    return path.split('.').reduce((current, key) => current?.[key], obj);
+    return path.split(".").reduce((current, key) => current?.[key], obj);
   }
 
   /**
    * Set nested property value
    */
   function setNestedProperty(obj, path, value) {
-    const keys = path.split('.');
+    const keys = path.split(".");
     let current = obj;
-    
+
     for (let i = 0; i < keys.length - 1; i++) {
       const key = keys[i];
-      if (!(key in current) || typeof current[key] !== 'object') {
+      if (!(key in current) || typeof current[key] !== "object") {
         current[key] = {};
       }
       current = current[key];
     }
-    
+
     current[keys[keys.length - 1]] = value;
   }
 
@@ -1108,32 +1122,35 @@
   }
 
   // Provide manual patching function
-  global.patchReactiveArray = function(state, key) {
+  global.patchReactiveArray = function (state, key) {
     if (!state || !state[key]) {
-      console.error('[Reactive Array Patch] Invalid state or key');
+      console.error("[Reactive Array Patch] Invalid state or key");
       return;
     }
     patchArrayMethods(state, key, key);
   };
 
-  console.log('[Reactive Array Patch] v1.0.0 loaded successfully');
-  console.log('[Reactive Array Patch] Array methods (push, pop, sort, etc.) are now reactive!');
-
-})(typeof window !== 'undefined' ? window : global);
+  console.log("[Reactive Array Patch] v1.0.0 loaded successfully");
+  console.log(
+    "[Reactive Array Patch] Array methods (push, pop, sort, etc.) are now reactive!"
+  );
+})(typeof window !== "undefined" ? window : global);
 /**
  * 03_dh-reactive-collections
- * 
+ *
  * Collections Extension for DOM Helpers Reactive State
  * Standalone file - no library modifications needed
  * @license MIT
  */
 
-(function(global) {
-  'use strict';
+(function (global) {
+  "use strict";
 
   // Check if ReactiveUtils exists
   if (!global.ReactiveUtils) {
-    console.error('[Collections] ReactiveUtils not found. Please load the reactive library first.');
+    console.error(
+      "[Collections] ReactiveUtils not found. Please load the reactive library first."
+    );
     return;
   }
 
@@ -1147,7 +1164,7 @@
   function createCollection(items = []) {
     // Create the base object with items array and methods BEFORE making it reactive
     const collectionObj = {
-      items: [...items]
+      items: [...items],
     };
 
     // Make it reactive first
@@ -1160,122 +1177,125 @@
         this.items.push(item);
         return this;
       },
-      
+
       remove(predicate) {
-        const idx = typeof predicate === 'function'
-          ? this.items.findIndex(predicate)
-          : this.items.indexOf(predicate);
+        const idx =
+          typeof predicate === "function"
+            ? this.items.findIndex(predicate)
+            : this.items.indexOf(predicate);
         if (idx !== -1) {
           this.items.splice(idx, 1);
         }
         return this;
       },
-      
+
       update(predicate, updates) {
-        const idx = typeof predicate === 'function'
-          ? this.items.findIndex(predicate)
-          : this.items.indexOf(predicate);
+        const idx =
+          typeof predicate === "function"
+            ? this.items.findIndex(predicate)
+            : this.items.indexOf(predicate);
         if (idx !== -1) {
           Object.assign(this.items[idx], updates);
         }
         return this;
       },
-      
+
       clear() {
         this.items.length = 0;
         return this;
       },
-      
+
       find(predicate) {
-        return typeof predicate === 'function'
+        return typeof predicate === "function"
           ? this.items.find(predicate)
-          : this.items.find(item => item === predicate);
+          : this.items.find((item) => item === predicate);
       },
-      
+
       filter(predicate) {
         return this.items.filter(predicate);
       },
-      
+
       map(fn) {
         return this.items.map(fn);
       },
-      
+
       forEach(fn) {
         this.items.forEach(fn);
         return this;
       },
-      
+
       sort(compareFn) {
         this.items.sort(compareFn);
         return this;
       },
-      
+
       reverse() {
         this.items.reverse();
         return this;
       },
-      
+
       get length() {
         return this.items.length;
       },
-      
+
       get first() {
         return this.items[0];
       },
-      
+
       get last() {
         return this.items[this.items.length - 1];
       },
-      
+
       at(index) {
         return this.items[index];
       },
-      
+
       includes(item) {
         return this.items.includes(item);
       },
-      
+
       indexOf(item) {
         return this.items.indexOf(item);
       },
-      
+
       slice(start, end) {
         return this.items.slice(start, end);
       },
-      
+
       splice(start, deleteCount, ...items) {
         this.items.splice(start, deleteCount, ...items);
         return this;
       },
-      
+
       push(...items) {
         this.items.push(...items);
         return this;
       },
-      
+
       pop() {
         return this.items.pop();
       },
-      
+
       shift() {
         return this.items.shift();
       },
-      
+
       unshift(...items) {
         this.items.unshift(...items);
         return this;
       },
-      
-      toggle(predicate, field = 'done') {
-        const idx = typeof predicate === 'function'
-          ? this.items.findIndex(predicate)
-          : this.items.indexOf(predicate);
+
+      toggle(predicate, field = "done") {
+        const idx =
+          typeof predicate === "function"
+            ? this.items.findIndex(predicate)
+            : this.items.indexOf(predicate);
         if (idx !== -1 && this.items[idx]) {
           this.items[idx][field] = !this.items[idx][field];
         }
         return this;
       },
-      
+
       removeWhere(predicate) {
         for (let i = this.items.length - 1; i >= 0; i--) {
           if (predicate(this.items[i], i)) {
@@ -1284,7 +1304,7 @@
         }
         return this;
       },
-      
+
       updateWhere(predicate, updates) {
         this.items.forEach((item, idx) => {
           if (predicate(item, idx)) {
@@ -1293,31 +1313,31 @@
         });
         return this;
       },
-      
+
       reset(newItems = []) {
         this.items.length = 0;
         this.items.push(...newItems);
         return this;
       },
-      
+
       toArray() {
         return [...this.items];
       },
-      
+
       isEmpty() {
         return this.items.length === 0;
-      }
+      },
     };
 
     // Attach methods to collection
-    Object.keys(methods).forEach(key => {
+    Object.keys(methods).forEach((key) => {
       const descriptor = Object.getOwnPropertyDescriptor(methods, key);
       if (descriptor.get) {
         // It's a getter
         Object.defineProperty(collection, key, {
           get: descriptor.get,
           enumerable: false,
-          configurable: true
+          configurable: true,
         });
       } else {
         // It's a method
@@ -1336,13 +1356,13 @@
    */
   function createCollectionWithComputed(items = [], computed = {}) {
     const collection = createCollection(items);
-    
-    if (computed && typeof computed === 'object') {
+
+    if (computed && typeof computed === "object") {
       Object.entries(computed).forEach(([key, fn]) => {
         collection.$computed(key, fn);
       });
     }
-    
+
     return collection;
   }
 
@@ -1354,13 +1374,13 @@
    */
   function createFilteredCollection(collection, predicate) {
     const filtered = createCollection([]);
-    
+
     // Sync filtered items whenever source changes
     global.ReactiveUtils.effect(() => {
       const newItems = collection.items.filter(predicate);
       filtered.reset(newItems);
     });
-    
+
     return filtered;
   }
 
@@ -1369,10 +1389,10 @@
     create: createCollection,
     createWithComputed: createCollectionWithComputed,
     createFiltered: createFilteredCollection,
-    
+
     // Alias for convenience
     collection: createCollection,
-    list: createCollection
+    list: createCollection,
   };
 
   // Attach to global
@@ -1392,30 +1412,33 @@
     global.ReactiveState.list = createCollection;
   }
 
-  console.log('[Collections Extension] v1.0.0 loaded successfully');
-  console.log('[Collections Extension] Available methods:');
-  console.log('  - Collections.create(items) / ReactiveUtils.collection(items)');
-  console.log('  - collection.add(item)');
-  console.log('  - collection.remove(predicate)');
-  console.log('  - collection.update(predicate, updates)');
-  console.log('  - collection.clear()');
-  console.log('  - Plus: find, filter, map, forEach, sort, toggle, and more!');
-
-})(typeof window !== 'undefined' ? window : global);
+  console.log("[Collections Extension] v1.0.0 loaded successfully");
+  console.log("[Collections Extension] Available methods:");
+  console.log(
+    "  - Collections.create(items) / ReactiveUtils.collection(items)"
+  );
+  console.log("  - collection.add(item)");
+  console.log("  - collection.remove(predicate)");
+  console.log("  - collection.update(predicate, updates)");
+  console.log("  - collection.clear()");
+  console.log("  - Plus: find, filter, map, forEach, sort, toggle, and more!");
+})(typeof window !== "undefined" ? window : global);
 /**
  *  04_dh-reactive-form
- * 
+ *
  * Forms Extension for DOM Helpers Reactive State
  * Standalone file - no library modifications needed
  * @license MIT
  */
 
-(function(global) {
-  'use strict';
+(function (global) {
+  "use strict";
 
   // Check if ReactiveUtils exists
   if (!global.ReactiveUtils) {
-    console.error('[Forms] ReactiveUtils not found. Please load the reactive library first.');
+    console.error(
+      "[Forms] ReactiveUtils not found. Please load the reactive library first."
+    );
     return;
   }
 
@@ -1434,32 +1457,32 @@
       errors: {},
       touched: {},
       isSubmitting: false,
-      submitCount: 0
+      submitCount: 0,
     };
 
     // Make it reactive
     const form = createState(formObj);
 
     // Add computed properties
-    form.$computed('isValid', function() {
+    form.$computed("isValid", function () {
       const errorKeys = Object.keys(this.errors);
-      return errorKeys.length === 0 || errorKeys.every(k => !this.errors[k]);
+      return errorKeys.length === 0 || errorKeys.every((k) => !this.errors[k]);
     });
 
-    form.$computed('isDirty', function() {
+    form.$computed("isDirty", function () {
       return Object.keys(this.touched).length > 0;
     });
 
-    form.$computed('hasErrors', function() {
-      return Object.keys(this.errors).some(k => this.errors[k]);
+    form.$computed("hasErrors", function () {
+      return Object.keys(this.errors).some((k) => this.errors[k]);
     });
 
-    form.$computed('touchedFields', function() {
+    form.$computed("touchedFields", function () {
       return Object.keys(this.touched);
     });
 
-    form.$computed('errorFields', function() {
-      return Object.keys(this.errors).filter(k => this.errors[k]);
+    form.$computed("errorFields", function () {
+      return Object.keys(this.errors).filter((k) => this.errors[k]);
     });
 
     // Store validators
@@ -1472,12 +1495,12 @@
       setValue(field, value) {
         this.values[field] = value;
         this.touched[field] = true;
-        
+
         // Auto-validate if validator exists
         if (validators[field]) {
           this.validateField(field);
         }
-        
+
         return this;
       },
 
@@ -1536,7 +1559,7 @@
       // Mark multiple fields as touched
       setTouchedFields(fields) {
         return batch(() => {
-          fields.forEach(field => this.setTouched(field));
+          fields.forEach((field) => this.setTouched(field));
           return this;
         });
       },
@@ -1544,7 +1567,7 @@
       // Mark all fields as touched
       touchAll() {
         return batch(() => {
-          Object.keys(this.values).forEach(field => {
+          Object.keys(this.values).forEach((field) => {
             this.touched[field] = true;
           });
           return this;
@@ -1557,7 +1580,7 @@
         if (!validator) return true;
 
         const error = validator(this.values[field], this.values);
-        
+
         if (error) {
           this.errors[field] = error;
           return false;
@@ -1571,12 +1594,12 @@
       validate() {
         return batch(() => {
           let isValid = true;
-          
-          Object.keys(validators).forEach(field => {
+
+          Object.keys(validators).forEach((field) => {
             const valid = this.validateField(field);
             if (!valid) isValid = false;
           });
-          
+
           return isValid;
         });
       },
@@ -1605,9 +1628,9 @@
       // Handle form submission
       async submit(customHandler) {
         const handler = customHandler || onSubmitCallback;
-        
+
         if (!handler) {
-          console.warn('[Forms] No submit handler provided');
+          console.warn("[Forms] No submit handler provided");
           return;
         }
 
@@ -1616,14 +1639,14 @@
 
         // Validate
         const isValid = this.validate();
-        
+
         if (!isValid) {
-          console.log('[Forms] Validation failed');
+          console.log("[Forms] Validation failed");
           return { success: false, errors: this.errors };
         }
 
         this.isSubmitting = true;
-        
+
         try {
           const result = await handler(this.values, this);
           this.submitCount++;
@@ -1631,7 +1654,7 @@
           return { success: true, result };
         } catch (error) {
           this.isSubmitting = false;
-          console.error('[Forms] Submit error:', error);
+          console.error("[Forms] Submit error:", error);
           return { success: false, error };
         }
       },
@@ -1640,8 +1663,9 @@
       handleChange(event) {
         const target = event.target;
         const field = target.name || target.id;
-        const value = target.type === 'checkbox' ? target.checked : target.value;
-        
+        const value =
+          target.type === "checkbox" ? target.checked : target.value;
+
         this.setValue(field, value);
       },
 
@@ -1649,9 +1673,9 @@
       handleBlur(event) {
         const target = event.target;
         const field = target.name || target.id;
-        
+
         this.setTouched(field);
-        
+
         if (validators[field]) {
           this.validateField(field);
         }
@@ -1661,9 +1685,9 @@
       getFieldProps(field) {
         return {
           name: field,
-          value: this.values[field] || '',
+          value: this.values[field] || "",
           onChange: (e) => this.handleChange(e),
-          onBlur: (e) => this.handleBlur(e)
+          onBlur: (e) => this.handleBlur(e),
         };
       },
 
@@ -1694,25 +1718,26 @@
 
       // Bind form to DOM inputs
       bindToInputs(selector) {
-        const inputs = typeof selector === 'string' 
-          ? document.querySelectorAll(selector)
-          : selector;
+        const inputs =
+          typeof selector === "string"
+            ? document.querySelectorAll(selector)
+            : selector;
 
-        inputs.forEach(input => {
+        inputs.forEach((input) => {
           const field = input.name || input.id;
-          
+
           if (!field) return;
 
           // Set initial value
-          if (input.type === 'checkbox') {
+          if (input.type === "checkbox") {
             input.checked = !!this.values[field];
           } else {
-            input.value = this.values[field] || '';
+            input.value = this.values[field] || "";
           }
 
           // Add event listeners
-          input.addEventListener('input', (e) => this.handleChange(e));
-          input.addEventListener('blur', (e) => this.handleBlur(e));
+          input.addEventListener("input", (e) => this.handleChange(e));
+          input.addEventListener("blur", (e) => this.handleBlur(e));
         });
 
         return this;
@@ -1727,13 +1752,13 @@
           isValid: this.isValid,
           isDirty: this.isDirty,
           isSubmitting: this.isSubmitting,
-          submitCount: this.submitCount
+          submitCount: this.submitCount,
         };
-      }
+      },
     };
 
     // Attach methods to form
-    Object.keys(methods).forEach(key => {
+    Object.keys(methods).forEach((key) => {
       form[key] = methods[key].bind(form);
     });
 
@@ -1744,16 +1769,16 @@
    * Common validators
    */
   const Validators = {
-    required(message = 'This field is required') {
+    required(message = "This field is required") {
       return (value) => {
-        if (!value || (typeof value === 'string' && value.trim() === '')) {
+        if (!value || (typeof value === "string" && value.trim() === "")) {
           return message;
         }
         return null;
       };
     },
 
-    email(message = 'Invalid email address') {
+    email(message = "Invalid email address") {
       return (value) => {
         if (!value) return null;
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -1777,7 +1802,7 @@
       };
     },
 
-    pattern(regex, message = 'Invalid format') {
+    pattern(regex, message = "Invalid format") {
       return (value) => {
         if (!value) return null;
         return regex.test(value) ? null : message;
@@ -1786,7 +1811,7 @@
 
     min(min, message) {
       return (value) => {
-        if (value === '' || value == null) return null;
+        if (value === "" || value == null) return null;
         const msg = message || `Must be at least ${min}`;
         return Number(value) >= min ? null : msg;
       };
@@ -1794,7 +1819,7 @@
 
     max(max, message) {
       return (value) => {
-        if (value === '' || value == null) return null;
+        if (value === "" || value == null) return null;
         const msg = message || `Must be no more than ${max}`;
         return Number(value) <= max ? null : msg;
       };
@@ -1819,7 +1844,7 @@
         }
         return null;
       };
-    }
+    },
   };
 
   // Export Forms API
@@ -1827,7 +1852,7 @@
     create: createForm,
     form: createForm,
     validators: Validators,
-    v: Validators // Shorthand
+    v: Validators, // Shorthand
   };
 
   // Attach to global
@@ -1846,14 +1871,13 @@
     global.ReactiveState.form = createForm;
   }
 
-  console.log('[Forms Extension] v1.0.0 loaded successfully');
-  console.log('[Forms Extension] Available methods:');
-  console.log('  - ReactiveUtils.form(initialValues, options)');
-  console.log('  - form.setValue(field, value)');
-  console.log('  - form.setError(field, error)');
-  console.log('  - form.validate()');
-  console.log('  - form.submit(handler)');
-  console.log('  - form.reset()');
-  console.log('  - Plus many more validation and binding helpers!');
-
-})(typeof window !== 'undefined' ? window : global);
+  console.log("[Forms Extension] v1.0.0 loaded successfully");
+  console.log("[Forms Extension] Available methods:");
+  console.log("  - ReactiveUtils.form(initialValues, options)");
+  console.log("  - form.setValue(field, value)");
+  console.log("  - form.setError(field, error)");
+  console.log("  - form.validate()");
+  console.log("  - form.submit(handler)");
+  console.log("  - form.reset()");
+  console.log("  - Plus many more validation and binding helpers!");
+})(typeof window !== "undefined" ? window : global);

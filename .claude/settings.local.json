@@ -5,7 +5,9 @@
       "Bash(node -c:*)",
       "Bash(ls -la \"c:\\Users\\DELL\\Desktop\\DOM helpers231125.js\\src\\modular\"\" && echo \"---\" && ls -la \"c:UsersDELLDesktopDOM helpers231125.jsDocumentation\"\")",
       "Bash(dir:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(powershell:*)",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []
