@@ -10,9 +10,9 @@
 2. [Core Concept - The Mental Model](#core-concept)
 3. [$add(item)`](#method-add)
 4. [$remove(predicate)`](#method-remove)
-5. [Method 3: `collection.$update(predicate, updates)`](#method-update)
-6. [Method 4: `collection.$clear()`](#method-clear)
-7. [Property: `collection.items`](#property-items)
+5. [$update(predicate, updates)`](#method-update)
+6. [$clear()`](#method-clear)
+7. [Property: `collection-items`](#property-items)
 8. [Complete Example - Todo App](#complete-example)
 9. [Quick Reference](#quick-reference)
 
