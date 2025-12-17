@@ -8,8 +8,8 @@
 
 1. [Introduction - What Are Reactive Collections?](#introduction)
 2. [Core Concept - The Mental Model](#core-concept)
-3. [Method 1: `collection.$add(item)`](#method-add)
-4. [Method 2: `collection.$remove(predicate)`](#method-remove)
+3. [$add(item)`](#method-add)
+4. [$remove(predicate)`](#method-remove)
 5. [Method 3: `collection.$update(predicate, updates)`](#method-update)
 6. [Method 4: `collection.$clear()`](#method-clear)
 7. [Property: `collection.items`](#property-items)
