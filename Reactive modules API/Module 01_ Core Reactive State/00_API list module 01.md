@@ -17,7 +17,6 @@
 - **`ReactiveUtils.ref(value)`** - Create a reactive reference with `.value` property
 - **`ReactiveUtils.refs(defs)`** - Create multiple refs from object definition
 - **`ReactiveUtils.collection(items)`** - Create a reactive collection (core version with $-prefixed methods)
-- **`ReactiveUtils.list(items)`** - Alias for collection()
 - **`ReactiveUtils.form(initialValues)`** - Create a basic form state manager
 - **`ReactiveUtils.async(initialValue)`** - Create async operation state (basic version)
 - **`ReactiveUtils.store(initialState, options)`** - Create a store with getters/actions

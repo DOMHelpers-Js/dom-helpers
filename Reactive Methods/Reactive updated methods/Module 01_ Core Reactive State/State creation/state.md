@@ -116,20 +116,55 @@ You  →  [Proxy Wrapper]  →  Your Data
 3. Any code that depends on that property automatically re-runs
 
 ---
+Here’s a clean, clear, and properly written version that fits well into teaching documentation:
+
+---
+
+## Syntax
+
+```js
+ReactiveUtils.state({})
+```
+
+For convenience, you can also use the shorter alias:
+
+```js
+state({})
+```
+
+Both forms do the same thing — they create a **reactive state object** from a regular JavaScript object.
+
+
+Here’s a polished, beginner-friendly version with clear structure and consistent tone:
+
+---
 
 ## Basic Usage
 
 ### Creating Reactive State
 
-The simplest way to use `state()`:
+The simplest way to use `state()` is to wrap a plain JavaScript object:
 
-```javascript
+```js
 const myState = ReactiveUtils.state({
   message: 'Hello',
   count: 0,
   isActive: true
 });
 ```
+
+For cleaner and more readable code, you can use the shorter alias:
+
+```js
+const myState = state({
+  message: 'Hello',
+  count: 0,
+  isActive: true
+});
+```
+
+In both cases, the result is the same:
+you get a **reactive state object** that automatically tracks changes to its properties.
 
 That's it! Now `myState` is ReactiveUtils.
 
