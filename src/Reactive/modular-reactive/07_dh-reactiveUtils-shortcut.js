@@ -232,21 +232,30 @@
   // COLLECTIONS EXTENDED API (if Collections module loaded)
   // ============================================================
 
-  if (global.Collections) {
-    /**
-     * Create collection with computed
-     * @example const items = createCollection([1, 2, 3], { total: function() { ... } });
-     */
-    global.createCollection = global.Collections.create || global.Collections.collection;
+  // Should be added to shortcut module
+if (global.Collections) {
+  /**
+   * Create collection with computed
+   * @example const items = createCollection([1, 2, 3], { total: function() { ... } });
+   */
+  global.createCollection = global.Collections.create || global.Collections.collection;
 
-    /**
-     * Create filtered collection
-     * @example const active = createFilteredCollection(todos, t => !t.done);
-     */
-    if (global.Collections.createFiltered) {
-      global.createFilteredCollection = global.Collections.createFiltered;
-    }
+  /**
+   * Create collection with computed properties
+   * @example const items = createCollectionWithComputed([1, 2, 3], { total() { return this.items.length; } });
+   */
+  if (global.Collections.createWithComputed) {
+    global.createCollectionWithComputed = global.Collections.createWithComputed;
   }
+
+  /**
+   * Create filtered collection
+   * @example const active = createFilteredCollection(todos, t => !t.done);
+   */
+  if (global.Collections.createFiltered) {
+    global.createFilteredCollection = global.Collections.createFiltered;
+  }
+}
 
   // ============================================================
   // SUMMARY

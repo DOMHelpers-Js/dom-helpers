@@ -237,7 +237,7 @@ console.log(items.items);  // [5, 4, 3, 2, 1]
 ```
 
 ### 14. **collection.toggle(predicate, field)**
-Toggles a boolean field on an item.
+Toggles a boolean field on a **single** item.
 
 ```javascript
 const todos = Collections.create([
@@ -467,9 +467,69 @@ console.log(Array.isArray(todos.items));  // true
 
 ---
 
+## 🆕 Extended Methods
+
+### 33. **collection.toggleAll(predicate, field)**
+Toggles a boolean field on **ALL** items matching predicate.
+
+**Key Differences from `toggle()`:**
+- `toggle()` - Toggles **one** item (first match)
+- `toggleAll()` - Toggles **all** matching items
+
+```javascript
+const todos = Collections.create([
+  { id: 1, text: "Task 1", done: false, starred: false },
+  { id: 2, text: "Task 2", done: false, starred: false },
+  { id: 3, text: "Task 3", done: true, starred: false }
+]);
+
+// Toggle 'done' on all incomplete tasks
+const count = todos.toggleAll(t => !t.done, 'done');
+console.log(count);  // 2 (number of items toggled)
+
+// Now all tasks are done
+console.log(todos.items.every(t => t.done));  // true
+
+// Toggle 'starred' on all tasks
+todos.toggleAll(() => true, 'starred');
+console.log(todos.items.every(t => t.starred));  // true
+```
+
+**Return Value:**
+Returns the number of items that were toggled.
+
+```javascript
+const todos = Collections.create([
+  { id: 1, done: false },
+  { id: 2, done: false },
+  { id: 3, done: true }
+]);
+
+const toggledCount = todos.toggleAll(t => !t.done, 'done');
+console.log(`Toggled ${toggledCount} items`);  // "Toggled 2 items"
+```
+
+**Common Use Cases:**
+
+```javascript
+// 1. Toggle all checkboxes
+todos.toggleAll(() => true, 'selected');
+
+// 2. Mark all as read
+messages.toggleAll(m => !m.read, 'read');
+
+// 3. Archive completed tasks
+todos.toggleAll(t => t.done, 'archived');
+
+// 4. Star urgent items
+tasks.toggleAll(t => t.priority === 'high', 'starred');
+```
+
+---
+
 ## 📝 Practical Examples
 
-### Example 1: Todo List Manager
+### Example 1: Todo List Manager with Toggle All
 ```javascript
 const todos = Collections.createWithComputed(
   [],
@@ -482,6 +542,9 @@ const todos = Collections.createWithComputed(
     },
     allDone() {
       return this.items.length > 0 && this.remaining === 0;
+    },
+    allSelected() {
+      return this.items.length > 0 && this.items.every(t => t.selected);
     }
   }
 );
@@ -493,6 +556,9 @@ todos.$bind({
   '#allDoneMessage': {
     hidden: () => !todos.allDone,
     textContent: () => 'All tasks completed! 🎉'
+  },
+  '#selectAllCheckbox': {
+    checked: () => todos.allSelected
   }
 });
 
@@ -502,13 +568,37 @@ function addTodo(text) {
     id: Date.now(),
     text,
     done: false,
+    selected: false,
     createdAt: new Date()
   });
 }
 
-// Toggle todo
+// Toggle single todo
 function toggleTodo(id) {
   todos.toggle(t => t.id === id, 'done');
+}
+
+// Toggle ALL todos
+function toggleAllTodos() {
+  const hasIncomplete = todos.items.some(t => !t.done);
+  
+  if (hasIncomplete) {
+    // Mark all as done
+    todos.toggleAll(t => !t.done, 'done');
+  } else {
+    // Mark all as incomplete
+    todos.toggleAll(t => t.done, 'done');
+  }
+}
+
+// Select all todos
+function selectAll() {
+  todos.toggleAll(() => true, 'selected');
+}
+
+// Toggle selection for all incomplete tasks
+function selectIncomplete() {
+  todos.toggleAll(t => !t.done, 'selected');
 }
 
 // Remove todo
@@ -530,7 +620,151 @@ function markAllDone() {
 }
 ```
 
-### Example 2: Shopping Cart
+### Example 2: Email Client with Bulk Actions
+```javascript
+const emails = Collections.createWithComputed(
+  [],
+  {
+    unreadCount() {
+      return this.items.filter(e => !e.read).length;
+    },
+    selectedCount() {
+      return this.items.filter(e => e.selected).length;
+    },
+    hasSelected() {
+      return this.selectedCount > 0;
+    },
+    allSelected() {
+      return this.items.length > 0 && 
+             this.items.every(e => e.selected);
+    }
+  }
+);
+
+// Bind to DOM
+emails.$bind({
+  '#unreadBadge': {
+    textContent: () => emails.unreadCount,
+    hidden: () => emails.unreadCount === 0
+  },
+  '#selectedCount': {
+    textContent: () => `${emails.selectedCount} selected`,
+    hidden: () => !emails.hasSelected
+  },
+  '#bulkActions': {
+    hidden: () => !emails.hasSelected
+  },
+  '#selectAllCheckbox': {
+    checked: () => emails.allSelected
+  }
+});
+
+// Select/deselect all
+function toggleSelectAll() {
+  emails.toggleAll(() => true, 'selected');
+}
+
+// Select all unread
+function selectUnread() {
+  // First deselect all
+  emails.updateWhere(() => true, { selected: false });
+  // Then select unread
+  emails.updateWhere(e => !e.read, { selected: true });
+}
+
+// Mark selected as read
+function markSelectedAsRead() {
+  const count = emails.toggleAll(
+    e => e.selected && !e.read,
+    'read'
+  );
+  console.log(`Marked ${count} emails as read`);
+  
+  // Deselect all after action
+  emails.updateWhere(() => true, { selected: false });
+}
+
+// Mark selected as unread
+function markSelectedAsUnread() {
+  const count = emails.toggleAll(
+    e => e.selected && e.read,
+    'read'
+  );
+  console.log(`Marked ${count} emails as unread`);
+  
+  emails.updateWhere(() => true, { selected: false });
+}
+
+// Star selected
+function starSelected() {
+  emails.toggleAll(e => e.selected, 'starred');
+  emails.updateWhere(() => true, { selected: false });
+}
+
+// Archive selected
+function archiveSelected() {
+  const count = emails.toggleAll(
+    e => e.selected,
+    'archived'
+  );
+  console.log(`Archived ${count} emails`);
+  
+  // Remove archived from view
+  emails.removeWhere(e => e.archived);
+}
+
+// Delete selected
+function deleteSelected() {
+  const selected = emails.filter(e => e.selected);
+  if (confirm(`Delete ${selected.length} emails?`)) {
+    emails.removeWhere(e => e.selected);
+  }
+}
+```
+
+### Example 3: Task Manager with Priority Toggles
+```javascript
+const tasks = Collections.createWithComputed(
+  [],
+  {
+    highPriorityCount() {
+      return this.items.filter(t => t.priority === 'high').length;
+    },
+    completedCount() {
+      return this.items.filter(t => t.completed).length;
+    }
+  }
+);
+
+// Complete all high priority tasks
+function completeHighPriority() {
+  const count = tasks.toggleAll(
+    t => t.priority === 'high' && !t.completed,
+    'completed'
+  );
+  console.log(`Completed ${count} high priority tasks`);
+}
+
+// Toggle visibility for all tasks in a category
+function toggleCategoryVisibility(category) {
+  tasks.toggleAll(
+    t => t.category === category,
+    'visible'
+  );
+}
+
+// Flag all overdue tasks
+function flagOverdueTasks() {
+  const now = Date.now();
+  const count = tasks.toggleAll(
+    t => t.dueDate < now && !t.completed,
+    'overdue'
+  );
+  console.log(`Flagged ${count} overdue tasks`);
+}
+```
+
+### Example 4: Shopping Cart
 ```javascript
 const cart = Collections.createWithComputed(
   [],
@@ -601,7 +835,7 @@ function emptyCart() {
 }
 ```
 
-### Example 3: User List with Filtering
+### Example 5: User List with Filtering
 ```javascript
 const users = Collections.create([
   { id: 1, name: "John", role: "admin", active: true },
@@ -650,7 +884,7 @@ function deactivateUser(id) {
 }
 ```
 
-### Example 4: Message Queue
+### Example 6: Message Queue
 ```javascript
 const messages = Collections.createWithComputed(
   [],
@@ -714,7 +948,7 @@ function deleteOldMessages(days = 30) {
 }
 ```
 
-### Example 5: Task Priority Queue
+### Example 7: Task Priority Queue
 ```javascript
 const tasks = Collections.create([
   { id: 1, text: "Low priority", priority: 1 },
@@ -769,6 +1003,19 @@ console.log(todos.length);  // 2 (after chaining)
 
 ---
 
+## 📊 Method Comparison Table
+
+| Method | Scope | Returns | Example Use Case |
+|--------|-------|---------|------------------|
+| `toggle(predicate, field)` | **Single item** (first match) | `this` (chainable) | Toggle one checkbox |
+| `toggleAll(predicate, field)` | **All matching items** | `count` (number) | Select all / Mark all read |
+| `update(predicate, updates)` | **Single item** (first match) | `this` (chainable) | Update one record |
+| `updateWhere(predicate, updates)` | **All matching items** | `this` (chainable) | Bulk update fields |
+| `remove(predicate)` | **Single item** (first match) | `this` (chainable) | Delete one item |
+| `removeWhere(predicate)` | **All matching items** | `this` (chainable) | Bulk delete |
+
+---
+
 ## 🚨 Important Notes
 
 1. **Reactive by Default** - All collections are reactive
@@ -777,5 +1024,21 @@ console.log(todos.length);  // 2 (after chaining)
 4. **Auto-Computed** - Use `createWithComputed()` for computed properties
 5. **Filtered Views** - Use `createFiltered()` for auto-syncing views
 6. **Works with Reactive Array Patch** - If loaded, array methods trigger reactivity
+7. **toggleAll Extension** - Requires loading the toggleAll extension after the main collections module
 
-This extension makes managing collections of data intuitive and powerful!
+---
+
+## 🔧 Module Loading Order
+
+```javascript
+<!-- Correct loading order -->
+<script src="dh-reactiveUtils-core.js"></script>
+<script src="dh-reactive-collections.js"></script>
+<!-- toggleAll extension is already included in collections file -->
+```
+
+The `toggleAll()` method is automatically available when you load the collections module.
+
+---
+
+This extension makes managing collections of data intuitive and powerful! 🚀

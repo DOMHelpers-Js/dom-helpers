@@ -43,13 +43,6 @@
 - **`ReactiveUtils.notify(state, key)`** - Manually notify dependencies for a key or all keys
 - **`ReactiveUtils.updateAll(state, updates)`** - Unified state + DOM updates
 
-### ReactiveState Namespace
-
-- **`ReactiveState.create(initialState)`** - Create reactive state
-- **`ReactiveState.form(initialValues)`** - Create form state
-- **`ReactiveState.async(initialValue)`** - Create async state
-- **`ReactiveState.collection(items)`** - Create collection
-
 ### State Instance Methods
 
 **State Management:**
