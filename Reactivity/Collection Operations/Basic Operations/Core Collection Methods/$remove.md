@@ -9,7 +9,7 @@ const todos = collection([
   { id: 2, text: 'Call mom', done: true }
 ]);
 
-// Remove completed todos - UI updates automatically!
+// Remove first completed todo - UI updates automatically!
 todos.$remove(todo => todo.done);
 
 // Setup auto-update (write once, works forever)
@@ -26,7 +26,7 @@ effect(() => {
 
 ## What is `collection.$remove()`?
 
-`collection.$remove()` is a **collection instance method** that removes items from a reactive collection created with `ReactiveUtils.collection()` or `ReactiveUtils.list()`. It accepts either a predicate function or a direct value to match and remove.
+`collection.$remove()` is a **collection instance method** that removes the **first matching item** from a reactive collection created with `ReactiveUtils.collection()` or `ReactiveUtils.list()`. It accepts either a predicate function or a direct value to match and remove.
 
 Think of it as **a smart "delete button"** for your arrays - instead of manually finding and removing items and remembering to update the UI, `$remove()` does both automatically with clean, semantic syntax.
 
@@ -38,11 +38,11 @@ Think of it as **a smart "delete button"** for your arrays - instead of manually
 // Using collection instance
 collection.$remove(predicate)
 
-// Remove by predicate function
+// Remove by predicate function (removes first match)
 const todos = collection([...]);
 todos.$remove(todo => todo.completed);
 
-// Remove by direct value
+// Remove by direct value (removes first occurrence)
 const numbers = collection([1, 2, 3]);
 numbers.$remove(2);
 ```
@@ -56,8 +56,40 @@ numbers.$remove(2);
   - **Function**: A function that receives each item and returns `true` to remove it
   - **Value**: A direct value to match and remove
 
+**How the parameter works:**
+
+Instead of having two separate methods (one for values, one for conditions), `$remove()` intelligently handles both cases:
+
+**1. Direct value mode** - Pass the exact value you want to removed:
+```js
+numbers.$remove(3); 
+// This means: “Find items equal to 3 and remove them.”
+// Internally, it’s like doing: item === 3
+// Simple case for primitive values
+```
+
+**2. Predicate function mode** - Pass a function that decides what to remove:
+```js
+todos.$remove(item => item.id === 3); // Function called for each item
+// This means: “Remove any item where this condition is true.”
+// Returns true → remove it
+// Returns false → keep it
+// Advanced/flexible case for complex logic
+```
+
+**Why this design?**
+- ✔ Simple for common cases (direct value)
+- ✔ Powerful for complex logic (predicate function)
+- ✔ One API instead of multiple methods
+- ✔ Matches familiar patterns from JavaScript (`Array.filter`, `find`, etc.)
+
 **Returns:**
 - The collection object (for chaining)
+
+**Important:** `$remove()` only removes the **first item** that matches the predicate or value.
+
+**One-sentence summary:** 
+- The method lets you remove items either by ***passing the exact value*** to remove, or by ***passing a function that decides*** which items should be removed.
 
 ---
 
@@ -113,7 +145,6 @@ let todos = [
 
 // You must manually update the DOM every time you remove
 function deleteTodo(todoId) {
-  // Step 1: Find and remove from array
   const index = todos.findIndex(t => t.id === todoId);
   if (index === -1) {
     console.warn('Todo not found');
@@ -121,36 +152,14 @@ function deleteTodo(todoId) {
   }
 
   todos.splice(index, 1);
-
-  // Step 2: Manually update the counter
   document.querySelector('#todo-count').textContent = todos.length;
-
-  // Step 3: Manually update the completed counter
-  const completed = todos.filter(t => t.completed).length;
-  document.querySelector('#completed-count').textContent = completed;
-
-  // Step 4: Manually re-render the entire list
   renderTodos();
   // If you forget any of these, UI is out of sync!
 }
 
-// Remove all completed todos
-function clearCompleted() {
-  // Step 1: Filter out completed todos
-  todos = todos.filter(t => !t.completed);
-
-  // Step 2: Manually update ALL UI elements
-  document.querySelector('#todo-count').textContent = todos.length;
-  document.querySelector('#completed-count').textContent = '0';
-  renderTodos();
-  // Must remember to call all update functions!
-}
-
 function renderTodos() {
   const list = document.querySelector('#todo-list');
-  list.innerHTML = ''; // Clear everything
-
-  // Rebuild the entire list from scratch
+  list.innerHTML = '';
   todos.forEach(todo => {
     const li = document.createElement('li');
     li.textContent = todo.text;
@@ -158,24 +167,12 @@ function renderTodos() {
   });
 }
 
-// Initial render
-renderTodos();
-document.querySelector('#todo-count').textContent = todos.length;
-
 deleteTodo(2);
-clearCompleted();
 ```
 
 **Code explanation:**
-- `deleteTodo()` must manually:
-  1. Find the index with `findIndex()`
-  2. Remove with `splice()`
-  3. Update todo count in DOM
-  4. Update completed count in DOM
-  5. Re-render the entire list
-- `clearCompleted()` filters the array but then must manually update every UI element
+- `deleteTodo()` must manually find the index, remove with `splice()`, update count, and re-render
 - If you forget to call `renderTodos()` or update any counter, the UI becomes out of sync
-- Every delete operation requires remembering 4-5 manual DOM update calls
 
 **What's the Real Issue?**
 
@@ -202,7 +199,17 @@ You remove data — **but you must remember to update everything that depends on
 
 ## The Solution with `collection.$remove()`
 
-`$remove()` provides a **semantic, flexible, and chainable** way to remove items with automatic reactivity.
+`$remove()` is a **chainable method that removes items in different ways and automatically triggers reactive updates.**
+
+**What this means:**
+
+1. **Semantic** - The method name clearly describes its intent. When you read `$remove()`, you immediately understand: "This removes something from the collection." No hidden behavior, no ambiguity.
+
+2. **Flexible** - Supports multiple ways of removing items (by value OR by condition). The same method works for simple and advanced cases.
+
+3. **Chainable** - Returns the collection instance, so you can keep calling other methods after it. No need to store intermediate variables.
+
+4. **Automatic reactivity** - You don't manually trigger updates. When `$remove()` changes data, watchers run, computed values update, and bindings re-render—all handled by the reactive system.
 
 ### ✅ Using `collection.$remove()` - Clean and Automatic
 
@@ -216,7 +223,6 @@ const todos = collection([
 
 // Set up automatic DOM updates (write once, works forever!)
 effect(() => {
-  // This runs automatically whenever todos change
   const count = todos.items.length;
   const completed = todos.items.filter(t => t.completed).length;
   document.querySelector('#todo-count').textContent = count;
@@ -227,9 +233,9 @@ effect(() => {
 todos.$remove(todo => todo.id === 2);
 // Effect runs automatically! DOM updates without manual calls! ✨
 
-// Remove all completed todos
+// Remove first completed todo
 todos.$remove(todo => todo.completed);
-// Effect runs again! Both counters update automatically!
+// Effect runs again! Counters update automatically!
 
 // Chain operations
 todos
@@ -247,7 +253,7 @@ todos
 **Benefits:**
 
 1. ✅ **Automatic** - DOM updates happen by themselves
-2. ✅ **Semantic** - Clearly expresses "remove items matching condition"
+2. ✅ **Semantic** - Clearly expresses "remove item matching condition"
 3. ✅ **Flexible** - Accept predicate function OR direct value
 4. ✅ **Chainable** - Returns collection for method chaining
 5. ✅ **Consistent** - Matches other collection methods (`$add`, `$update`, `$clear`)
@@ -272,7 +278,7 @@ You must tell everyone manually: "Hey, I removed some items!"
 ```
 You call $remove(predicate)
        ↓
-System automatically finds and removes matches
+System automatically finds and removes first match
        ↓
 ┌──────────────┬──────────────┬──────────────┐
 ↓              ↓              ↓
@@ -308,14 +314,15 @@ When you call `$remove()`, here's the magic that happens automatically:
                             │
                             ▼
          ┌──────────────────────────────────┐
-         │  Step 1: Test Each Item          │
-         │  Evaluate predicate for all      │
+         │  Step 1: Find First Match        │
+         │  Test items until predicate      │
+         │  returns true                    │
          └──────────────────────────────────┘
                             │
                             ▼
          ┌──────────────────────────────────┐
-         │  Step 2: Remove Matches          │
-         │  splice() items where true       │
+         │  Step 2: Remove Match            │
+         │  splice() first matching item    │
          └──────────────────────────────────┘
                             │
                             ▼
@@ -333,7 +340,7 @@ When you call `$remove()`, here's the magic that happens automatically:
                             ▼
          ┌──────────────────────────────────┐
          │  Step 5: DOM Updates             │
-         │  UI reflects removed items       │
+         │  UI reflects removed item        │
          └──────────────────────────────────┘
                             │
                             ▼
@@ -345,12 +352,12 @@ When you call `$remove()`, here's the magic that happens automatically:
 
 **What's happening behind the scenes:**
 
-1. **Test each item** - Evaluates the predicate function (or value match) for each item
-2. **Remove matches** - Uses `splice()` to remove items where predicate returns `true`
+1. **Find first match** - Tests each item with the predicate function (or value match) until finding the first match
+2. **Remove match** - Uses `splice()` to remove the first item where predicate returns `true`
 3. **Trigger reactivity** - The reactive system detects the array changes
 4. **Notify watchers** - All effects watching this collection are notified
 5. **Effects re-run** - Each `effect()` re-executes with the updated array
-6. **DOM updates** - Your UI updates automatically to reflect removed items
+6. **DOM updates** - Your UI updates automatically to reflect removed item
 7. **Return collection** - Returns the collection object for chaining
 
 Think of it as: **You remove → System reacts → UI updates** - all automatic!
@@ -369,15 +376,15 @@ const todos = collection([
   { id: 3, text: 'Finish project', completed: false }
 ]);
 
-// Remove by predicate function
+// Remove by predicate function (removes first match)
 todos.$remove(todo => todo.id === 2);
 
-// Remove all completed todos
+// Remove first completed todo
 todos.$remove(todo => todo.completed);
 
-// Remove by direct value (for primitive arrays)
+// Remove by direct value (for primitive arrays - removes first occurrence)
 const numbers = collection([1, 2, 3, 4, 5]);
-numbers.$remove(3);  // Removes 3
+numbers.$remove(3);  // Removes first 3
 console.log(numbers.items);  // [1, 2, 4, 5]
 
 // Chain operations
@@ -410,7 +417,7 @@ function deleteTodo(todoId) {
   console.log(`Deleted: "${todo.text}"`);
 }
 
-// Clear completed todos
+// Clear completed todos (remove all matching)
 function clearCompleted() {
   const completedCount = todos.items.filter(t => t.completed).length;
 
@@ -419,7 +426,12 @@ function clearCompleted() {
     return;
   }
 
-  todos.$remove(todo => todo.completed);
+  // Remove all completed todos
+  batch(() => {
+    while (todos.items.some(t => t.completed)) {
+      todos.$remove(todo => todo.completed);
+    }
+  });
   console.log(`${completedCount} completed todos removed`);
 }
 
@@ -438,7 +450,7 @@ clearCompleted();
 - `deleteTodo()` removes a specific todo by ID using a predicate function
 - `find()` first checks if the todo exists before removal (validation)
 - `$remove()` takes a predicate: `t => t.id === todoId` (returns true for matching todo)
-- `clearCompleted()` removes ALL completed todos with predicate: `todo => todo.completed`
+- `clearCompleted()` removes ALL completed todos using a while loop with `batch()` for efficiency
 - `effect()` automatically tracks stats whenever todos change
 - When `$remove()` runs, the effect re-runs automatically - no manual DOM updates!
 
@@ -463,10 +475,16 @@ function removeFromCart(productId) {
   console.log(`Removed ${item.name} from cart`);
 }
 
-// Remove items under a price
+// Remove all items under a price
 function removeUnderPrice(minPrice) {
   const before = cart.items.length;
-  cart.$remove(item => item.price < minPrice);
+  
+  batch(() => {
+    while (cart.items.some(item => item.price < minPrice)) {
+      cart.$remove(item => item.price < minPrice);
+    }
+  });
+  
   const removed = before - cart.items.length;
   console.log(`${removed} items under $${minPrice} removed`);
 }
@@ -497,13 +515,8 @@ function dismissNotification(notificationId) {
   const notification = notifications.items.find(n => n.id === notificationId);
   if (!notification) return;
 
-  // Fade out animation
-  notification.visible = false;
-
-  setTimeout(() => {
-    notifications.$remove(n => n.id === notificationId);
-    console.log('Notification dismissed');
-  }, 300);
+  notifications.$remove(n => n.id === notificationId);
+  console.log('Notification dismissed');
 }
 
 // Clear all read notifications
@@ -515,18 +528,12 @@ function clearReadNotifications() {
     return;
   }
 
-  notifications.$remove(n => n.read);
+  batch(() => {
+    while (notifications.items.some(n => n.read)) {
+      notifications.$remove(n => n.read);
+    }
+  });
   console.log(`${readCount} read notifications cleared`);
-}
-
-// Clear old notifications (24 hours)
-function clearOldNotifications(hoursOld = 24) {
-  const cutoff = new Date();
-  cutoff.setHours(cutoff.getHours() - hoursOld);
-
-  const oldCount = notifications.items.filter(n => n.timestamp < cutoff).length;
-  notifications.$remove(n => n.timestamp < cutoff);
-  console.log(`${oldCount} old notifications cleared`);
 }
 
 // Display notifications
@@ -563,16 +570,13 @@ function deleteUser(userId) {
   }
 
   const confirmed = confirm(`Delete user "${user.name}"?`);
-  if (!confirmed) {
-    console.log('Deletion cancelled');
-    return;
-  }
+  if (!confirmed) return;
 
   users.$remove(u => u.id === userId);
   console.log(`User ${user.name} deleted`);
 }
 
-// Remove inactive users
+// Remove all inactive users
 function removeInactiveUsers(daysInactive = 30) {
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - daysInactive);
@@ -581,24 +585,21 @@ function removeInactiveUsers(daysInactive = 30) {
     return u.role !== 'admin' && !u.active && u.lastSeen < cutoffDate;
   }).length;
 
-  users.$remove(user => {
-    return user.role !== 'admin' && !user.active && user.lastSeen < cutoffDate;
+  batch(() => {
+    while (users.items.some(u => 
+      u.role !== 'admin' && !u.active && u.lastSeen < cutoffDate
+    )) {
+      users.$remove(user => {
+        return user.role !== 'admin' && !user.active && user.lastSeen < cutoffDate;
+      });
+    }
   });
 
   console.log(`${inactiveCount} inactive users removed`);
 }
 
-// Bulk delete
-function bulkDeleteUsers(userIds) {
-  const before = users.items.length;
-  users.$remove(user => userIds.includes(user.id) && user.role !== 'admin');
-  const removed = before - users.items.length;
-  console.log(`${removed} users deleted`);
-}
-
 deleteUser(2);
 removeInactiveUsers(30);
-bulkDeleteUsers([4, 5, 6]);
 ```
 
 ### 5. **Game Entities** - Remove Defeated Enemies
@@ -612,8 +613,6 @@ function spawnEnemies(count) {
     enemies.$add({
       id: Date.now() + i,
       health: 100,
-      x: Math.random() * 800,
-      y: Math.random() * 600,
       defeated: false
     });
   }
@@ -632,18 +631,17 @@ function damageEnemy(enemyId, damage) {
   }
 }
 
-// Remove defeated enemies
+// Remove all defeated enemies
 function removeDefeatedEnemies() {
   const defeatedCount = enemies.items.filter(e => e.defeated).length;
-  enemies.$remove(enemy => enemy.defeated);
-  console.log(`${defeatedCount} defeated enemies removed`);
-}
-
-// Remove enemies outside bounds
-function removeOutOfBounds() {
-  enemies.$remove(enemy => {
-    return enemy.x < 0 || enemy.x > 800 || enemy.y < 0 || enemy.y > 600;
+  
+  batch(() => {
+    while (enemies.items.some(e => e.defeated)) {
+      enemies.$remove(enemy => enemy.defeated);
+    }
   });
+  
+  console.log(`${defeatedCount} defeated enemies removed`);
 }
 
 // Track enemy count
@@ -680,16 +678,16 @@ const history = {
 
 // Remove with undo capability
 function removeWithUndo(predicate) {
-  const toRemove = tasks.items.filter(predicate);
+  const toRemove = tasks.items.find(predicate);
 
-  if (toRemove.length === 0) {
-    console.log('No items match criteria');
+  if (!toRemove) {
+    console.log('No item matches criteria');
     return;
   }
 
   // Save to history before removing
   history.removed.push({
-    items: toRemove,
+    item: toRemove,
     timestamp: Date.now()
   });
 
@@ -699,7 +697,7 @@ function removeWithUndo(predicate) {
   }
 
   tasks.$remove(predicate);
-  console.log(`${toRemove.length} items removed (undo available)`);
+  console.log('Item removed (undo available)');
 }
 
 // Undo last removal
@@ -710,9 +708,9 @@ function undoLastRemove() {
   }
 
   const lastRemoved = history.removed.pop();
-  lastRemoved.items.forEach(item => tasks.$add(item));
+  tasks.$add(lastRemoved.item);
 
-  console.log(`Restored ${lastRemoved.items.length} items`);
+  console.log('Restored item');
 }
 
 // Usage
@@ -745,7 +743,12 @@ function safeBulkRemove(predicate, description) {
     return false;
   }
 
-  items.$remove(predicate);
+  batch(() => {
+    while (items.items.some(predicate)) {
+      items.$remove(predicate);
+    }
+  });
+  
   console.log(`${toRemove.length} items removed`);
   return true;
 }
@@ -834,8 +837,16 @@ function removeUserAndContent(userId) {
   // Use batch for performance
   batch(() => {
     users.$remove(u => u.id === userId);
-    posts.$remove(p => p.userId === userId);
-    comments.$remove(c => c.userId === userId);
+    
+    // Remove all posts by this user
+    while (posts.items.some(p => p.userId === userId)) {
+      posts.$remove(p => p.userId === userId);
+    }
+    
+    // Remove all comments by this user
+    while (comments.items.some(c => c.userId === userId)) {
+      comments.$remove(c => c.userId === userId);
+    }
   });
 
   console.log('User and all content removed');
@@ -858,7 +869,9 @@ If you want to remove everything, use `$clear()` instead:
 **Less efficient:**
 ```js
 // ❌ SLOW - removes items one by one
-todos.$remove(() => true);  // Works, but slower
+while (todos.items.length > 0) {
+  todos.$remove(() => true);
+}
 ```
 
 **More efficient:**
@@ -868,7 +881,7 @@ todos.$clear();
 ```
 
 **Rule of thumb:**
-- **Remove SOME items?** Use `$remove(predicate)`
+- **Remove SOME items?** Use `$remove(predicate)` (with loop for multiple)
 - **Remove ALL items?** Use `$clear()`
 
 ---
@@ -950,6 +963,24 @@ const threshold = calculateThreshold();
 todos.$remove(todo => todo.score > threshold);
 ```
 
+**Tip 4: Use batch() for Multiple Removals**
+
+When removing multiple items, wrap in `batch()` for better performance:
+
+```js
+// ⚠️ SLOWER - effect runs each time
+while (todos.items.some(t => t.completed)) {
+  todos.$remove(t => t.completed);
+}
+
+// ✅ FASTER - effect runs once
+batch(() => {
+  while (todos.items.some(t => t.completed)) {
+    todos.$remove(t => t.completed);
+  }
+});
+```
+
 ---
 
 ## Common Pitfalls
@@ -992,8 +1023,12 @@ items.items.forEach(item => {
 
 **Solution:**
 ```js
-// Use predicate directly
-items.$remove(item => item.invalid);
+// Use while loop with batch
+batch(() => {
+  while (items.items.some(item => item.invalid)) {
+    items.$remove(item => item.invalid);
+  }
+});
 ```
 
 ---
@@ -1003,7 +1038,9 @@ items.$remove(item => item.invalid);
 **Problem:**
 ```js
 // Inefficient way to remove everything
-items.$remove(() => true);
+while (items.items.length > 0) {
+  items.$remove(() => true);
+}
 ```
 
 **Solution:**
@@ -1048,6 +1085,29 @@ function deleteUser(id) {
 
 ---
 
+### Pitfall 5: Expecting All Matches to Be Removed
+
+**Problem:**
+```js
+const numbers = collection([1, 2, 3, 2, 4]);
+numbers.$remove(2);
+console.log(numbers.items);  // [1, 3, 2, 4] - only first 2 removed!
+// Expected all 2's to be removed, but only first one was removed
+```
+
+**Solution:**
+```js
+// Use loop to remove all matches
+batch(() => {
+  while (numbers.items.includes(2)) {
+    numbers.$remove(2);
+  }
+});
+console.log(numbers.items);  // [1, 3, 4] - all 2's removed!
+```
+
+---
+
 ## Real-World Example
 
 Here's a spam filter using `$remove()`:
@@ -1064,29 +1124,29 @@ effect(() => {
   document.querySelector('#inbox-count').textContent = emails.items.length;
 });
 
-// Remove spam by domain
+// Remove all spam by domain
 function removeSpam() {
   const spamDomains = ['spam@bad.com', 'scam@fake.com'];
-  emails.$remove(email => spamDomains.some(spam => email.from.includes(spam)));
+  
+  batch(() => {
+    while (emails.items.some(email => 
+      spamDomains.some(spam => email.from.includes(spam))
+    )) {
+      emails.$remove(email => 
+        spamDomains.some(spam => email.from.includes(spam))
+      );
+    }
+  });
   // UI updates automatically! ✨
 }
 
-// Remove old emails
-function removeOldEmails(days = 30) {
-  const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - days);
-
-  emails.$remove(email => new Date(email.date) < cutoff);
-}
-
 // Usage
-removeSpam();         // Removes 2 emails, UI updates automatically
-removeOldEmails(30);  // Removes emails older than 30 days
+removeSpam();  // Removes spam emails, UI updates automatically
 ```
 
 **What this demonstrates:**
-- Removing by predicate function
-- Multiple items removed at once
+- Removing multiple items with a loop
+- Using `batch()` for performance
 - Automatic UI updates via effects
 - Clean, readable code
 
@@ -1096,11 +1156,18 @@ removeOldEmails(30);  // Removes emails older than 30 days
 
 ### Q: Can I remove multiple items at once?
 
-**A:** Yes! The predicate function will match all items that return `true`:
+**A:** `$remove()` only removes the **first match**. To remove multiple items, use a loop:
 
 ```js
-// Removes ALL completed todos, not just the first one
+// Removes only FIRST completed todo
 todos.$remove(todo => todo.completed);
+
+// Remove ALL completed todos
+batch(() => {
+  while (todos.items.some(todo => todo.completed)) {
+    todos.$remove(todo => todo.completed);
+  }
+});
 ```
 
 ### Q: What happens if no items match?
@@ -1113,22 +1180,23 @@ todos.$remove(todo => todo.id === 999);  // No error, just no removal
 
 ### Q: Can I remove by value instead of predicate?
 
-**A:** Yes! For primitive values, pass the value directly:
+**A:** Yes! For primitive values, pass the value directly (removes first occurrence):
 
 ```js
 const numbers = collection([1, 2, 3, 2, 4]);
-numbers.$remove(2);  // Removes ALL 2's (not just first one)
+numbers.$remove(2);  // Removes first 2
+console.log(numbers.items);  // [1, 3, 2, 4]
 ```
 
 ### Q: How do I remove just ONE item when multiple match?
 
-**A:** Use a more specific predicate that only matches one item:
+**A:** `$remove()` already removes only the first match! Use a specific predicate:
 
 ```js
-// Removes ALL users named "John"
+// Removes only FIRST user named "John"
 users.$remove(user => user.name === 'John');
 
-// Removes only ONE specific user
+// Removes only ONE specific user (by unique ID)
 users.$remove(user => user.id === 123);
 ```
 
@@ -1140,13 +1208,13 @@ users.$remove(user => user.id === 123);
 let backup = null;
 
 function removeWithUndo(predicate) {
-  backup = todos.items.filter(predicate);
+  backup = todos.items.find(predicate);
   todos.$remove(predicate);
 }
 
 function undo() {
   if (backup) {
-    backup.forEach(item => todos.$add(item));
+    todos.$add(backup);
   }
 }
 ```
@@ -1155,23 +1223,24 @@ function undo() {
 
 ## Summary
 
-**`collection.$remove()` provides a semantic, flexible way to remove items from reactive collections.**
+**`collection.$remove()` provides a semantic, flexible way to remove the first matching item from reactive collections.**
 
 **Key benefits:**
 - ✅ **Flexible** - Accepts predicate function OR direct value for removal
-- ✅ **Semantic** - Clearly expresses "remove items matching condition"
+- ✅ **Semantic** - Clearly expresses "remove first item matching condition"
 - ✅ **Chainable** - Returns collection for method chaining
 - ✅ **Automatic** - DOM updates by itself without manual calls
 - ✅ **Consistent** - Matches other collection methods (`$add`, `$update`, `$clear`)
 - ✅ **Efficient** - Works with `batch()` for multiple removals
-- ✅ Perfect for **filtering**, **deletion by ID**, **cleanup**, **bulk removal**, **conditional removal**
+- ✅ Perfect for **single item deletion**, **deletion by ID**, **first-match removal**
 
 **Important warnings:**
+- ⚠️ **Only removes first match** - use loops with `batch()` for multiple removals
 - ⚠️ **Always return boolean** from predicate functions (use implicit return with arrow functions)
-- ⚠️ **Don't modify** collection during iteration (use predicate directly)
+- ⚠️ **Don't modify** collection during iteration (use while loop with batch instead)
 - ⚠️ **Use `$clear()`** instead when removing all items
 - ⚠️ **Validate before removal** (check item exists, confirm destructive actions)
 
-**Remember:** `$remove()` is for selective removal. If you need to remove ALL items, use `$clear()` instead!
+**Remember:** `$remove()` removes only the **first matching item**. To remove multiple items, use a `while` loop with `batch()`. If you need to remove ALL items, use `$clear()` instead!
 
 ➡️ Next, explore [`collection.$update()`](collection_$update.md) to update items or [`collection.$clear()`]($clear.md) to clear collections!
