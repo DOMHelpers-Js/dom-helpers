@@ -345,7 +345,9 @@ effect(() => {
 counter.count = 5;  // Effect runs, updates DOM
 counter.count = 10; // Effect runs again
 ```
+state() detects when data changes, but effect() is what tells your application what to do when those changes happen.
 
+An effect automatically re-runs whenever the state it reads changes, keeping your UI and side effects perfectly in sync — without manual updates.
 ---
 
 ## Deep Reactivity
