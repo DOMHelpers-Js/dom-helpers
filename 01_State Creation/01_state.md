@@ -30,7 +30,7 @@ user.name = 'Jane'; // Display updates to "Jane"
 
 **A reactive state:**
 - Detects when properties are read
-- Detects when properties are   changed
+- Detects when properties are writes
 - Automatically notifies effects, computed values, and watchers
 
 Think of it as **upgrading a plain object to a smart object** - it becomes self-aware and can notify other parts of your code when something changes.
