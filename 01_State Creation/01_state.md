@@ -329,25 +329,71 @@ State becomes truly powerful when combined with effects:
 const counter = state({
   count: 0
 });
+```
+Here, ***counter*** is no longer a plain object.
+It is a reactive proxy that can:
+- Detect when properties are **read**
+- Detect when properties are **written**
+- **Notify** any dependent logic when a value changes
+At this point, nothing reacts yet — the state is just ready.
 
+
+
+An effect is a function that automatically re-runs whenever the reactive data it uses changes.
+You don’t tell it when to run — it figures that out by itself.
+
+```js
 // Effect runs whenever counter.count changes
 effect(() => {
   console.log('Count is now: ' + counter.count);
   document.getElementById('display').textContent = counter.count;
 });
+```
+This effect does two important things:
+- Reads counter.count
+- Uses that value to:
+  Log to the console
+  Update the DOM
+Because counter.count is read inside the effect, the reactive system automatically:
+Registers the effect as a dependency of counter.count
+Remembers:
+“This effect depends on counter.count”
+The effect also runs immediately once to establish the initial state.
 
+
+```js
 // Changes automatically trigger the effect
 counter.count = 5;  // Effect runs, updates DOM
 counter.count = 10; // Effect runs again
 ```
+When these lines executes:
+The proxy detects a write to counter.count
+The reactive system looks up:
+“Who depends on counter.count?”
+All matching effects are automatically re-run
+
+Result:
+Console updates
+DOM updates
+No manual calls
+No event wiring
+
 
 ---
 
 ## Deep Reactivity
 
 State objects support **deep reactivity** - nested objects are automatically made reactive:
+Reactive state in this system is deep by default.
+This means that nested objects automatically participate in reactivity, without any extra configuration or manual wrapping.
+
+You don’t need to call state() for every level — the system handles it for you.
 
 ```js
+
+/*Although only the top-level object is passed to state(), all nested objects (user, address) become reactive as well.
+There is no difference in how you use them — you access properties normally.
+*/
 const app = state({
   user: {
     name: 'John',
@@ -358,12 +404,27 @@ const app = state({
   }
 });
 
+
+/*What matters here is what gets read inside the effect:
+1. app.user
+2. app.user.address
+3. app.user.address.city
+Each read is automatically tracked by the reactive system.
+The effect is now subscribed specifically to address.city.
+*/
 effect(() => {
   console.log('City: ' + app.user.address.city);
 });
 
-// Deep changes are tracked!
+
+/* Deep changes are tracked!
+Even though this change happens several levels deep:
+1. The proxy detects the write
+2. The system finds all effects that depend on address.city
+3. Those effects re-run automatically
+*/
 app.user.address.city = 'Los Angeles'; // Effect re-runs!
+
 ```
 
 **How it works:**
