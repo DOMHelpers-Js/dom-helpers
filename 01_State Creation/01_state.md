@@ -28,6 +28,11 @@ user.name = 'Jane'; // Display updates to "Jane"
 
 `state()` is the **most fundamental function** in the Reactive library. It takes a regular JavaScript object and transforms it into a **reactive object** - one that can automatically detect when its properties change and trigger updates throughout your application.
 
+**A reactive state:**
+- Detects when properties are read
+- Detects when properties are   changed
+- Automatically notifies effects, computed values, and watchers
+
 Think of it as **upgrading a plain object to a smart object** - it becomes self-aware and can notify other parts of your code when something changes.
 
 ---
