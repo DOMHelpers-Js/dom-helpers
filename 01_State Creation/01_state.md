@@ -326,64 +326,62 @@ myState.count = myState.count * 2;
 
 **The difference:** When you change them, any reactive code (like effects) will automatically detect these changes and respond!
 
-### Using with Effects
+ 
+# Using with Effects
 
 State becomes truly powerful when combined with effects:
 
-```js
+```javascript
 const counter = state({
   count: 0
 });
 ```
-Here, ***counter*** is no longer a plain object.
-It is a reactive proxy that can:
-- Detect when properties are **read**
-- Detect when properties are **written**
-- **Notify** any dependent logic when a value changes
+
+Here, `counter` is no longer a plain object. It is a reactive proxy that can:
+* Detect when properties are read
+* Detect when properties are written
+* Notify any dependent logic when a value changes
+
 At this point, nothing reacts yet — the state is just ready.
 
+An effect is a function that automatically re-runs whenever the reactive data it uses changes. You don't tell it when to run — it figures that out by itself.
 
-
-An effect is a function that automatically re-runs whenever the reactive data it uses changes.
-You don’t tell it when to run — it figures that out by itself.
-
-```js
+```javascript
 // Effect runs whenever counter.count changes
 effect(() => {
   console.log('Count is now: ' + counter.count);
   document.getElementById('display').textContent = counter.count;
 });
 ```
+
 This effect does two important things:
-- Reads counter.count
-- Uses that value to:
-  Log to the console
-  Update the DOM
-Because counter.count is read inside the effect, the reactive system automatically:
-Registers the effect as a dependency of counter.count
-Remembers:
-“This effect depends on counter.count”
+* Reads `counter.count`
+* Uses that value to:
+  * Log to the console
+  * Update the DOM
+
+Because `counter.count` is read inside the effect, the reactive system automatically:
+* Registers the effect as a dependency of `counter.count`
+* Remembers: "This effect depends on `counter.count`"
+
 The effect also runs immediately once to establish the initial state.
 
-
-```js
+```javascript
 // Changes automatically trigger the effect
 counter.count = 5;  // Effect runs, updates DOM
 counter.count = 10; // Effect runs again
 ```
 
-When these lines executes:
-The proxy detects a write to counter.count
-The reactive system looks up:
-“Who depends on counter.count?”
-All matching effects are automatically re-run
+When these lines execute:
+* The proxy detects a write to `counter.count`
+* The reactive system looks up: "Who depends on `counter.count`?"
+* All matching effects are automatically re-run
 
 Result:
-Console updates
-DOM updates
-No manual calls
-No event wiring
-
+* Console updates
+* DOM updates
+* No manual calls
+* No event wiring
 
 ---
 
