@@ -377,6 +377,56 @@ When these lines execute:
 * The reactive system looks up: "Who depends on `counter.count`?"
 * All matching effects are automatically re-run
 
+## Dependency Tracking Illustration
+
+Think of the reactive system as maintaining a dependency map:
+
+```
+counter.count → [Effect #1, Effect #2, Effect #3]
+    │
+    └─ When counter.count changes, notify all subscribers
+```
+
+Here's a more concrete example with multiple effects:
+
+```javascript
+const counter = state({ count: 0 });
+
+// Effect #1: Updates console
+effect(() => {
+  console.log('Count: ' + counter.count);
+});
+
+// Effect #2: Updates DOM element
+effect(() => {
+  document.getElementById('display').textContent = counter.count;
+});
+
+// Effect #3: Checks if count is even
+effect(() => {
+  const isEven = counter.count % 2 === 0;
+  console.log('Is even: ' + isEven);
+});
+```
+
+**Dependency map after setup:**
+
+```
+counter.count
+    ├─→ Effect #1 (console log)
+    ├─→ Effect #2 (DOM update)
+    └─→ Effect #3 (even check)
+```
+
+**What happens when you write `counter.count = 5`:**
+
+1. **Proxy intercepts:** "Someone is writing to `counter.count`"
+2. **System looks up:** "I have 3 effects watching `counter.count`"
+3. **Notification cascade:** All three effects re-run automatically
+4. **Result:** Console shows new count, DOM updates, even check runs
+
+This is why you never need to manually call effects or wire up event listeners — the reactive system maintains these relationships and handles notifications for you.
+
 Result:
 * Console updates
 * DOM updates
