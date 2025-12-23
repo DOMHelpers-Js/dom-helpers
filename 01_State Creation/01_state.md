@@ -327,7 +327,7 @@ myState.count = myState.count * 2;
 **The difference:** When you change them, any reactive code (like effects) will automatically detect these changes and respond!
 
  
-# Using with Effects
+## Using with Effects
 
 State becomes truly powerful when combined with effects:
 
