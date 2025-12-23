@@ -483,6 +483,100 @@ app.user.address.city = 'Los Angeles'; // Effect re-runs!
 * All levels of nesting are reactive
 * You can track changes at any depth
 
+# Why This Matters
+
+Without deep reactivity, you would need to manually wrap every nested level in `state()`:
+
+```javascript
+const app = state({
+  user: state({
+    address: state({
+      city: 'New York'
+    })
+  })
+});
+```
+
+This becomes tedious and error-prone, especially with deeply nested data structures. You'd need to remember to wrap every object at every level, or reactivity would break at that point.
+
+Deep reactivity removes that complexity entirely. When you create a reactive state object, the system automatically makes all nested objects reactive too. You write code the way you naturally think about data structures.
+
+## The Difference in Practice
+
+**Without deep reactivity (manual wrapping):**
+```javascript
+// You have to wrap each level
+const app = state({
+  user: state({
+    profile: state({
+      settings: state({
+        theme: 'dark'
+      })
+    })
+  })
+});
+```
+
+**With deep reactivity (automatic):**
+```javascript
+// Just wrap the top level, everything else is handled
+const app = state({
+  user: {
+    profile: {
+      settings: {
+        theme: 'dark'
+      }
+    }
+  }
+});
+
+// Changes at any depth still work
+app.user.profile.settings.theme = 'light'; // ✅ Triggers effects
+```
+
+## Benefits
+
+* ✅ **Clean, natural data structures** — Write objects the way you normally would
+* ✅ **No repetitive `state()` calls** — One call at the top level is enough
+* ✅ **Works with real-world nested data** — API responses, configurations, and data models often have deep nesting
+* ✅ **Fine-grained updates** — Only effects that depend on the specific changed property re-run, not everything
+
+## Real-World Example
+
+When you fetch data from an API, it often comes deeply nested:
+
+```javascript
+const app = state({
+  currentUser: {
+    id: 123,
+    profile: {
+      name: 'Jane Doe',
+      avatar: 'avatar.jpg'
+    },
+    preferences: {
+      notifications: {
+        email: true,
+        push: false
+      }
+    }
+  }
+});
+
+// This works immediately, no extra setup
+effect(() => {
+  if (app.currentUser.preferences.notifications.email) {
+    console.log('Email notifications enabled');
+  }
+});
+
+// Change deep property, effect runs automatically
+app.currentUser.preferences.notifications.email = false;
+```
+
+## Key Takeaway
+
+Deep reactivity allows you to treat complex, nested data as a single reactive unit. You don't need to think about "making things reactive" at each level — you just work with your data naturally, and the reactive system tracks everything automatically, no matter how deep.
+
 ### Adding New Properties
 
 New properties added to reactive objects are also reactive:
