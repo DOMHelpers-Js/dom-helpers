@@ -18,8 +18,15 @@
     
     <script>
         // Create counter with autosave
-        const counter = ref(0);
-        autoSave(counter, 'counter');
+
+        // Option 1: One-liner
+           const counter = autoSave(ref(0), 'counter');
+        
+           
+        // Option 2: Create ref and then apply autoSave
+        // const counter = ref(0);
+        // autoSave(counter, 'counter');
+
 
         console.log('Counter loaded:', counter.value);
         
