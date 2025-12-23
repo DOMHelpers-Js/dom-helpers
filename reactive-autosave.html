@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoSave Test</title>
+</head>
+<body>
+    <h1>Counter: <span id="count">0</span></h1>
+    <button id="increment">Increment</button>
+    <button id="reset">Reset</button>
+
+    <!-- Load scripts in order -->
+    <script src="src/Reactive/modular-reactive/01_dh-reactive.js"></script>
+    <script src="src/Reactive/modular-reactive/07_dh-reactiveUtils-shortcut.js"></script>
+    <script src="src/Storage/dh-storage.js"></script>
+    <script src="src/Reactive/modular-reactive/08_dh-reactive-storage.js"></script>
+    
+    <script>
+        // Create counter with autosave
+        const counter = ref(0);
+        autoSave(counter, 'counter');
+
+        console.log('Counter loaded:', counter.value);
+        
+        // Update UI
+        effect(() => {
+            document.getElementById('count').textContent = counter.value;
+        });
+        
+        // Increment button
+        document.getElementById('increment').onclick = () => {
+            counter.value++;
+            console.log('Counter:', counter.value, '(auto-saved)');
+        };
+        
+        // Reset button
+        document.getElementById('reset').onclick = () => {
+            counter.value = 0;
+            console.log('Counter reset');
+        };
+        
+        // Try reloading the page - the counter persists! 🎉
+    </script>
+</body>
+</html>
