@@ -435,7 +435,7 @@ Result:
 
 ---
 
-# Deep Reactivity
+## Deep Reactivity
 
 State objects support deep reactivity - nested objects are automatically made reactive: Reactive state in this system is deep by default. This means that nested objects automatically participate in reactivity, without any extra configuration or manual wrapping.
 
@@ -483,7 +483,7 @@ app.user.address.city = 'Los Angeles'; // Effect re-runs!
 * All levels of nesting are reactive
 * You can track changes at any depth
 
-# Why This Matters
+## Why This Matters
 
 Without deep reactivity, you would need to manually wrap every nested level in `state()`:
 
