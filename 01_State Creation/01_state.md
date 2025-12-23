@@ -371,7 +371,7 @@ The effect also runs immediately once to establish the initial state.
 counter.count = 5;  // Effect runs, updates DOM
 counter.count = 10; // Effect runs again
 ```
-<<<<<<< HEAD
+
 When these lines executes:
 The proxy detects a write to counter.count
 The reactive system looks up:
@@ -387,19 +387,15 @@ No event wiring
 
 ---
 
-## Deep Reactivity
+# Deep Reactivity
 
-State objects support **deep reactivity** - nested objects are automatically made reactive:
-Reactive state in this system is deep by default.
-This means that nested objects automatically participate in reactivity, without any extra configuration or manual wrapping.
+State objects support deep reactivity - nested objects are automatically made reactive: Reactive state in this system is deep by default. This means that nested objects automatically participate in reactivity, without any extra configuration or manual wrapping.
 
-You don’t need to call state() for every level — the system handles it for you.
+You don't need to call `state()` for every level — the system handles it for you.
 
-```js
+Although only the top-level object is passed to `state()`, all nested objects (user, address) become reactive as well. There is no difference in how you use them — you access properties normally.
 
-/*Although only the top-level object is passed to state(), all nested objects (user, address) become reactive as well.
-There is no difference in how you use them — you access properties normally.
-*/
+```javascript
 const app = state({
   user: {
     name: 'John',
@@ -409,34 +405,35 @@ const app = state({
     }
   }
 });
+```
 
+What matters here is what gets read inside the effect:
+1. `app.user`
+2. `app.user.address`
+3. `app.user.address.city`
 
-/*What matters here is what gets read inside the effect:
-1. app.user
-2. app.user.address
-3. app.user.address.city
-Each read is automatically tracked by the reactive system.
-The effect is now subscribed specifically to address.city.
-*/
+Each read is automatically tracked by the reactive system. The effect is now subscribed specifically to `address.city`.
+
+```javascript
 effect(() => {
   console.log('City: ' + app.user.address.city);
 });
-
-
-/* Deep changes are tracked!
-Even though this change happens several levels deep:
-1. The proxy detects the write
-2. The system finds all effects that depend on address.city
-3. Those effects re-run automatically
-*/
-app.user.address.city = 'Los Angeles'; // Effect re-runs!
-
 ```
 
-**How it works:**
-- When you access a nested object, it's automatically converted to a reactive proxy
-- All levels of nesting are reactive
-- You can track changes at any depth
+Deep changes are tracked! Even though this change happens several levels deep:
+1. The proxy detects the write
+2. The system finds all effects that depend on `address.city`
+3. Those effects re-run automatically
+
+```javascript
+app.user.address.city = 'Los Angeles'; // Effect re-runs!
+```
+
+## How it works:
+
+* When you access a nested object, it's automatically converted to a reactive proxy
+* All levels of nesting are reactive
+* You can track changes at any depth
 
 ### Adding New Properties
 
