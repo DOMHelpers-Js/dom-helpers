@@ -585,19 +585,4 @@
     }, 10);
   };
 
-  console.log('[Reactive Cleanup] v1.0.0 loaded successfully');
-  console.log('[Reactive Cleanup] Features enabled:');
-  console.log('  ✓ Automatic effect cleanup');
-  console.log('  ✓ Memory leak prevention');
-  console.log('  ✓ Cleanup collectors and scopes');
-  console.log('  ✓ Enhanced component lifecycle');
-  console.log('');
-  console.log('Available methods:');
-  console.log('  - ReactiveCleanup.collector() - Manage multiple cleanups');
-  console.log('  - ReactiveCleanup.scope(fn) - Auto-cleanup scope');
-  console.log('  - ReactiveCleanup.test() - Test cleanup is working');
-  console.log('  - ReactiveCleanup.debug() - Enable debug mode');
-  console.log('');
-  console.log('Run ReactiveCleanup.test() to verify cleanup is working!');
-
 })(typeof window !== 'undefined' ? window : global);

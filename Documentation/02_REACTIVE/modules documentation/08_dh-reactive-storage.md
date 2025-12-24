@@ -9,8 +9,7 @@ Load the scripts in this order:
 ```html
 <script src="01_dh-reactive.js"></script>
 <script src="07_dh-reactiveUtils-shortcut.js"></script>
-<script src="dh-storage.js"></script>
-<script src="09_dh-reactive-storage-simple.js"></script>
+<script src="08_dh-reactive-storage.js"></script>
 ```
 
 ## 🎯 Core Concepts

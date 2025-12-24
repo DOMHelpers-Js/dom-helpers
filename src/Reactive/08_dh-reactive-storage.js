@@ -1,30 +1,156 @@
 /**
- * 08_dh-reactive-storage.js (PRODUCTION HARDENED)
+ * 08_dh-reactive-storage.js
  * 
- * Simplified Storage Integration - Production Ready
+ * STANDALONE AutoSave - No dh-storage.js dependency!
+ * Only requires: 01_dh-reactive.js
+ * 
  * @license MIT
- * @version 2.1.0
+ * @version 3.0.0
  */
 
 (function(global) {
   'use strict';
 
   // ============================================================================
-  // VERIFY DEPENDENCIES
+  // VERIFY DEPENDENCIES (only reactive needed!)
   // ============================================================================
   
   if (!global.ReactiveUtils) {
-    console.error('[Storage Integration] ReactiveUtils not found. Load 01_dh-reactive.js first.');
-    return;
-  }
-
-  if (!global.Storage) {
-    console.error('[Storage Integration] Storage not found. Load dh-storage.js first.');
+    console.error('[autoSave] ReactiveUtils not found. Load 01_dh-reactive.js first.');
     return;
   }
 
   const { effect, batch } = global.ReactiveUtils;
-  const Storage = global.Storage;
+
+  // ============================================================================
+  // BUILT-IN STORAGE WRAPPER (replaces dh-storage.js)
+  // ============================================================================
+  
+  /**
+   * Simple storage wrapper with JSON handling and namespaces
+   */
+  class StorageWrapper {
+    constructor(storageType = 'localStorage', namespace = '') {
+      this.storageType = storageType;
+      this.namespace = namespace;
+      this.storage = global[storageType];
+      
+      if (!this.storage) {
+        console.warn(`[autoSave] ${storageType} not available`);
+        this.storage = {
+          getItem: () => null,
+          setItem: () => {},
+          removeItem: () => {},
+          clear: () => {},
+          key: () => null,
+          length: 0
+        };
+      }
+    }
+
+    _getKey(key) {
+      return this.namespace ? `${this.namespace}:${key}` : key;
+    }
+
+    set(key, value, options = {}) {
+      try {
+        const fullKey = this._getKey(key);
+        
+        const data = {
+          value: value,
+          timestamp: Date.now()
+        };
+
+        // Add expiration
+        if (options.expires) {
+          data.expires = Date.now() + (options.expires * 1000);
+        }
+
+        this.storage.setItem(fullKey, JSON.stringify(data));
+        return true;
+      } catch (error) {
+        console.error('[autoSave] Storage set error:', error);
+        return false;
+      }
+    }
+
+    get(key) {
+      try {
+        const fullKey = this._getKey(key);
+        const item = this.storage.getItem(fullKey);
+        
+        if (!item) return null;
+
+        const data = JSON.parse(item);
+        
+        // Check expiration
+        if (data.expires && Date.now() > data.expires) {
+          this.storage.removeItem(fullKey);
+          return null;
+        }
+
+        return data.value;
+      } catch (error) {
+        console.error('[autoSave] Storage get error:', error);
+        return null;
+      }
+    }
+
+    remove(key) {
+      try {
+        const fullKey = this._getKey(key);
+        this.storage.removeItem(fullKey);
+        return true;
+      } catch (error) {
+        console.error('[autoSave] Storage remove error:', error);
+        return false;
+      }
+    }
+
+    has(key) {
+      try {
+        const fullKey = this._getKey(key);
+        return this.storage.getItem(fullKey) !== null;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    keys() {
+      try {
+        const keys = [];
+        const prefix = this.namespace ? `${this.namespace}:` : '';
+        
+        for (let i = 0; i < this.storage.length; i++) {
+          const key = this.storage.key(i);
+          if (key && (!this.namespace || key.startsWith(prefix))) {
+            const strippedKey = this.namespace 
+              ? key.slice(prefix.length)
+              : key;
+            keys.push(strippedKey);
+          }
+        }
+        
+        return keys;
+      } catch (error) {
+        return [];
+      }
+    }
+
+    clear() {
+      try {
+        if (this.namespace) {
+          const keys = this.keys();
+          keys.forEach(key => this.remove(key));
+        } else {
+          this.storage.clear();
+        }
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+  }
 
   // ============================================================================
   // STORAGE AVAILABILITY CHECK
@@ -45,72 +171,35 @@
   const hasLocalStorage = isStorageAvailable('localStorage');
   const hasSessionStorage = isStorageAvailable('sessionStorage');
 
-  if (!hasLocalStorage) {
-    console.warn('[autoSave] localStorage not available (private browsing?)');
-  }
-
   // ============================================================================
-  // PRODUCTION UTILITIES
+  // UTILITIES
   // ============================================================================
 
-  /**
-   * Safe JSON stringify with circular reference detection
-   */
   function safeStringify(obj) {
     const seen = new WeakSet();
-    
     return JSON.stringify(obj, (key, value) => {
       if (typeof value === 'object' && value !== null) {
-        if (seen.has(value)) {
-          return '[Circular]';
-        }
+        if (seen.has(value)) return '[Circular]';
         seen.add(value);
       }
       return value;
     });
   }
 
-  /**
-   * Check storage quota
-   */
-  function getStorageSize(storage) {
-    let size = 0;
-    for (let key in storage) {
-      if (storage.hasOwnProperty(key)) {
-        size += storage[key].length + key.length;
-      }
-    }
-    return size;
-  }
-
-  const MAX_STORAGE_SIZE = 5 * 1024 * 1024; // 5MB warning threshold
-  const LARGE_ITEM_SIZE = 100 * 1024; // 100KB warning for single item
-
   // ============================================================================
-  // CONCEPT 1: autoSave() - Production Hardened
+  // autoSave() - STANDALONE VERSION
   // ============================================================================
   
   function autoSave(reactiveObj, key, options = {}) {
-    // ========================================================================
-    // INPUT VALIDATION
-    // ========================================================================
-    
+    // Validation
     if (!reactiveObj || typeof reactiveObj !== 'object') {
       throw new Error('[autoSave] First argument must be a reactive object');
     }
-
-    if (!key || typeof key !== 'string' || key.trim() === '') {
-      throw new Error('[autoSave] Second argument must be a non-empty string key');
+    if (!key || typeof key !== 'string') {
+      throw new Error('[autoSave] Second argument must be a string key');
     }
 
-    if (options && typeof options !== 'object') {
-      throw new Error('[autoSave] Third argument must be an options object');
-    }
-
-    // ========================================================================
-    // OPTIONS WITH VALIDATION
-    // ========================================================================
-    
+    // Options
     const {
       storage = 'localStorage',
       namespace = '',
@@ -118,224 +207,157 @@
       autoLoad = true,
       autoSave: autoSaveEnabled = true,
       sync = false,
+      expires = null,
       onSave = null,
       onLoad = null,
       onSync = null,
       onError = null
     } = options;
 
-    // Validate storage type
-    if (storage !== 'localStorage' && storage !== 'sessionStorage') {
-      throw new Error('[autoSave] storage must be "localStorage" or "sessionStorage"');
-    }
-
-    // Check storage availability
+    // Check availability
     if (storage === 'localStorage' && !hasLocalStorage) {
-      console.warn('[autoSave] localStorage not available, data will not persist');
-      return reactiveObj; // Return unmodified object
+      console.warn('[autoSave] localStorage not available');
+      return reactiveObj;
     }
-
     if (storage === 'sessionStorage' && !hasSessionStorage) {
-      console.warn('[autoSave] sessionStorage not available, data will not persist');
+      console.warn('[autoSave] sessionStorage not available');
       return reactiveObj;
     }
 
-    // Validate debounce
-    if (typeof debounce !== 'number' || debounce < 0) {
-      throw new Error('[autoSave] debounce must be a non-negative number');
-    }
-
-    // Validate callbacks
-    if (onSave && typeof onSave !== 'function') {
-      throw new Error('[autoSave] onSave must be a function');
-    }
-    if (onLoad && typeof onLoad !== 'function') {
-      throw new Error('[autoSave] onLoad must be a function');
-    }
-    if (onSync && typeof onSync !== 'function') {
-      throw new Error('[autoSave] onSync must be a function');
-    }
-    if (onError && typeof onError !== 'function') {
-      throw new Error('[autoSave] onError must be a function');
-    }
-
-    // Get storage instance
-    const storageInstance = namespace
-      ? Storage.namespace(namespace)
-      : (storage === 'sessionStorage' ? Storage.session : Storage);
+    // Create storage wrapper (no external dependency!)
+    const store = new StorageWrapper(storage, namespace);
 
     // ========================================================================
-    // HELPER: Get value with error handling
+    // HELPERS
     // ========================================================================
-    
+
     function getValue(obj) {
       try {
-        let value;
-        
-        // Ref
         if (obj.value !== undefined && typeof obj.valueOf === 'function') {
-          value = obj.value;
+          return obj.value; // Ref
         }
-        // Collection
-        else if (obj.items !== undefined) {
-          value = obj.items;
+        if (obj.items !== undefined) {
+          return obj.items; // Collection
         }
-        // Form
-        else if (obj.values !== undefined) {
-          value = {
-            values: obj.values,
-            errors: obj.errors || {},
-            touched: obj.touched || {}
-          };
+        if (obj.values !== undefined) {
+          return { values: obj.values, errors: obj.errors || {}, touched: obj.touched || {} }; // Form
         }
-        // State (with $raw)
-        else if (obj.$raw) {
-          value = obj.$raw;
+        if (obj.$raw) {
+          return obj.$raw; // State
         }
-        // Plain object
-        else {
-          value = obj;
-        }
-
-        // Validate serializability
-        safeStringify(value);
-        
-        return value;
+        return obj; // Plain object
       } catch (error) {
-        console.error('[autoSave] Error getting value:', error);
-        if (onError) {
-          onError(error, 'serialize');
-        }
+        console.error('[autoSave] getValue error:', error);
+        if (onError) onError(error, 'getValue');
         return null;
       }
     }
 
-    // ========================================================================
-    // HELPER: Set value with validation
-    // ========================================================================
-    
     function setValue(obj, value) {
-      if (value === null || value === undefined) {
-        return;
-      }
-
+      if (!value) return;
       try {
-        // Ref
         if (obj.value !== undefined && typeof obj.valueOf === 'function') {
           obj.value = value;
-        }
-        // Collection
-        else if (obj.items !== undefined) {
-          if (obj.reset) {
-            obj.reset(value);
-          } else {
-            obj.items = value;
-          }
-        }
-        // Form
-        else if (obj.values !== undefined) {
-          if (value.values) {
-            Object.assign(obj.values, value.values);
-            if (value.errors) obj.errors = value.errors;
-            if (value.touched) obj.touched = value.touched;
-          }
-        }
-        // State or plain object
-        else {
+        } else if (obj.items !== undefined) {
+          obj.reset ? obj.reset(value) : (obj.items = value);
+        } else if (obj.values !== undefined && value.values) {
+          Object.assign(obj.values, value.values);
+          if (value.errors) obj.errors = value.errors;
+          if (value.touched) obj.touched = value.touched;
+        } else {
           Object.assign(obj, value);
         }
       } catch (error) {
-        console.error('[autoSave] Error setting value:', error);
-        if (onError) {
-          onError(error, 'deserialize');
-        }
+        console.error('[autoSave] setValue error:', error);
+        if (onError) onError(error, 'setValue');
       }
     }
 
     // ========================================================================
-    // LOAD FROM STORAGE (with validation)
+    // LOAD
     // ========================================================================
-    
+
     if (autoLoad) {
       try {
-        const loaded = storageInstance.get(key);
+        const loaded = store.get(key);
         if (loaded !== null) {
-          const processedValue = onLoad ? onLoad(loaded) : loaded;
-          setValue(reactiveObj, processedValue);
+          const processed = onLoad ? onLoad(loaded) : loaded;
+          setValue(reactiveObj, processed);
         }
       } catch (error) {
         console.error('[autoSave] Load error:', error);
-        if (onError) {
-          onError(error, 'load');
-        }
+        if (onError) onError(error, 'load');
       }
     }
 
     // ========================================================================
-    // AUTO-SAVE SETUP (Production Hardened)
+    // SAVE (PRODUCTION HARDENED)
     // ========================================================================
-    
+
     let saveTimeout;
     let effectCleanup;
     let isUpdatingFromStorage = false;
-    let lastSaveAttempt = 0;
+    let lastSaveTime = 0;
     const MIN_SAVE_INTERVAL = 100; // Minimum 100ms between saves
+    const LARGE_ITEM_WARNING = 100 * 1024; // 100KB
+    const MAX_STORAGE_WARNING = 5 * 1024 * 1024; // 5MB
 
     function save() {
       if (isUpdatingFromStorage) return;
       
-      // Prevent too frequent saves
+      // Prevent excessive saves
       const now = Date.now();
-      if (now - lastSaveAttempt < MIN_SAVE_INTERVAL) {
+      if (now - lastSaveTime < MIN_SAVE_INTERVAL) {
         return;
       }
-      lastSaveAttempt = now;
+      lastSaveTime = now;
       
       if (saveTimeout) clearTimeout(saveTimeout);
-      
+
       const doSave = () => {
         try {
           let valueToSave = getValue(reactiveObj);
-          
-          if (valueToSave === null) {
-            console.warn('[autoSave] Skipping save - value is null');
-            return;
-          }
-          
-          // Apply user transform
+          if (valueToSave === null) return;
+
           if (onSave) {
             valueToSave = onSave(valueToSave);
           }
 
-          // Check size
+          // Validate serializability and check size
           const serialized = safeStringify(valueToSave);
           const size = serialized.length;
           
-          if (size > LARGE_ITEM_SIZE) {
+          // Warn about large data
+          if (size > LARGE_ITEM_WARNING) {
             console.warn(`[autoSave] Large data detected (${Math.round(size / 1024)}KB) for key "${key}"`);
           }
 
           // Check total storage size
-          const totalSize = getStorageSize(global[storage]);
-          if (totalSize > MAX_STORAGE_SIZE) {
-            console.warn(`[autoSave] Storage approaching limit (${Math.round(totalSize / 1024 / 1024)}MB)`);
+          if (typeof global[storage] !== 'undefined') {
+            let totalSize = 0;
+            try {
+              for (let i = 0; i < global[storage].length; i++) {
+                const k = global[storage].key(i);
+                if (k) {
+                  totalSize += (global[storage].getItem(k) || '').length + k.length;
+                }
+              }
+              if (totalSize > MAX_STORAGE_WARNING) {
+                console.warn(`[autoSave] Storage size: ${Math.round(totalSize / 1024 / 1024)}MB`);
+              }
+            } catch (e) {
+              // Ignore size check errors
+            }
           }
-          
-          // Attempt save with quota error handling
-          storageInstance.set(key, valueToSave, options);
-          
+
+          store.set(key, valueToSave, { expires });
         } catch (error) {
-          // Handle quota exceeded
           if (error.name === 'QuotaExceededError') {
             console.error('[autoSave] Storage quota exceeded');
-            if (onError) {
-              onError(new Error('Storage quota exceeded. Consider clearing old data.'), 'quota');
-            }
+            if (onError) onError(new Error('Storage quota exceeded. Consider clearing old data.'), 'quota');
           } else {
             console.error('[autoSave] Save error:', error);
-            if (onError) {
-              onError(error, 'save');
-            }
+            if (onError) onError(error, 'save');
           }
         }
       };
@@ -347,7 +369,6 @@
       }
     }
 
-    // Set up auto-save
     if (autoSaveEnabled) {
       effectCleanup = effect(() => {
         const _ = getValue(reactiveObj);
@@ -356,148 +377,119 @@
     }
 
     // ========================================================================
-    // CROSS-TAB SYNC (Production Hardened)
+    // CROSS-TAB SYNC (PRODUCTION HARDENED)
     // ========================================================================
-    
+
     let storageEventCleanup = null;
     let syncLock = false; // Prevent sync loops
 
     if (sync && typeof window !== 'undefined') {
       const handleStorageEvent = (event) => {
-        if (syncLock) return; // Prevent loops
+        if (syncLock) return; // Already syncing, prevent loops
         
         const fullKey = namespace ? `${namespace}:${key}` : key;
         if (event.key !== fullKey) return;
 
         try {
-          if (event.newValue === null) {
-            return;
-          }
+          if (event.newValue === null) return;
 
           const data = JSON.parse(event.newValue);
           const newValue = data.value !== undefined ? data.value : data;
 
-          syncLock = true;
+          syncLock = true; // Lock to prevent loops
           isUpdatingFromStorage = true;
           
-          batch(() => {
-            setValue(reactiveObj, newValue);
-          });
+          batch(() => setValue(reactiveObj, newValue));
           
           isUpdatingFromStorage = false;
-          
-          if (onSync) {
-            onSync(newValue);
-          }
-          
+
+          if (onSync) onSync(newValue);
         } catch (error) {
           console.error('[autoSave] Sync error:', error);
-          if (onError) {
-            onError(error, 'sync');
-          }
+          if (onError) onError(error, 'sync');
         } finally {
-          syncLock = false;
+          syncLock = false; // Always release lock
         }
       };
 
       window.addEventListener('storage', handleStorageEvent);
-      storageEventCleanup = () => {
-        window.removeEventListener('storage', handleStorageEvent);
-      };
+      storageEventCleanup = () => window.removeEventListener('storage', handleStorageEvent);
     }
 
     // ========================================================================
-    // FLUSH ON PAGE UNLOAD (Prevent data loss)
+    // FLUSH ON UNLOAD
     // ========================================================================
-    
+
     let unloadCleanup = null;
-    
+
     if (typeof window !== 'undefined' && autoSaveEnabled) {
       const handleUnload = () => {
         if (saveTimeout) {
           clearTimeout(saveTimeout);
-          // Force immediate save
           try {
             let valueToSave = getValue(reactiveObj);
-            if (valueToSave !== null && onSave) {
+            if (valueToSave && onSave) {
               valueToSave = onSave(valueToSave);
             }
-            if (valueToSave !== null) {
-              storageInstance.set(key, valueToSave, options);
+            if (valueToSave) {
+              store.set(key, valueToSave, { expires });
             }
           } catch (error) {
-            // Silent fail on unload
+            // Silent on unload
           }
         }
       };
 
       window.addEventListener('beforeunload', handleUnload);
-      unloadCleanup = () => {
-        window.removeEventListener('beforeunload', handleUnload);
-      };
+      unloadCleanup = () => window.removeEventListener('beforeunload', handleUnload);
     }
 
     // ========================================================================
-    // ADD STORAGE METHODS
+    // METHODS
     // ========================================================================
-    
+
     reactiveObj.$save = function() {
       if (saveTimeout) clearTimeout(saveTimeout);
-      
       try {
         let valueToSave = getValue(this);
-        if (valueToSave !== null && onSave) {
+        if (valueToSave && onSave) {
           valueToSave = onSave(valueToSave);
         }
-        if (valueToSave !== null) {
-          storageInstance.set(key, valueToSave, options);
+        if (valueToSave) {
+          return store.set(key, valueToSave, { expires });
         }
-        return true;
+        return false;
       } catch (error) {
         console.error('[autoSave] $save error:', error);
-        if (onError) {
-          onError(error, 'save');
-        }
+        if (onError) onError(error, 'save');
         return false;
       }
     };
 
     reactiveObj.$load = function() {
       try {
-        const loaded = storageInstance.get(key);
+        const loaded = store.get(key);
         if (loaded !== null) {
-          const processedValue = onLoad ? onLoad(loaded) : loaded;
+          const processed = onLoad ? onLoad(loaded) : loaded;
           isUpdatingFromStorage = true;
-          setValue(this, processedValue);
+          setValue(this, processed);
           isUpdatingFromStorage = false;
           return true;
         }
         return false;
       } catch (error) {
         console.error('[autoSave] $load error:', error);
-        if (onError) {
-          onError(error, 'load');
-        }
+        if (onError) onError(error, 'load');
         return false;
       }
     };
 
     reactiveObj.$clear = function() {
-      try {
-        storageInstance.remove(key);
-        return true;
-      } catch (error) {
-        console.error('[autoSave] $clear error:', error);
-        return false;
-      }
+      return store.remove(key);
     };
 
     reactiveObj.$exists = function() {
-      try {
-        return storageInstance.has(key);
-      } catch (error) {
-        return false;
-      }
+      return store.has(key);
     };
 
     reactiveObj.$stopAutoSave = function() {
@@ -525,26 +517,44 @@
       if (saveTimeout) clearTimeout(saveTimeout);
     };
 
-    // Add storage info
     reactiveObj.$storageInfo = function() {
-      return {
-        key,
-        namespace,
-        storage,
-        exists: this.$exists(),
-        size: this.$exists() ? safeStringify(storageInstance.get(key)).length : 0
-      };
+      try {
+        const exists = this.$exists();
+        let size = 0;
+        if (exists) {
+          const data = store.get(key);
+          if (data) {
+            size = safeStringify(data).length;
+          }
+        }
+        return {
+          key,
+          namespace,
+          storage,
+          exists,
+          size,
+          sizeKB: Math.round(size / 1024 * 10) / 10
+        };
+      } catch (error) {
+        return {
+          key,
+          namespace,
+          storage,
+          exists: false,
+          size: 0,
+          error: error.message
+        };
+      }
     };
 
     return reactiveObj;
   }
 
   // ============================================================================
-  // CONCEPT 2: reactiveStorage() - Same as before
+  // reactiveStorage() - STANDALONE VERSION
   // ============================================================================
-  
+
   function reactiveStorage(storageType = 'localStorage', namespace = '') {
-    // Check availability
     if (storageType === 'localStorage' && !hasLocalStorage) {
       console.warn('[reactiveStorage] localStorage not available');
     }
@@ -552,51 +562,41 @@
       console.warn('[reactiveStorage] sessionStorage not available');
     }
 
-    const baseStorage = namespace 
-      ? Storage.namespace(namespace)
-      : (storageType === 'sessionStorage' ? Storage.session : Storage);
+    const store = new StorageWrapper(storageType, namespace);
     
     const reactiveState = global.ReactiveUtils.state({
       _version: 0,
-      _keys: new Set(baseStorage.keys())
+      _keys: new Set(store.keys())
     });
 
     function notify() {
       batch(() => {
         reactiveState._version++;
-        reactiveState._keys = new Set(baseStorage.keys());
+        reactiveState._keys = new Set(store.keys());
       });
     }
 
-    const proxy = new Proxy(baseStorage, {
+    const proxy = new Proxy(store, {
       get(target, prop) {
         if (prop === 'get' || prop === 'has' || prop === 'keys') {
           const _ = reactiveState._version;
           const __ = reactiveState._keys;
         }
-        
         const value = target[prop];
         return typeof value === 'function' ? value.bind(target) : value;
       }
     });
 
-    const originalSet = baseStorage.set.bind(baseStorage);
+    const originalSet = store.set.bind(store);
     proxy.set = function(key, value, options) {
       const result = originalSet(key, value, options);
       if (result) notify();
       return result;
     };
 
-    const originalRemove = baseStorage.remove.bind(baseStorage);
+    const originalRemove = store.remove.bind(store);
     proxy.remove = function(key) {
       const result = originalRemove(key);
-      if (result) notify();
-      return result;
-    };
-
-    const originalClear = baseStorage.clear.bind(baseStorage);
-    proxy.clear = function() {
-      const result = originalClear();
       if (result) notify();
       return result;
     };
@@ -614,9 +614,9 @@
   }
 
   // ============================================================================
-  // CONCEPT 3: watch() - Same as before
+  // watch() - STANDALONE VERSION
   // ============================================================================
-  
+
   function watch(key, callback, options = {}) {
     const {
       storage = 'localStorage',
@@ -624,11 +624,8 @@
       immediate = false
     } = options;
 
-    const storageInstance = namespace
-      ? Storage.namespace(namespace)
-      : (storage === 'sessionStorage' ? Storage.session : Storage);
-
-    let oldValue = storageInstance.get(key);
+    const store = new StorageWrapper(storage, namespace);
+    let oldValue = store.get(key);
 
     if (immediate && oldValue !== null) {
       callback(oldValue, null);
@@ -649,16 +646,14 @@
   }
 
   // ============================================================================
-  // EXPORT API
+  // EXPORT
   // ============================================================================
 
   const StorageIntegration = {
     autoSave,
     reactiveStorage,
     watch,
-    withStorage: autoSave, // Backward compat
-    
-    // Utility
+    withStorage: autoSave,
     isStorageAvailable,
     hasLocalStorage,
     hasSessionStorage
@@ -673,28 +668,10 @@
     global.ReactiveUtils.withStorage = autoSave;
   }
 
-  if (global.Storage) {
-    global.Storage.autoSave = autoSave;
-    global.Storage.reactive = reactiveStorage;
-    global.Storage.watch = watch;
-    global.Storage.withStorage = autoSave;
-  }
-
   if (typeof global.state !== 'undefined') {
     global.autoSave = autoSave;
     global.reactiveStorage = reactiveStorage;
     global.watchStorage = watch;
   }
-
-  console.log('[Reactive Storage] v2.1.0 PRODUCTION loaded successfully');
-  console.log('');
-  console.log('🎯 Production Features:');
-  console.log('  ✓ Storage availability detection');
-  console.log('  ✓ Quota exceeded handling');
-  console.log('  ✓ Input validation');
-  console.log('  ✓ Circular reference protection');
-  console.log('  ✓ Size warnings');
-  console.log('  ✓ beforeunload flush');
-  console.log('  ✓ Race condition prevention');
 
 })(typeof window !== 'undefined' ? window : global);

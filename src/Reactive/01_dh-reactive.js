@@ -938,14 +938,5 @@
   
   // Global updateAll method
   global.updateAll = updateAll;
-
-  console.log('[DOM Helpers Reactive] v2.0.2 loaded successfully');
-  console.log('[DOM Helpers Reactive] New features available:');
-  console.log('  - state.$update() - Mixed state + DOM updates');
-  console.log('  - state.$set() - Functional updates');
-  console.log('  - state.$bind() - Create reactive bindings');
-  console.log('  - Elements/Collections/Selector.createState() - State with auto-bindings');
-  console.log('  - Elements/Collections/Selector.updateAll() - Unified updates');
-  console.log('  - Global updateAll() method');
-
+  
 })(typeof window !== 'undefined' ? window : global);

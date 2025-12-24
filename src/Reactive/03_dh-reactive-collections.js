@@ -338,7 +338,4 @@
     global.Collections.list = createCollectionWithToggleAll;
   }
 
-  console.log('[toggleAll Extension] v1.0.0 loaded successfully');
-  console.log('  - collection.toggleAll(predicate, field)');
-
 })(typeof window !== 'undefined' ? window : global);

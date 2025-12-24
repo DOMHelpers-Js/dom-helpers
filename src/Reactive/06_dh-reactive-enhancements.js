@@ -833,20 +833,4 @@
     global.ReactiveUtils.DevTools = DevTools;
   }
 
-  console.log('[Reactive Enhancements] v1.0.0 loaded successfully');
-  console.log('');
-  console.log('🎯 New Features:');
-  console.log('  ✓ Enhanced batching (prevents race conditions)');
-  console.log('  ✓ Collection support (Map, Set are now reactive)');
-  console.log('  ✓ Computed caching (better performance)');
-  console.log('  ✓ Error boundaries (isolated error handling)');
-  console.log('  ✓ Async effects (with auto-cancellation)');
-  console.log('  ✓ DevTools (inspect state and effects)');
-  console.log('');
-  console.log('📚 Available APIs:');
-  console.log('  - ReactiveUtils.safeEffect(fn, options)');
-  console.log('  - ReactiveUtils.asyncEffect(fn, options)');
-  console.log('  - ReactiveUtils.asyncState(initial, options)');
-  console.log('  - ReactiveUtils.DevTools (inspect your app)');
-
 })(typeof window !== 'undefined' ? window : global);

@@ -442,14 +442,4 @@
     global.ReactiveState.form = createForm;
   }
 
-  console.log('[Forms Extension] v1.0.0 loaded successfully');
-  console.log('[Forms Extension] Available methods:');
-  console.log('  - ReactiveUtils.form(initialValues, options)');
-  console.log('  - form.setValue(field, value)');
-  console.log('  - form.setError(field, error)');
-  console.log('  - form.validate()');
-  console.log('  - form.submit(handler)');
-  console.log('  - form.reset()');
-  console.log('  - Plus many more validation and binding helpers!');
-
 })(typeof window !== 'undefined' ? window : global);

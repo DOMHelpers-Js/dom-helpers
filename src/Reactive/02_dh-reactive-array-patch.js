@@ -188,10 +188,4 @@
     global.Selector.patchArray = patchReactiveArray;
   }
 
-  console.log('[Reactive Array Patch] v1.0.1 loaded successfully');
-  console.log('[Reactive Array Patch] Array methods (push, pop, sort, etc.) are now reactive!');
-  console.log('[Reactive Array Patch] Manual patching available via:');
-  console.log('  - ReactiveUtils.patchArray(state, key)');
-  console.log('  - patchReactiveArray(state, key) [legacy]');
-
 })(typeof window !== 'undefined' ? window : global);

@@ -256,35 +256,4 @@ if (global.Collections) {
     global.createFilteredCollection = global.Collections.createFiltered;
   }
 }
-
-  // ============================================================
-  // SUMMARY
-  // ============================================================
-
-  console.log('[Standalone API] v1.0.0 loaded successfully');
-  console.log('[Standalone API] Simplified functions available:');
-  console.log('');
-  console.log('Core:');
-  console.log('  state(), effect(), batch(), computed(), watch()');
-  console.log('');
-  console.log('Data Structures:');
-  console.log('  ref(), refs(), collection(), list()');
-  console.log('');
-  console.log('Arrays:');
-  console.log('  patchArray()');
-  console.log('');
-  console.log('Forms:');
-  console.log('  form(), createForm(), validators');
-  console.log('');
-  console.log('Advanced:');
-  console.log('  store(), component(), reactive(), bindings()');
-  console.log('');
-  console.log('Utilities:');
-  console.log('  isReactive(), toRaw(), notify(), pause(), resume(), untrack()');
-  console.log('');
-  console.log('✨ You can now use simplified syntax:');
-  console.log('   const myState = state({}) // instead of ReactiveUtils.state({})');
-  console.log('   effect(() => {}) // instead of ReactiveUtils.effect(() => {})');
-  console.log('   patchArray(state, "items") // instead of ReactiveUtils.patchArray(state, "items")');
-
 })(typeof window !== 'undefined' ? window : global);

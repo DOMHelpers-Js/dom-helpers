@@ -11,21 +11,20 @@
     <button id="reset">Reset</button>
 
     <!-- Load scripts in order -->
-    <script src="src/Reactive/modular-reactive/01_dh-reactive.js"></script>
-    <script src="src/Reactive/modular-reactive/07_dh-reactiveUtils-shortcut.js"></script>
-    <script src="src/Storage/dh-storage.js"></script>
-    <script src="src/Reactive/modular-reactive/08_dh-reactive-storage.js"></script>
+    <script src="src/Reactive/01_dh-reactive.js"></script>
+    <script src="src/Reactive/07_dh-reactiveUtils-shortcut.js"></script>
+    <script src="src/Reactive/08_dh-reactive-storage.js"></script>
     
     <script>
         // Create counter with autosave
 
         // Option 1: One-liner
-           const counter = autoSave(ref(0), 'counter');
+           //const counter = autoSave(ref(0), 'counter');
         
            
         // Option 2: Create ref and then apply autoSave
-        // const counter = ref(0);
-        // autoSave(counter, 'counter');
+         const counter = ref(0);
+         autoSave(counter, 'counter');
 
 
         console.log('Counter loaded:', counter.value);
