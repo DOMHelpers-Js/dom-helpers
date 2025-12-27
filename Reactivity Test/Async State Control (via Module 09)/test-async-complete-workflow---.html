@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Async Complete Workflow</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/09_dh-reactive-namespace-methods.js"></script>
+  <script>
+    const asyncState = ReactiveUtils.async(null);
+    
+    // Monitor all state changes
+    ReactiveUtils.effect(() => {
+      console.log('State updated:', {
+        data: asyncState.data,
+        loading: asyncState.loading,
+        error: asyncState.error ? asyncState.error.message : null
+      });
+    });
+    
+    // Workflow 1: Successful fetch
+    console.log('\n=== Workflow 1: Successful fetch ===');
+    ReactiveUtils.execute(asyncState, async () => {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return { result: 'success', value: 100 };
+    });
+    
+    // Workflow 2: Refetch after success
+    setTimeout(() => {
+      console.log('\n=== Workflow 2: Refetch ===');
+      ReactiveUtils.refetch(asyncState);
+    }, 2000);
+    
+    // Workflow 3: Execute with error
+    setTimeout(() => {
+      console.log('\n=== Workflow 3: Fetch with error ===');
+      ReactiveUtils.execute(asyncState, async () => {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        throw new Error('Network error');
+      });
+    }, 4000);
+    
+    // Workflow 4: Reset after error
+    setTimeout(() => {
+      console.log('\n=== Workflow 4: Reset state ===');
+      ReactiveUtils.reset(asyncState);
+    }, 5500);
+    
+    // Workflow 5: Execute and abort
+    setTimeout(() => {
+      console.log('\n=== Workflow 5: Execute and abort ===');
+      ReactiveUtils.execute(asyncState, async () => {
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        return { result: 'should not complete' };
+      });
+      
+      setTimeout(() => {
+        console.log('Aborting...');
+        ReactiveUtils.abort(asyncState);
+      }, 500);
+    }, 6500);
+  </script>
+</body>
+</html>

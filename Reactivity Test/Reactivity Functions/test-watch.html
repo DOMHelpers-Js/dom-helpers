@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Watch</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    const state = ReactiveUtils.state({ count: 0 });
+    
+    ReactiveUtils.watch(state, {
+      count: (newVal, oldVal) => {
+        console.log(`Changed: ${oldVal} -> ${newVal}`);
+      }
+    });
+    
+    state.count = 5; // Logs: "Changed: 0 -> 5"
+    state.count = 10; // Logs: "Changed: 5 -> 10"
+  </script>
+</body>
+</html>

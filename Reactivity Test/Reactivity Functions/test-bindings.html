@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Bindings</title></head>
+<body>
+  <div id="counter">0</div>
+  <div class="status">idle</div>
+  
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    const state = ReactiveUtils.state({
+      count: 0,
+      status: 'idle'
+    });
+    
+    ReactiveUtils.bindings({
+      '#counter': () => state.count,
+      '.status': () => state.status
+    });
+    
+    state.count = 42;
+    state.status = 'active';
+    
+    // DOM updates automatically
+    // #counter shows: 42
+    // .status shows: active
+  </script>
+</body>
+</html>

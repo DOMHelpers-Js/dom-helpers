@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test isReactive</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    const state = ReactiveUtils.state({ count: 0 });
+    const plainObject = { count: 0 };
+    const ref = ReactiveUtils.ref(5);
+    
+    console.log('state is reactive:', ReactiveUtils.isReactive(state)); // true
+    console.log('plainObject is reactive:', ReactiveUtils.isReactive(plainObject)); // false
+    console.log('ref is reactive:', ReactiveUtils.isReactive(ref)); // true
+    console.log('number is reactive:', ReactiveUtils.isReactive(42)); // false
+    console.log('string is reactive:', ReactiveUtils.isReactive('hello')); // false
+    console.log('null is reactive:', ReactiveUtils.isReactive(null)); // false
+  </script>
+</body>
+</html>

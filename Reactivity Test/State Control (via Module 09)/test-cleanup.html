@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test cleanup (Basic)</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/05_dh-reactive-cleanup.js"></script>
+  <script src="../../src/Reactive/09_dh-reactive-namespace-methods.js"></script>
+
+  <script>
+    const state = ReactiveUtils.state({
+      count: 0,
+      name: 'Test'
+    });
+    
+    let effect1Runs = 0;
+    let effect2Runs = 0;
+    
+    // Create effects and capture cleanup functions
+    const cleanup1 = ReactiveUtils.effect(() => {
+      effect1Runs++;
+      console.log(`Effect 1 run #${effect1Runs}: count=${state.count}`);
+    });
+    
+    const cleanup2 = ReactiveUtils.effect(() => {
+      effect2Runs++;
+      console.log(`Effect 2 run #${effect2Runs}: name=${state.name}`);
+    });
+    
+    console.log('After setup - Effect1:', effect1Runs, 'Effect2:', effect2Runs); // 1, 1
+    
+    // Update state - should trigger effects
+    console.log('\nUpdating state before cleanup:');
+    state.count = 5;
+    state.name = 'Updated';
+    console.log('After update - Effect1:', effect1Runs, 'Effect2:', effect2Runs); // 2, 2
+    
+    // Clean up manually
+    console.log('\nCalling cleanup functions...');
+    cleanup1();
+    cleanup2();
+    
+    // Update state again - should NOT trigger effects anymore
+    console.log('\nUpdating state after cleanup:');
+    state.count = 10;
+    state.name = 'Final';
+    console.log('After cleanup update - Effect1:', effect1Runs, 'Effect2:', effect2Runs); // Still 2, 2
+    console.log('✓ Effects did not run after cleanup');
+  </script>
+</body>
+</html>

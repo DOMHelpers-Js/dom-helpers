@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test getRaw</title></head>
+<body>
+<script src="../../src/Reactive/01_dh-reactive.js"></script>
+<script src="../../src/Reactive/09_dh-reactive-namespace-methods.js"></script>
+  <script>
+    const original = { count: 0, name: 'Test', nested: { value: 100 } };
+    const state = ReactiveUtils.state(original);
+    
+    console.log('state is reactive:', ReactiveUtils.isReactive(state)); // true
+    
+    // Get raw using Module 09 method
+    const raw = ReactiveUtils.toRaw(state);
+    console.log('raw is reactive:', ReactiveUtils.isReactive(raw)); // false
+    console.log('raw object:', raw);
+    
+    // Verify they point to same underlying object
+    console.log('\nVerifying raw and state connection:');
+    console.log('state.count:', state.count); // 0
+    console.log('raw.count:', raw.count); // 0
+    
+    raw.count = 999;
+    console.log('\nAfter raw.count = 999:');
+    console.log('state.count:', state.count); // 999
+    console.log('raw.count:', raw.count); // 999
+    
+    // Test that raw doesn't trigger reactivity
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: count=${state.count}`);
+    });
+    
+    console.log('\nEffect runs after setup:', effectRuns); // 1
+    
+    state.count = 5; // Triggers effect
+    console.log('Effect runs after state update:', effectRuns); // 2
+    
+    raw.count = 10; // Does NOT trigger effect
+    console.log('Effect runs after raw update:', effectRuns); // Still 2
+    console.log('But state.count is now:', state.count); // 10
+  </script>
+</body>
+</html>

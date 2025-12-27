@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test notify</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    const state = ReactiveUtils.state({
+      count: 0,
+      name: 'Test'
+    });
+    
+    let countEffectRuns = 0;
+    let nameEffectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      countEffectRuns++;
+      console.log(`Count effect #${countEffectRuns}: ${state.count}`);
+    });
+    
+    ReactiveUtils.effect(() => {
+      nameEffectRuns++;
+      console.log(`Name effect #${nameEffectRuns}: ${state.name}`);
+    });
+    
+    console.log('After setup - count runs:', countEffectRuns, 'name runs:', nameEffectRuns); // 1, 1
+    
+    // Manually notify specific key
+    console.log('\nManually notifying "count":');
+    ReactiveUtils.notify(state, 'count');
+    console.log('After notify count - count runs:', countEffectRuns, 'name runs:', nameEffectRuns); // 2, 1
+    
+    // Manually notify all keys
+    console.log('\nManually notifying all keys:');
+    ReactiveUtils.notify(state);
+    console.log('After notify all - count runs:', countEffectRuns, 'name runs:', nameEffectRuns); // 3, 2
+    
+    // Notify specific key again
+    console.log('\nManually notifying "name":');
+    ReactiveUtils.notify(state, 'name');
+    console.log('After notify name - count runs:', countEffectRuns, 'name runs:', nameEffectRuns); // 3, 3
+  </script>
+</body>
+</html>

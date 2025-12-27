@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test asyncState.isSuccess</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    const asyncState = ReactiveUtils.async(null);
+    
+    console.log('Initial state:');
+    console.log('  data:', asyncState.data);
+    console.log('  loading:', asyncState.loading);
+    console.log('  error:', asyncState.error);
+    console.log('  isSuccess:', asyncState.isSuccess); // false (data is null)
+    
+    // Success = data loaded, no error, not loading
+    console.log('\n=== Setting successful state ===');
+    asyncState.data = { result: 'success' };
+    asyncState.loading = false;
+    asyncState.error = null;
+    console.log('isSuccess:', asyncState.isSuccess); // true
+    
+    // Still loading = not success
+    console.log('\n=== While loading ===');
+    asyncState.loading = true;
+    console.log('isSuccess:', asyncState.isSuccess); // false
+    
+    // Has error = not success
+    console.log('\n=== With error ===');
+    asyncState.loading = false;
+    asyncState.error = new Error('Failed');
+    console.log('isSuccess:', asyncState.isSuccess); // false
+    
+    // Back to success
+    console.log('\n=== Back to success ===');
+    asyncState.error = null;
+    asyncState.data = { result: 'data' };
+    console.log('isSuccess:', asyncState.isSuccess); // true
+    
+    // isSuccess is reactive (computed)
+    console.log('\n=== Testing reactivity ===');
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const status = asyncState.isSuccess ? '✓ SUCCESS' : '✗ NOT SUCCESS';
+      console.log(`Effect #${effectRuns}: ${status}`);
+    });
+    
+    console.log('Effect runs after setup:', effectRuns); // 1
+    
+    asyncState.loading = true;
+    console.log('Effect runs after loading = true:', effectRuns); // 2
+    
+    asyncState.loading = false;
+    console.log('Effect runs after loading = false:', effectRuns); // 3
+    
+    asyncState.error = new Error('Error');
+    console.log('Effect runs after error:', effectRuns); // 4
+    
+    asyncState.error = null;
+    console.log('Effect runs after clearing error:', effectRuns); // 5
+  </script>
+</body>
+</html>

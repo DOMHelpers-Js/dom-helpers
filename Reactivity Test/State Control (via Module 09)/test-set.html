@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test set</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/09_dh-reactive-namespace-methods.js"></script>
+  <script>
+    const state = ReactiveUtils.state({
+      count: 0,
+      name: 'Test',
+      score: 10
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: count=${state.count}, name=${state.name}, score=${state.score}`);
+    });
+    
+    console.log('Initial state:', state.count, state.name, state.score);
+    console.log('Effect runs:', effectRuns); // 1
+    
+    // Set with direct values
+    console.log('\nSetting with direct values:');
+    ReactiveUtils.set(state, {
+      count: 5,
+      name: 'Updated'
+    });
+    console.log('After set:', state.count, state.name, state.score);
+    console.log('Effect runs:', effectRuns); // 2
+    
+    // Set with functional updates
+    console.log('\nSetting with functional updates:');
+    ReactiveUtils.set(state, {
+      count: prev => prev + 10,
+      score: prev => prev * 2
+    });
+    console.log('After functional set:', state.count, state.name, state.score);
+    console.log('Effect runs:', effectRuns); // 3
+    
+    // Mixed: direct and functional
+    console.log('\nSetting with mixed updates:');
+    ReactiveUtils.set(state, {
+      count: prev => prev + 5,
+      name: 'Final',
+      score: 100
+    });
+    console.log('After mixed set:', state.count, state.name, state.score);
+    console.log('Effect runs:', effectRuns); // 4
+  </script>
+</body>
+</html>

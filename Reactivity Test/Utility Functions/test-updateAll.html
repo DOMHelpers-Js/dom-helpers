@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test updateAll</title></head>
+<body>
+  <div id="counter">0</div>
+  <div class="status">idle</div>
+  
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    const state = ReactiveUtils.state({
+      count: 0,
+      status: 'idle',
+      name: 'Test'
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: count=${state.count}, status=${state.status}, name=${state.name}`);
+    });
+    
+    console.log('Initial state:', state.count, state.status, state.name);
+    console.log('Initial DOM #counter:', document.getElementById('counter').textContent);
+    console.log('Initial DOM .status:', document.querySelector('.status').textContent);
+    
+    // Update both state AND DOM in one call
+    console.log('\nCalling updateAll...');
+    ReactiveUtils.updateAll(state, {
+      count: 42,              // Updates state
+      status: 'active',       // Updates state
+      '#counter': 42,     // Updates DOM
+      '.status': 'active'     // Updates DOM
+    });
+    
+    setTimeout(() => {
+      console.log('\nAfter updateAll:');
+      console.log('State:', state.count, state.status, state.name);
+      console.log('DOM #counter:', document.getElementById('counter').textContent);
+      console.log('DOM .status:', document.querySelector('.status').textContent);
+      console.log('Effect runs:', effectRuns); // Should be 2 (batched update)
+    }, 2000);
+  </script>
+</body>
+</html>

@@ -2,8 +2,9 @@
 
 [![Sponsor](https://img.shields.io/badge/Sponsor-PayPal-blue?logo=paypal)](https://paypal.me/GiovanniSylvain)
 
+# Reactive Library - Complete Methods List (All Modules)
 
-# Reactive Library - Complete Methods List by Module
+**Clean API Documentation - Non-$ Prefix Methods Only**
 
 ---
 
@@ -16,7 +17,7 @@
 - **`ReactiveUtils.createState(initialState, bindingDefs)`** - Create state with auto-bindings
 - **`ReactiveUtils.ref(value)`** - Create a reactive reference with `.value` property
 - **`ReactiveUtils.refs(defs)`** - Create multiple refs from object definition
-- **`ReactiveUtils.collection(items)`** - Create a reactive collection (core version with $-prefixed methods)
+- **`ReactiveUtils.collection(items)`** - Create a reactive collection (core version)
 - **`ReactiveUtils.list(items)`** - Alias for collection()
 - **`ReactiveUtils.form(initialValues)`** - Create a basic form state manager
 - **`ReactiveUtils.async(initialValue)`** - Create async operation state (basic version)
@@ -43,76 +44,51 @@
 - **`ReactiveUtils.notify(state, key)`** - Manually notify dependencies for a key or all keys
 - **`ReactiveUtils.updateAll(state, updates)`** - Unified state + DOM updates
 
-### ReactiveState Namespace
+**State Control (via Module 09):**
+- **`ReactiveUtils.set(state, updates)`** - Set state values with functional updates (requires Module 09)
+- **`ReactiveUtils.cleanup(state)`** - Clean up all effects and watchers (requires Module 09)
+- **`ReactiveUtils.getRaw(state)`** - Get raw (non-reactive) object (requires Module 09)
 
-- **`ReactiveState.create(initialState)`** - Create reactive state
-- **`ReactiveState.form(initialValues)`** - Create form state
-- **`ReactiveState.async(initialValue)`** - Create async state
-- **`ReactiveState.collection(items)`** - Create collection
+### State Properties (Read/Write)
 
-### State Instance Methods
+- All properties defined in `initialState` are directly accessible and reactive
 
-**State Management:**
-- **`state.$computed(key, fn)`** - Add computed property to instance
-- **`state.$watch(keyOrFn, callback)`** - Watch for changes (returns cleanup function)
-- **`state.$batch(fn)`** - Batch multiple updates
-- **`state.$notify(key)`** - Manually trigger updates for a key (or all if no key)
-- **`state.$raw`** - Property getter to access non-reactive raw object
-- **`state.$update(updates)`** - Mixed state + DOM updates (supports selectors and nested paths)
-- **`state.$set(updates)`** - Functional updates with callbacks
-- **`state.$bind(bindingDefs)`** - Create reactive DOM bindings (returns cleanup function)
+### Collection Properties (Module 01 - Basic)
 
-### Core Collection Methods (Module 01)
+- **`collection.items`** - Array property containing the reactive items (read/write)
 
-When using `ReactiveUtils.collection()` or `ReactiveUtils.list()`:
+### Form Properties (Module 01 - Basic)
 
-- **`collection.$add(item)`** - Add item to collection
-- **`collection.$remove(predicate)`** - Remove item by predicate function or direct value
-- **`collection.$update(predicate, updates)`** - Update item in collection by predicate or value
-- **`collection.$clear()`** - Clear all items from collection
-- **`collection.items`** - Property containing the reactive array
+- **`form.values`** - Object containing form values (read/write)
+- **`form.errors`** - Object containing form errors (read/write)
+- **`form.touched`** - Object containing touched fields (read/write)
+- **`form.isSubmitting`** - Boolean for submission state (read/write)
+- **`form.isValid`** - Computed property for form validity (read-only)
+- **`form.isDirty`** - Computed property for form dirty state (read-only)
 
-### Form Instance Methods (Module 01 - Basic)
+### Async State Properties (Module 01 - Basic)
 
-Basic form from `ReactiveUtils.form()`:
+- **`asyncState.data`** - Property containing async data (read/write)
+- **`asyncState.loading`** - Boolean for loading state (read/write)
+- **`asyncState.error`** - Property containing error if any (read/write)
+- **`asyncState.isSuccess`** - Computed property (data loaded, no error) (read-only)
+- **`asyncState.isError`** - Computed property (has error, not loading) (read-only)
 
-- **`form.$setValue(field, value)`** - Set form field value and mark as touched
-- **`form.$setError(field, error)`** - Set or clear field error
-- **`form.$reset(newValues)`** - Reset form to initial or new values
-- **`form.values`** - Property containing form values
-- **`form.errors`** - Property containing form errors
-- **`form.touched`** - Property containing touched fields
-- **`form.isSubmitting`** - Property for submission state
-- **`form.isValid`** - Computed property for form validity
-- **`form.isDirty`** - Computed property for form dirty state
+**Async State Control (via Module 09):**
+- **`ReactiveUtils.execute(asyncState, fn)`** - Execute async operation (requires Module 09)
+- **`ReactiveUtils.abort(asyncState)`** - Abort current async operation (requires Module 09)
+- **`ReactiveUtils.reset(asyncState)`** - Reset async state (requires Module 09)
+- **`ReactiveUtils.refetch(asyncState)`** - Refetch with last function (requires Module 09)
 
-### Async State Instance Methods (Module 01 - Basic)
+### Ref Properties
 
-Basic async state from `ReactiveUtils.async()`:
-
-- **`asyncState.$execute(fn)`** - Execute async operation and update state
-- **`asyncState.$reset()`** - Reset async state to initial values
-- **`asyncState.data`** - Property containing async data
-- **`asyncState.loading`** - Property for loading state
-- **`asyncState.error`** - Property containing error if any
-- **`asyncState.isSuccess`** - Computed property (data loaded, no error)
-- **`asyncState.isError`** - Computed property (has error, not loading)
-
-### Component Instance Methods (Module 01)
-
-- **`component.$destroy()`** - Clean up all effects, watchers, and bindings
-
-### Ref Instance Methods (Module 01)
-
-- **`ref.value`** - Property to get/set the ref value
+- **`ref.value`** - Property to get/set the ref value (read/write)
 - **`ref.valueOf()`** - Get primitive value
 - **`ref.toString()`** - Convert to string
 
-### Builder Pattern Methods (Module 01)
+### Builder Pattern Methods
 
-Returned by `ReactiveUtils.reactive()`:
-
-- **`builder.state`** - Access to the created reactive state
+- **`builder.state`** - Access to the created reactive state (read-only)
 - **`builder.computed(defs)`** - Add computed properties (returns builder)
 - **`builder.watch(defs)`** - Add watchers (returns builder)
 - **`builder.effect(fn)`** - Add effect (returns builder)
@@ -122,112 +98,19 @@ Returned by `ReactiveUtils.reactive()`:
 - **`builder.build()`** - Build and return state with destroy method
 - **`builder.destroy()`** - Clean up all effects
 
-### Global Functions (Module 01)
+### Component Control (via Module 09)
+
+- **`ReactiveUtils.destroy(component)`** - Destroy component and clean up resources (requires Module 09)
+
+### Global Functions
 
 - **`updateAll(state, updates)`** - Global function for unified updates
-
-### Elements Namespace Integration
-
-All core methods available via `Elements.*`:
-
-**Core Methods:**
-- **`Elements.state()`** - Create reactive state
-- **`Elements.createState(initialState, bindingDefs)`** - Create state with bindings
-- **`Elements.updateAll(state, updates)`** - Unified updates
-- **`Elements.computed(state, defs)`** - Add computed properties
-- **`Elements.watch(state, defs)`** - Add watchers
-- **`Elements.effect(fn)`** - Create effect
-- **`Elements.effects(defs)`** - Create multiple effects
-- **`Elements.ref(value)`** - Create ref
-- **`Elements.refs(defs)`** - Create multiple refs
-- **`Elements.store(initialState, options)`** - Create store
-- **`Elements.component(config)`** - Create component
-- **`Elements.reactive(initialState)`** - Fluent builder
-- **`Elements.bindings(defs)`** - Create bindings
-- **`Elements.list(items)`** - Create collection
-- **`Elements.batch(fn)`** - Batch updates
-- **`Elements.isReactive(value)`** - Check reactive
-- **`Elements.toRaw(value)`** - Get raw value
-- **`Elements.notify(state, key)`** - Notify dependencies
-- **`Elements.pause()`** - Pause reactivity
-- **`Elements.resume(flush)`** - Resume reactivity
-- **`Elements.untrack(fn)`** - Untrack dependencies
-
-**Special Elements Method:**
-- **`Elements.bind(bindingDefs)`** - ID-based bindings (uses getElementById)
-
-### Collections Namespace Integration
-
-All core methods available via `Collections.*`:
-
-**Core Methods:**
-- **`Collections.state()`** - Create reactive state
-- **`Collections.createState(initialState, bindingDefs)`** - Create state with bindings
-- **`Collections.updateAll(state, updates)`** - Unified updates
-- **`Collections.computed(state, defs)`** - Add computed properties
-- **`Collections.watch(state, defs)`** - Add watchers
-- **`Collections.effect(fn)`** - Create effect
-- **`Collections.effects(defs)`** - Create multiple effects
-- **`Collections.ref(value)`** - Create ref
-- **`Collections.refs(defs)`** - Create multiple refs
-- **`Collections.store(initialState, options)`** - Create store
-- **`Collections.component(config)`** - Create component
-- **`Collections.reactive(initialState)`** - Fluent builder
-- **`Collections.bindings(defs)`** - Create bindings
-- **`Collections.list(items)`** - Create collection
-- **`Collections.batch(fn)`** - Batch updates
-- **`Collections.isReactive(value)`** - Check reactive
-- **`Collections.toRaw(value)`** - Get raw value
-- **`Collections.notify(state, key)`** - Notify dependencies
-- **`Collections.pause()`** - Pause reactivity
-- **`Collections.resume(flush)`** - Resume reactivity
-- **`Collections.untrack(fn)`** - Untrack dependencies
-
-**Special Collections Method:**
-- **`Collections.bind(bindingDefs)`** - Class-based bindings (uses getElementsByClassName)
-
-### Selector Namespace Integration
-
-All core methods available via `Selector.*`:
-
-**Core Methods:**
-- **`Selector.state()`** - Create reactive state
-- **`Selector.createState(initialState, bindingDefs)`** - Create state with bindings
-- **`Selector.updateAll(state, updates)`** - Unified updates
-- **`Selector.computed(state, defs)`** - Add computed properties
-- **`Selector.watch(state, defs)`** - Add watchers
-- **`Selector.effect(fn)`** - Create effect
-- **`Selector.effects(defs)`** - Create multiple effects
-- **`Selector.ref(value)`** - Create ref
-- **`Selector.refs(defs)`** - Create multiple refs
-- **`Selector.store(initialState, options)`** - Create store
-- **`Selector.component(config)`** - Create component
-- **`Selector.reactive(initialState)`** - Fluent builder
-- **`Selector.bindings(defs)`** - Create bindings
-- **`Selector.list(items)`** - Create collection
-- **`Selector.batch(fn)`** - Batch updates
-- **`Selector.isReactive(value)`** - Check reactive
-- **`Selector.toRaw(value)`** - Get raw value
-- **`Selector.notify(state, key)`** - Notify dependencies
-- **`Selector.pause()`** - Pause reactivity
-- **`Selector.resume(flush)`** - Resume reactivity
-- **`Selector.untrack(fn)`** - Untrack dependencies
-
-**Selector.query Methods:**
-- All core methods plus:
-- **`Selector.query.bind(bindingDefs)`** - Single element bindings (uses querySelector)
-
-**Selector.queryAll Methods:**
-- All core methods plus:
-- **`Selector.queryAll.bind(bindingDefs)`** - Multiple element bindings (uses querySelectorAll)
 
 ---
 
 ## Module 02: Array Patch (`02_dh-reactive-array-patch.js`)
 
 ### Reactive Array Methods
-
-When array patch extension is loaded, these array methods become reactive:
 
 - **`push(...items)`** - Add items to end (triggers reactivity)
 - **`pop()`** - Remove item from end (triggers reactivity)
@@ -241,17 +124,14 @@ When array patch extension is loaded, these array methods become reactive:
 
 ### Array Patch Functions
 
-- **`ReactiveUtils.patchArray(state, key)`** - Manually patch array property
+- **`ReactiveUtils.patchArray(state, key)`** - Manually patch array property for reactivity
 - **`patchReactiveArray(state, key)`** - Legacy global function name
-- **`Elements.patchArray(state, key)`** - Array patch via Elements namespace
-- **`Collections.patchArray(state, key)`** - Array patch via Collections namespace
-- **`Selector.patchArray(state, key)`** - Array patch via Selector namespace
 
 ---
 
 ## Module 03: Collections Extension (`03_dh-reactive-collections.js`)
 
-### Collections Extension Namespace
+### Collections Namespace
 
 - **`Collections.create(items)`** - Create collection with extended methods
 - **`Collections.createWithComputed(items, computed)`** - Create collection with computed properties
@@ -259,12 +139,23 @@ When array patch extension is loaded, these array methods become reactive:
 - **`Collections.collection(items)`** - Alias for create
 - **`Collections.list(items)`** - Alias for create
 
+### ReactiveUtils Integration
+
+- **`ReactiveUtils.collection(items)`** - Create collection with extended methods (replaces Module 01 version)
+- **`ReactiveUtils.list(items)`** - Alias for collection
+- **`ReactiveUtils.createCollection(items)`** - Alias for collection
+
+### Collection Properties
+
+- **`collection.items`** - Array property containing the reactive items (read/write)
+- **`collection.length`** - Get collection length (read-only getter)
+- **`collection.first`** - Get first item (read-only getter)
+- **`collection.last`** - Get last item (read-only getter)
+
 ### Basic Operations
 
-When using `Collections.create()`, `Collections.collection()`, or `Collections.list()`:
-
-- **`add(item)`** - Add item to collection (returns this for chaining)
-- **`remove(predicate)`** - Remove item by predicate or value (returns this)
+- **`add(item)`** - Add item to collection (returns this)
+- **`remove(predicate)`** - Remove item by predicate function or direct value (returns this)
 - **`update(predicate, updates)`** - Update item by predicate or value (returns this)
 - **`clear()`** - Clear all items (returns this)
 
@@ -279,12 +170,6 @@ When using `Collections.create()`, `Collections.collection()`, or `Collections.l
 
 - **`sort(compareFn)`** - Sort items in place (returns this)
 - **`reverse()`** - Reverse items in place (returns this)
-
-### Getters
-
-- **`length`** - Get collection length (getter property)
-- **`first`** - Get first item (getter property)
-- **`last`** - Get last item (getter property)
 
 ### Array Methods
 
@@ -312,7 +197,7 @@ When using `Collections.create()`, `Collections.collection()`, or `Collections.l
 
 ## Module 04: Forms Extension (`04_dh-reactive-form.js`)
 
-### Forms Extension Namespace
+### Forms Namespace
 
 - **`Forms.create(initialValues, options)`** - Create reactive form
 - **`Forms.form(initialValues, options)`** - Alias for create
@@ -321,15 +206,26 @@ When using `Collections.create()`, `Collections.collection()`, or `Collections.l
 
 ### ReactiveUtils Integration
 
-- **`ReactiveUtils.form(initialValues, options)`** - Create form via ReactiveUtils
-- **`ReactiveUtils.createForm(initialValues, options)`** - Alias
+- **`ReactiveUtils.form(initialValues, options)`** - Create form with extended methods (replaces Module 01 version)
+- **`ReactiveUtils.createForm(initialValues, options)`** - Alias for form
 - **`ReactiveUtils.validators`** - Access validators via ReactiveUtils
+
+### Form Properties
+
+- **`form.values`** - Object containing form values (read/write)
+- **`form.errors`** - Object containing form errors (read/write)
+- **`form.touched`** - Object containing touched fields (read/write)
+- **`form.isSubmitting`** - Boolean for submission state (read/write)
+- **`form.submitCount`** - Number of submission attempts (read/write)
+- **`form.isValid`** - Computed property for form validity (read-only)
+- **`form.isDirty`** - Computed property for form dirty state (read-only)
+- **`form.hasErrors`** - Computed property - check if has errors (read-only)
+- **`form.touchedFields`** - Computed property - get touched fields array (read-only)
+- **`form.errorFields`** - Computed property - get error fields array (read-only)
 
 ### Value Management
 
-When using `Forms.create()` or `Forms.form()`:
-
-- **`setValue(field, value)`** - Set single field value (returns this)
+- **`setValue(field, value)`** - Set single field value and mark as touched (returns this)
 - **`setValues(values)`** - Set multiple field values in batch (returns this)
 - **`getValue(field)`** - Get field value
 
@@ -344,7 +240,7 @@ When using `Forms.create()` or `Forms.form()`:
 
 ### Touched State Management
 
-- **`setTouched(field, touched)`** - Mark field as touched (returns this)
+- **`setTouched(field, touched)`** - Mark field as touched/untouched (returns this)
 - **`setTouchedFields(fields)`** - Mark multiple fields as touched (returns this)
 - **`touchAll()`** - Mark all fields as touched (returns this)
 - **`isTouched(field)`** - Check if field is touched
@@ -352,8 +248,8 @@ When using `Forms.create()` or `Forms.form()`:
 
 ### Validation
 
-- **`validateField(field)`** - Validate single field (returns boolean)
-- **`validate()`** - Validate all fields (returns boolean)
+- **`validateField(field)`** - Validate single field
+- **`validate()`** - Validate all fields
 
 ### Reset
 
@@ -368,23 +264,15 @@ When using `Forms.create()` or `Forms.form()`:
 
 - **`handleChange(event)`** - Handle input change event
 - **`handleBlur(event)`** - Handle input blur event
-- **`getFieldProps(field)`** - Get field props for binding (returns object with name, value, onChange, onBlur)
+- **`getFieldProps(field)`** - Get field props for binding
 
 ### DOM Binding
 
-- **`bindToInputs(selector)`** - Bind form to DOM inputs (returns this)
+- **`bindToInputs(selector)`** - Bind form to DOM inputs by selector (returns this)
 
 ### Serialization
 
 - **`toObject()`** - Convert to plain object
-
-### Computed Properties (Forms Extension)
-
-- **`isValid`** - Check if form is valid (computed property)
-- **`isDirty`** - Check if form is dirty (computed property)
-- **`hasErrors`** - Check if has errors (computed property)
-- **`touchedFields`** - Get touched fields array (computed property)
-- **`errorFields`** - Get error fields array (computed property)
 
 ### Built-in Validators
 
@@ -395,7 +283,7 @@ When using `Forms.create()` or `Forms.form()`:
 - **`Validators.pattern(regex, message)`** - Pattern/regex validator
 - **`Validators.min(min, message)`** - Minimum value validator
 - **`Validators.max(max, message)`** - Maximum value validator
-- **`Validators.match(fieldName, message)`** - Match field validator
+- **`Validators.match(fieldName, message)`** - Match another field validator
 - **`Validators.custom(validatorFn)`** - Custom validator function
 - **`Validators.combine(...validators)`** - Combine multiple validators
 
@@ -413,7 +301,7 @@ When using `Forms.create()` or `Forms.form()`:
 - **`ReactiveCleanup.debug(enable)`** - Enable or disable debug mode for cleanup operations
 - **`ReactiveCleanup.test()`** - Run test to verify cleanup system is working properly
 
-### Cleanup via ReactiveUtils
+### ReactiveUtils Integration
 
 - **`ReactiveUtils.cleanup`** - Reference to ReactiveCleanup API
 - **`ReactiveUtils.collector()`** - Create cleanup collector
@@ -421,16 +309,14 @@ When using `Forms.create()` or `Forms.form()`:
 
 ### Cleanup Collector Methods
 
-Returned by `ReactiveCleanup.collector()`:
-
 - **`collector.add(cleanup)`** - Add cleanup function to collector (returns collector)
 - **`collector.cleanup()`** - Execute all cleanup functions
-- **`collector.size`** - Get number of cleanup functions (getter property)
-- **`collector.disposed`** - Check if collector is disposed (getter property)
+- **`collector.size`** - Get number of cleanup functions (read-only getter)
+- **`collector.disposed`** - Check if collector is disposed (read-only getter)
 
-### Enhanced State Methods (added by Cleanup)
+### State Cleanup (via Module 09)
 
-- **`state.$cleanup()`** - Remove all effects, watchers, and computed properties associated with the state
+- **`ReactiveUtils.cleanup(state)`** - Clean up all effects, watchers, and computed properties (requires Module 09)
 
 ---
 
@@ -447,25 +333,25 @@ Returned by `ReactiveCleanup.collector()`:
 
 ### Enhanced Async State
 
-When using `ReactiveUtils.asyncState()` from enhancements module:
+- **`ReactiveUtils.asyncState(initialValue, options)`** - Create enhanced async state (replaces Module 01 version)
 
-**Enhanced Methods:**
-- **`$execute(fn)`** - Execute async with automatic cancellation (receives AbortSignal)
-- **`$abort()`** - Manually abort current request
-- **`$reset()`** - Reset to initial state
-- **`$refetch()`** - Re-execute last function
+### Enhanced Async State Properties
 
-**Enhanced Properties:**
-- **`data`** - Property containing async data
-- **`loading`** - Property for loading state
-- **`error`** - Property containing error if any
-- **`requestId`** - Property tracking request sequence
-- **`abortController`** - Property containing current AbortController
+- **`asyncState.data`** - Property containing async data (read/write)
+- **`asyncState.loading`** - Boolean for loading state (read/write)
+- **`asyncState.error`** - Property containing error if any (read/write)
+- **`asyncState.requestId`** - Request sequence number for race condition prevention (read/write)
+- **`asyncState.abortController`** - Current AbortController instance (read/write)
+- **`asyncState.isSuccess`** - Computed property (data loaded, no error) (read-only)
+- **`asyncState.isError`** - Computed property (has error, not loading) (read-only)
+- **`asyncState.isIdle`** - Computed property (no data, no error, not loading) (read-only)
 
-**Enhanced Computed Properties:**
-- **`isSuccess`** - Computed property (data loaded, no error)
-- **`isError`** - Computed property (has error, not loading)
-- **`isIdle`** - Computed property (no data, no error, not loading)
+### Enhanced Async State Control (via Module 09)
+
+- **`ReactiveUtils.execute(asyncState, fn)`** - Execute async with AbortSignal and race condition prevention (requires Module 09)
+- **`ReactiveUtils.abort(asyncState)`** - Abort current request (requires Module 09)
+- **`ReactiveUtils.reset(asyncState)`** - Reset to initial state (requires Module 09)
+- **`ReactiveUtils.refetch(asyncState)`** - Re-execute last function (requires Module 09)
 
 ### Error Boundaries
 
@@ -475,33 +361,30 @@ When using `ReactiveUtils.asyncState()` from enhancements module:
 
 ### Development Tools
 
-**DevTools Namespace:**
 - **`ReactiveUtils.DevTools`** - Development tools object
-- **`DevTools.enable()`** - Enable DevTools and expose globally
-- **`DevTools.disable()`** - Disable DevTools and remove global reference
-- **`DevTools.trackState(state, name)`** - Register state for tracking
-- **`DevTools.trackEffect(effect, name)`** - Register effect for tracking
-- **`DevTools.getStates()`** - Get array of all tracked states with metadata
-- **`DevTools.getHistory()`** - Get array of all logged state changes
-- **`DevTools.clearHistory()`** - Clear DevTools history
-- **`DevTools.enabled`** - Property indicating if DevTools is enabled
-- **`DevTools.states`** - Map of tracked states
-- **`DevTools.effects`** - Map of tracked effects
-- **`DevTools.history`** - Array of change history
-- **`DevTools.maxHistory`** - Maximum history size
+- **`ReactiveUtils.DevTools.enable()`** - Enable DevTools and expose globally
+- **`ReactiveUtils.DevTools.disable()`** - Disable DevTools and remove global reference
+- **`ReactiveUtils.DevTools.trackState(state, name)`** - Register state for tracking
+- **`ReactiveUtils.DevTools.trackEffect(effect, name)`** - Register effect for tracking
+- **`ReactiveUtils.DevTools.getStates()`** - Get array of all tracked states with metadata
+- **`ReactiveUtils.DevTools.getHistory()`** - Get array of all logged state changes
+- **`ReactiveUtils.DevTools.clearHistory()`** - Clear DevTools history
+- **`ReactiveUtils.DevTools.enabled`** - Boolean indicating if DevTools is enabled (read-only)
+- **`ReactiveUtils.DevTools.states`** - Map of tracked states (read-only)
+- **`ReactiveUtils.DevTools.effects`** - Map of tracked effects (read-only)
+- **`ReactiveUtils.DevTools.history`** - Array of change history (read-only)
+- **`ReactiveUtils.DevTools.maxHistory`** - Maximum history size (default: 50) (read/write)
 
 ### Priority Constants
 
-Available as `ReactiveEnhancements.PRIORITY`:
-
-- **`PRIORITY.COMPUTED`** - Priority level 1 (computed properties run first)
-- **`PRIORITY.WATCH`** - Priority level 2 (watchers run second)
-- **`PRIORITY.EFFECT`** - Priority level 3 (effects run last)
+- **`ReactiveEnhancements.PRIORITY.COMPUTED`** - Priority level 1 (computed properties run first)
+- **`ReactiveEnhancements.PRIORITY.WATCH`** - Priority level 2 (watchers run second)
+- **`ReactiveEnhancements.PRIORITY.EFFECT`** - Priority level 3 (effects run last)
 
 ### Enhancements Namespace
 
 - **`ReactiveEnhancements.batch`** - Enhanced batch function
-- **`ReactiveEnhancements.queueUpdate`** - Queue update with priority
+- **`ReactiveEnhancements.queueUpdate(fn, priority)`** - Queue update with priority
 - **`ReactiveEnhancements.safeEffect`** - Safe effect with error boundary
 - **`ReactiveEnhancements.safeWatch`** - Safe watch with error boundary
 - **`ReactiveEnhancements.ErrorBoundary`** - Error boundary class
@@ -514,52 +397,169 @@ Available as `ReactiveEnhancements.PRIORITY`:
 
 ## Module 07: Shortcuts (`07_dh-reactiveUtils-shortcut.js`)
 
-### Global Shortcuts
+### Global Shortcuts Overview
 
-When `07_dh-reactiveUtils-shortcut.js` is loaded, all methods available as globals:
+When Module 07 is loaded, all ReactiveUtils methods become available as global functions without the `ReactiveUtils.` prefix.
+
+### Available Global Shortcuts
 
 **Core State:**
-- **`state(initialState)`** - Global shortcut for ReactiveUtils.state
-- **`createState(initialState, bindingDefs)`** - Global shortcut
-- **`effect(fn)`** - Global shortcut
-- **`batch(fn)`** - Global shortcut
-- **`computed(state, defs)`** - Global shortcut
-- **`watch(state, defs)`** - Global shortcut
-- **`effects(defs)`** - Global shortcut
+- **`state(initialState)`**
+- **`createState(initialState, bindingDefs)`**
+- **`effect(fn)`**
+- **`batch(fn)`**
+- **`computed(state, defs)`**
+- **`watch(state, defs)`**
+- **`effects(defs)`**
 
 **References & Collections:**
-- **`ref(value)`** - Global shortcut
-- **`refs(defs)`** - Global shortcut
-- **`collection(items)`** - Global shortcut
-- **`list(items)`** - Global shortcut
-- **`createCollection(items)`** - Global shortcut (from Collections extension)
-- **`createFilteredCollection(collection, predicate)`** - Global shortcut (from Collections extension)
+- **`ref(value)`**
+- **`refs(defs)`**
+- **`collection(items)`**
+- **`list(items)`**
+- **`createCollection(items)`**
+- **`createCollectionWithComputed(items, computed)`**
+- **`createFilteredCollection(collection, predicate)`**
 
 **Forms:**
-- **`form(initialValues, options)`** - Global shortcut
-- **`createForm(initialValues, options)`** - Global shortcut
-- **`validators`** - Global shortcut to validators object
+- **`form(initialValues, options)`**
+- **`createForm(initialValues, options)`**
+- **`validators`**
 
 **Advanced:**
-- **`store(initialState, options)`** - Global shortcut
-- **`component(config)`** - Global shortcut
-- **`reactive(initialState)`** - Global shortcut
-- **`bindings(defs)`** - Global shortcut
-- **`updateAll(state, updates)`** - Global shortcut
+- **`store(initialState, options)`**
+- **`component(config)`**
+- **`reactive(initialState)`**
+- **`bindings(defs)`**
+- **`updateAll(state, updates)`**
 
 **Async:**
-- **`asyncState(initialValue)`** - Global shortcut (if enhancements loaded)
+- **`asyncState(initialValue)`**
 
 **Utilities:**
-- **`isReactive(value)`** - Global shortcut
-- **`toRaw(value)`** - Global shortcut
-- **`notify(state, key)`** - Global shortcut
-- **`pause()`** - Global shortcut
-- **`resume(flush)`** - Global shortcut
-- **`untrack(fn)`** - Global shortcut
+- **`isReactive(value)`**
+- **`toRaw(value)`**
+- **`notify(state, key)`**
+- **`pause()`**
+- **`resume(flush)`**
+- **`untrack(fn)`**
 
 **Array Patching:**
-- **`patchArray(state, key)`** - Global shortcut
+- **`patchArray(state, key)`**
+
+**Storage:**
+- **`autoSave(reactiveObj, key, options)`**
+- **`reactiveStorage(storageType, namespace)`**
+- **`watchStorage(key, callback, options)`**
+
+**State Control:**
+- **`set(state, updates)`**
+- **`cleanup(state)`**
+- **`getRaw(state)`**
+- **`execute(asyncState, fn)`**
+- **`abort(asyncState)`**
+- **`reset(asyncState)`**
+- **`refetch(asyncState)`**
+- **`destroy(component)`**
+- **`save(state)`**
+- **`load(state)`**
+- **`clear(state)`**
+- **`exists(state)`**
+- **`stopAutoSave(state)`**
+- **`startAutoSave(state)`**
+- **`storageInfo(state)`**
 
 ---
 
+## Module 08: Storage/AutoSave (`08_dh-reactive-storage.js`)
+
+### ReactiveStorage Namespace
+
+- **`ReactiveStorage.autoSave(reactiveObj, key, options)`** - Add auto-save functionality to any reactive object
+- **`ReactiveStorage.reactiveStorage(storageType, namespace)`** - Create reactive storage proxy
+- **`ReactiveStorage.watch(key, callback, options)`** - Watch a storage key for changes
+- **`ReactiveStorage.withStorage(reactiveObj, key, options)`** - Alias for autoSave (backward compatibility)
+- **`ReactiveStorage.isStorageAvailable(type)`** - Check if storage type is available
+- **`ReactiveStorage.hasLocalStorage`** - Boolean flag for localStorage availability (read-only)
+- **`ReactiveStorage.hasSessionStorage`** - Boolean flag for sessionStorage availability (read-only)
+
+### ReactiveUtils Integration
+
+- **`ReactiveUtils.autoSave(reactiveObj, key, options)`** - Add auto-save to reactive object
+- **`ReactiveUtils.reactiveStorage(storageType, namespace)`** - Create reactive storage
+- **`ReactiveUtils.watchStorage(key, callback, options)`** - Watch storage key
+- **`ReactiveUtils.withStorage(reactiveObj, key, options)`** - Alias for autoSave
+
+### Storage Control (via Module 09)
+
+- **`ReactiveUtils.save(state)`** - Force save immediately (requires Module 09)
+- **`ReactiveUtils.load(state)`** - Reload from storage (requires Module 09)
+- **`ReactiveUtils.clear(state)`** - Remove from storage (requires Module 09)
+- **`ReactiveUtils.exists(state)`** - Check if exists in storage (requires Module 09)
+- **`ReactiveUtils.stopAutoSave(state)`** - Stop automatic saving (requires Module 09)
+- **`ReactiveUtils.startAutoSave(state)`** - Start automatic saving (requires Module 09)
+- **`ReactiveUtils.storageInfo(state)`** - Get storage information (requires Module 09)
+
+### Reactive Storage Proxy Methods
+
+- **`set(key, value, options)`** - Set value in storage
+- **`get(key)`** - Get value from storage
+- **`remove(key)`** - Remove key from storage
+- **`has(key)`** - Check if key exists
+- **`keys()`** - Get all keys in namespace
+- **`clear()`** - Clear all keys in namespace
+
+---
+
+## Module 09: Namespace Methods (`09_dh-reactive-namespace-methods.js`)
+
+### Core State Methods
+
+- **`ReactiveUtils.set(state, updates)`** - Set state values with functional updates
+- **`ReactiveUtils.cleanup(state)`** - Clean up all effects and watchers
+- **`ReactiveUtils.getRaw(state)`** - Get raw (non-reactive) object
+
+### Async State Methods
+
+- **`ReactiveUtils.execute(asyncState, fn)`** - Execute async operation
+- **`ReactiveUtils.abort(asyncState)`** - Abort current async operation
+- **`ReactiveUtils.reset(asyncState)`** - Reset async state to initial values
+- **`ReactiveUtils.refetch(asyncState)`** - Refetch with last async function
+
+### Component Methods
+
+- **`ReactiveUtils.destroy(component)`** - Destroy component and clean up resources
+
+### Storage Methods
+
+- **`ReactiveUtils.save(state)`** - Force save state to storage immediately
+- **`ReactiveUtils.load(state)`** - Load state from storage
+- **`ReactiveUtils.clear(state)`** - Clear state from storage
+- **`ReactiveUtils.exists(state)`** - Check if state exists in storage
+- **`ReactiveUtils.stopAutoSave(state)`** - Stop automatic saving
+- **`ReactiveUtils.startAutoSave(state)`** - Start automatic saving
+- **`ReactiveUtils.storageInfo(state)`** - Get storage information
+
+### Availability in Other Namespaces
+
+All 14 methods above are also available via:
+- **`Elements.*`** - If Elements namespace exists
+- **`Collections.*`** - If Collections namespace exists
+- **`Selector.*`** - If Selector namespace exists
+- **Global functions** - If Module 07 (shortcuts) is loaded
+
+---
+
+## Summary: Total Method Count
+
+**Module 01 (Core):** ~30 methods  
+**Module 02 (Array Patch):** ~11 methods  
+**Module 03 (Collections):** ~35 methods  
+**Module 04 (Forms):** ~30 methods  
+**Module 05 (Cleanup):** ~10 methods  
+**Module 06 (Enhancements):** ~15 methods  
+**Module 07 (Shortcuts):** ~50 global shortcuts  
+**Module 08 (Storage):** ~13 methods  
+**Module 09 (Namespace):** ~14 methods  
+
+**Total Unique Methods: ~208 methods**

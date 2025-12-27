@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test asyncState.data</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    const asyncState = ReactiveUtils.async(null);
+    
+    console.log('Initial data:', asyncState.data); // null
+    
+    // Read data
+    console.log('asyncState.data:', asyncState.data);
+    
+    // Write data directly
+    asyncState.data = { id: 1, name: 'User 1' };
+    console.log('After setting data:', asyncState.data);
+    // { id: 1, name: 'User 1' }
+    
+    // Update data
+    asyncState.data = { id: 2, name: 'User 2', email: 'user2@example.com' };
+    console.log('After updating data:', asyncState.data);
+    
+    // Set to null
+    asyncState.data = null;
+    console.log('After setting to null:', asyncState.data); // null
+    
+    // Data is reactive
+    console.log('\n=== Testing reactivity ===');
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: data =`, asyncState.data);
+    });
+    
+    console.log('Effect runs after setup:', effectRuns); // 1
+    
+    asyncState.data = { result: 'success' };
+    console.log('Effect runs after data change:', effectRuns); // 2
+    
+    asyncState.data = { result: 'updated' };
+    console.log('Effect runs after another change:', effectRuns); // 3
+  </script>
+</body>
+</html>

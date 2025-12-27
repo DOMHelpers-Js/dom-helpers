@@ -164,6 +164,7 @@
             addComputed(this, key, fn);
             return this;
           },
+          writable: true,
           enumerable: false,
           configurable: true
         },
@@ -171,6 +172,7 @@
           value: function(keyOrFn, callback) {
             return addWatch(this, keyOrFn, callback);
           },
+          writable: true,
           enumerable: false,
           configurable: true
         },
@@ -178,6 +180,7 @@
           value: function(fn) {
             return batch(() => fn.call(this));
           },
+          writable: true,
           enumerable: false,
           configurable: true
         },
@@ -185,11 +188,13 @@
           value: function(key) {
             notify(this, key);
           },
+          writable: true,
           enumerable: false,
           configurable: true
         },
         $raw: {
           get() { return toRaw(this); },
+        
           enumerable: false,
           configurable: true
         },
@@ -197,6 +202,7 @@
           value: function(updates) {
             return updateMixed(this, updates);
           },
+          writable: true,
           enumerable: false,
           configurable: true
         },
@@ -204,6 +210,7 @@
           value: function(updates) {
             return setWithFunctions(this, updates);
           },
+          writable: true,
           enumerable: false,
           configurable: true
         },
@@ -211,6 +218,7 @@
           value: function(bindingDefs) {
             return createBindings(this, bindingDefs);
           },
+          writable: true,
           enumerable: false,
           configurable: true
         }
@@ -814,12 +822,15 @@
       Object.entries(defs).forEach(([k, v]) => result[k] = ref(v));
       return result;
     },
+    form,                  
+    async: asyncState, 
     store,
     component,
     reactive,
     builder: reactive,
     bindings,
     list: collection,
+    collection: collection, 
     batch,
     isReactive,
     toRaw,

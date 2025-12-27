@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test toRaw</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    const original = { count: 0, name: 'Test' };
+    const state = ReactiveUtils.state(original);
+    
+    console.log('state is reactive:', ReactiveUtils.isReactive(state)); // true
+    
+    const raw = ReactiveUtils.toRaw(state);
+    console.log('raw is reactive:', ReactiveUtils.isReactive(raw)); // false
+    console.log('raw object:', raw); // { count: 0, name: 'Test' }
+    
+    // Modifying raw doesn't trigger reactivity
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: count=${state.count}`);
+    });
+    
+    console.log('Runs after setup:', effectRuns); // 1
+    
+    state.count = 5; // Triggers effect
+    console.log('Runs after state update:', effectRuns); // 2
+    
+    raw.count = 10; // Does NOT trigger effect
+    console.log('Runs after raw update:', effectRuns); // Still 2
+    console.log('state.count:', state.count); // 10 (raw and state share same object)
+  </script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveUtils.execute()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/09_dh-reactive-namespace-methods.js"></script>
+  <script>
+    const asyncState = ReactiveUtils.async(null);
+    
+    console.log('Initial state:', {
+      data: asyncState.data,
+      loading: asyncState.loading,
+      error: asyncState.error
+    });
+    
+    // Execute async operation
+    console.log('\n=== Executing async operation ===');
+    
+    ReactiveUtils.execute(asyncState, async () => {
+      console.log('Inside execute function');
+      console.log('loading:', asyncState.loading); // true
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      return { id: 1, name: 'User 1', email: 'user1@example.com' };
+    }).then(result => {
+      console.log('\n=== After execute ===');
+      console.log('Result:', result);
+      console.log('asyncState.data:', asyncState.data);
+      console.log('asyncState.loading:', asyncState.loading); // false
+      console.log('asyncState.error:', asyncState.error); // null
+    });
+    
+    // Execute with error
+    setTimeout(() => {
+      console.log('\n=== Executing with error ===');
+      
+      ReactiveUtils.execute(asyncState, async () => {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        throw new Error('Something went wrong');
+      }).catch(error => {
+        console.log('\n=== After error ===');
+        console.log('Error caught:', error.message);
+        console.log('asyncState.error:', asyncState.error?.message);
+        console.log('asyncState.loading:', asyncState.loading); // false
+      });
+    }, 2000);
+  </script>
+</body>
+</html>

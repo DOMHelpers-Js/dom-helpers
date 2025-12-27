@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveUtils.abort()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/09_dh-reactive-namespace-methods.js"></script>
+  <script>
+    const asyncState = ReactiveUtils.async(null);
+    
+    console.log('Initial state:', {
+      data: asyncState.data,
+      loading: asyncState.loading,
+      error: asyncState.error
+    });
+    
+    // Start a long-running operation
+    console.log('\n=== Starting long operation ===');
+    
+    ReactiveUtils.execute(asyncState, async () => {
+      console.log('Operation started, loading:', asyncState.loading); // true
+      
+      // Simulate long operation
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      
+      return { result: 'This should not complete' };
+    }).then(result => {
+      console.log('Operation completed:', result);
+    }).catch(error => {
+      console.log('Operation failed:', error.message);
+    });
+    
+    // Abort after 1 second
+    setTimeout(() => {
+      console.log('\n=== Aborting operation ===');
+      ReactiveUtils.abort(asyncState);
+      
+      console.log('After abort:', {
+        data: asyncState.data,
+        loading: asyncState.loading,
+        error: asyncState.error
+      });
+    }, 1000);
+    
+    // Try to execute again after abort
+    setTimeout(() => {
+      console.log('\n=== Executing new operation after abort ===');
+      
+      ReactiveUtils.execute(asyncState, async () => {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        return { result: 'New operation completed' };
+      }).then(result => {
+        console.log('New operation result:', result);
+        console.log('asyncState.data:', asyncState.data);
+      });
+    }, 2000);
+  </script>
+</body>
+</html>

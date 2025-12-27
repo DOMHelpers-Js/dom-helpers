@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Batch</title></head>
+<body>
+    
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+
+  <script>
+    const state = ReactiveUtils.state({ count: 0, name: '' });
+    
+    let runs = 0;
+    ReactiveUtils.effect(() => {
+      runs++;
+      console.log(`Effect #${runs}: count=${state.count}, name=${state.name}`);
+    });
+    
+    // Without batch - triggers effect twice
+    state.count = 1;
+    state.name = 'A';
+    console.log('Runs without batch:', runs); // 3
+    
+    runs = 0;
+    
+    // With batch - triggers effect once
+    ReactiveUtils.batch(() => {
+      state.count = 2;
+      state.name = 'B';
+    });
+    console.log('Runs with batch:', runs); // 1
+  </script>
+</body>
+</html>

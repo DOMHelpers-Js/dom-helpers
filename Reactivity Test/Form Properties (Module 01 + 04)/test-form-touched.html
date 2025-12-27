@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.touched</title></head>
+<body>
+  
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  
+  
+
+  <script>
+    const form = ReactiveUtils.form({
+      email: '',
+      password: '',
+      remember: false
+    });
+    
+    console.log('Initial touched:', form.touched); // {}
+    
+    // Mark fields as touched
+    form.touched.email = true;
+    console.log('\nAfter touching email:', form.touched);
+    // { email: true }
+    
+    form.touched.password = true;
+    console.log('After touching password:', form.touched);
+    // { email: true, password: true }
+    
+    // Check if field is touched
+    console.log('\nIs email touched?', form.touched.email); // true
+    console.log('Is remember touched?', form.touched.remember); // undefined/false
+    
+    // Mark all as touched
+    form.touched.email = true;
+    form.touched.password = true;
+    form.touched.remember = true;
+    console.log('All touched:', form.touched);
+    
+    // Touched is reactive
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const emailTouched = form.touched.email ? 'yes' : 'no';
+      console.log(`Effect #${effectRuns}: email touched? ${emailTouched}`);
+    });
+    
+    form.touched.email = false;
+    console.log('Effect runs:', effectRuns); // 2
+  </script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.isDirty</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  
+  
+  <script>
+    const form = ReactiveUtils.form({
+      email: '',
+      password: '',
+      remember: false
+    });
+    
+    console.log('Initial isDirty:', form.isDirty); // false (no touched fields)
+    console.log('Initial touched:', form.touched); // {}
+    
+    // Touch a field - becomes dirty
+    form.touched.email = true;
+    console.log('\nAfter touching email:');
+    console.log('isDirty:', form.isDirty); // true
+    console.log('touched:', form.touched);
+    
+    // Touch more fields
+    form.touched.password = true;
+    console.log('\nAfter touching password:');
+    console.log('isDirty:', form.isDirty); // true
+    console.log('touched:', form.touched);
+    
+    // Clear all touched
+    form.touched = {};
+    console.log('\nAfter clearing touched:');
+    console.log('isDirty:', form.isDirty); // false
+    console.log('touched:', form.touched);
+    
+    // isDirty is reactive (computed)
+    ReactiveUtils.effect(() => {
+      const status = form.isDirty ? 'DIRTY (has changes)' : 'PRISTINE (no changes)';
+      console.log('Form state:', status);
+    });
+    
+    console.log('\nTouching field to trigger effect:');
+    form.touched.remember = true;
+  </script>
+</body>
+</html>

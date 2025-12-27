@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.values</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  
+  <script>
+    const form = ReactiveUtils.form({
+      email: '',
+      password: '',
+      age: 0
+    });
+    
+    console.log('Initial values:', form.values);
+    // { email: '', password: '', age: 0 }
+    
+    // Read values
+    console.log('form.values.email:', form.values.email); // ''
+    console.log('form.values.password:', form.values.password); // ''
+    console.log('form.values.age:', form.values.age); // 0
+    
+    // Write values directly
+    form.values.email = 'test@example.com';
+    form.values.password = 'secret123';
+    form.values.age = 25;
+    
+    console.log('\nAfter updates:', form.values);
+    // { email: 'test@example.com', password: 'secret123', age: 25 }
+    
+    // Values are reactive
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: email=${form.values.email}`);
+    });
+    
+    form.values.email = 'updated@example.com';
+    console.log('Effect runs:', effectRuns); // 2
+  </script>
+</body>
+</html>

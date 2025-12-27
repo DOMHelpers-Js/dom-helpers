@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test asyncState.isError</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    const asyncState = ReactiveUtils.async(null);
+    
+    console.log('Initial state:');
+    console.log('  data:', asyncState.data);
+    console.log('  loading:', asyncState.loading);
+    console.log('  error:', asyncState.error);
+    console.log('  isError:', asyncState.isError); // false
+    
+    // Error state = has error, not loading
+    console.log('\n=== Setting error state ===');
+    asyncState.error = new Error('Request failed');
+    asyncState.loading = false;
+    console.log('isError:', asyncState.isError); // true
+    
+    // Still loading = not error state yet
+    console.log('\n=== While loading ===');
+    asyncState.loading = true;
+    console.log('isError:', asyncState.isError); // false
+    
+    // No error = not error state
+    console.log('\n=== Clearing error ===');
+    asyncState.loading = false;
+    asyncState.error = null;
+    console.log('isError:', asyncState.isError); // false
+    
+    // Back to error
+    console.log('\n=== Back to error ===');
+    asyncState.error = new Error('New error');
+    console.log('isError:', asyncState.isError); // true
+    
+    // isError is reactive (computed)
+    console.log('\n=== Testing reactivity ===');
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const status = asyncState.isError ? '✗ ERROR STATE' : '✓ NO ERROR';
+      console.log(`Effect #${effectRuns}: ${status}`);
+    });
+    
+    console.log('Effect runs after setup:', effectRuns); // 1
+    
+    asyncState.error = null;
+    console.log('Effect runs after clearing error:', effectRuns); // 2
+    
+    asyncState.error = new Error('Network error');
+    console.log('Effect runs after setting error:', effectRuns); // 3
+    
+    asyncState.loading = true;
+    console.log('Effect runs after loading = true:', effectRuns); // 4
+    
+    asyncState.loading = false;
+    console.log('Effect runs after loading = false:', effectRuns); // 5
+    
+    // Simulate error flow
+    console.log('\n=== Simulating error flow ===');
+    asyncState.loading = true;
+    asyncState.error = null;
+    console.log('Starting request...');
+    
+    setTimeout(() => {
+      asyncState.loading = false;
+      asyncState.error = new Error('Timeout');
+      console.log('Request failed!');
+      console.log('isError:', asyncState.isError);
+      console.log('Final effect runs:', effectRuns);
+    }, 1000);
+  </script>
+</body>
+</html>

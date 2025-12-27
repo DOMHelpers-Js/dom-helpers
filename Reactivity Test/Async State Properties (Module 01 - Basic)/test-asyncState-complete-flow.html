@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test asyncState Complete Flow</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    const asyncState = ReactiveUtils.async(null);
+    
+    // Monitor all state changes
+    ReactiveUtils.effect(() => {
+      console.log('State changed:', {
+        data: asyncState.data,
+        loading: asyncState.loading,
+        error: asyncState.error,
+        isSuccess: asyncState.isSuccess,
+        isError: asyncState.isError
+      });
+    });
+    
+    console.log('=== Simulating successful fetch ===');
+    asyncState.loading = true;
+    asyncState.error = null;
+    
+    setTimeout(() => {
+      asyncState.loading = false;
+      asyncState.data = { userId: 1, name: 'John' };
+      console.log('✓ Fetch successful');
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Simulating failed fetch ===');
+      asyncState.loading = true;
+      asyncState.error = null;
+      asyncState.data = null;
+    }, 2000);
+    
+    setTimeout(() => {
+      asyncState.loading = false;
+      asyncState.error = new Error('404 Not Found');
+      console.log('✗ Fetch failed');
+    }, 3000);
+  </script>
+</body>
+</html>

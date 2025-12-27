@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test asyncState.error</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    const asyncState = ReactiveUtils.async(null);
+    
+    console.log('Initial error:', asyncState.error); // null
+    
+    // Set error
+    asyncState.error = new Error('Network error');
+    console.log('After setting error:', asyncState.error);
+    console.log('Error message:', asyncState.error.message); // "Network error"
+    
+    // Clear error
+    asyncState.error = null;
+    console.log('After clearing error:', asyncState.error); // null
+    
+    // Set different error
+    asyncState.error = new Error('Validation failed');
+    console.log('Different error:', asyncState.error.message);
+    
+    // Error is reactive
+    console.log('\n=== Testing reactivity ===');
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const status = asyncState.error 
+        ? `ERROR: ${asyncState.error.message}` 
+        : 'NO ERROR';
+      console.log(`Effect #${effectRuns}: ${status}`);
+    });
+    
+    console.log('Effect runs after setup:', effectRuns); // 1
+    
+    asyncState.error = new Error('Server error 500');
+    console.log('Effect runs after error:', effectRuns); // 2
+    
+    asyncState.error = null;
+    console.log('Effect runs after clearing:', effectRuns); // 3
+    
+    // Simulate error handling
+    console.log('\n=== Simulating error scenario ===');
+    asyncState.loading = true;
+    asyncState.error = null;
+    
+    setTimeout(() => {
+      asyncState.loading = false;
+      asyncState.error = new Error('Timeout');
+      console.log('Request failed with error:', asyncState.error.message);
+      console.log('Final effect runs:', effectRuns);
+    }, 1000);
+  </script>
+</body>
+</html>

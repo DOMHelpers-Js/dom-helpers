@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveUtils.refetch()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/09_dh-reactive-namespace-methods.js"></script>
+  <script>
+    const asyncState = ReactiveUtils.async(null);
+    
+    let fetchCount = 0;
+    
+    console.log('Initial state:', {
+      data: asyncState.data,
+      loading: asyncState.loading,
+      error: asyncState.error
+    });
+    
+    // Execute initial fetch
+    console.log('\n=== Initial fetch ===');
+    
+    ReactiveUtils.execute(asyncState, async () => {
+      fetchCount++;
+      console.log(`Fetch #${fetchCount} started`);
+      
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      return {
+        id: fetchCount,
+        timestamp: Date.now(),
+        data: `Data from fetch #${fetchCount}`
+      };
+    }).then(() => {
+      console.log('\n=== After initial fetch ===');
+      console.log('asyncState.data:', asyncState.data);
+      console.log('Fetch count:', fetchCount);
+      
+      // Refetch after 2 seconds
+      setTimeout(() => {
+        console.log('\n=== Refetching (calling same function again) ===');
+        
+        ReactiveUtils.refetch(asyncState).then(() => {
+          console.log('\n=== After refetch ===');
+          console.log('asyncState.data:', asyncState.data);
+          console.log('Fetch count:', fetchCount);
+          
+          // Refetch again
+          setTimeout(() => {
+            console.log('\n=== Refetching again ===');
+            
+            ReactiveUtils.refetch(asyncState).then(() => {
+              console.log('\n=== After second refetch ===');
+              console.log('asyncState.data:', asyncState.data);
+              console.log('Total fetches:', fetchCount);
+            });
+          }, 2000);
+        });
+      }, 2000);
+    });
+    
+    // Test refetch without initial execute
+    setTimeout(() => {
+      const asyncState2 = ReactiveUtils.async(null);
+      
+      console.log('\n=== Testing refetch without execute ===');
+      const result = ReactiveUtils.refetch(asyncState2);
+      console.log('Refetch result:', result); // Should be undefined
+    }, 8000);
+  </script>
+</body>
+</html>

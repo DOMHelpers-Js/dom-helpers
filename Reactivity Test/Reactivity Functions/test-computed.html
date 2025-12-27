@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Computed</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    const state = ReactiveUtils.state({
+      firstName: 'John',
+      lastName: 'Doe'
+    });
+    
+    ReactiveUtils.computed(state, {
+      fullName: function() {
+        return this.firstName + ' ' + this.lastName;
+      }
+    });
+    
+    console.log(state.fullName); // "John Doe"
+    state.firstName = 'Jane';
+    console.log(state.fullName); // "Jane Doe"
+  </script>
+</body>
+</html>

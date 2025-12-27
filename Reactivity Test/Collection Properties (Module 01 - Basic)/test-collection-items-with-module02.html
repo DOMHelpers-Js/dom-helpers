@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.items with Array Patch</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+ 
+  <script>
+    // Create a collection
+    const collection = ReactiveUtils.collection([1, 2, 3]);
+    
+    console.log('Initial items:', collection.items); // [1, 2, 3]
+    
+    // Items are reactive
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: items = [${collection.items.join(', ')}]`);
+    });
+    
+    console.log('\n=== Testing array methods (WITH Module 02) ===');
+    console.log('Effect runs after setup:', effectRuns); // 1
+    
+    // push() - triggers reactivity
+    collection.items.push(4);
+    console.log('After push(4):', collection.items);
+    console.log('Effect runs:', effectRuns); // 2
+    
+    // pop() - triggers reactivity
+    collection.items.pop();
+    console.log('After pop():', collection.items);
+    console.log('Effect runs:', effectRuns); // 3
+    
+    // unshift() - triggers reactivity
+    collection.items.unshift(0);
+    console.log('After unshift(0):', collection.items);
+    console.log('Effect runs:', effectRuns); // 4
+    
+    // splice() - triggers reactivity
+    collection.items.splice(1, 1, 99);
+    console.log('After splice(1, 1, 99):', collection.items);
+    console.log('Effect runs:', effectRuns); // 5
+    
+    // sort() - triggers reactivity
+    collection.items.sort((a, b) => b - a);
+    console.log('After sort() descending:', collection.items);
+    console.log('Effect runs:', effectRuns); // 6
+    
+    // reverse() - triggers reactivity
+    collection.items.reverse();
+    console.log('After reverse():', collection.items);
+    console.log('Effect runs:', effectRuns); // 7
+    
+    console.log('\n✓ All array methods are reactive with Module 02!');
+  </script>
+</body>
+</html>

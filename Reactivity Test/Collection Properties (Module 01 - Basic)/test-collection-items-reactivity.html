@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.items Reactivity</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    const collection = ReactiveUtils.collection([]);
+    
+    let effectRuns = 0;
+    let lastLength = 0;
+    
+    // Track changes to items
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      lastLength = collection.items.length;
+      console.log(`Effect #${effectRuns}: items.length = ${lastLength}, items = [${collection.items.join(', ')}]`);
+    });
+    
+    console.log('Initial effect runs:', effectRuns); // 1
+    
+    // Change entire array
+    console.log('\n1. Replacing entire array:');
+    collection.items = [1, 2, 3];
+    console.log('Effect runs:', effectRuns); // 2
+    console.log('Last length:', lastLength); // 3
+    
+    // Change single item
+    console.log('\n2. Changing single item:');
+    collection.items[0] = 10;
+    console.log('Effect runs:', effectRuns); // 3
+    
+    // Add item using $add
+    console.log('\n3. Using $add:');
+    collection.$add(4);
+    console.log('Effect runs:', effectRuns); // 4
+    console.log('Last length:', lastLength); // 4
+    
+    // Remove item using $remove
+    console.log('\n4. Using $remove:');
+    collection.$remove(2);
+    console.log('Effect runs:', effectRuns); // 5
+    console.log('Last length:', lastLength); // 3
+    
+    // Clear all
+    console.log('\n5. Using $clear:');
+    collection.$clear();
+    console.log('Effect runs:', effectRuns); // 6
+    console.log('Last length:', lastLength); // 0
+    
+    console.log('\n✓ collection.items is fully reactive!');
+  </script>
+</body>
+</html>

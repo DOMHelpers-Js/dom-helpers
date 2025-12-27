@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Pause/Resume</title></head>
+<body>
+
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  
+  <script>
+    const state = ReactiveUtils.state({ value: 0 });
+    
+    let runs = 0;
+    ReactiveUtils.effect(() => {
+      runs++;
+      console.log(`Effect #${runs}: value=${state.value}`);
+    });
+    
+    // Pause reactivity
+    ReactiveUtils.pause();
+    state.value = 10;
+    state.value = 20;
+    console.log('Runs while paused:', runs); // Still 1
+    
+    // Resume with flush
+    ReactiveUtils.resume(true);
+    console.log('Runs after resume(true):', runs); // 2
+  </script>
+</body>
+</html>

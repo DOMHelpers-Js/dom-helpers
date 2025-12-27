@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.isValid</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+
+
+  <script>
+    const form = ReactiveUtils.form({
+      email: '',
+      password: ''
+    });
+    
+    console.log('Initial isValid:', form.isValid); // true (no errors)
+    console.log('Initial errors:', form.errors); // {}
+    
+    // Set an error - isValid should become false
+    form.errors.email = 'Email is required';
+    console.log('\nAfter adding email error:');
+    console.log('isValid:', form.isValid); // false
+    console.log('errors:', form.errors);
+    
+    // Add another error
+    form.errors.password = 'Password is required';
+    console.log('\nAfter adding password error:');
+    console.log('isValid:', form.isValid); // false
+    console.log('errors:', form.errors);
+    
+    // Clear one error - still invalid
+    form.errors.email = null;
+    console.log('\nAfter clearing email error:');
+    console.log('isValid:', form.isValid); // false (password error still exists)
+    console.log('errors:', form.errors);
+    
+    // Clear all errors - becomes valid
+    form.errors.password = null;
+    console.log('\nAfter clearing all errors:');
+    console.log('isValid:', form.isValid); // true
+    console.log('errors:', form.errors);
+    
+    // isValid is reactive (computed)
+    ReactiveUtils.effect(() => {
+      const status = form.isValid ? 'VALID ✓' : 'INVALID ✗';
+      console.log('Form validation status:', status);
+    });
+    
+    console.log('\nAdding error to trigger effect:');
+    form.errors.email = 'Invalid email';
+  </script>
+</body>
+</html>

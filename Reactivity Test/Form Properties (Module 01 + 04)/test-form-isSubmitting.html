@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.isSubmitting</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+ 
+
+  <script>
+    const form = ReactiveUtils.form({
+      email: '',
+      password: ''
+    });
+    
+    console.log('Initial isSubmitting:', form.isSubmitting); // false
+    
+    // Simulate submission start
+    form.isSubmitting = true;
+    console.log('During submission:', form.isSubmitting); // true
+    
+    // Simulate submission end
+    setTimeout(() => {
+      form.isSubmitting = false;
+      console.log('After submission:', form.isSubmitting); // false
+    }, 1000);
+    
+    // isSubmitting is reactive
+    ReactiveUtils.effect(() => {
+      const status = form.isSubmitting ? 'SUBMITTING...' : 'IDLE';
+      console.log('Form status:', status);
+    });
+    
+    // Manually toggle
+    setTimeout(() => {
+      console.log('\nToggling isSubmitting...');
+      form.isSubmitting = true;
+    }, 2000);
+    
+    setTimeout(() => {
+      form.isSubmitting = false;
+    }, 3000);
+  </script>
+</body>
+</html>

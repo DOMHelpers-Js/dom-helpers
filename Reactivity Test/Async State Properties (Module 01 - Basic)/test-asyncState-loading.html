@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test asyncState.loading</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    const asyncState = ReactiveUtils.async(null);
+    
+    console.log('Initial loading:', asyncState.loading); // false
+    
+    // Simulate loading start
+    asyncState.loading = true;
+    console.log('During loading:', asyncState.loading); // true
+    
+    // Simulate loading end
+    asyncState.loading = false;
+    console.log('After loading:', asyncState.loading); // false
+    
+    // Loading is reactive
+    console.log('\n=== Testing reactivity ===');
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const status = asyncState.loading ? 'LOADING...' : 'IDLE';
+      console.log(`Effect #${effectRuns}: ${status}`);
+    });
+    
+    console.log('Effect runs after setup:', effectRuns); // 1
+    
+    asyncState.loading = true;
+    console.log('Effect runs after loading = true:', effectRuns); // 2
+    
+    asyncState.loading = false;
+    console.log('Effect runs after loading = false:', effectRuns); // 3
+    
+    // Simulate multiple loading cycles
+    console.log('\n=== Simulating fetch cycles ===');
+    asyncState.loading = true;
+    console.log('Starting fetch...');
+    
+    setTimeout(() => {
+      asyncState.loading = false;
+      asyncState.data = { result: 'data loaded' };
+      console.log('Fetch complete. Effect runs:', effectRuns);
+    }, 1000);
+  </script>
+</body>
+</html>

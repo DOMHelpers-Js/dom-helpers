@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveUtils.reset()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/09_dh-reactive-namespace-methods.js"></script>
+  <script>
+    const asyncState = ReactiveUtils.async({ initial: 'data' });
+    
+    console.log('Initial state:', {
+      data: asyncState.data,
+      loading: asyncState.loading,
+      error: asyncState.error
+    });
+    
+    // Execute operation
+    console.log('\n=== Executing operation ===');
+    
+    ReactiveUtils.execute(asyncState, async () => {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return { id: 1, name: 'User 1' };
+    }).then(() => {
+      console.log('\n=== After execute ===');
+      console.log('State:', {
+        data: asyncState.data,
+        loading: asyncState.loading,
+        error: asyncState.error
+      });
+      
+      // Reset the state
+      setTimeout(() => {
+        console.log('\n=== Resetting state ===');
+        ReactiveUtils.reset(asyncState);
+        
+        console.log('After reset:', {
+          data: asyncState.data,
+          loading: asyncState.loading,
+          error: asyncState.error
+        });
+      }, 1000);
+    });
+    
+    // Test reset with error state
+    setTimeout(() => {
+      console.log('\n=== Setting error state ===');
+      asyncState.data = null;
+      asyncState.error = new Error('Test error');
+      asyncState.loading = false;
+      
+      console.log('Error state:', {
+        data: asyncState.data,
+        loading: asyncState.loading,
+        error: asyncState.error?.message
+      });
+      
+      setTimeout(() => {
+        console.log('\n=== Resetting error state ===');
+        ReactiveUtils.reset(asyncState);
+        
+        console.log('After reset:', {
+          data: asyncState.data,
+          loading: asyncState.loading,
+          error: asyncState.error
+        });
+      }, 1000);
+    }, 3000);
+  </script>
+</body>
+</html>

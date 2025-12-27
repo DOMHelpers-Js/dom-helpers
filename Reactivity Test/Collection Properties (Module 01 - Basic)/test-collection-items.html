@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.items</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  
+  <script>
+    // Create a collection
+    const collection = ReactiveUtils.collection([1, 2, 3]);
+    
+    console.log('Initial items:', collection.items); // [1, 2, 3]
+    
+    // Read items
+    console.log('collection.items[0]:', collection.items[0]); // 1
+    console.log('collection.items[1]:', collection.items[1]); // 2
+    console.log('collection.items.length:', collection.items.length); // 3
+    
+    // Write to items directly
+    collection.items[0] = 10;
+    console.log('\nAfter collection.items[0] = 10:', collection.items); // [10, 2, 3]
+    
+    // Replace entire items array
+    collection.items = [100, 200, 300];
+    console.log('After collection.items = [100, 200, 300]:', collection.items); // [100, 200, 300]
+    
+    // Items are reactive
+    console.log('\n=== Testing reactivity ===');
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: items = [${collection.items.join(', ')}]`);
+    });
+    
+    console.log('Effect runs after setup:', effectRuns); // 1
+    
+    collection.items = [1, 2, 3, 4, 5];
+    console.log('Effect runs after assignment:', effectRuns); // 2
+    
+    collection.items[0] = 999;
+    console.log('Effect runs after item update:', effectRuns); // 3
+    
+    // Note: Without Module 02 (array patch), array methods won't trigger reactivity
+    console.log('\n=== Array methods (without Module 02) ===');
+    console.log('NOTE: Array methods like push() need Module 02 to be reactive');
+    
+    const beforePush = effectRuns;
+    collection.items.push(6);
+    console.log('After push(6):', collection.items);
+    console.log('Effect runs after push:', effectRuns); // Same as before (not reactive without Module 02)
+  </script>
+</body>
+</html>

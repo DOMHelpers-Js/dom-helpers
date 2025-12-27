@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.items with Core Methods</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    // Create a collection
+    const collection = ReactiveUtils.collection([
+      { id: 1, name: 'Item 1' },
+      { id: 2, name: 'Item 2' },
+      { id: 3, name: 'Item 3' }
+    ]);
+    
+    console.log('Initial items:', collection.items);
+    console.log('Length:', collection.items.length); // 3
+    
+    // Use core collection methods (Module 01)
+    console.log('\n=== Using $add, $remove, $update ===');
+    
+    // $add - adds to items array
+    collection.$add({ id: 4, name: 'Item 4' });
+    console.log('After $add:', collection.items);
+    console.log('Length:', collection.items.length); // 4
+    
+    // $remove - removes from items array
+    collection.$remove(item => item.id === 2);
+    console.log('After $remove id=2:', collection.items);
+    console.log('Length:', collection.items.length); // 3
+    
+    // $update - updates item in items array
+    collection.$update(item => item.id === 1, { name: 'Updated Item 1' });
+    console.log('After $update id=1:', collection.items);
+    
+    // $clear - clears items array
+    collection.$clear();
+    console.log('After $clear:', collection.items);
+    console.log('Length:', collection.items.length); // 0
+    
+    // Rebuild items
+    collection.items = [
+      { id: 1, name: 'A' },
+      { id: 2, name: 'B' },
+      { id: 3, name: 'C' }
+    ];
+    console.log('\nRebuilt items:', collection.items);
+    
+    // Direct access to items
+    console.log('\n=== Direct access ===');
+    console.log('First item:', collection.items[0]);
+    console.log('Last item:', collection.items[collection.items.length - 1]);
+    console.log('Second item name:', collection.items[1].name);
+  </script>
+</body>
+</html>

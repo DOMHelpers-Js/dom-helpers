@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.errors</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  
+  
+  <script>
+    const form = ReactiveUtils.form({
+      email: '',
+      password: ''
+    });
+    
+    console.log('Initial errors:', form.errors); // {}
+    
+    // Set errors directly
+    form.errors.email = 'Email is required';
+    form.errors.password = 'Password must be 8+ characters';
+    
+    console.log('\nAfter setting errors:', form.errors);
+    // { email: 'Email is required', password: 'Password must be 8+ characters' }
+    
+    // Read specific errors
+    console.log('Email error:', form.errors.email);
+    console.log('Password error:', form.errors.password);
+    
+    // Clear an error
+    form.errors.email = null;
+    console.log('\nAfter clearing email error:', form.errors);
+    
+    // Errors are reactive
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const hasEmailError = form.errors.email ? 'yes' : 'no';
+      console.log(`Effect #${effectRuns}: email error? ${hasEmailError}`);
+    });
+    
+    form.errors.email = 'Invalid format';
+    console.log('Effect runs:', effectRuns); // 2
+  </script>
+</body>
+</html>

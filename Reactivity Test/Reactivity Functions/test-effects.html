@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Effects</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    const state = ReactiveUtils.state({ a: 1, b: 2 });
+    
+    ReactiveUtils.effects({
+      logA: () => console.log('a =', state.a),
+      logB: () => console.log('b =', state.b),
+      logSum: () => console.log('sum =', state.a + state.b)
+    });
+    // Logs: "a = 1", "b = 2", "sum = 3"
+    
+    state.a = 10;
+    // Logs: "a = 10", "sum = 12"
+  </script>
+</body>
+</html>

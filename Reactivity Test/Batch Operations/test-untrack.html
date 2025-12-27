@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Untrack</title></head>
+<body>
+
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  
+  <script>
+    const state = ReactiveUtils.state({
+      tracked: 0,
+      untracked: 0
+    });
+    
+    let runs = 0;
+    ReactiveUtils.effect(() => {
+      runs++;
+      const t = state.tracked; // Tracked
+      const u = ReactiveUtils.untrack(() => state.untracked); // Not tracked
+      console.log(`Effect #${runs}: tracked=${t}, untracked=${u}`);
+    });
+    
+    state.tracked = 5; // Triggers effect
+    console.log('After tracked update:', runs); // 2
+    
+    state.untracked = 100; // Does NOT trigger effect
+    console.log('After untracked update:', runs); // Still 2
+  </script>
+</body>
+</html>
