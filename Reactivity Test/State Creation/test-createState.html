@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveUtils.createState()</title></head>
+<body>
+  <div id="username">No user</div>
+  <div id="counter">0</div>
+  <div class="status">Idle</div>
+  
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('=== Testing createState with bindings ===');
+      
+      // createState automatically creates bindings
+      const state = ReactiveUtils.createState(
+        {
+          username: 'John',
+          count: 0,
+          status: 'active'
+        },
+        {
+          // Binding definitions
+          '#username': 'username',
+          '#counter': 'count',
+          '.status': function() {
+            return this.status.toUpperCase();
+          }
+        }
+      );
+      
+      console.log('✅ State created with auto-bindings');
+      console.log('Initial state:', {
+        username: state.username,
+        count: state.count,
+        status: state.status
+      });
+      console.log('Check DOM - all elements should be populated');
+      
+      // Update state - DOM should update automatically
+      setTimeout(() => {
+        console.log('\n=== Updating username ===');
+        state.username = 'Jane';
+        console.log('Check #username element');
+      }, 1000);
+      
+      setTimeout(() => {
+        console.log('\n=== Updating count ===');
+        state.count = 42;
+        console.log('Check #counter element');
+      }, 2000);
+      
+      setTimeout(() => {
+        console.log('\n=== Updating status ===');
+        state.status = 'completed';
+        console.log('Check .status element (should show COMPLETED)');
+      }, 3000);
+      
+      // Add computed property
+      setTimeout(() => {
+        console.log('\n=== Adding computed property ===');
+        state.$computed('display', function() {
+          return `${this.username}: ${this.count}`;
+        });
+        console.log('state.display:', state.display);
+      }, 4000);
+    });
+  </script>
+</body>
+</html>

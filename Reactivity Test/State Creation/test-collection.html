@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveUtils.collection</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+
+  <script>
+    console.log('=== Testing ReactiveUtils.collection() ===\n');
+
+    // ========================================================================
+    // TEST 1: Create basic collection
+    // ========================================================================
+    console.log('TEST 1: Create basic collection');
+    const col1 = ReactiveUtils.collection([1, 2, 3]);
+
+    console.log('  Initial items:', col1.items);
+    console.log('  Length:', col1.length);
+    console.log('  Is reactive:', ReactiveUtils.isReactive(col1));
+    console.log('  Expected: true');
+    console.log('  ✓ Basic collection created\n');
+
+    // ========================================================================
+    // TEST 2: Empty collection
+    // ========================================================================
+    console.log('TEST 2: Empty collection');
+    const col2 = ReactiveUtils.collection();
+
+    console.log('  Empty items:', col2.items);
+    console.log('  Length:', col2.length);
+    console.log('  isEmpty:', col2.isEmpty());
+    console.log('  Expected: true');
+    console.log('  ✓ Empty collection works\n');
+
+    // ========================================================================
+    // TEST 3: add() method
+    // ========================================================================
+    console.log('TEST 3: add() method');
+    const col3 = ReactiveUtils.collection([1, 2]);
+
+    col3.add(3);
+    console.log('  After add(3):', col3.items);
+    console.log('  Expected: [1, 2, 3]');
+
+    col3.add(4).add(5);
+    console.log('  After chaining add(4).add(5):', col3.items);
+    console.log('  Expected: [1, 2, 3, 4, 5]');
+    console.log('  ✓ add() works\n');
+
+    // ========================================================================
+    // TEST 4: remove() method
+    // ========================================================================
+    console.log('TEST 4: remove() method');
+    const col4 = ReactiveUtils.collection(['a', 'b', 'c']);
+
+    // Remove by value
+    col4.remove('b');
+    console.log('  After remove("b"):', col4.items);
+    console.log('  Expected: ["a", "c"]');
+
+    // Remove by predicate
+    const col5 = ReactiveUtils.collection([
+      { id: 1, name: 'A' },
+      { id: 2, name: 'B' },
+      { id: 3, name: 'C' }
+    ]);
+
+    col5.remove(item => item.id === 2);
+    console.log('  After remove by predicate:', col5.items.map(i => i.name));
+    console.log('  Expected: ["A", "C"]');
+    console.log('  ✓ remove() works\n');
+
+    // ========================================================================
+    // TEST 5: update() method
+    // ========================================================================
+    console.log('TEST 5: update() method');
+    const col6 = ReactiveUtils.collection([
+      { id: 1, name: 'A', active: false },
+      { id: 2, name: 'B', active: false }
+    ]);
+
+    col6.update(item => item.id === 1, { active: true });
+    console.log('  After update id:1:', col6.items);
+    console.log('  Item 1 active:', col6.items[0].active);
+    console.log('  Expected: true');
+
+    col6.update(col6.items[1], { name: 'Updated B' });
+    console.log('  After update by reference:', col6.items[1].name);
+    console.log('  Expected: "Updated B"');
+    console.log('  ✓ update() works\n');
+
+    // ========================================================================
+    // TEST 6: clear() method
+    // ========================================================================
+    console.log('TEST 6: clear() method');
+    const col7 = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+
+    console.log('  Before clear:', col7.items.length);
+    col7.clear();
+    console.log('  After clear:', col7.items.length);
+    console.log('  isEmpty:', col7.isEmpty());
+    console.log('  Expected: true');
+    console.log('  ✓ clear() works\n');
+
+    // ========================================================================
+    // TEST 7: find() method
+    // ========================================================================
+    console.log('TEST 7: find() method');
+    const col8 = ReactiveUtils.collection([
+      { id: 1, name: 'A' },
+      { id: 2, name: 'B' },
+      { id: 3, name: 'C' }
+    ]);
+
+    const found = col8.find(item => item.id === 2);
+    console.log('  Found item:', found);
+    console.log('  Expected: {id: 2, name: "B"}');
+
+    const notFound = col8.find(item => item.id === 999);
+    console.log('  Not found:', notFound);
+    console.log('  Expected: undefined');
+    console.log('  ✓ find() works\n');
+
+    // ========================================================================
+    // TEST 8: filter() method
+    // ========================================================================
+    console.log('TEST 8: filter() method');
+    const col9 = ReactiveUtils.collection([1, 2, 3, 4, 5, 6]);
+
+    const evens = col9.filter(n => n % 2 === 0);
+    console.log('  Even numbers:', evens);
+    console.log('  Expected: [2, 4, 6]');
+
+    const greaterThan3 = col9.filter(n => n > 3);
+    console.log('  Numbers > 3:', greaterThan3);
+    console.log('  Expected: [4, 5, 6]');
+    console.log('  ✓ filter() works\n');
+
+    // ========================================================================
+    // TEST 9: map() method
+    // ========================================================================
+    console.log('TEST 9: map() method');
+    const col10 = ReactiveUtils.collection([1, 2, 3]);
+
+    const doubled = col10.map(n => n * 2);
+    console.log('  Doubled:', doubled);
+    console.log('  Expected: [2, 4, 6]');
+
+    const names = ReactiveUtils.collection([
+      { id: 1, name: 'Alice' },
+      { id: 2, name: 'Bob' }
+    ]);
+    const nameList = names.map(item => item.name);
+    console.log('  Names:', nameList);
+    console.log('  Expected: ["Alice", "Bob"]');
+    console.log('  ✓ map() works\n');
+
+    // ========================================================================
+    // TEST 10: forEach() method
+    // ========================================================================
+    console.log('TEST 10: forEach() method');
+    const col11 = ReactiveUtils.collection([1, 2, 3]);
+    let sum = 0;
+
+    col11.forEach(n => sum += n);
+    console.log('  Sum via forEach:', sum);
+    console.log('  Expected: 6');
+    console.log('  ✓ forEach() works\n');
+
+    // ========================================================================
+    // TEST 11: first, last, at properties/methods
+    // ========================================================================
+    console.log('TEST 11: first, last, at properties/methods');
+    const col12 = ReactiveUtils.collection(['a', 'b', 'c', 'd']);
+
+    console.log('  first:', col12.first);
+    console.log('  Expected: "a"');
+
+    console.log('  last:', col12.last);
+    console.log('  Expected: "d"');
+
+    console.log('  at(2):', col12.at(2));
+    console.log('  Expected: "c"');
+    console.log('  ✓ Accessor methods work\n');
+
+    // ========================================================================
+    // TEST 12: Collection triggers effects
+    // ========================================================================
+    console.log('TEST 12: Collection triggers effects');
+    const col13 = ReactiveUtils.collection([1, 2]);
+
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`  Effect #${effectRuns}: length=${col13.length}`);
+    });
+
+    col13.add(3);
+    setTimeout(() => {
+      console.log('  After add - effect runs:', effectRuns);
+      console.log('  Expected: 2');
+
+      col13.remove(2);
+      setTimeout(() => {
+        console.log('  After remove - effect runs:', effectRuns);
+        console.log('  Expected: 3');
+        console.log('  ✓ Collection is reactive\n');
+
+        // ====================================================================
+        // TEST 13: Array-like methods
+        // ====================================================================
+        console.log('TEST 13: Array-like methods');
+        const col14 = ReactiveUtils.collection([1, 2, 3]);
+
+        col14.push(4, 5);
+        console.log('  After push(4, 5):', col14.items);
+        console.log('  Expected: [1, 2, 3, 4, 5]');
+
+        const popped = col14.pop();
+        console.log('  Popped:', popped, '- Items:', col14.items);
+        console.log('  Expected: 5, [1, 2, 3, 4]');
+
+        const shifted = col14.shift();
+        console.log('  Shifted:', shifted, '- Items:', col14.items);
+        console.log('  Expected: 1, [2, 3, 4]');
+
+        col14.unshift(0, 1);
+        console.log('  After unshift(0, 1):', col14.items);
+        console.log('  Expected: [0, 1, 2, 3, 4]');
+        console.log('  ✓ Array-like methods work\n');
+
+        // ====================================================================
+        // TEST 14: toggle() method
+        // ====================================================================
+        console.log('TEST 14: toggle() method');
+        const col15 = ReactiveUtils.collection([
+          { id: 1, done: false },
+          { id: 2, done: true }
+        ]);
+
+        col15.toggle(item => item.id === 1, 'done');
+        console.log('  After toggle id:1:', col15.items[0].done);
+        console.log('  Expected: true');
+
+        col15.toggle(item => item.id === 2, 'done');
+        console.log('  After toggle id:2:', col15.items[1].done);
+        console.log('  Expected: false');
+        console.log('  ✓ toggle() works\n');
+
+        // ====================================================================
+        // TEST 15: Practical use case - Todo list
+        // ====================================================================
+        console.log('TEST 15: Practical use case - Todo list');
+        const todos = ReactiveUtils.collection([
+          { id: 1, text: 'Learn Reactive', done: false },
+          { id: 2, text: 'Build App', done: false }
+        ]);
+
+        todos.$computed('remaining', function() {
+          return this.items.filter(t => !t.done).length;
+        });
+
+        console.log('  Initial todos:', todos.length);
+        console.log('  Remaining:', todos.remaining);
+
+        todos.toggle(t => t.id === 1, 'done');
+        console.log('  After toggle 1:', todos.remaining);
+        console.log('  Expected: 1');
+
+        todos.add({ id: 3, text: 'Deploy', done: false });
+        console.log('  After add:', todos.length, '- Remaining:', todos.remaining);
+        console.log('  Expected: 3, 2');
+
+        console.log('  ✓ Practical use case works\n');
+
+        console.log('=== All ReactiveUtils.collection() tests completed ===');
+      }, 50);
+    }, 50);
+  </script>
+</body>
+</html>

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveUtils.reactive (Builder)</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+
+  <script>
+    console.log('=== Testing ReactiveUtils.reactive() (Builder Pattern) ===\n');
+
+    // ========================================================================
+    // TEST 1: Basic builder pattern
+    // ========================================================================
+    console.log('TEST 1: Basic builder pattern');
+    const builder1 = ReactiveUtils.reactive({ count: 0 });
+
+    console.log('  Builder has state:', builder1.state);
+    console.log('  Builder.state.count:', builder1.state.count);
+    console.log('  Has computed method:', typeof builder1.computed === 'function');
+    console.log('  Has watch method:', typeof builder1.watch === 'function');
+    console.log('  Has effect method:', typeof builder1.effect === 'function');
+    console.log('  Has build method:', typeof builder1.build === 'function');
+    console.log('  ✓ Builder structure correct\n');
+
+    // ========================================================================
+    // TEST 2: Builder.computed()
+    // ========================================================================
+    console.log('TEST 2: Builder.computed()');
+    const builder2 = ReactiveUtils.reactive({ x: 5, y: 10 })
+      .computed({
+        sum: function() {
+          return this.x + this.y;
+        },
+        product: function() {
+          return this.x * this.y;
+        }
+      });
+
+    const state2 = builder2.build();
+
+    console.log('  sum:', state2.sum);
+    console.log('  Expected: 15');
+    console.log('  product:', state2.product);
+    console.log('  Expected: 50');
+
+    state2.x = 10;
+    console.log('  After x = 10:');
+    console.log('    sum:', state2.sum);
+    console.log('    Expected: 20');
+    console.log('    product:', state2.product);
+    console.log('    Expected: 100');
+    console.log('  ✓ computed() works\n');
+
+    // ========================================================================
+    // TEST 3: Builder.watch()
+    // ========================================================================
+    console.log('TEST 3: Builder.watch()');
+    let watchCalls = 0;
+
+    const builder3 = ReactiveUtils.reactive({ value: 0 })
+      .watch({
+        value: (newVal, oldVal) => {
+          watchCalls++;
+          console.log(`  Watch #${watchCalls}: ${oldVal} -> ${newVal}`);
+        }
+      });
+
+    const state3 = builder3.build();
+
+    state3.value = 5;
+    setTimeout(() => {
+      console.log('  Watch calls:', watchCalls);
+      console.log('  Expected: 1');
+      console.log('  ✓ watch() works\n');
+
+      // ====================================================================
+      // TEST 4: Builder.effect()
+      // ====================================================================
+      console.log('TEST 4: Builder.effect()');
+      let effectRuns = 0;
+
+      const builder4 = ReactiveUtils.reactive({ counter: 0 })
+        .effect(function() {
+          effectRuns++;
+          console.log(`  Effect #${effectRuns}: counter=${this.counter}`);
+        });
+
+      const state4 = builder4.build();
+
+      state4.counter = 10;
+      setTimeout(() => {
+        console.log('  Effect runs:', effectRuns);
+        console.log('  Expected: 2');
+        console.log('  ✓ effect() works\n');
+
+        // ================================================================
+        // TEST 5: Builder.action() and actions()
+        // ================================================================
+        console.log('TEST 5: Builder.action() and actions()');
+        const builder5 = ReactiveUtils.reactive({ count: 0 })
+          .action('increment', function(state) {
+            state.count++;
+          })
+          .action('add', function(state, amount) {
+            state.count += amount;
+          })
+          .actions({
+            reset: function(state) {
+              state.count = 0;
+            }
+          });
+
+        const state5 = builder5.build();
+
+        console.log('  Initial count:', state5.count);
+
+        state5.increment();
+        console.log('  After increment:', state5.count);
+        console.log('  Expected: 1');
+
+        state5.add(5);
+        console.log('  After add(5):', state5.count);
+        console.log('  Expected: 6');
+
+        state5.reset();
+        console.log('  After reset:', state5.count);
+        console.log('  Expected: 0');
+        console.log('  ✓ action() and actions() work\n');
+
+        // ================================================================
+        // TEST 6: Method chaining
+        // ================================================================
+        console.log('TEST 6: Method chaining');
+        const builder6 = ReactiveUtils.reactive({ value: 1 })
+          .computed({
+            doubled: function() {
+              return this.value * 2;
+            }
+          })
+          .watch({
+            value: (newVal) => {
+              console.log('  Value changed to:', newVal);
+            }
+          })
+          .action('increment', function(state) {
+            state.value++;
+          });
+
+        const state6 = builder6.build();
+
+        console.log('  Initial doubled:', state6.doubled);
+        console.log('  Expected: 2');
+
+        state6.increment();
+        setTimeout(() => {
+          console.log('  After increment - doubled:', state6.doubled);
+          console.log('  Expected: 4');
+          console.log('  ✓ Method chaining works\n');
+
+          // ============================================================
+          // TEST 7: build() returns state with destroy
+          // ============================================================
+          console.log('TEST 7: build() returns state with destroy');
+          const builder7 = ReactiveUtils.reactive({ x: 1 });
+          const state7 = builder7.build();
+
+          console.log('  Has destroy:', typeof state7.destroy === 'function');
+          console.log('  Expected: true');
+
+          let destroyEffectRuns = 0;
+          ReactiveUtils.effect(() => {
+            destroyEffectRuns++;
+            const _ = state7.x;
+          });
+
+          const before = destroyEffectRuns;
+          state7.destroy();
+
+          state7.x = 100;
+          setTimeout(() => {
+            console.log('  Effect runs after destroy:', destroyEffectRuns - before);
+            console.log('  Expected: 0');
+            console.log('  ✓ destroy() works\n');
+
+            // ========================================================
+            // TEST 8: Builder.destroy() without build
+            // ========================================================
+            console.log('TEST 8: Builder.destroy() without build');
+            let builderEffectRuns = 0;
+
+            const builder8 = ReactiveUtils.reactive({ value: 0 })
+              .effect(function() {
+                builderEffectRuns++;
+                const _ = this.value;
+              });
+
+            const beforeBuilderDestroy = builderEffectRuns;
+            builder8.destroy();
+
+            builder8.state.value = 50;
+            setTimeout(() => {
+              console.log('  Builder effect runs after destroy:', builderEffectRuns - beforeBuilderDestroy);
+              console.log('  Expected: 0');
+              console.log('  ✓ Builder destroy() works\n');
+
+              // ==================================================
+              // TEST 9: Practical example - Counter with builder
+              // ==================================================
+              console.log('TEST 9: Practical example - Counter');
+              const counter = ReactiveUtils.reactive({ count: 0, step: 1 })
+                .computed({
+                  isPositive: function() {
+                    return this.count > 0;
+                  },
+                  isEven: function() {
+                    return this.count % 2 === 0;
+                  }
+                })
+                .actions({
+                  increment: function(state) {
+                    state.count += state.step;
+                  },
+                  decrement: function(state) {
+                    state.count -= state.step;
+                  },
+                  setStep: function(state, step) {
+                    state.step = step;
+                  }
+                })
+                .build();
+
+              console.log('  Initial:', {
+                count: counter.count,
+                isPositive: counter.isPositive,
+                isEven: counter.isEven
+              });
+
+              counter.increment();
+              counter.increment();
+              console.log('  After 2 increments:', {
+                count: counter.count,
+                isPositive: counter.isPositive,
+                isEven: counter.isEven
+              });
+              console.log('  Expected: count=2, isPositive=true, isEven=true');
+
+              counter.setStep(3);
+              counter.increment();
+              console.log('  After setStep(3) and increment:', counter.count);
+              console.log('  Expected: 5');
+              console.log('  ✓ Counter example works\n');
+
+              // ==================================================
+              // TEST 10: Complex builder chain
+              // ==================================================
+              console.log('TEST 10: Complex builder chain');
+              let complexWatchCalls = 0;
+              let complexEffectRuns = 0;
+
+              const complex = ReactiveUtils.reactive({
+                firstName: 'John',
+                lastName: 'Doe',
+                age: 30
+              })
+                .computed({
+                  fullName: function() {
+                    return this.firstName + ' ' + this.lastName;
+                  },
+                  isAdult: function() {
+                    return this.age >= 18;
+                  }
+                })
+                .watch({
+                  age: (newVal, oldVal) => {
+                    complexWatchCalls++;
+                    console.log(`  Age watch: ${oldVal} -> ${newVal}`);
+                  }
+                })
+                .effect(function() {
+                  complexEffectRuns++;
+                  const _ = this.fullName;
+                })
+                .actions({
+                  setName: function(state, first, last) {
+                    state.firstName = first;
+                    state.lastName = last;
+                  },
+                  celebrate: function(state) {
+                    state.age++;
+                  }
+                })
+                .build();
+
+              console.log('  Initial fullName:', complex.fullName);
+              console.log('  Expected: "John Doe"');
+              console.log('  isAdult:', complex.isAdult);
+              console.log('  Expected: true');
+
+              complex.setName('Jane', 'Smith');
+              setTimeout(() => {
+                console.log('  After setName - fullName:', complex.fullName);
+                console.log('  Expected: "Jane Smith"');
+
+                complex.celebrate();
+                setTimeout(() => {
+                  console.log('  After celebrate - age:', complex.age);
+                  console.log('  Watch calls:', complexWatchCalls);
+                  console.log('  Effect runs:', complexEffectRuns);
+                  console.log('  ✓ Complex builder chain works\n');
+
+                  console.log('=== All ReactiveUtils.reactive() tests completed ===');
+                }, 50);
+              }, 50);
+            }, 50);
+          }, 50);
+        }, 50);
+      }, 50);
+    }, 50);
+  </script>
+</body>
+</html>

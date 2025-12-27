@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveUtils.async()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    console.log('=== Creating async state ===');
+    
+    // Create async state with initial value
+    const asyncState1 = ReactiveUtils.async(null);
+    console.log('asyncState1 (null):', {
+      data: asyncState1.data,
+      loading: asyncState1.loading,
+      error: asyncState1.error
+    });
+    
+    // Create async state with initial data
+    const asyncState2 = ReactiveUtils.async({ initial: 'data' });
+    console.log('\nasyncState2 (with data):', {
+      data: asyncState2.data,
+      loading: asyncState2.loading,
+      error: asyncState2.error
+    });
+    
+    // Test computed properties
+    console.log('\n=== Testing computed properties ===');
+    console.log('asyncState1.isSuccess:', asyncState1.isSuccess);
+    console.log('asyncState1.isError:', asyncState1.isError);
+    
+    asyncState1.data = { result: 'success' };
+    console.log('\nAfter setting data:');
+    console.log('asyncState1.isSuccess:', asyncState1.isSuccess);
+    
+    asyncState1.error = new Error('Failed');
+    console.log('\nAfter setting error:');
+    console.log('asyncState1.isError:', asyncState1.isError);
+    
+    // Test $execute method
+    console.log('\n=== Testing $execute ===');
+    const asyncState3 = ReactiveUtils.async(null);
+    
+    asyncState3.$execute(async () => {
+      console.log('Executing async operation...');
+      console.log('loading:', asyncState3.loading);
+      
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      return { userId: 1, name: 'John' };
+    }).then(result => {
+      console.log('\n$execute completed:');
+      console.log('result:', result);
+      console.log('asyncState3.data:', asyncState3.data);
+      console.log('asyncState3.loading:', asyncState3.loading);
+    });
+    
+    // Test $reset method
+    setTimeout(() => {
+      console.log('\n=== Testing $reset ===');
+      asyncState3.$reset();
+      console.log('After reset:', {
+        data: asyncState3.data,
+        loading: asyncState3.loading,
+        error: asyncState3.error
+      });
+    }, 2000);
+  </script>
+</body>
+</html>

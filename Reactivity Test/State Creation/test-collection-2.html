@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveUtils.collection()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Creating collections ===');
+    
+    // Create empty collection
+    const collection1 = ReactiveUtils.collection();
+    console.log('Empty collection:', collection1.items);
+    
+    // Create collection with items
+    const collection2 = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    console.log('\nCollection with items:', collection2.items);
+    
+    // Test add method
+    console.log('\n=== Testing add method ===');
+    collection2.add(6);
+    console.log('After add(6):', collection2.items);
+    console.log('Length:', collection2.length);
+    
+    // Test remove method
+    console.log('\n=== Testing remove method ===');
+    collection2.remove(3);
+    console.log('After remove(3):', collection2.items);
+    
+    collection2.remove(item => item > 4);
+    console.log('After remove(item > 4):', collection2.items);
+    
+    // Test update method
+    console.log('\n=== Testing update method ===');
+    collection2.update(2, { value: 20 });
+    console.log('After update(2, {value: 20}):', collection2.items);
+    
+    // Collection with objects
+    console.log('\n=== Collection with objects ===');
+    const todos = ReactiveUtils.collection([
+      { id: 1, text: 'Task 1', done: false },
+      { id: 2, text: 'Task 2', done: false },
+      { id: 3, text: 'Task 3', done: false }
+    ]);
+    
+    console.log('Initial todos:', todos.items);
+    
+    // Add todo
+    todos.add({ id: 4, text: 'Task 4', done: false });
+    console.log('\nAfter add:', todos.items);
+    
+    // Update todo
+    todos.update(t => t.id === 2, { done: true });
+    console.log('\nAfter update (mark #2 done):', todos.items);
+    
+    // Toggle todo
+    todos.toggle(t => t.id === 1, 'done');
+    console.log('\nAfter toggle #1:', todos.items);
+    
+    // Filter todos
+    const activeTodos = todos.filter(t => !t.done);
+    console.log('\nActive todos:', activeTodos);
+    
+    // Map todos
+    const todoTexts = todos.map(t => t.text);
+    console.log('Todo texts:', todoTexts);
+    
+    // Find todo
+    const todo2 = todos.find(t => t.id === 2);
+    console.log('Found todo #2:', todo2);
+    
+    // Sort
+    console.log('\n=== Testing sort ===');
+    const numbers = ReactiveUtils.collection([5, 2, 8, 1, 9]);
+    console.log('Before sort:', numbers.items);
+    numbers.sort((a, b) => a - b);
+    console.log('After sort:', numbers.items);
+    
+    // Reverse
+    numbers.reverse();
+    console.log('After reverse:', numbers.items);
+    
+    // Clear
+    console.log('\n=== Testing clear ===');
+    todos.clear();
+    console.log('After clear:', todos.items);
+    console.log('isEmpty:', todos.isEmpty());
+  </script>
+</body>
+</html>

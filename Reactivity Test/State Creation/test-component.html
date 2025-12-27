@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveUtils.component()</title></head>
+<body>
+  <div id="counter">0</div>
+  <div id="message">Loading...</div>
+  
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/05_dh-reactive-cleanup.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('=== Creating component ===');
+      
+      const component = ReactiveUtils.component({
+        // Component state
+        state: {
+          count: 0,
+          message: 'Hello'
+        },
+        
+        // Computed properties
+        computed: {
+          doubled() {
+            return this.count * 2;
+          },
+          greeting() {
+            return `${this.message}, count is ${this.count}`;
+          }
+        },
+        
+        // Watchers
+        watch: {
+          count(newVal, oldVal) {
+            console.log(`👀 Watch: count changed from ${oldVal} to ${newVal}`);
+          }
+        },
+        
+        // Effects
+        effects: {
+          logState() {
+            console.log(`⚡ Effect: count=${this.count}, doubled=${this.doubled}`);
+          }
+        },
+        
+        // DOM bindings
+        bindings: {
+          '#counter': 'count',
+          '#message': function() {
+            return this.greeting;
+          }
+        },
+        
+        // Actions
+        actions: {
+          increment(state, amount = 1) {
+            state.count += amount;
+          },
+          setMessage(state, msg) {
+            state.message = msg;
+          }
+        },
+        
+        // Lifecycle hooks
+        mounted() {
+          console.log('🎉 Component mounted!');
+          console.log('Initial state:', {
+            count: this.count,
+            message: this.message,
+            doubled: this.doubled
+          });
+        },
+        
+        unmounted() {
+          console.log('👋 Component unmounted!');
+        }
+      });
+      
+      console.log('\n✅ Component created');
+      
+      // Use component
+      setTimeout(() => {
+        console.log('\n=== Using component actions ===');
+        component.increment();
+      }, 1000);
+      
+      setTimeout(() => {
+        component.increment(5);
+      }, 2000);
+      
+      setTimeout(() => {
+        component.setMessage('Goodbye');
+      }, 3000);
+      
+      // Destroy component
+      setTimeout(() => {
+        console.log('\n=== Destroying component ===');
+        component.$destroy();
+        
+        console.log('\n=== After destroy ===');
+        component.count = 100;
+        console.log('Set count to 100, but watch/effects should NOT run');
+      }, 4000);
+    });
+  </script>
+</body>
+</html>

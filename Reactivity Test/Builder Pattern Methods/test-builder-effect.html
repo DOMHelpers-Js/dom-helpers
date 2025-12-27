@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test builder.effect()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/05_dh-reactive-cleanup.js"></script>
+  <script>
+    const builder = ReactiveUtils.reactive({
+      count: 0,
+      multiplier: 2
+    });
+    
+    console.log('Initial state:', {
+      count: builder.state.count,
+      multiplier: builder.state.multiplier
+    });
+    
+    // Add effect
+    console.log('\n=== Adding effect ===');
+    let effectRuns = 0;
+    builder.effect(function() {
+      effectRuns++;
+      const result = this.count * this.multiplier;
+      console.log(`Effect #${effectRuns}: ${this.count} × ${this.multiplier} = ${result}`);
+    });
+    
+    console.log('Effect added and ran immediately');
+    
+    // Update state - effect should run
+    setTimeout(() => {
+      console.log('\n=== Updating count ===');
+      builder.state.count = 5;
+      console.log('Effect runs:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      console.log('\n=== Updating multiplier ===');
+      builder.state.multiplier = 3;
+      console.log('Effect runs:', effectRuns);
+    }, 1000);
+    
+    // Add another effect
+    setTimeout(() => {
+      console.log('\n=== Adding second effect ===');
+      let effect2Runs = 0;
+      builder.effect(function() {
+        effect2Runs++;
+        console.log(`Effect 2 #${effect2Runs}: count = ${this.count}`);
+      });
+      
+      console.log('Second effect added');
+    }, 1500);
+    
+    // Update - both effects should run
+    setTimeout(() => {
+      console.log('\n=== Updating count (both effects should run) ===');
+      builder.state.count = 10;
+      console.log('Total effect runs:', effectRuns);
+    }, 2000);
+    
+    // Chaining - effect returns builder
+    setTimeout(() => {
+      console.log('\n=== Chaining effect ===');
+      const result = builder.effect(function() {
+        console.log('Third effect:', this.count);
+      });
+      
+      console.log('builder.effect() returns:', result === builder ? 'builder (chainable)' : 'something else');
+    }, 2500);
+  </script>
+</body>
+</html>

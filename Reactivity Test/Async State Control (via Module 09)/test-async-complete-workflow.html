@@ -1,24 +1,29 @@
 <!DOCTYPE html>
 <html>
-<head><title>Test Async Complete Workflow</title></head>
+<head><title>Test Async Complete Workflow (Module 06)</title></head>
 <body>
   <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/05_dh-reactive-cleanup.js"></script>
+  <script src="../../src/Reactive/06_dh-reactive-enhancements.js"></script>
   <script src="../../src/Reactive/09_dh-reactive-namespace-methods.js"></script>
   <script>
-    const asyncState = ReactiveUtils.async(null);
+    // Use enhanced async state from Module 06
+    const asyncState = ReactiveUtils.asyncState(null);
     
     // Monitor all state changes
     ReactiveUtils.effect(() => {
       console.log('State updated:', {
         data: asyncState.data,
         loading: asyncState.loading,
-        error: asyncState.error ? asyncState.error.message : null
+        error: asyncState.error ? asyncState.error.message : null,
+        isSuccess: asyncState.isSuccess,
+        isError: asyncState.isError
       });
     });
     
     // Workflow 1: Successful fetch
     console.log('\n=== Workflow 1: Successful fetch ===');
-    ReactiveUtils.execute(asyncState, async () => {
+    ReactiveUtils.execute(asyncState, async (signal) => {
       await new Promise(resolve => setTimeout(resolve, 1000));
       return { result: 'success', value: 100 };
     });
@@ -32,9 +37,11 @@
     // Workflow 3: Execute with error
     setTimeout(() => {
       console.log('\n=== Workflow 3: Fetch with error ===');
-      ReactiveUtils.execute(asyncState, async () => {
+      ReactiveUtils.execute(asyncState, async (signal) => {
         await new Promise(resolve => setTimeout(resolve, 500));
         throw new Error('Network error');
+      }).catch(err => {
+        console.log('Caught error:', err.error?.message || err);
       });
     }, 4000);
     
@@ -47,9 +54,17 @@
     // Workflow 5: Execute and abort
     setTimeout(() => {
       console.log('\n=== Workflow 5: Execute and abort ===');
-      ReactiveUtils.execute(asyncState, async () => {
-        await new Promise(resolve => setTimeout(resolve, 3000));
+      ReactiveUtils.execute(asyncState, async (signal) => {
+        await new Promise((resolve, reject) => {
+          const timeout = setTimeout(resolve, 3000);
+          signal.addEventListener('abort', () => {
+            clearTimeout(timeout);
+            reject(new Error('Aborted'));
+          });
+        });
         return { result: 'should not complete' };
+      }).catch(err => {
+        console.log('Caught:', err);
       });
       
       setTimeout(() => {

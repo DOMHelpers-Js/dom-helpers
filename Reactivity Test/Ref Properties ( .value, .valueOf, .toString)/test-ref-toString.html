@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ref.toString()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+
+  <script>
+    console.log('=== Testing ref.toString() ===\n');
+
+    // ========================================================================
+    // TEST 1: Basic toString - convert to string
+    // ========================================================================
+    console.log('TEST 1: Basic toString - convert to string');
+
+    const numToStr = ReactiveUtils.ref(42);
+    console.log('  ref(42).toString():', numToStr.toString());
+    console.log('  typeof:', typeof numToStr.toString());
+    console.log('  Expected: "42" (string)');
+
+    const strToStr = ReactiveUtils.ref('hello');
+    console.log('  ref("hello").toString():', strToStr.toString());
+    console.log('  Expected: "hello"');
+
+    const boolToStr = ReactiveUtils.ref(true);
+    console.log('  ref(true).toString():', boolToStr.toString());
+    console.log('  Expected: "true"');
+
+    const nullToStr = ReactiveUtils.ref(null);
+    console.log('  ref(null).toString():', nullToStr.toString());
+    console.log('  Expected: "null"');
+
+    const undefinedToStr = ReactiveUtils.ref(undefined);
+    console.log('  ref(undefined).toString():', undefinedToStr.toString());
+    console.log('  Expected: "undefined"');
+
+    console.log('  ✓ Basic toString works\n');
+
+    // ========================================================================
+    // TEST 2: String concatenation with +
+    // ========================================================================
+    console.log('TEST 2: String concatenation with +');
+
+    const name = ReactiveUtils.ref('Alice');
+    const greeting = 'Hello, ' + name.toString();
+    console.log('  "Hello, " + ref("Alice"):', greeting);
+    console.log('  Expected: "Hello, Alice"');
+
+    const age = ReactiveUtils.ref(25);
+    const info = 'Age: ' + age.toString();
+    console.log('  "Age: " + ref(25):', info);
+    console.log('  Expected: "Age: 25"');
+
+    const count = ReactiveUtils.ref(10);
+    const message = 'You have ' + count.toString() + ' items';
+    console.log('  Multi-part concatenation:', message);
+    console.log('  Expected: "You have 10 items"');
+
+    console.log('  ✓ String concatenation works\n');
+
+    // ========================================================================
+    // TEST 3: Template literals
+    // ========================================================================
+    console.log('TEST 3: Template literals');
+
+    const userName = ReactiveUtils.ref('Bob');
+    const userAge = ReactiveUtils.ref(30);
+
+    const template1 = `Name: ${userName.toString()}`;
+    console.log('  Template with name:', template1);
+    console.log('  Expected: "Name: Bob"');
+
+    const template2 = `Age: ${userAge.toString()}`;
+    console.log('  Template with age:', template2);
+    console.log('  Expected: "Age: 30"');
+
+    const template3 = `User ${userName.toString()} is ${userAge.toString()} years old`;
+    console.log('  Multi-value template:', template3);
+    console.log('  Expected: "User Bob is 30 years old"');
+
+    const score = ReactiveUtils.ref(95);
+    const result = `Score: ${score.toString()}/100`;
+    console.log('  Template with expression:', result);
+    console.log('  Expected: "Score: 95/100"');
+
+    console.log('  ✓ Template literals work\n');
+
+    // ========================================================================
+    // TEST 4: Different number formats
+    // ========================================================================
+    console.log('TEST 4: Different number formats');
+
+    const integer = ReactiveUtils.ref(123);
+    console.log('  Integer ref(123):', integer.toString());
+    console.log('  Expected: "123"');
+
+    const float = ReactiveUtils.ref(3.14159);
+    console.log('  Float ref(3.14159):', float.toString());
+    console.log('  Expected: "3.14159"');
+
+    const negative = ReactiveUtils.ref(-42);
+    console.log('  Negative ref(-42):', negative.toString());
+    console.log('  Expected: "-42"');
+
+    const zero = ReactiveUtils.ref(0);
+    console.log('  Zero ref(0):', zero.toString());
+    console.log('  Expected: "0"');
+
+    const scientific = ReactiveUtils.ref(1.23e5);
+    console.log('  Scientific ref(1.23e5):', scientific.toString());
+    console.log('  Expected: "123000"');
+
+    console.log('  ✓ Number formats work\n');
+
+    // ========================================================================
+    // TEST 5: Arrays and objects
+    // ========================================================================
+    console.log('TEST 5: Arrays and objects');
+
+    const arrRef = ReactiveUtils.ref([1, 2, 3]);
+    console.log('  ref([1,2,3]).toString():', arrRef.toString());
+    console.log('  Expected: "1,2,3"');
+
+    const emptyArr = ReactiveUtils.ref([]);
+    console.log('  ref([]).toString():', emptyArr.toString());
+    console.log('  Expected: ""');
+
+    const strArr = ReactiveUtils.ref(['a', 'b', 'c']);
+    console.log('  ref(["a","b","c"]).toString():', strArr.toString());
+    console.log('  Expected: "a,b,c"');
+
+    const objRef = ReactiveUtils.ref({ x: 10, y: 20 });
+    console.log('  ref({x:10,y:20}).toString():', objRef.toString());
+    console.log('  Expected: "[object Object]"');
+
+    const nestedArr = ReactiveUtils.ref([1, [2, 3], 4]);
+    console.log('  Nested array:', nestedArr.toString());
+    console.log('  Expected: "1,2,3,4"');
+
+    console.log('  ✓ Complex types handled\n');
+
+    // ========================================================================
+    // TEST 6: DOM text content
+    // ========================================================================
+    console.log('TEST 6: DOM text content (simulated)');
+
+    const displayValue = ReactiveUtils.ref(42);
+    const div = document.createElement('div');
+    div.textContent = displayValue.toString();
+
+    console.log('  div.textContent set to ref(42).toString():', div.textContent);
+    console.log('  Expected: "42"');
+
+    const title = ReactiveUtils.ref('Welcome');
+    const h1 = document.createElement('h1');
+    h1.textContent = title.toString();
+
+    console.log('  h1.textContent set to ref("Welcome"):', h1.textContent);
+    console.log('  Expected: "Welcome"');
+
+    const status = ReactiveUtils.ref('active');
+    const badge = document.createElement('span');
+    badge.textContent = 'Status: ' + status.toString();
+
+    console.log('  badge.textContent:', badge.textContent);
+    console.log('  Expected: "Status: active"');
+
+    console.log('  ✓ DOM text content works\n');
+
+    // ========================================================================
+    // TEST 7: Logging and debugging
+    // ========================================================================
+    console.log('TEST 7: Logging and debugging');
+
+    const debugValue = ReactiveUtils.ref(100);
+    const logMessage = 'Debug value: ' + debugValue.toString();
+    console.log('  Log message:', logMessage);
+    console.log('  Expected: "Debug value: 100"');
+
+    const error = ReactiveUtils.ref('Network timeout');
+    const errorMsg = `Error: ${error.toString()}`;
+    console.log('  Error message:', errorMsg);
+    console.log('  Expected: "Error: Network timeout"');
+
+    const id = ReactiveUtils.ref(12345);
+    const trace = `[ID: ${id.toString()}] Processing...`;
+    console.log('  Trace message:', trace);
+    console.log('  Expected: "[ID: 12345] Processing..."');
+
+    console.log('  ✓ Logging works\n');
+
+    // ========================================================================
+    // TEST 8: String comparison
+    // ========================================================================
+    console.log('TEST 8: String comparison');
+
+    const input1 = ReactiveUtils.ref('test');
+    const input2 = ReactiveUtils.ref('test');
+
+    console.log('  ref("test").toString() === ref("test").toString():',
+      input1.toString() === input2.toString());
+    console.log('  Expected: true');
+
+    const num1 = ReactiveUtils.ref(42);
+    const str1 = ReactiveUtils.ref('42');
+
+    console.log('  ref(42).toString() === ref("42").toString():',
+      num1.toString() === str1.toString());
+    console.log('  Expected: true');
+
+    const different = ReactiveUtils.ref('hello');
+    console.log('  ref("test").toString() === ref("hello").toString():',
+      input1.toString() === different.toString());
+    console.log('  Expected: false');
+
+    console.log('  ✓ String comparison works\n');
+
+    // ========================================================================
+    // TEST 9: URL and query parameters
+    // ========================================================================
+    console.log('TEST 9: URL and query parameters (simulated)');
+
+    const userId = ReactiveUtils.ref(123);
+    const page = ReactiveUtils.ref(5);
+    const url = `/api/users/${userId.toString()}?page=${page.toString()}`;
+
+    console.log('  Generated URL:', url);
+    console.log('  Expected: "/api/users/123?page=5"');
+
+    const category = ReactiveUtils.ref('electronics');
+    const sort = ReactiveUtils.ref('price');
+    const queryString = `category=${category.toString()}&sort=${sort.toString()}`;
+
+    console.log('  Query string:', queryString);
+    console.log('  Expected: "category=electronics&sort=price"');
+
+    console.log('  ✓ URL building works\n');
+
+    // ========================================================================
+    // TEST 10: Form values
+    // ========================================================================
+    console.log('TEST 10: Form values (simulated)');
+
+    const firstName = ReactiveUtils.ref('John');
+    const lastName = ReactiveUtils.ref('Doe');
+    const fullName = firstName.toString() + ' ' + lastName.toString();
+
+    console.log('  Full name:', fullName);
+    console.log('  Expected: "John Doe"');
+
+    const email = ReactiveUtils.ref('user@example.com');
+    const emailDisplay = `Email: ${email.toString()}`;
+
+    console.log('  Email display:', emailDisplay);
+    console.log('  Expected: "Email: user@example.com"');
+
+    const quantity = ReactiveUtils.ref(5);
+    const pricePerItem = ReactiveUtils.ref(10);
+    const summary = `${quantity.toString()} items × $${pricePerItem.toString()}`;
+
+    console.log('  Order summary:', summary);
+    console.log('  Expected: "5 items × $10"');
+
+    console.log('  ✓ Form values work\n');
+
+    // ========================================================================
+    // TEST 11: Boolean string representation
+    // ========================================================================
+    console.log('TEST 11: Boolean string representation');
+
+    const isActive = ReactiveUtils.ref(true);
+    const isClosed = ReactiveUtils.ref(false);
+
+    console.log('  ref(true).toString():', isActive.toString());
+    console.log('  Expected: "true"');
+
+    console.log('  ref(false).toString():', isClosed.toString());
+    console.log('  Expected: "false"');
+
+    const activeStatus = `Active: ${isActive.toString()}`;
+    console.log('  Status message:', activeStatus);
+    console.log('  Expected: "Active: true"');
+
+    const closedStatus = `Closed: ${isClosed.toString()}`;
+    console.log('  Closed message:', closedStatus);
+    console.log('  Expected: "Closed: false"');
+
+    console.log('  ✓ Boolean strings work\n');
+
+    // ========================================================================
+    // TEST 12: Computed with toString
+    // ========================================================================
+    console.log('TEST 12: Computed with toString');
+
+    const first = ReactiveUtils.ref('Jane');
+    const last = ReactiveUtils.ref('Smith');
+    const state = ReactiveUtils.state({});
+
+    state.$computed('displayName', function() {
+      return first.toString() + ' ' + last.toString();
+    });
+
+    console.log('  Initial displayName:', state.displayName);
+    console.log('  Expected: "Jane Smith"');
+
+    first.value = 'John';
+    setTimeout(() => {
+      console.log('  After first = "John", displayName:', state.displayName);
+      console.log('  Expected: "John Smith"');
+
+      last.value = 'Doe';
+      setTimeout(() => {
+        console.log('  After last = "Doe", displayName:', state.displayName);
+        console.log('  Expected: "John Doe"');
+        console.log('  ✓ toString works in computed\n');
+
+        // ================================================================
+        // TEST 13: Edge cases
+        // ================================================================
+        console.log('TEST 13: Edge cases');
+
+        // Empty string
+        const emptyStr = ReactiveUtils.ref('');
+        console.log('  ref("").toString():', `"${emptyStr.toString()}"`);
+        console.log('  Expected: ""');
+
+        // Whitespace
+        const whitespace = ReactiveUtils.ref('  ');
+        console.log('  ref("  ").toString():', `"${whitespace.toString()}"`);
+        console.log('  Expected: "  "');
+
+        // Special characters
+        const special = ReactiveUtils.ref('Hello\nWorld');
+        console.log('  ref with newline:', special.toString());
+
+        const unicode = ReactiveUtils.ref('Hello 👋');
+        console.log('  ref with emoji:', unicode.toString());
+
+        // Very large number
+        const large = ReactiveUtils.ref(9999999999999);
+        console.log('  Large number:', large.toString());
+
+        console.log('  ✓ Edge cases handled\n');
+
+        console.log('=== All ref.toString() tests completed ===');
+      }, 50);
+    }, 50);
+  </script>
+</body>
+</html>

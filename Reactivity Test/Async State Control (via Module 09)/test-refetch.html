@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html>
-<head><title>Test ReactiveUtils.refetch()</title></head>
+<head><title>Test ReactiveUtils.refetch() - Requires Module 06</title></head>
 <body>
   <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/05_dh-reactive-cleanup.js"></script>
+  <script src="../../src/Reactive/06_dh-reactive-enhancements.js"></script>
   <script src="../../src/Reactive/09_dh-reactive-namespace-methods.js"></script>
   <script>
-    const asyncState = ReactiveUtils.async(null);
+    // Module 06 replaces async state with enhanced version
+    const asyncState = ReactiveUtils.asyncState(null);
     
     let fetchCount = 0;
     
@@ -18,7 +21,7 @@
     // Execute initial fetch
     console.log('\n=== Initial fetch ===');
     
-    ReactiveUtils.execute(asyncState, async () => {
+    ReactiveUtils.execute(asyncState, async (signal) => {
       fetchCount++;
       console.log(`Fetch #${fetchCount} started`);
       
@@ -29,7 +32,7 @@
         timestamp: Date.now(),
         data: `Data from fetch #${fetchCount}`
       };
-    }).then(() => {
+    }).then((result) => {
       console.log('\n=== After initial fetch ===');
       console.log('asyncState.data:', asyncState.data);
       console.log('Fetch count:', fetchCount);
@@ -59,7 +62,7 @@
     
     // Test refetch without initial execute
     setTimeout(() => {
-      const asyncState2 = ReactiveUtils.async(null);
+      const asyncState2 = ReactiveUtils.asyncState(null);
       
       console.log('\n=== Testing refetch without execute ===');
       const result = ReactiveUtils.refetch(asyncState2);

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test updateAll() with Reactive Bindings</title></head>
+<body>
+  <div id="counter">0</div>
+  <div id="doubled">0</div>
+  <div id="status">Idle</div>
+  
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    const state = ReactiveUtils.state({
+      count: 0
+    });
+    
+    // Add computed property
+    state.$computed('doubled', function() {
+      return this.count * 2;
+    });
+    
+    // Create reactive bindings
+    state.$bind({
+      '#counter': 'count',
+      '#doubled': function() {
+        return this.doubled;
+      },
+      '#status': function() {
+        return this.count > 10 ? 'High' : 'Low';
+      }
+    });
+    
+    console.log('Initial state:', { count: state.count, doubled: state.doubled });
+    console.log('Check DOM: counter, doubled, status');
+    
+    // Update state - bindings should update automatically
+    setTimeout(() => {
+      console.log('\n=== Updating with updateAll ===');
+      updateAll(state, {
+        count: 15
+      });
+      console.log('State:', { count: state.count, doubled: state.doubled });
+      console.log('Check DOM: All should update automatically via bindings');
+    }, 1000);
+    
+    // Update both state and DOM directly
+    setTimeout(() => {
+      console.log('\n=== Updating state and DOM ===');
+      updateAll(state, {
+        count: 25,
+        '#status': { 
+          textContent: 'Very High',
+          style: { color: 'red' }
+        }
+      });
+      console.log('State:', { count: state.count, doubled: state.doubled });
+      console.log('Check DOM: counter and doubled update via binding, status set directly');
+    }, 2000);
+  </script>
+</body>
+</html>

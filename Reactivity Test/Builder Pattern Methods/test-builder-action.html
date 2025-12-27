@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test builder.action() - FIXED</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    const builder = ReactiveUtils.reactive({
+      count: 0,
+      items: []
+    });
+    
+    console.log('Initial state:', {
+      count: builder.state.count,
+      items: builder.state.items
+    });
+    
+    // IMPORTANT: Actions receive state as FIRST parameter
+    console.log('\n=== Adding single action ===');
+    builder.action('increment', function(state, amount = 1) {
+      state.count += amount;
+      console.log(`increment(${amount}): count is now ${state.count}`);
+    });
+    
+    console.log('Action added: increment');
+    
+    // Use the action
+    console.log('\n=== Using increment action ===');
+    builder.state.increment();
+    builder.state.increment(5);
+    builder.state.increment(10);
+    console.log('Final count:', builder.state.count);
+    
+    // Add another action
+    console.log('\n=== Adding another action ===');
+    builder.action('addItem', function(state, item) {
+      state.items.push(item);
+      console.log(`addItem("${item}"): items =`, state.items);
+    });
+    
+    builder.state.addItem('Apple');
+    builder.state.addItem('Banana');
+    builder.state.addItem('Cherry');
+    console.log('Final items:', builder.state.items);
+    
+    // Actions can use other state properties
+    console.log('\n=== Action using multiple properties ===');
+    builder.action('summary', function(state) {
+      return `Count: ${state.count}, Items: ${state.items.length}`;
+    });
+    
+    const summary = builder.state.summary();
+    console.log('Summary:', summary);
+    
+    // Chaining - action returns builder
+    console.log('\n=== Chaining action ===');
+    const result = builder.action('reset', function(state) {
+      state.count = 0;
+      state.items = [];
+      console.log('State reset');
+    });
+    
+    console.log('builder.action() returns:', result === builder ? 'builder (chainable)' : 'something else');
+    
+    builder.state.reset();
+    console.log('After reset:', {
+      count: builder.state.count,
+      items: builder.state.items
+    });
+  </script>
+</body>
+</html>

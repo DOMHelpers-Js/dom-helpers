@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test builder.state</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    // Create a builder
+    const builder = ReactiveUtils.reactive({
+      count: 0,
+      name: 'Initial'
+    });
+    
+    console.log('Builder created');
+    console.log('builder.state:', builder.state);
+    
+    // Access state properties
+    console.log('\n=== Accessing state properties ===');
+    console.log('builder.state.count:', builder.state.count);
+    console.log('builder.state.name:', builder.state.name);
+    
+    // State is reactive
+    console.log('\n=== State is reactive ===');
+    ReactiveUtils.effect(() => {
+      console.log(`Effect: count = ${builder.state.count}`);
+    });
+    
+    builder.state.count = 5;
+    console.log('After builder.state.count = 5');
+    
+    builder.state.count = 10;
+    console.log('After builder.state.count = 10');
+    
+    // State is read-only property on builder
+    console.log('\n=== State property is read-only ===');
+    try {
+      builder.state = { different: 'object' };
+      console.log('ERROR: Should not be able to replace state');
+    } catch (e) {
+      console.log('✓ Cannot replace builder.state (read-only)');
+    }
+    
+    // But state properties are writable
+    console.log('\n=== State properties are writable ===');
+    builder.state.name = 'Updated';
+    console.log('builder.state.name:', builder.state.name);
+    
+    // State persists through builder operations
+    console.log('\n=== State persists through builder ===');
+    builder.computed({
+      doubled() {
+        return this.count * 2;
+      }
+    });
+    
+    console.log('After adding computed:');
+    console.log('  builder.state.count:', builder.state.count);
+    console.log('  builder.state.doubled:', builder.state.doubled);
+  </script>
+</body>
+</html>

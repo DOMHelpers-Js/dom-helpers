@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Form with Validation</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Creating form with validators ===');
+    
+    const form = ReactiveUtils.form(
+      {
+        username: '',
+        email: '',
+        password: '',
+        confirmPassword: ''
+      },
+      {
+        validators: {
+          username: (value) => {
+            if (!value) return 'Username is required';
+            if (value.length < 3) return 'Username must be at least 3 characters';
+            return null;
+          },
+          
+          email: (value) => {
+            if (!value) return 'Email is required';
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(value)) return 'Invalid email format';
+            return null;
+          },
+          
+          password: (value) => {
+            if (!value) return 'Password is required';
+            if (value.length < 6) return 'Password must be at least 6 characters';
+            return null;
+          },
+          
+          confirmPassword: (value, allValues) => {
+            if (!value) return 'Please confirm password';
+            if (value !== allValues.password) return 'Passwords do not match';
+            return null;
+          }
+        }
+      }
+    );
+    
+    console.log('Initial state:', {
+      isValid: form.isValid,
+      hasErrors: form.hasErrors
+    });
+    
+    // Test validation on setValue
+    console.log('\n=== Testing auto-validation ===');
+    form.setValue('username', 'jo');
+    console.log('username="jo":', {
+      error: form.getError('username'),
+      isValid: form.isValid
+    });
+    
+    form.setValue('username', 'john_doe');
+    console.log('username="john_doe":', {
+      error: form.getError('username'),
+      isValid: form.isValid
+    });
+    
+    // Test email validation
+    console.log('\n=== Testing email validation ===');
+    form.setValue('email', 'invalid');
+    console.log('email="invalid":', form.getError('email'));
+    
+    form.setValue('email', 'john@example.com');
+    console.log('email="john@example.com":', form.getError('email'));
+    
+    // Test password matching
+    console.log('\n=== Testing password matching ===');
+    form.setValue('password', 'secret123');
+    form.setValue('confirmPassword', 'secret456');
+    console.log('Passwords dont match:', form.getError('confirmPassword'));
+    
+    form.setValue('confirmPassword', 'secret123');
+    console.log('Passwords match:', form.getError('confirmPassword'));
+    
+    // Validate all
+    console.log('\n=== Validating all fields ===');
+    form.reset();
+    const isValid = form.validate();
+    console.log('Form valid?', isValid);
+    console.log('All errors:', form.errors);
+    console.log('Error fields:', form.errorFields);
+  </script>
+</body>
+</html>

@@ -582,8 +582,10 @@
       loading: false,
       error: null,
       requestId: 0,
-      abortController: null
+      
     });
+
+ 
 
     // Add computed properties
     state.$computed('isSuccess', function() {
@@ -602,6 +604,8 @@
      * Execute async function with automatic cancellation
      */
     state.$execute = async function(fn) {
+      this.lastFn = fn;
+
       // Cancel previous request
       if (this.abortController) {
         this.abortController.abort();
@@ -683,6 +687,10 @@
       if (this.lastFn) {
         return this.$execute(this.lastFn);
       }
+
+    return Promise.resolve({ success: false, error: new Error('No function to refetch') });
+ 
+
     };
 
     return state;

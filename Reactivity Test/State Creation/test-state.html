@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveUtils.state()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    console.log('=== Creating reactive states ===');
+    
+    // Simple state
+    const state1 = ReactiveUtils.state({
+      count: 0,
+      name: 'John'
+    });
+    
+    console.log('Simple state:', {
+      count: state1.count,
+      name: state1.name
+    });
+    
+    // Nested state
+    const state2 = ReactiveUtils.state({
+      user: {
+        name: 'Jane',
+        age: 25
+      },
+      settings: {
+        theme: 'dark',
+        notifications: true
+      }
+    });
+    
+    console.log('\nNested state:', {
+      userName: state2.user.name,
+      theme: state2.settings.theme
+    });
+    
+    // Test reactivity
+    console.log('\n=== Testing reactivity ===');
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: count = ${state1.count}, name = ${state1.name}`);
+    });
+    
+    console.log('Initial effect runs:', effectRuns);
+    
+    setTimeout(() => {
+      console.log('\n=== Updating count ===');
+      state1.count = 5;
+      console.log('Effect runs:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      console.log('\n=== Updating name ===');
+      state1.name = 'Jane';
+      console.log('Effect runs:', effectRuns);
+    }, 1000);
+    
+    // Test nested updates
+    setTimeout(() => {
+      console.log('\n=== Updating nested property ===');
+      let nestedRuns = 0;
+      ReactiveUtils.effect(() => {
+        nestedRuns++;
+        console.log(`Nested effect #${nestedRuns}: theme = ${state2.settings.theme}`);
+      });
+      
+      setTimeout(() => {
+        state2.settings.theme = 'light';
+        console.log('Nested effect runs:', nestedRuns);
+      }, 500);
+    }, 1500);
+    
+    // Test state methods
+    setTimeout(() => {
+      console.log('\n=== Testing state methods ===');
+      
+      // $computed
+      state1.$computed('doubled', function() {
+        return this.count * 2;
+      });
+      console.log('state1.doubled:', state1.doubled);
+      
+      // $watch
+      state1.$watch('count', (newVal, oldVal) => {
+        console.log(`Watch: count changed from ${oldVal} to ${newVal}`);
+      });
+      
+      setTimeout(() => {
+        state1.count = 10;
+      }, 500);
+    }, 2500);
+  </script>
+</body>
+</html>

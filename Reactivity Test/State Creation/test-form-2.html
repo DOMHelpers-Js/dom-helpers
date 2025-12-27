@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveUtils.form()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Creating form ===');
+    
+    // Create simple form
+    const form = ReactiveUtils.form({
+      username: '',
+      email: '',
+      password: ''
+    });
+    
+    console.log('Initial form state:', {
+      values: form.values,
+      errors: form.errors,
+      touched: form.touched,
+      isValid: form.isValid,
+      isDirty: form.isDirty
+    });
+    
+    // Set values
+    console.log('\n=== Setting values ===');
+    form.setValue('username', 'john_doe');
+    console.log('After setValue:', {
+      username: form.values.username,
+      touched: form.touched,
+      isDirty: form.isDirty
+    });
+    
+    form.setValues({
+      email: 'john@example.com',
+      password: 'secret123'
+    });
+    console.log('After setValues:', form.values);
+    
+    // Test errors
+    console.log('\n=== Testing errors ===');
+    form.setError('email', 'Invalid email format');
+    console.log('After setError:', {
+      errors: form.errors,
+      hasErrors: form.hasErrors,
+      isValid: form.isValid
+    });
+    
+    form.clearError('email');
+    console.log('After clearError:', {
+      errors: form.errors,
+      isValid: form.isValid
+    });
+    
+    // Test touched
+    console.log('\n=== Testing touched ===');
+    form.setTouched('password');
+    console.log('Touched fields:', form.touchedFields);
+    
+    form.touchAll();
+    console.log('After touchAll:', form.touchedFields);
+    
+    // Reset form
+    console.log('\n=== Resetting form ===');
+    form.reset();
+    console.log('After reset:', {
+      values: form.values,
+      errors: form.errors,
+      touched: form.touched,
+      isDirty: form.isDirty
+    });
+  </script>
+</body>
+</html>

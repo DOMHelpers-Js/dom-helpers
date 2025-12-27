@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Form Submit</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Creating form with submit handler ===');
+    
+    const form = ReactiveUtils.form(
+      {
+        email: '',
+        message: ''
+      },
+      {
+        validators: {
+          email: (value) => {
+            if (!value) return 'Email is required';
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(value) ? null : 'Invalid email';
+          },
+          message: (value) => {
+            if (!value) return 'Message is required';
+            if (value.length < 10) return 'Message must be at least 10 characters';
+            return null;
+          }
+        },
+        
+        onSubmit: async (values, form) => {
+          console.log('📤 Submitting form...');
+          console.log('Values:', values);
+          
+          // Simulate API call
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          console.log('✅ Form submitted successfully!');
+          return { success: true };
+        }
+      }
+    );
+    
+    // Try to submit empty form
+    console.log('\n=== Attempting to submit empty form ===');
+    form.submit().then(result => {
+      console.log('Submit result:', result);
+      if (!result.success) {
+        console.log('Validation errors:', result.errors);
+      }
+    });
+    
+    // Submit valid form
+    setTimeout(() => {
+      console.log('\n=== Submitting valid form ===');
+      form.setValues({
+        email: 'test@example.com',
+        message: 'This is a test message that is long enough.'
+      });
+      
+      console.log('isSubmitting before:', form.isSubmitting);
+      
+      form.submit().then(result => {
+        console.log('Submit result:', result);
+        console.log('isSubmitting after:', form.isSubmitting);
+        console.log('submitCount:', form.submitCount);
+      });
+    }, 2000);
+    
+    // Test custom submit handler
+    setTimeout(() => {
+      console.log('\n=== Using custom submit handler ===');
+      form.reset();
+      form.setValues({
+        email: 'custom@example.com',
+        message: 'Custom submit handler test message here.'
+      });
+      
+      form.submit(async (values) => {
+        console.log('🔧 Custom handler called');
+        console.log('Values:', values);
+        return { customResult: true };
+      }).then(result => {
+        console.log('Custom result:', result);
+      });
+    }, 5000);
+  </script>
+</body>
+</html>

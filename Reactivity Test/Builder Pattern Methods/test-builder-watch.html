@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test builder.watch()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/05_dh-reactive-cleanup.js"></script>
+  <script>
+    const builder = ReactiveUtils.reactive({
+      count: 0,
+      name: 'John'
+    });
+    
+    console.log('Initial state:', {
+      count: builder.state.count,
+      name: builder.state.name
+    });
+    
+    // Add watchers
+    console.log('\n=== Adding watchers ===');
+    builder.watch({
+      count(newVal, oldVal) {
+        console.log(`Watch: count changed from ${oldVal} to ${newVal}`);
+      },
+      name(newVal, oldVal) {
+        console.log(`Watch: name changed from "${oldVal}" to "${newVal}"`);
+      }
+    });
+    
+    console.log('Watchers added');
+    
+    // Update state - watchers should trigger
+    setTimeout(() => {
+      console.log('\n=== Updating count ===');
+      builder.state.count = 5;
+    }, 500);
+    
+    setTimeout(() => {
+      console.log('\n=== Updating count again ===');
+      builder.state.count = 10;
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Updating name ===');
+      builder.state.name = 'Jane';
+    }, 1500);
+    
+    setTimeout(() => {
+      console.log('\n=== Updating both ===');
+      builder.state.count = 20;
+      builder.state.name = 'Bob';
+    }, 2000);
+    
+    // Chaining - watch returns builder
+    setTimeout(() => {
+      console.log('\n=== Chaining watch ===');
+      const result = builder.watch({
+        count(newVal) {
+          console.log(`Second watcher: count is now ${newVal}`);
+        }
+      });
+      
+      console.log('builder.watch() returns:', result === builder ? 'builder (chainable)' : 'something else');
+      
+      builder.state.count = 30;
+      console.log('NOTE: Both watchers should trigger');
+    }, 2500);
+  </script>
+</body>
+</html>

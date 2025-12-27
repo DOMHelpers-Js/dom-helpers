@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Builder State Issue</title></head>
+<body>
+  <div id="counter">INITIAL</div>
+  
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/05_dh-reactive-cleanup.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('=== Testing two approaches ===');
+      
+      // Approach 1: Direct state with binding
+      console.log('\n--- Approach 1: Direct state ---');
+      const directState = ReactiveUtils.state({ count: 0 });
+      directState.$bind({ '#counter': 'count' });
+      
+      console.log('Initial element:', document.getElementById('counter').textContent);
+      
+      setTimeout(() => {
+        console.log('\nDirect state: setting count to 5');
+        directState.count = 5;
+        console.log('Element:', document.getElementById('counter').textContent);
+      }, 1000);
+      
+      // Approach 2: Builder pattern
+      setTimeout(() => {
+        console.log('\n--- Approach 2: Builder pattern ---');
+        
+        const builder = ReactiveUtils.reactive({ count: 0 });
+        
+        console.log('Builder state before bind:', builder.state.count);
+        console.log('Builder state object:', builder.state);
+        
+        builder.bind({ '#counter': 'count' });
+        
+        console.log('After bind, element:', document.getElementById('counter').textContent);
+        
+        setTimeout(() => {
+          console.log('\nBuilder: setting count to 10');
+          builder.state.count = 10;
+          console.log('Element:', document.getElementById('counter').textContent);
+        }, 1000);
+      }, 3000);
+    });
+  </script>
+</body>
+</html>

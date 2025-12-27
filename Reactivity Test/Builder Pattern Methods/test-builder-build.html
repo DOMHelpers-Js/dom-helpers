@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test builder.build() - FIXED</title></head>
+<body>
+  <div id="counter">0</div>
+  
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/05_dh-reactive-cleanup.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM is ready, building reactive state...');
+      
+      // Build a complete reactive state
+      console.log('=== Building reactive state ===');
+      
+      const state = ReactiveUtils.reactive({
+        count: 0
+      })
+      .computed({
+        doubled() {
+          return this.count * 2;
+        }
+      })
+      .watch({
+        count(newVal, oldVal) {
+          console.log(`Watch: count ${oldVal} → ${newVal}`);
+        }
+      })
+      .effect(function() {
+        console.log(`Effect: count = ${this.count}, doubled = ${this.doubled}`);
+      })
+      .actions({
+        increment() {
+          this.count++;
+        },
+        reset() {
+          this.count = 0;
+        }
+      })
+      .build();
+      
+      // IMPORTANT: Call $bind() AFTER .build()
+      console.log('\n=== Adding bindings to built state ===');
+      state.$bind({
+        '#counter': 'count'
+      });
+      
+      console.log('\n=== State built ===');
+      console.log('state:', state);
+      console.log('state.count:', state.count);
+      console.log('state.doubled:', state.doubled);
+      console.log('Check #counter (should show 0)');
+      
+      // Use the built state
+      setTimeout(() => {
+        console.log('\n=== Using increment() ===');
+        state.increment();
+        console.log('Check #counter (should show 1)');
+      }, 1000);
+      
+      setTimeout(() => {
+        console.log('\n=== Setting count to 10 ===');
+        state.count = 10;
+        console.log('Check #counter (should show 10)');
+      }, 2000);
+      
+      setTimeout(() => {
+        console.log('\n=== Using reset() ===');
+        state.reset();
+        console.log('Check #counter (should show 0)');
+      }, 3000);
+      
+      // State has destroy method
+      setTimeout(() => {
+        console.log('\n=== Destroying state ===');
+        state.destroy();
+        
+        console.log('\n=== After destroy ===');
+        state.count = 100;
+        console.log('count is now 100, but watch/effects should NOT run');
+        console.log('DOM should still show 0 (binding destroyed)');
+      }, 4000);
+    });
+  </script>
+</body>
+</html>

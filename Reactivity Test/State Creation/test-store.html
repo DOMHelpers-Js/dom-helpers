@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveUtils.store()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    console.log('=== Creating store ===');
+    
+    const store = ReactiveUtils.store(
+      // Initial state
+      {
+        count: 0,
+        items: [],
+        filter: 'all'
+      },
+      // Options
+      {
+        // Getters
+        getters: {
+          doubled() {
+            return this.count * 2;
+          },
+          filteredItems() {
+            if (this.filter === 'all') return this.items;
+            return this.items.filter(item => item.status === this.filter);
+          },
+          itemCount() {
+            return this.items.length;
+          }
+        },
+        
+        // Actions
+        actions: {
+          increment(state, amount = 1) {
+            state.count += amount;
+            console.log(`increment(${amount}): count = ${state.count}`);
+          },
+          
+          addItem(state, text, status = 'active') {
+            const item = { id: Date.now(), text, status };
+            state.items.push(item);
+            console.log(`addItem("${text}")`);
+          },
+          
+          removeItem(state, id) {
+            const index = state.items.findIndex(item => item.id === id);
+            if (index !== -1) {
+              state.items.splice(index, 1);
+              console.log(`removeItem(${id})`);
+            }
+          },
+          
+          setFilter(state, filter) {
+            state.filter = filter;
+            console.log(`setFilter("${filter}")`);
+          }
+        }
+      }
+    );
+    
+    console.log('\n✅ Store created');
+    console.log('Initial state:', {
+      count: store.count,
+      doubled: store.doubled,
+      items: store.items,
+      itemCount: store.itemCount
+    });
+    
+    // Test getters
+    console.log('\n=== Testing getters ===');
+    store.count = 5;
+    console.log('count:', store.count);
+    console.log('doubled:', store.doubled);
+    
+    // Test actions
+    console.log('\n=== Testing actions ===');
+    store.increment();
+    store.increment(10);
+    console.log('After increments:', {
+      count: store.count,
+      doubled: store.doubled
+    });
+    
+    // Test item actions
+    setTimeout(() => {
+      console.log('\n=== Testing item actions ===');
+      store.addItem('Task 1', 'active');
+      store.addItem('Task 2', 'active');
+      store.addItem('Task 3', 'completed');
+      
+      console.log('All items:', store.items);
+      console.log('Item count:', store.itemCount);
+      console.log('Filtered items (all):', store.filteredItems);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Filtering items ===');
+      store.setFilter('active');
+      console.log('Filtered items (active):', store.filteredItems);
+      
+      store.setFilter('completed');
+      console.log('Filtered items (completed):', store.filteredItems);
+    }, 2000);
+    
+    setTimeout(() => {
+      console.log('\n=== Removing item ===');
+      const firstItemId = store.items[0].id;
+      store.removeItem(firstItemId);
+      console.log('After remove:', store.items);
+      console.log('Item count:', store.itemCount);
+    }, 3000);
+    
+    // Test reactivity
+    setTimeout(() => {
+      console.log('\n=== Testing reactivity ===');
+      let effectRuns = 0;
+      ReactiveUtils.effect(() => {
+        effectRuns++;
+        console.log(`Effect #${effectRuns}: doubled = ${store.doubled}, itemCount = ${store.itemCount}`);
+      });
+      
+      setTimeout(() => {
+        store.increment(5);
+      }, 500);
+      
+      setTimeout(() => {
+        store.addItem('New task');
+      }, 1000);
+    }, 4000);
+  </script>
+</body>
+</html>

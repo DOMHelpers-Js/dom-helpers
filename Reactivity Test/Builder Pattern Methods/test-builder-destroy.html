@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test builder.destroy()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/05_dh-reactive-cleanup.js"></script>
+  <script>
+    let effectRuns = 0;
+    let watchRuns = 0;
+    
+    const builder = ReactiveUtils.reactive({
+      count: 0
+    });
+    
+    // Add effect and watch
+    builder
+      .effect(function() {
+        effectRuns++;
+        console.log(`Effect #${effectRuns}: count = ${this.count}`);
+      })
+      .watch({
+        count(newVal, oldVal) {
+          watchRuns++;
+          console.log(`Watch #${watchRuns}: count ${oldVal} → ${newVal}`);
+        }
+      });
+    
+    console.log('Initial runs:', { effect: effectRuns, watch: watchRuns });
+    
+    // Update state
+    setTimeout(() => {
+      console.log('\n=== Updating count ===');
+      builder.state.count = 5;
+      console.log('Runs:', { effect: effectRuns, watch: watchRuns });
+    }, 1000);
+    
+    setTimeout(() => {
+      builder.state.count = 10;
+      console.log('Runs:', { effect: effectRuns, watch: watchRuns });
+    }, 2000);
+    
+    // Destroy builder
+    setTimeout(() => {
+      console.log('\n=== Destroying builder ===');
+      builder.destroy();
+      console.log('Builder destroyed');
+    }, 3000);
+    
+    // Update after destroy
+    setTimeout(() => {
+      console.log('\n=== Updating after destroy ===');
+      builder.state.count = 20;
+      console.log('Runs:', { effect: effectRuns, watch: watchRuns });
+      console.log('NOTE: Runs should not increase (effects cleaned up)');
+    }, 4000);
+    
+    setTimeout(() => {
+      builder.state.count = 30;
+      console.log('Runs:', { effect: effectRuns, watch: watchRuns });
+      console.log('NOTE: Still no increase');
+    }, 5000);
+  </script>
+</body>
+</html>

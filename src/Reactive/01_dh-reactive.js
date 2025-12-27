@@ -61,7 +61,7 @@
   }
 
   // Create reactive proxy
-  function createReactive(target) {
+  /*function createReactive(target) {
     if (!target || typeof target !== 'object') return target;
     if (isReactive(target)) return target;
 
@@ -152,7 +152,149 @@
         
         return true;
       }
-    });
+    }); */
+
+
+function createReactive(target) {
+  if (!target || typeof target !== 'object') return target;
+  if (isReactive(target)) return target;
+  
+  // ============================================================================
+  // ADD THIS: Don't make built-in objects reactive
+  // ============================================================================
+  const skipReactive = [
+    'AbortController',
+    'AbortSignal', 
+    'Promise',
+    'Date',
+    'RegExp',
+    'Error',
+    'Map',
+    'Set',
+    'WeakMap',
+    'WeakSet'
+  ];
+  
+  const constructorName = target.constructor?.name;
+  if (constructorName && skipReactive.includes(constructorName)) {
+    return target;
+  }
+  
+  // Also skip DOM nodes
+  if (typeof Node !== 'undefined' && target instanceof Node) {
+    return target;
+  }
+  
+  if (typeof Element !== 'undefined' && target instanceof Element) {
+    return target;
+  }
+  // ============================================================================
+
+  const deps = new Map();
+  const computedMap = new Map();
+
+  const proxy = new Proxy(target, {
+    get(obj, key) {
+      if (key === RAW) return target;
+      if (key === IS_REACTIVE) return true;
+
+      // Track dependency
+      if (currentEffect && typeof key !== 'symbol') {
+        if (!deps.has(key)) deps.set(key, new Set());
+        deps.get(key).add(currentEffect);
+        if (currentEffect.onDep) currentEffect.onDep(key);
+      }
+
+      let value = obj[key];
+
+      // Handle computed
+      if (computedMap.has(key)) {
+        const comp = computedMap.get(key);
+        if (comp.dirty) {
+          comp.deps.clear();
+          const prevEffect = currentEffect;
+          currentEffect = { 
+            isComputed: true,
+            onDep: (k) => comp.deps.add(k)
+          };
+          try {
+            value = comp.fn.call(proxy);
+            comp.value = value;
+            comp.dirty = false;
+          } finally {
+            currentEffect = prevEffect;
+          }
+        }
+        value = comp.value;
+        
+        if (currentEffect && !currentEffect.isComputed) {
+          if (!deps.has(key)) deps.set(key, new Set());
+          deps.get(key).add(currentEffect);
+        }
+        
+        return value;
+      }
+
+      // Deep reactivity - BUT skip built-in objects
+      if (value && typeof value === 'object' && !isReactive(value)) {
+        // Check if it's a built-in object before making reactive
+        const valueConstructor = value.constructor?.name;
+        const shouldSkip = valueConstructor && skipReactive.includes(valueConstructor);
+        
+        if (!shouldSkip && !(value instanceof Node) && !(value instanceof Element)) {
+          value = createReactive(value);
+          obj[key] = value;
+        }
+      }
+
+      return value;
+    },
+
+    set(obj, key, value) {
+      if (obj[key] === value) return true;
+      
+      // Don't try to convert built-in objects
+      const rawValue = toRaw(value);
+      const constructorName = rawValue?.constructor?.name;
+      const shouldSkip = constructorName && skipReactive.includes(constructorName);
+      
+      if (shouldSkip || rawValue instanceof Node || rawValue instanceof Element) {
+        obj[key] = rawValue; // Store as-is without making reactive
+      } else {
+        obj[key] = rawValue;
+      }
+      
+      // Trigger updates
+      const effects = deps.get(key);
+      if (effects) {
+        computedMap.forEach((comp, compKey) => {
+          if (comp.deps.has(key)) {
+            comp.dirty = true;
+            const compDeps = deps.get(compKey);
+            if (compDeps) {
+              compDeps.forEach(effect => {
+                if (effect && !effect.isComputed) {
+                  queueUpdate(effect);
+                }
+              });
+            }
+          }
+        });
+        
+        effects.forEach(effect => {
+          if (effect && !effect.isComputed) {
+            queueUpdate(effect);
+          }
+        });
+      }
+      
+      return true;
+    }
+  });
+
+  
+
+
 
     reactiveMap.set(proxy, { deps, computedMap });
     

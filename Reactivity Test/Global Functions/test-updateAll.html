@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test updateAll()</title></head>
+<body>
+  <div id="counter">0</div>
+  <div id="message">Initial</div>
+  <div class="status">Idle</div>
+  
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    const state = ReactiveUtils.state({
+      count: 0,
+      message: 'Hello',
+      status: 'active'
+    });
+    
+    console.log('Initial state:', state);
+    
+    // updateAll can update both state AND DOM
+    console.log('\n=== Test 1: Update state only ===');
+    updateAll(state, {
+      count: 5,
+      message: 'Updated'
+    });
+    console.log('State after update:', { count: state.count, message: state.message });
+    
+    // Update DOM only
+    console.log('\n=== Test 2: Update DOM only ===');
+    updateAll(state, {
+      '#counter': { textContent: '10' },
+      '#message': { textContent: 'Direct DOM update' }
+    });
+    console.log('DOM updated (check elements)');
+    console.log('State unchanged:', { count: state.count, message: state.message });
+    
+    // Update both state AND DOM
+    console.log('\n=== Test 3: Update both state and DOM ===');
+    updateAll(state, {
+      count: 20,
+      message: 'State updated',
+      '#counter': { textContent: '20' },
+      '#message': { textContent: 'State updated' },
+      '.status': { textContent: 'Modified' }
+    });
+    console.log('State:', { count: state.count, message: state.message });
+    console.log('DOM also updated (check elements)');
+    
+    // Update with nested properties
+    console.log('\n=== Test 4: Nested property updates ===');
+    const nestedState = ReactiveUtils.state({
+      user: {
+        name: 'John',
+        age: 30
+      }
+    });
+    
+    updateAll(nestedState, {
+      'user.name': 'Jane',
+      'user.age': 25
+    });
+    console.log('Nested state:', nestedState.user);
+    
+    // Update with styles
+    console.log('\n=== Test 5: Update DOM styles ===');
+    updateAll(state, {
+      '#counter': {
+        style: {
+          color: 'red',
+          fontSize: '24px',
+          fontWeight: 'bold'
+        }
+      },
+      '#message': {
+        style: {
+          backgroundColor: 'yellow',
+          padding: '10px'
+        }
+      }
+    });
+    console.log('Styles applied (check elements)');
+  </script>
+</body>
+</html>

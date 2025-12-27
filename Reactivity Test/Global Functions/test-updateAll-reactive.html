@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test updateAll() with Reactivity</title></head>
+<body>
+  <div id="display">0</div>
+  
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    const state = ReactiveUtils.state({
+      count: 0,
+      multiplier: 2
+    });
+    
+    // Track state changes
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const result = state.count * state.multiplier;
+      console.log(`Effect #${effectRuns}: ${state.count} × ${state.multiplier} = ${result}`);
+    });
+    
+    console.log('Initial effect runs:', effectRuns);
+    
+    // Update multiple properties - should batch into single effect run
+    console.log('\n=== Updating multiple properties ===');
+    updateAll(state, {
+      count: 5,
+      multiplier: 3
+    });
+    console.log('Effect runs after updateAll:', effectRuns);
+    console.log('NOTE: Should only be 2 (initial + batched update)');
+    
+    // Compare with individual updates
+    console.log('\n=== Individual updates (not batched) ===');
+    state.count = 10;
+    console.log('After count = 10, effect runs:', effectRuns);
+    
+    state.multiplier = 4;
+    console.log('After multiplier = 4, effect runs:', effectRuns);
+    console.log('NOTE: Two separate effect runs (not batched)');
+    
+    // updateAll batches updates
+    console.log('\n=== updateAll batches updates ===');
+    const beforeRuns = effectRuns;
+    updateAll(state, {
+      count: 20,
+      multiplier: 5,
+      '#display': { textContent: '100' }
+    });
+    console.log(`Effect runs: ${beforeRuns} → ${effectRuns}`);
+    console.log('NOTE: Only 1 additional effect run (batched)');
+  </script>
+</body>
+</html>

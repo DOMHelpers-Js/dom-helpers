@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveUtils.destroy()</title></head>
+<body>
+  <div id="counter">0</div>
+  <div id="message">Initial</div>
+  
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/05_dh-reactive-cleanup.js"></script>
+  <script src="../../src/Reactive/09_dh-reactive-namespace-methods.js"></script>
+  <script>
+    // Create a component
+    const component = ReactiveUtils.component({
+      state: {
+        count: 0,
+        message: 'Active'
+      },
+      
+      computed: {
+        doubled() {
+          return this.count * 2;
+        }
+      },
+      
+      watch: {
+        count(newVal, oldVal) {
+          console.log(`Watch triggered: count changed from ${oldVal} to ${newVal}`);
+        }
+      },
+      
+      effects: {
+        logCount() {
+          console.log(`Effect: count = ${this.count}, doubled = ${this.doubled}`);
+        }
+      },
+      
+      bindings: {
+        '#counter': function() {
+          return this.count;
+        },
+        '#message': function() {
+          return this.message;
+        }
+      },
+      
+      mounted() {
+        console.log('Component mounted!');
+      },
+      
+      unmounted() {
+        console.log('Component unmounted!');
+      }
+    });
+    
+    console.log('Initial state:', {
+      count: component.count,
+      message: component.message,
+      doubled: component.doubled
+    });
+    
+    // Test that watchers and effects work
+    console.log('\n=== Testing component is active ===');
+    component.count = 5;
+    console.log('After count = 5:', component.doubled);
+    
+    component.count = 10;
+    console.log('After count = 10:', component.doubled);
+    
+    // Destroy the component after 2 seconds
+    setTimeout(() => {
+      console.log('\n=== Destroying component ===');
+      ReactiveUtils.destroy(component);
+      
+      console.log('\n=== Testing after destroy ===');
+      console.log('Changing count to 20...');
+      component.count = 20;
+      console.log('Count is now:', component.count);
+      console.log('NOTE: Watch and effects should NOT trigger');
+      
+      setTimeout(() => {
+        console.log('\nChanging count to 30...');
+        component.count = 30;
+        console.log('Count is now:', component.count);
+        console.log('NOTE: Still no watch/effect triggers (component is destroyed)');
+      }, 1000);
+    }, 2000);
+  </script>
+</body>
+</html>

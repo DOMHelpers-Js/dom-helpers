@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test builder.computed()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    const builder = ReactiveUtils.reactive({
+      count: 0,
+      price: 10
+    });
+    
+    console.log('Initial state:', {
+      count: builder.state.count,
+      price: builder.state.price
+    });
+    
+    // Add computed properties
+    console.log('\n=== Adding computed properties ===');
+    builder.computed({
+      doubled() {
+        return this.count * 2;
+      },
+      total() {
+        return this.count * this.price;
+      },
+      display() {
+        return `${this.count} items × $${this.price} = $${this.total}`;
+      }
+    });
+    
+    console.log('Computed properties added');
+    console.log('builder.state.doubled:', builder.state.doubled);
+    console.log('builder.state.total:', builder.state.total);
+    console.log('builder.state.display:', builder.state.display);
+    
+    // Update state - computed should recalculate
+    console.log('\n=== Updating state ===');
+    builder.state.count = 5;
+    console.log('After count = 5:');
+    console.log('  doubled:', builder.state.doubled);
+    console.log('  total:', builder.state.total);
+    console.log('  display:', builder.state.display);
+    
+    builder.state.price = 20;
+    console.log('\nAfter price = 20:');
+    console.log('  total:', builder.state.total);
+    console.log('  display:', builder.state.display);
+    
+    // Chaining - computed returns builder
+    console.log('\n=== Chaining computed ===');
+    const result = builder.computed({
+      tripled() {
+        return this.count * 3;
+      }
+    });
+    
+    console.log('builder.computed() returns:', result === builder ? 'builder (chainable)' : 'something else');
+    console.log('builder.state.tripled:', builder.state.tripled);
+  </script>
+</body>
+</html>

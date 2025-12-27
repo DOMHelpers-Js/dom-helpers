@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test builder.actions()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    const builder = ReactiveUtils.reactive({
+      count: 0,
+      name: 'Product',
+      price: 10
+    });
+    
+    console.log('Initial state:', builder.state);
+    
+    // Add multiple actions at once
+    console.log('\n=== Adding multiple actions ===');
+    builder.actions({
+      increment(amount = 1) {
+        this.count += amount;
+        console.log(`increment(${amount}): count = ${this.count}`);
+      },
+      
+      decrement(amount = 1) {
+        this.count -= amount;
+        console.log(`decrement(${amount}): count = ${this.count}`);
+      },
+      
+      setPrice(newPrice) {
+        this.price = newPrice;
+        console.log(`setPrice(${newPrice}): price = ${this.price}`);
+      },
+      
+      total() {
+        const result = this.count * this.price;
+        console.log(`total(): ${this.count} × ${this.price} = ${result}`);
+        return result;
+      },
+      
+      reset() {
+        this.count = 0;
+        this.price = 10;
+        console.log('reset(): state reset');
+      }
+    });
+    
+    console.log('Actions added: increment, decrement, setPrice, total, reset');
+    
+    // Use the actions
+    console.log('\n=== Using actions ===');
+    builder.state.increment(5);
+    builder.state.setPrice(20);
+    const total1 = builder.state.total();
+    
+    console.log('\n=== More actions ===');
+    builder.state.increment(3);
+    builder.state.decrement(2);
+    const total2 = builder.state.total();
+    
+    console.log('\n=== Reset ===');
+    builder.state.reset();
+    builder.state.total();
+    
+    // Chaining - actions returns builder
+    console.log('\n=== Chaining actions ===');
+    const result = builder.actions({
+      double() {
+        this.count *= 2;
+        console.log(`double(): count = ${this.count}`);
+      }
+    });
+    
+    console.log('builder.actions() returns:', result === builder ? 'builder (chainable)' : 'something else');
+    
+    builder.state.count = 5;
+    builder.state.double();
+  </script>
+</body>
+</html>

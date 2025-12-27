@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Complete Builder Chain - FIXED</title></head>
+<body>
+  <div id="display">Loading...</div>
+  <div id="status">Idle</div>
+  
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/05_dh-reactive-cleanup.js"></script>
+  <script>
+    window.addEventListener('load', function() {
+      console.log('Window loaded, building counter...');
+      
+      console.log('=== Building complete reactive system ===');
+      
+      const counter = ReactiveUtils.reactive({
+        count: 0,
+        step: 1
+      })
+      .computed({
+        doubled() {
+          return this.count * 2;
+        },
+        status() {
+          if (this.count === 0) return 'Zero';
+          if (this.count < 10) return 'Low';
+          if (this.count < 20) return 'Medium';
+          return 'High';
+        }
+      })
+      .watch({
+        count(newVal, oldVal) {
+          console.log(`📊 Count changed: ${oldVal} → ${newVal}`);
+        }
+      })
+      .effect(function() {
+        console.log(`⚡ Effect: count=${this.count}, doubled=${this.doubled}, status=${this.status}`);
+      })
+      .action('increment', function() {
+        this.count += this.step;
+      })
+      .action('decrement', function() {
+        this.count -= this.step;
+      })
+      .actions({
+        setStep(newStep) {
+          this.step = newStep;
+          console.log(`📐 Step set to ${this.step}`);
+        },
+        reset() {
+          this.count = 0;
+          this.step = 1;
+          console.log('🔄 Reset');
+        }
+      })
+      .build();
+      
+      // IMPORTANT: Call $bind() AFTER .build()
+      console.log('\n=== Adding bindings to built counter ===');
+      counter.$bind({
+        '#display': function() {
+          return `Count: ${this.count} (×2 = ${this.doubled})`;
+        },
+        '#status': 'status'
+      });
+      
+      console.log('\n✅ Counter built with all features!');
+      console.log('Check DOM: display and status should be visible');
+      
+      // Test the complete system
+      setTimeout(() => {
+        console.log('\n=== Test 1: increment ===');
+        counter.increment();
+      }, 1000);
+      
+      setTimeout(() => {
+        console.log('\n=== Test 2: increment again ===');
+        counter.increment();
+      }, 2000);
+      
+      setTimeout(() => {
+        console.log('\n=== Test 3: change step and increment ===');
+        counter.setStep(5);
+        counter.increment();
+      }, 3000);
+      
+      setTimeout(() => {
+        console.log('\n=== Test 4: increment to "High" status ===');
+        counter.increment();
+        counter.increment();
+      }, 4000);
+      
+      setTimeout(() => {
+        console.log('\n=== Test 5: decrement ===');
+        counter.decrement();
+      }, 5000);
+      
+      setTimeout(() => {
+        console.log('\n=== Test 6: reset ===');
+        counter.reset();
+      }, 6000);
+      
+      setTimeout(() => {
+        console.log('\n=== Test 7: destroy ===');
+        counter.destroy();
+        console.log('Counter destroyed');
+      }, 7000);
+      
+      setTimeout(() => {
+        console.log('\n=== Test 8: try to use after destroy ===');
+        counter.increment();
+        console.log('NOTE: Watch and effects should NOT run, DOM should not update');
+      }, 8000);
+    });
+  </script>
+</body>
+</html>

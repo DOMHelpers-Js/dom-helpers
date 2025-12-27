@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ref.valueOf()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+
+  <script>
+    console.log('=== Testing ref.valueOf() ===\n');
+
+    // ========================================================================
+    // TEST 1: Basic valueOf - returns primitive value
+    // ========================================================================
+    console.log('TEST 1: Basic valueOf - returns primitive value');
+
+    const num = ReactiveUtils.ref(42);
+    console.log('  ref(42).valueOf():', num.valueOf());
+    console.log('  typeof valueOf():', typeof num.valueOf());
+    console.log('  valueOf() === value:', num.valueOf() === num.value);
+
+    const str = ReactiveUtils.ref('hello');
+    console.log('  ref("hello").valueOf():', str.valueOf());
+
+    const bool = ReactiveUtils.ref(false);
+    console.log('  ref(false).valueOf():', bool.valueOf());
+
+    console.log('  ✓ valueOf returns primitive value\n');
+
+    // ========================================================================
+    // TEST 2: Arithmetic operations
+    // ========================================================================
+    console.log('TEST 2: Arithmetic operations');
+
+    const count = ReactiveUtils.ref(10);
+
+    const sum = count.valueOf() + 5;
+    console.log('  ref(10).valueOf() + 5 =', sum);
+    console.log('  Expected: 15');
+
+    const difference = count.valueOf() - 3;
+    console.log('  ref(10).valueOf() - 3 =', difference);
+    console.log('  Expected: 7');
+
+    const product = count.valueOf() * 2;
+    console.log('  ref(10).valueOf() * 2 =', product);
+    console.log('  Expected: 20');
+
+    const quotient = count.valueOf() / 2;
+    console.log('  ref(10).valueOf() / 2 =', quotient);
+    console.log('  Expected: 5');
+
+    const remainder = count.valueOf() % 3;
+    console.log('  ref(10).valueOf() % 3 =', remainder);
+    console.log('  Expected: 1');
+
+    console.log('  ✓ Arithmetic operations work\n');
+
+    // ========================================================================
+    // TEST 3: Comparison operations
+    // ========================================================================
+    console.log('TEST 3: Comparison operations');
+
+    const value = ReactiveUtils.ref(10);
+
+    console.log('  ref(10).valueOf() > 5:', value.valueOf() > 5);
+    console.log('  Expected: true');
+
+    console.log('  ref(10).valueOf() < 5:', value.valueOf() < 5);
+    console.log('  Expected: false');
+
+    console.log('  ref(10).valueOf() >= 10:', value.valueOf() >= 10);
+    console.log('  Expected: true');
+
+    console.log('  ref(10).valueOf() <= 10:', value.valueOf() <= 10);
+    console.log('  Expected: true');
+
+    console.log('  ref(10).valueOf() === 10:', value.valueOf() === 10);
+    console.log('  Expected: true');
+
+    console.log('  ref(10).valueOf() !== 5:', value.valueOf() !== 5);
+    console.log('  Expected: true');
+
+    console.log('  ✓ Comparison operations work\n');
+
+    // ========================================================================
+    // TEST 4: Logical operations
+    // ========================================================================
+    console.log('TEST 4: Logical operations');
+
+    const trueRef = ReactiveUtils.ref(true);
+    const falseRef = ReactiveUtils.ref(false);
+
+    console.log('  ref(true).valueOf() && true:', trueRef.valueOf() && true);
+    console.log('  Expected: true');
+
+    console.log('  ref(false).valueOf() || true:', falseRef.valueOf() || true);
+    console.log('  Expected: true');
+
+    console.log('  !ref(false).valueOf():', !falseRef.valueOf());
+    console.log('  Expected: true');
+
+    const numForLogic = ReactiveUtils.ref(0);
+    console.log('  ref(0).valueOf() || 42:', numForLogic.valueOf() || 42);
+    console.log('  Expected: 42');
+
+    console.log('  ✓ Logical operations work\n');
+
+    // ========================================================================
+    // TEST 5: Conditional expressions
+    // ========================================================================
+    console.log('TEST 5: Conditional expressions');
+
+    const age = ReactiveUtils.ref(18);
+
+    const canVote = age.valueOf() >= 18 ? 'Yes' : 'No';
+    console.log('  ref(18).valueOf() >= 18 ? "Yes" : "No" =>', canVote);
+    console.log('  Expected: "Yes"');
+
+    const category = age.valueOf() < 13 ? 'child' :
+                    age.valueOf() < 20 ? 'teen' : 'adult';
+    console.log('  Age category:', category);
+    console.log('  Expected: "teen"');
+
+    const status = age.valueOf() === 18 ? 'exact' : 'not exact';
+    console.log('  Status:', status);
+    console.log('  Expected: "exact"');
+
+    console.log('  ✓ Conditional expressions work\n');
+
+    // ========================================================================
+    // TEST 6: if/else statements
+    // ========================================================================
+    console.log('TEST 6: if/else statements');
+
+    const score = ReactiveUtils.ref(85);
+    let grade;
+
+    if (score.valueOf() >= 90) {
+      grade = 'A';
+    } else if (score.valueOf() >= 80) {
+      grade = 'B';
+    } else if (score.valueOf() >= 70) {
+      grade = 'C';
+    } else {
+      grade = 'F';
+    }
+
+    console.log('  Score:', score.valueOf(), '- Grade:', grade);
+    console.log('  Expected: B');
+
+    const temp = ReactiveUtils.ref(25);
+    let weather;
+
+    if (temp.valueOf() > 30) {
+      weather = 'hot';
+    } else if (temp.valueOf() > 20) {
+      weather = 'warm';
+    } else if (temp.valueOf() > 10) {
+      weather = 'cool';
+    } else {
+      weather = 'cold';
+    }
+
+    console.log('  Temperature:', temp.valueOf(), '- Weather:', weather);
+    console.log('  Expected: warm');
+
+    console.log('  ✓ if/else statements work\n');
+
+    // ========================================================================
+    // TEST 7: Math operations
+    // ========================================================================
+    console.log('TEST 7: Math operations');
+
+    const num1 = ReactiveUtils.ref(16);
+
+    const sqrt = Math.sqrt(num1.valueOf());
+    console.log('  Math.sqrt(ref(16)):', sqrt);
+    console.log('  Expected: 4');
+
+    const pow = Math.pow(num1.valueOf(), 2);
+    console.log('  Math.pow(ref(16), 2):', pow);
+    console.log('  Expected: 256');
+
+    const abs = Math.abs(ReactiveUtils.ref(-10).valueOf());
+    console.log('  Math.abs(ref(-10)):', abs);
+    console.log('  Expected: 10');
+
+    const max = Math.max(num1.valueOf(), 20, 5);
+    console.log('  Math.max(ref(16), 20, 5):', max);
+    console.log('  Expected: 20');
+
+    const min = Math.min(num1.valueOf(), 20, 5);
+    console.log('  Math.min(ref(16), 20, 5):', min);
+    console.log('  Expected: 5');
+
+    console.log('  ✓ Math operations work\n');
+
+    // ========================================================================
+    // TEST 8: Array operations
+    // ========================================================================
+    console.log('TEST 8: Array operations');
+
+    const index = ReactiveUtils.ref(2);
+    const array = ['a', 'b', 'c', 'd'];
+
+    const element = array[index.valueOf()];
+    console.log('  array[ref(2)]:', element);
+    console.log('  Expected: "c"');
+
+    const sliced = array.slice(0, index.valueOf());
+    console.log('  array.slice(0, ref(2)):', sliced);
+    console.log('  Expected: ["a", "b"]');
+
+    const lengthRef = ReactiveUtils.ref(3);
+    const filled = new Array(lengthRef.valueOf()).fill('x');
+    console.log('  new Array(ref(3)).fill("x"):', filled);
+    console.log('  Expected: ["x", "x", "x"]');
+
+    console.log('  ✓ Array operations work\n');
+
+    // ========================================================================
+    // TEST 9: Loop iterations
+    // ========================================================================
+    console.log('TEST 9: Loop iterations');
+
+    const iterations = ReactiveUtils.ref(5);
+    let loopCount = 0;
+
+    for (let i = 0; i < iterations.valueOf(); i++) {
+      loopCount++;
+    }
+
+    console.log('  for loop with ref(5):', loopCount, 'iterations');
+    console.log('  Expected: 5');
+
+    const start = ReactiveUtils.ref(1);
+    const end = ReactiveUtils.ref(4);
+    const result = [];
+
+    for (let i = start.valueOf(); i <= end.valueOf(); i++) {
+      result.push(i);
+    }
+
+    console.log('  Loop from ref(1) to ref(4):', result);
+    console.log('  Expected: [1, 2, 3, 4]');
+
+    console.log('  ✓ Loop iterations work\n');
+
+    // ========================================================================
+    // TEST 10: Different data types
+    // ========================================================================
+    console.log('TEST 10: Different data types');
+
+    const numRef = ReactiveUtils.ref(123);
+    console.log('  Number ref.valueOf():', numRef.valueOf(), '- type:', typeof numRef.valueOf());
+
+    const strRef = ReactiveUtils.ref('test');
+    console.log('  String ref.valueOf():', strRef.valueOf(), '- type:', typeof strRef.valueOf());
+
+    const boolRef = ReactiveUtils.ref(true);
+    console.log('  Boolean ref.valueOf():', boolRef.valueOf(), '- type:', typeof boolRef.valueOf());
+
+    const nullRef = ReactiveUtils.ref(null);
+    console.log('  Null ref.valueOf():', nullRef.valueOf());
+
+    const undefinedRef = ReactiveUtils.ref(undefined);
+    console.log('  Undefined ref.valueOf():', undefinedRef.valueOf());
+
+    const objRef = ReactiveUtils.ref({ x: 10 });
+    console.log('  Object ref.valueOf():', objRef.valueOf(), '- type:', typeof objRef.valueOf());
+
+    const arrRef = ReactiveUtils.ref([1, 2, 3]);
+    console.log('  Array ref.valueOf():', arrRef.valueOf(), '- is array:', Array.isArray(arrRef.valueOf()));
+
+    console.log('  ✓ Works with all data types\n');
+
+    // ========================================================================
+    // TEST 11: Computed with valueOf
+    // ========================================================================
+    console.log('TEST 11: Computed with valueOf');
+
+    const x = ReactiveUtils.ref(10);
+    const y = ReactiveUtils.ref(20);
+    const state = ReactiveUtils.state({});
+
+    state.$computed('sum', function() {
+      return x.valueOf() + y.valueOf();
+    });
+
+    console.log('  Initial sum:', state.sum);
+    console.log('  Expected: 30');
+
+    x.value = 15;
+    setTimeout(() => {
+      console.log('  After x = 15, sum:', state.sum);
+      console.log('  Expected: 35');
+
+      y.value = 25;
+      setTimeout(() => {
+        console.log('  After y = 25, sum:', state.sum);
+        console.log('  Expected: 40');
+        console.log('  ✓ valueOf works in computed\n');
+
+        // ====================================================================
+        // TEST 12: Practical use cases
+        // ====================================================================
+        console.log('TEST 12: Practical use cases');
+
+        // Price calculation
+        const price = ReactiveUtils.ref(100);
+        const quantity = ReactiveUtils.ref(3);
+        const total = price.valueOf() * quantity.valueOf();
+        console.log('  Total price:', total);
+        console.log('  Expected: 300');
+
+        // Percentage calculation
+        const current = ReactiveUtils.ref(75);
+        const max = ReactiveUtils.ref(100);
+        const percentage = (current.valueOf() / max.valueOf()) * 100;
+        console.log('  Percentage:', percentage + '%');
+        console.log('  Expected: 75%');
+
+        // Range validation
+        const inputValue = ReactiveUtils.ref(50);
+        const min = ReactiveUtils.ref(0);
+        const maxVal = ReactiveUtils.ref(100);
+        const isInRange = inputValue.valueOf() >= min.valueOf() &&
+                          inputValue.valueOf() <= maxVal.valueOf();
+        console.log('  Is in range [0-100]:', isInRange);
+        console.log('  Expected: true');
+
+        // Countdown
+        const timeLeft = ReactiveUtils.ref(10);
+        const isTimeUp = timeLeft.valueOf() === 0;
+        console.log('  Time left:', timeLeft.valueOf(), '- Is time up:', isTimeUp);
+        console.log('  Expected: 10, false');
+
+        console.log('  ✓ Practical use cases work\n');
+
+        // ====================================================================
+        // TEST 13: valueOf vs direct value access
+        // ====================================================================
+        console.log('TEST 13: valueOf vs direct value access');
+
+        const testRef = ReactiveUtils.ref(42);
+
+        const viaValue = testRef.value;
+        const viaValueOf = testRef.valueOf();
+
+        console.log('  Direct .value:', viaValue);
+        console.log('  Via .valueOf():', viaValueOf);
+        console.log('  Both equal:', viaValue === viaValueOf);
+        console.log('  Both same type:', typeof viaValue === typeof viaValueOf);
+
+        // Performance note
+        console.log('  Note: Both methods are equivalent');
+        console.log('  ✓ valueOf === .value\n');
+
+        console.log('=== All ref.valueOf() tests completed ===');
+      }, 50);
+    }, 50);
+  </script>
+</body>
+</html>

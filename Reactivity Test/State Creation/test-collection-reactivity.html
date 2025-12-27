@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Collection Reactivity</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection reactivity ===');
+    
+    const collection = ReactiveUtils.collection([1, 2, 3]);
+    
+    // Track changes with effect
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: [${collection.items.join(', ')}] (length: ${collection.length})`);
+    });
+    
+    console.log('Initial effect runs:', effectRuns);
+    
+    // Test add - should trigger effect
+    setTimeout(() => {
+      console.log('\n=== Testing add ===');
+      collection.add(4);
+      console.log('Effect runs after add:', effectRuns);
+    }, 500);
+    
+    // Test remove - should trigger effect
+    setTimeout(() => {
+      console.log('\n=== Testing remove ===');
+      collection.remove(2);
+      console.log('Effect runs after remove:', effectRuns);
+    }, 1000);
+    
+    // Test update - should trigger effect
+    setTimeout(() => {
+      console.log('\n=== Testing update ===');
+      collection.update(3, { value: 30 });
+      console.log('Effect runs after update:', effectRuns);
+    }, 1500);
+    
+    // Test array methods (with Module 02)
+    setTimeout(() => {
+      console.log('\n=== Testing array methods ===');
+      collection.items.push(5);
+      console.log('Effect runs after push:', effectRuns);
+    }, 2000);
+    
+    setTimeout(() => {
+      collection.items.sort((a, b) => b - a);
+      console.log('Effect runs after sort:', effectRuns);
+    }, 2500);
+    
+    // Test clear
+    setTimeout(() => {
+      console.log('\n=== Testing clear ===');
+      collection.clear();
+      console.log('Effect runs after clear:', effectRuns);
+      console.log('isEmpty:', collection.isEmpty());
+    }, 3000);
+    
+    // Test reset
+    setTimeout(() => {
+      console.log('\n=== Testing reset ===');
+      collection.reset([10, 20, 30]);
+      console.log('Effect runs after reset:', effectRuns);
+    }, 3500);
+  </script>
+</body>
+</html>

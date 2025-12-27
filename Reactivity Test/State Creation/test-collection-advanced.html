@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Collection Advanced Features</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing advanced collection features ===');
+    
+    const todos = ReactiveUtils.collection([
+      { id: 1, text: 'Buy milk', done: false, priority: 'high' },
+      { id: 2, text: 'Walk dog', done: false, priority: 'medium' },
+      { id: 3, text: 'Read book', done: true, priority: 'low' },
+      { id: 4, text: 'Write code', done: false, priority: 'high' }
+    ]);
+    
+    console.log('Initial todos:', todos.items);
+    console.log('Length:', todos.length);
+    console.log('First:', todos.first);
+    console.log('Last:', todos.last);
+    
+    // Test at()
+    console.log('\n=== Testing at() ===');
+    console.log('todos.at(0):', todos.at(0));
+    console.log('todos.at(2):', todos.at(2));
+    
+    // Test includes()
+    console.log('\n=== Testing includes() ===');
+    const firstTodo = todos.first;
+    console.log('includes(firstTodo):', todos.includes(firstTodo));
+    
+    // Test indexOf()
+    console.log('indexOf(firstTodo):', todos.indexOf(firstTodo));
+    
+    // Test slice()
+    console.log('\n=== Testing slice() ===');
+    const firstTwo = todos.slice(0, 2);
+    console.log('slice(0, 2):', firstTwo);
+    
+    // Test push/pop
+    console.log('\n=== Testing push/pop ===');
+    todos.push({ id: 5, text: 'New task', done: false, priority: 'low' });
+    console.log('After push:', todos.items);
+    
+    const popped = todos.pop();
+    console.log('Popped:', popped);
+    console.log('After pop:', todos.items);
+    
+    // Test shift/unshift
+    console.log('\n=== Testing shift/unshift ===');
+    todos.unshift({ id: 0, text: 'Urgent task', done: false, priority: 'high' });
+    console.log('After unshift:', todos.items);
+    
+    const shifted = todos.shift();
+    console.log('Shifted:', shifted);
+    console.log('After shift:', todos.items);
+    
+    // Test splice
+    console.log('\n=== Testing splice ===');
+    todos.splice(1, 1, { id: 10, text: 'Replaced task', done: false, priority: 'medium' });
+    console.log('After splice:', todos.items);
+    
+    // Test removeWhere
+    console.log('\n=== Testing removeWhere ===');
+    todos.removeWhere(t => t.done);
+    console.log('After removeWhere(done):', todos.items);
+    
+    // Test updateWhere
+    console.log('\n=== Testing updateWhere ===');
+    todos.updateWhere(t => t.priority === 'high', { priority: 'critical' });
+    console.log('After updateWhere (high -> critical):', todos.items);
+    
+    // Test forEach
+    console.log('\n=== Testing forEach ===');
+    todos.forEach((todo, index) => {
+      console.log(`  [${index}] ${todo.text} (${todo.priority})`);
+    });
+    
+    // Test toArray
+    console.log('\n=== Testing toArray ===');
+    const array = todos.toArray();
+    console.log('toArray():', array);
+    console.log('Is different array?', array !== todos.items);
+    
+    // Test reset
+    console.log('\n=== Testing reset ===');
+    todos.reset([
+      { id: 1, text: 'Fresh start', done: false, priority: 'medium' }
+    ]);
+    console.log('After reset:', todos.items);
+  </script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Destroying Multiple Components</title></head>
+<body>
+  <div id="comp1">Component 1</div>
+  <div id="comp2">Component 2</div>
+  
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/05_dh-reactive-cleanup.js"></script>
+  <script src="../../src/Reactive/09_dh-reactive-namespace-methods.js"></script>
+  <script>
+    let comp1EffectRuns = 0;
+    let comp2EffectRuns = 0;
+    
+    // Create first component
+    const component1 = ReactiveUtils.component({
+      state: { value: 'A' },
+      effects: {
+        log() {
+          comp1EffectRuns++;
+          console.log(`Component 1 effect #${comp1EffectRuns}: ${this.value}`);
+        }
+      },
+      bindings: {
+        '#comp1': function() {
+          return `Component 1: ${this.value}`;
+        }
+      }
+    });
+    
+    // Create second component
+    const component2 = ReactiveUtils.component({
+      state: { value: 'B' },
+      effects: {
+        log() {
+          comp2EffectRuns++;
+          console.log(`Component 2 effect #${comp2EffectRuns}: ${this.value}`);
+        }
+      },
+      bindings: {
+        '#comp2': function() {
+          return `Component 2: ${this.value}`;
+        }
+      }
+    });
+    
+    console.log('Initial effect runs:', { comp1: comp1EffectRuns, comp2: comp2EffectRuns });
+    
+    // Update both
+    setTimeout(() => {
+      console.log('\n=== Updating both components ===');
+      component1.value = 'A1';
+      component2.value = 'B1';
+      console.log('Effect runs:', { comp1: comp1EffectRuns, comp2: comp2EffectRuns });
+    }, 1000);
+    
+    // Destroy component 1
+    setTimeout(() => {
+      console.log('\n=== Destroying component 1 ===');
+      ReactiveUtils.destroy(component1);
+    }, 2000);
+    
+    // Update both again
+    setTimeout(() => {
+      console.log('\n=== Updating both after destroying component 1 ===');
+      component1.value = 'A2';
+      component2.value = 'B2';
+      console.log('Effect runs:', { comp1: comp1EffectRuns, comp2: comp2EffectRuns });
+      console.log('NOTE: Component 1 effects should NOT run');
+    }, 3000);
+    
+    // Destroy component 2
+    setTimeout(() => {
+      console.log('\n=== Destroying component 2 ===');
+      ReactiveUtils.destroy(component2);
+    }, 4000);
+    
+    // Update both again
+    setTimeout(() => {
+      console.log('\n=== Updating both after destroying both ===');
+      component1.value = 'A3';
+      component2.value = 'B3';
+      console.log('Final effect runs:', { comp1: comp1EffectRuns, comp2: comp2EffectRuns });
+      console.log('NOTE: No effects should run');
+    }, 5000);
+  </script>
+</body>
+</html>
