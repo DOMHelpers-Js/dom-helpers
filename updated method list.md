@@ -43,33 +43,15 @@
 - **`ReactiveUtils.notify(state, key)`** - Manually notify dependencies for a key or all keys
 - **`ReactiveUtils.updateAll(state, updates)`** - Unified state + DOM updates
 
-### ReactiveState Namespace
-
-- **`ReactiveState.create(initialState)`** - Create reactive state
-- **`ReactiveState.form(initialValues)`** - Create form state
-- **`ReactiveState.async(initialValue)`** - Create async state
-- **`ReactiveState.collection(items)`** - Create collection
-
 ### State Instance Methods
 
 **State Management:**
-- **`state.$computed(key, fn)`** - Add computed property to instance
-- **`state.$watch(keyOrFn, callback)`** - Watch for changes (returns cleanup function)
-- **`state.$batch(fn)`** - Batch multiple updates
-- **`state.$notify(key)`** - Manually trigger updates for a key (or all if no key)
-- **`state.$raw`** - Property getter to access non-reactive raw object
-- **`state.$update(updates)`** - Mixed state + DOM updates (supports selectors and nested paths)
 - **`state.$set(updates)`** - Functional updates with callbacks
-- **`state.$bind(bindingDefs)`** - Create reactive DOM bindings (returns cleanup function)
 
 ### Core Collection Methods (Module 01)
 
 When using `ReactiveUtils.collection()` or `ReactiveUtils.list()`:
 
-- **`collection.$add(item)`** - Add item to collection
-- **`collection.$remove(predicate)`** - Remove item by predicate function or direct value
-- **`collection.$update(predicate, updates)`** - Update item in collection by predicate or value
-- **`collection.$clear()`** - Clear all items from collection
 - **`collection.items`** - Property containing the reactive array
 
 ### Form Instance Methods (Module 01 - Basic)
@@ -126,102 +108,6 @@ Returned by `ReactiveUtils.reactive()`:
 
 - **`updateAll(state, updates)`** - Global function for unified updates
 
-### Elements Namespace Integration
-
-All core methods available via `Elements.*`:
-
-**Core Methods:**
-- **`Elements.state()`** - Create reactive state
-- **`Elements.createState(initialState, bindingDefs)`** - Create state with bindings
-- **`Elements.updateAll(state, updates)`** - Unified updates
-- **`Elements.computed(state, defs)`** - Add computed properties
-- **`Elements.watch(state, defs)`** - Add watchers
-- **`Elements.effect(fn)`** - Create effect
-- **`Elements.effects(defs)`** - Create multiple effects
-- **`Elements.ref(value)`** - Create ref
-- **`Elements.refs(defs)`** - Create multiple refs
-- **`Elements.store(initialState, options)`** - Create store
-- **`Elements.component(config)`** - Create component
-- **`Elements.reactive(initialState)`** - Fluent builder
-- **`Elements.bindings(defs)`** - Create bindings
-- **`Elements.list(items)`** - Create collection
-- **`Elements.batch(fn)`** - Batch updates
-- **`Elements.isReactive(value)`** - Check reactive
-- **`Elements.toRaw(value)`** - Get raw value
-- **`Elements.notify(state, key)`** - Notify dependencies
-- **`Elements.pause()`** - Pause reactivity
-- **`Elements.resume(flush)`** - Resume reactivity
-- **`Elements.untrack(fn)`** - Untrack dependencies
-
-**Special Elements Method:**
-- **`Elements.bind(bindingDefs)`** - ID-based bindings (uses getElementById)
-
-### Collections Namespace Integration
-
-All core methods available via `Collections.*`:
-
-**Core Methods:**
-- **`Collections.state()`** - Create reactive state
-- **`Collections.createState(initialState, bindingDefs)`** - Create state with bindings
-- **`Collections.updateAll(state, updates)`** - Unified updates
-- **`Collections.computed(state, defs)`** - Add computed properties
-- **`Collections.watch(state, defs)`** - Add watchers
-- **`Collections.effect(fn)`** - Create effect
-- **`Collections.effects(defs)`** - Create multiple effects
-- **`Collections.ref(value)`** - Create ref
-- **`Collections.refs(defs)`** - Create multiple refs
-- **`Collections.store(initialState, options)`** - Create store
-- **`Collections.component(config)`** - Create component
-- **`Collections.reactive(initialState)`** - Fluent builder
-- **`Collections.bindings(defs)`** - Create bindings
-- **`Collections.list(items)`** - Create collection
-- **`Collections.batch(fn)`** - Batch updates
-- **`Collections.isReactive(value)`** - Check reactive
-- **`Collections.toRaw(value)`** - Get raw value
-- **`Collections.notify(state, key)`** - Notify dependencies
-- **`Collections.pause()`** - Pause reactivity
-- **`Collections.resume(flush)`** - Resume reactivity
-- **`Collections.untrack(fn)`** - Untrack dependencies
-
-**Special Collections Method:**
-- **`Collections.bind(bindingDefs)`** - Class-based bindings (uses getElementsByClassName)
-
-### Selector Namespace Integration
-
-All core methods available via `Selector.*`:
-
-**Core Methods:**
-- **`Selector.state()`** - Create reactive state
-- **`Selector.createState(initialState, bindingDefs)`** - Create state with bindings
-- **`Selector.updateAll(state, updates)`** - Unified updates
-- **`Selector.computed(state, defs)`** - Add computed properties
-- **`Selector.watch(state, defs)`** - Add watchers
-- **`Selector.effect(fn)`** - Create effect
-- **`Selector.effects(defs)`** - Create multiple effects
-- **`Selector.ref(value)`** - Create ref
-- **`Selector.refs(defs)`** - Create multiple refs
-- **`Selector.store(initialState, options)`** - Create store
-- **`Selector.component(config)`** - Create component
-- **`Selector.reactive(initialState)`** - Fluent builder
-- **`Selector.bindings(defs)`** - Create bindings
-- **`Selector.list(items)`** - Create collection
-- **`Selector.batch(fn)`** - Batch updates
-- **`Selector.isReactive(value)`** - Check reactive
-- **`Selector.toRaw(value)`** - Get raw value
-- **`Selector.notify(state, key)`** - Notify dependencies
-- **`Selector.pause()`** - Pause reactivity
-- **`Selector.resume(flush)`** - Resume reactivity
-- **`Selector.untrack(fn)`** - Untrack dependencies
-
-**Selector.query Methods:**
-- All core methods plus:
-- **`Selector.query.bind(bindingDefs)`** - Single element bindings (uses querySelector)
-
-**Selector.queryAll Methods:**
-- All core methods plus:
-- **`Selector.queryAll.bind(bindingDefs)`** - Multiple element bindings (uses querySelectorAll)
-
----
 
 ## Module 02: Array Patch (`02_dh-reactive-array-patch.js`)
 
@@ -243,13 +129,18 @@ When array patch extension is loaded, these array methods become reactive:
 
 - **`ReactiveUtils.patchArray(state, key)`** - Manually patch array property
 - **`patchReactiveArray(state, key)`** - Legacy global function name
-- **`Elements.patchArray(state, key)`** - Array patch via Elements namespace
-- **`Collections.patchArray(state, key)`** - Array patch via Collections namespace
-- **`Selector.patchArray(state, key)`** - Array patch via Selector namespace
-
----
 
 ## Module 03: Collections Extension (`03_dh-reactive-collections.js`)
+
+### Module 03 (Collections Extension): ~40 methods
+- 4 basic operations (no `$` prefix)
+- 4 search/filter methods
+- 2 sorting methods
+- 3 getter properties
+- 12 array methods
+- 7 advanced operations
+- 4 namespace methods
+
 
 ### Collections Extension Namespace
 
@@ -562,4 +453,3 @@ When `07_dh-reactiveUtils-shortcut.js` is loaded, all methods available as globa
 - **`patchArray(state, key)`** - Global shortcut
 
 ---
-
