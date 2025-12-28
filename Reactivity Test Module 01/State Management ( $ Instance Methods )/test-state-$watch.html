@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test state.$watch()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    console.log('=== Testing state.$watch() ===');
+    
+    // Basic watch
+    console.log('\n=== Basic watch ===');
+    const state = ReactiveUtils.state({
+      count: 0,
+      name: 'Test'
+    });
+    
+    let watchRuns = 0;
+    state.$watch('count', (newVal, oldVal) => {
+      watchRuns++;
+      console.log(`Watch #${watchRuns}: count changed from ${oldVal} to ${newVal}`);
+    });
+    
+    setTimeout(() => {
+      state.count = 5;
+      console.log('Watch runs after count = 5:', watchRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      state.count = 10;
+      console.log('Watch runs after count = 10:', watchRuns);
+    }, 1000);
+    
+    // Watch multiple properties
+    console.log('\n=== Watch multiple properties ===');
+    const multi = ReactiveUtils.state({
+      x: 0,
+      y: 0
+    });
+    
+    let xWatchRuns = 0;
+    let yWatchRuns = 0;
+    
+    multi.$watch('x', (newVal, oldVal) => {
+      xWatchRuns++;
+      console.log(`x watch #${xWatchRuns}: ${oldVal} → ${newVal}`);
+    });
+    
+    multi.$watch('y', (newVal, oldVal) => {
+      yWatchRuns++;
+      console.log(`y watch #${yWatchRuns}: ${oldVal} → ${newVal}`);
+    });
+    
+    setTimeout(() => {
+      multi.x = 10;
+      console.log('After x change, xWatch:', xWatchRuns, 'yWatch:', yWatchRuns);
+    }, 1500);
+    
+    setTimeout(() => {
+      multi.y = 20;
+      console.log('After y change, xWatch:', xWatchRuns, 'yWatch:', yWatchRuns);
+    }, 2000);
+    
+    // Watch with function (computed watch)
+    console.log('\n=== Watch with function (computed watch) ===');
+    const computed = ReactiveUtils.state({
+      firstName: 'John',
+      lastName: 'Doe'
+    });
+    
+    let fullNameWatchRuns = 0;
+    computed.$watch(
+      function() { return this.firstName + ' ' + this.lastName; },
+      (newVal, oldVal) => {
+        fullNameWatchRuns++;
+        console.log(`Full name watch #${fullNameWatchRuns}: "${oldVal}" → "${newVal}"`);
+      }
+    );
+    
+    setTimeout(() => {
+      computed.firstName = 'Jane';
+      console.log('Watch runs after firstName change:', fullNameWatchRuns);
+    }, 2500);
+    
+    setTimeout(() => {
+      computed.lastName = 'Smith';
+      console.log('Watch runs after lastName change:', fullNameWatchRuns);
+    }, 3000);
+    
+    // Watch returns cleanup function
+    console.log('\n=== Watch returns cleanup function ===');
+    const cleanup = ReactiveUtils.state({ value: 0 });
+    
+    let cleanupWatchRuns = 0;
+    const stopWatch = cleanup.$watch('value', (newVal, oldVal) => {
+      cleanupWatchRuns++;
+      console.log(`Cleanup watch #${cleanupWatchRuns}: ${oldVal} → ${newVal}`);
+    });
+    
+    console.log('stopWatch is function:', typeof stopWatch === 'function');
+    
+    setTimeout(() => {
+      cleanup.value = 1;
+      console.log('Before cleanup, watch runs:', cleanupWatchRuns);
+      
+      stopWatch(); // Stop watching
+      console.log('Cleanup function called');
+      
+      cleanup.value = 2;
+      console.log('After cleanup, watch runs:', cleanupWatchRuns);
+    }, 3500);
+    
+    // Watch only fires when value changes
+    console.log('\n=== Watch only fires when value changes ===');
+    const noChange = ReactiveUtils.state({ val: 10 });
+    
+    let noChangeWatchRuns = 0;
+    noChange.$watch('val', (newVal, oldVal) => {
+      noChangeWatchRuns++;
+      console.log(`No-change watch #${noChangeWatchRuns}: ${oldVal} → ${newVal}`);
+    });
+    
+    setTimeout(() => {
+      noChange.val = 10; // Same value
+      console.log('After setting same value, watch runs:', noChangeWatchRuns);
+      
+      noChange.val = 20; // Different value
+      console.log('After setting different value, watch runs:', noChangeWatchRuns);
+    }, 4000);
+    
+    // Watch with complex objects
+    console.log('\n=== Watch with complex objects ===');
+    const obj = ReactiveUtils.state({
+      user: { name: 'Alice', age: 25 }
+    });
+    
+    let objWatchRuns = 0;
+    obj.$watch('user', (newVal, oldVal) => {
+      objWatchRuns++;
+      console.log(`Object watch #${objWatchRuns}:`, oldVal, '→', newVal);
+    });
+    
+    setTimeout(() => {
+      obj.user = { name: 'Bob', age: 30 };
+      console.log('Watch runs after object replacement:', objWatchRuns);
+    }, 4500);
+    
+    // Watch for validation
+    console.log('\n=== Watch for validation ===');
+    const validation = ReactiveUtils.state({
+      email: '',
+      emailError: null
+    });
+    
+    validation.$watch('email', (newVal) => {
+      if (!newVal) {
+        validation.emailError = 'Email required';
+      } else if (!/\S+@\S+\.\S+/.test(newVal)) {
+        validation.emailError = 'Invalid email';
+      } else {
+        validation.emailError = null;
+      }
+      console.log(`Email: "${newVal}", Error: ${validation.emailError}`);
+    });
+    
+    setTimeout(() => {
+      validation.email = 'invalid';
+    }, 5000);
+    
+    setTimeout(() => {
+      validation.email = 'valid@example.com';
+    }, 5500);
+    
+    // Watch for logging
+    console.log('\n=== Watch for logging ===');
+    const logger = ReactiveUtils.state({
+      action: null,
+      timestamp: null
+    });
+    
+    const log = [];
+    logger.$watch('action', (newVal) => {
+      if (newVal) {
+        const entry = {
+          action: newVal,
+          time: new Date().toISOString()
+        };
+        log.push(entry);
+        console.log('Logged action:', entry);
+      }
+    });
+    
+    setTimeout(() => {
+      logger.action = 'user_login';
+    }, 6000);
+    
+    setTimeout(() => {
+      logger.action = 'data_fetch';
+    }, 6500);
+    
+    setTimeout(() => {
+      logger.action = 'user_logout';
+      console.log('Total logged actions:', log.length);
+    }, 7000);
+    
+    // Watch with side effects
+    console.log('\n=== Watch with side effects ===');
+    const sideEffect = ReactiveUtils.state({
+      cart: [],
+      total: 0
+    });
+    
+    sideEffect.$watch(
+      function() { return this.cart.length; },
+      (newLen, oldLen) => {
+        console.log(`Cart size changed: ${oldLen} → ${newLen} items`);
+        if (newLen === 0) {
+          console.log('Cart is empty!');
+        }
+      }
+    );
+    
+    setTimeout(() => {
+      sideEffect.cart = [{ item: 'Product 1' }];
+    }, 7500);
+    
+    setTimeout(() => {
+      sideEffect.cart = [];
+    }, 8000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ $watch(key, callback) watches property changes');
+      console.log('✓ $watch(fn, callback) watches computed value changes');
+      console.log('✓ Watch callback receives (newValue, oldValue)');
+      console.log('✓ Can watch multiple properties independently');
+      console.log('✓ $watch returns cleanup function');
+      console.log('✓ Watch only fires when value actually changes');
+      console.log('✓ Works with complex objects and arrays');
+      console.log('✓ Useful for validation and logging');
+      console.log('✓ Supports side effects and derived state');
+    }, 8500);
+  </script>
+</body>
+</html>

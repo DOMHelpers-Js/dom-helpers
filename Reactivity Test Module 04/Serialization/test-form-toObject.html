@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.toObject()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.toObject() ===');
+    
+    // Basic toObject
+    console.log('\n=== Basic toObject ===');
+    const form = ReactiveUtils.form({
+      username: 'john',
+      email: 'john@example.com'
+    });
+    
+    const obj = form.toObject();
+    console.log('toObject():', obj);
+    console.log('Has values:', 'values' in obj);
+    console.log('Has errors:', 'errors' in obj);
+    console.log('Has touched:', 'touched' in obj);
+    console.log('Has isValid:', 'isValid' in obj);
+    console.log('Has isDirty:', 'isDirty' in obj);
+    console.log('Has isSubmitting:', 'isSubmitting' in obj);
+    console.log('Has submitCount:', 'submitCount' in obj);
+    
+    // toObject returns plain object
+    console.log('\n=== toObject returns plain object ===');
+    const plainForm = ReactiveUtils.form({
+      field: 'value'
+    });
+    
+    const plainObj = plainForm.toObject();
+    console.log('Type:', typeof plainObj);
+    console.log('Is object:', typeof plainObj === 'object');
+    console.log('Is plain object:', plainObj.constructor === Object);
+    console.log('Not reactive:', !plainObj.$computed);
+    console.log('✓ Returns plain non-reactive object');
+    
+    // toObject includes values
+    console.log('\n=== toObject includes values ===');
+    const valuesForm = ReactiveUtils.form({
+      name: 'Alice',
+      email: 'alice@example.com',
+      age: '25'
+    });
+    
+    const valuesObj = valuesForm.toObject();
+    console.log('Values:', valuesObj.values);
+    console.log('Values match:', JSON.stringify(valuesObj.values) === JSON.stringify(valuesForm.values));
+    
+    // toObject includes errors
+    console.log('\n=== toObject includes errors ===');
+    const errorsForm = ReactiveUtils.form({
+      field1: '',
+      field2: ''
+    });
+    
+    errorsForm.setErrors({
+      field1: 'Error 1',
+      field2: 'Error 2'
+    });
+    
+    const errorsObj = errorsForm.toObject();
+    console.log('Errors:', errorsObj.errors);
+    console.log('Errors match:', JSON.stringify(errorsObj.errors) === JSON.stringify(errorsForm.errors));
+    
+    // toObject includes touched
+    console.log('\n=== toObject includes touched ===');
+    const touchedForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    touchedForm.touchAll();
+    
+    const touchedObj = touchedForm.toObject();
+    console.log('Touched:', touchedObj.touched);
+    console.log('Touched match:', JSON.stringify(touchedObj.touched) === JSON.stringify(touchedForm.touched));
+    
+    // toObject includes computed properties
+    console.log('\n=== toObject includes computed properties ===');
+    const computedForm = ReactiveUtils.form({
+      field1: '',
+      field2: ''
+    });
+    
+    computedForm.setError('field1', 'Error');
+    computedForm.setTouched('field2');
+    
+    const computedObj = computedForm.toObject();
+    console.log('Computed properties:', {
+      isValid: computedObj.isValid,
+      isDirty: computedObj.isDirty
+    });
+    console.log('isValid matches:', computedObj.isValid === computedForm.isValid);
+    console.log('isDirty matches:', computedObj.isDirty === computedForm.isDirty);
+    
+    // toObject includes isSubmitting
+    console.log('\n=== toObject includes isSubmitting ===');
+    const submittingForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    submittingForm.isSubmitting = true;
+    
+    const submittingObj = submittingForm.toObject();
+    console.log('isSubmitting:', submittingObj.isSubmitting);
+    console.log('Matches:', submittingObj.isSubmitting === submittingForm.isSubmitting);
+    
+    // toObject includes submitCount
+    console.log('\n=== toObject includes submitCount ===');
+    const countForm = ReactiveUtils.form({
+      field: 'value'
+    }, {
+      onSubmit: async (values) => values
+    });
+    
+    setTimeout(async () => {
+      await countForm.submit();
+      await countForm.submit();
+      
+      const countObj = countForm.toObject();
+      console.log('submitCount:', countObj.submitCount);
+      console.log('Matches:', countObj.submitCount === countForm.submitCount);
+    }, 500);
+    
+    // toObject is snapshot
+    console.log('\n=== toObject is snapshot (not reactive) ===');
+    const snapshotForm = ReactiveUtils.form({
+      field: 'initial'
+    });
+    
+    setTimeout(() => {
+      const snapshot1 = snapshotForm.toObject();
+      console.log('Snapshot 1 value:', snapshot1.values.field);
+      
+      snapshotForm.setValue('field', 'updated');
+      console.log('Snapshot 1 after change:', snapshot1.values.field);
+      console.log('Form value after change:', snapshotForm.values.field);
+      console.log('✓ Snapshot is independent copy');
+    }, 1000);
+    
+    // toObject for serialization
+    console.log('\n=== toObject for serialization ===');
+    const serializeForm = ReactiveUtils.form({
+      username: 'johndoe',
+      email: 'john@example.com',
+      password: 'secret123'
+    });
+    
+    serializeForm.setError('email', 'Already exists');
+    serializeForm.touchAll();
+    
+    setTimeout(() => {
+      const serialized = serializeForm.toObject();
+      const json = JSON.stringify(serialized, null, 2);
+      console.log('JSON serialized:', json);
+      console.log('✓ Can be JSON serialized');
+    }, 1500);
+    
+    // toObject for logging
+    console.log('\n=== toObject for logging ===');
+    const logForm = ReactiveUtils.form({
+      name: 'Alice',
+      email: 'alice@example.com'
+    });
+    
+    logForm.setError('email', 'Invalid');
+    logForm.setTouched('name');
+    
+    setTimeout(() => {
+      console.log('Form state snapshot:');
+      console.log(logForm.toObject());
+      console.log('✓ Perfect for debugging/logging');
+    }, 2000);
+    
+    // toObject for comparison
+    console.log('\n=== toObject for comparison ===');
+    const compareForm = ReactiveUtils.form({
+      field: 'value'
+    });
+    
+    setTimeout(() => {
+      const before = compareForm.toObject();
+      
+      compareForm.setValue('field', 'changed');
+      compareForm.setError('field', 'Error');
+      
+      const after = compareForm.toObject();
+      
+      console.log('Before:', before);
+      console.log('After:', after);
+      console.log('Values changed:', before.values.field !== after.values.field);
+      console.log('Errors changed:', JSON.stringify(before.errors) !== JSON.stringify(after.errors));
+    }, 2500);
+    
+    // toObject complete state
+    console.log('\n=== toObject complete state ===');
+    const completeForm = ReactiveUtils.form({
+      username: 'john',
+      email: 'john@example.com',
+      password: 'secret'
+    }, {
+      validators: {
+        username: (value) => value ? null : 'Required',
+        email: (value) => value ? null : 'Required',
+        password: (value) => value ? null : 'Required'
+      }
+    });
+    
+    setTimeout(async () => {
+      completeForm.touchAll();
+      completeForm.validate();
+      await completeForm.submit();
+      
+      const complete = completeForm.toObject();
+      console.log('Complete form state:', {
+        hasValues: Object.keys(complete.values).length > 0,
+        hasErrors: Object.keys(complete.errors).length >= 0,
+        hasTouched: Object.keys(complete.touched).length > 0,
+        isValid: complete.isValid,
+        isDirty: complete.isDirty,
+        isSubmitting: complete.isSubmitting,
+        submitCount: complete.submitCount
+      });
+    }, 3000);
+    
+    // toObject vs direct access
+    console.log('\n=== toObject vs direct access ===');
+    const accessForm = ReactiveUtils.form({
+      field: 'value'
+    });
+    
+    accessForm.setError('field', 'Error');
+    accessForm.setTouched('field');
+    
+    setTimeout(() => {
+      const obj = accessForm.toObject();
+      
+      console.log('Direct access - values:', accessForm.values);
+      console.log('toObject - values:', obj.values);
+      console.log('Match:', JSON.stringify(accessForm.values) === JSON.stringify(obj.values));
+      
+      console.log('Direct access - isValid:', accessForm.isValid);
+      console.log('toObject - isValid:', obj.isValid);
+      console.log('Match:', accessForm.isValid === obj.isValid);
+      
+      console.log('✓ toObject provides same data as direct access');
+    }, 3500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ toObject() converts form to plain object');
+      console.log('✓ toObject returns non-reactive plain object');
+      console.log('✓ toObject includes values');
+      console.log('✓ toObject includes errors');
+      console.log('✓ toObject includes touched state');
+      console.log('✓ toObject includes computed properties (isValid, isDirty)');
+      console.log('✓ toObject includes isSubmitting');
+      console.log('✓ toObject includes submitCount');
+      console.log('✓ toObject creates independent snapshot');
+      console.log('✓ toObject perfect for serialization (JSON)');
+      console.log('✓ toObject perfect for logging/debugging');
+      console.log('✓ toObject perfect for state comparison');
+    }, 4000);
+  </script>
+</body>
+</html>

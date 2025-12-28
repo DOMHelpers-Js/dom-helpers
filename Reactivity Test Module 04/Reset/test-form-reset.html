@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.reset()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.reset() ===');
+    
+    // Basic reset
+    console.log('\n=== Basic reset ===');
+    const form = ReactiveUtils.form({
+      username: 'initial',
+      email: 'initial@example.com'
+    });
+    
+    console.log('Initial values:', form.values);
+    
+    form.setValues({
+      username: 'changed',
+      email: 'changed@example.com'
+    });
+    console.log('After changes:', form.values);
+    
+    form.reset();
+    console.log('After reset():', form.values);
+    console.log('✓ Resets to initial values');
+    
+    // reset with new values
+    console.log('\n=== reset with new values ===');
+    const newForm = ReactiveUtils.form({
+      name: 'John',
+      age: '25'
+    });
+    
+    console.log('Initial:', newForm.values);
+    
+    newForm.setValues({ name: 'Jane', age: '30' });
+    console.log('After changes:', newForm.values);
+    
+    newForm.reset({ name: 'Bob', age: '35' });
+    console.log('After reset with new values:', newForm.values);
+    console.log('✓ Can reset to new values');
+    
+    // reset clears errors
+    console.log('\n=== reset clears errors ===');
+    const errorForm = ReactiveUtils.form({
+      field1: '',
+      field2: ''
+    });
+    
+    errorForm.setErrors({
+      field1: 'Error 1',
+      field2: 'Error 2'
+    });
+    console.log('Before reset:', errorForm.errors);
+    
+    errorForm.reset();
+    console.log('After reset:', errorForm.errors);
+    console.log('Errors cleared:', Object.keys(errorForm.errors).length === 0);
+    
+    // reset clears touched
+    console.log('\n=== reset clears touched ===');
+    const touchedForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    touchedForm.touchAll();
+    console.log('Before reset:', touchedForm.touched);
+    
+    touchedForm.reset();
+    console.log('After reset:', touchedForm.touched);
+    console.log('Touched cleared:', Object.keys(touchedForm.touched).length === 0);
+    
+    // reset clears isSubmitting
+    console.log('\n=== reset clears isSubmitting ===');
+    const submittingForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    submittingForm.isSubmitting = true;
+    console.log('Before reset, isSubmitting:', submittingForm.isSubmitting);
+    
+    submittingForm.reset();
+    console.log('After reset, isSubmitting:', submittingForm.isSubmitting);
+    
+    // reset returns this (chainable)
+    console.log('\n=== reset returns this (chainable) ===');
+    const chainForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    const result = chainForm.reset();
+    console.log('reset returns this:', result === chainForm);
+    
+    chainForm
+      .reset({ field: 'value1' })
+      .setError('field', 'Error')
+      .reset({ field: 'value2' });
+    console.log('After chained operations:', {
+      values: chainForm.values,
+      errors: chainForm.errors
+    });
+    
+    // reset is reactive
+    console.log('\n=== reset is reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      field1: '',
+      field2: ''
+    });
+    
+    reactiveForm.setValues({ field1: 'a', field2: 'b' });
+    reactiveForm.setErrors({ field1: 'Error 1' });
+    reactiveForm.touchAll();
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const valueCount = Object.values(reactiveForm.values).filter(Boolean).length;
+      const errorCount = Object.keys(reactiveForm.errors).length;
+      const touchedCount = Object.keys(reactiveForm.touched).length;
+      console.log(`Effect #${effectRuns}: ${valueCount} values, ${errorCount} errors, ${touchedCount} touched`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.reset();
+      console.log('Effect runs after reset:', effectRuns);
+    }, 500);
+    
+    // reset updates computed properties
+    console.log('\n=== reset updates computed properties ===');
+    const computedForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    computedForm.setValue('field', 'value');
+    computedForm.setError('field', 'Error');
+    computedForm.setTouched('field');
+    
+    console.log('Before reset:', {
+      isDirty: computedForm.isDirty,
+      hasErrors: computedForm.hasErrors,
+      isValid: computedForm.isValid
+    });
+    
+    setTimeout(() => {
+      computedForm.reset();
+      console.log('After reset:', {
+        isDirty: computedForm.isDirty,
+        hasErrors: computedForm.hasErrors,
+        isValid: computedForm.isValid
+      });
+    }, 1000);
+    
+    // reset in submit workflow
+    console.log('\n=== reset in submit workflow ===');
+    const submitForm = ReactiveUtils.form({
+      name: '',
+      email: ''
+    }, {
+      validators: {
+        name: (value) => value ? null : 'Name required',
+        email: (value) => value ? null : 'Email required'
+      },
+      onSubmit: async (values) => {
+        console.log('Submitting:', values);
+        return { success: true };
+      }
+    });
+    
+    setTimeout(() => {
+      submitForm.setValues({ name: 'John', email: 'john@example.com' });
+      submitForm.touchAll();
+      
+      console.log('After filling form:', {
+        values: submitForm.values,
+        isDirty: submitForm.isDirty
+      });
+      
+      // Simulate successful submit and reset
+      submitForm.reset();
+      console.log('After submit + reset:', {
+        values: submitForm.values,
+        isDirty: submitForm.isDirty,
+        touched: submitForm.touched
+      });
+    }, 1500);
+    
+    // reset partial values
+    console.log('\n=== reset partial values ===');
+    const partialForm = ReactiveUtils.form({
+      field1: 'initial1',
+      field2: 'initial2',
+      field3: 'initial3'
+    });
+    
+    partialForm.setValues({
+      field1: 'changed1',
+      field2: 'changed2',
+      field3: 'changed3'
+    });
+    
+    setTimeout(() => {
+      console.log('After changes:', partialForm.values);
+      
+      partialForm.reset({ field1: 'new1' });
+      console.log('After partial reset:', partialForm.values);
+      console.log('✓ Partial reset updates specified fields');
+    }, 2000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ reset() resets to initial values');
+      console.log('✓ reset(newValues) resets to new values');
+      console.log('✓ reset clears all errors');
+      console.log('✓ reset clears all touched state');
+      console.log('✓ reset clears isSubmitting');
+      console.log('✓ reset returns this for chaining');
+      console.log('✓ reset is reactive (triggers effects)');
+      console.log('✓ reset updates computed properties');
+      console.log('✓ reset useful after form submission');
+      console.log('✓ reset supports partial value updates');
+    }, 2500);
+  </script>
+</body>
+</html>

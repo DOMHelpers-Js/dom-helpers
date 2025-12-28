@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.touched</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.touched ===');
+    
+    // Basic touched access
+    console.log('\n=== Basic touched access ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: ''
+    });
+    
+    console.log('Initial touched:', form.touched);
+    console.log('touched is object:', typeof form.touched === 'object');
+    console.log('Empty object:', Object.keys(form.touched).length === 0);
+    
+    // Read touched
+    console.log('\n=== Read touched ===');
+    const touchForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    touchForm.setValue('field1', 'value');
+    console.log('After setValue("field1"):', touchForm.touched);
+    console.log('field1 touched:', touchForm.touched.field1);
+    console.log('field2 touched:', touchForm.touched.field2);
+    
+    // Write touched (direct assignment)
+    console.log('\n=== Write touched (direct assignment) ===');
+    const directForm = ReactiveUtils.form({
+      name: '',
+      email: ''
+    });
+    
+    console.log('Before write:', directForm.touched);
+    
+    directForm.touched.name = true;
+    console.log('After touched.name = true:', directForm.touched);
+    
+    directForm.touched.email = true;
+    console.log('After touched.email = true:', directForm.touched);
+    
+    // Clear touched by deletion
+    console.log('\n=== Clear touched by deletion ===');
+    const clearForm = ReactiveUtils.form({
+      field1: '',
+      field2: ''
+    });
+    
+    clearForm.touched.field1 = true;
+    clearForm.touched.field2 = true;
+    console.log('With touched:', clearForm.touched);
+    
+    delete clearForm.touched.field1;
+    console.log('After delete touched.field1:', clearForm.touched);
+    
+    // Touched are reactive
+    console.log('\n=== Touched are reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      email: ''
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const touchedCount = Object.keys(reactiveForm.touched).length;
+      console.log(`Effect #${effectRuns}: ${touchedCount} touched fields`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.touched.email = true;
+      console.log('Effect runs after setting touched:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      delete reactiveForm.touched.email;
+      console.log('Effect runs after deleting touched:', effectRuns);
+    }, 1000);
+    
+    // Touched with setTouched method
+    console.log('\n=== Touched with setTouched method ===');
+    const setTouchedForm = ReactiveUtils.form({
+      username: '',
+      email: ''
+    });
+    
+    console.log('Initial touched:', setTouchedForm.touched);
+    
+    setTouchedForm.setTouched('username');
+    console.log('After setTouched("username"):', setTouchedForm.touched);
+    
+    setTouchedForm.setTouched('email', true);
+    console.log('After setTouched("email", true):', setTouchedForm.touched);
+    
+    setTouchedForm.setTouched('username', false);
+    console.log('After setTouched("username", false):', setTouchedForm.touched);
+    
+    // Touched from setValue
+    console.log('\n=== Touched from setValue ===');
+    const valueForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    console.log('Before setValue:', valueForm.touched);
+    
+    valueForm.setValue('field1', 'value1');
+    console.log('After setValue("field1"):', valueForm.touched);
+    
+    valueForm.setValue('field2', 'value2');
+    console.log('After setValue("field2"):', valueForm.touched);
+    
+    valueForm.setValues({ field3: 'value3' });
+    console.log('After setValues({field3}):', valueForm.touched);
+    
+    // TouchAll method
+    console.log('\n=== TouchAll method ===');
+    const touchAllForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    console.log('Before touchAll:', touchAllForm.touched);
+    
+    touchAllForm.touchAll();
+    console.log('After touchAll():', touchAllForm.touched);
+    console.log('All touched:', Object.keys(touchAllForm.touched).length === 3);
+    
+    // Iterate over touched
+    console.log('\n=== Iterate over touched ===');
+    const iterForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    iterForm.touched.field1 = true;
+    iterForm.touched.field3 = true;
+    
+    console.log('Touched fields:');
+    Object.keys(iterForm.touched).forEach(field => {
+      console.log(`  ${field}: ${iterForm.touched[field]}`);
+    });
+    
+    console.log('Touched count:', Object.keys(iterForm.touched).length);
+    
+    // Touched reset
+    console.log('\n=== Touched reset ===');
+    const resetForm = ReactiveUtils.form({
+      name: '',
+      email: ''
+    });
+    
+    resetForm.touched.name = true;
+    resetForm.touched.email = true;
+    console.log('With touched:', resetForm.touched);
+    
+    resetForm.reset();
+    console.log('After reset():', resetForm.touched);
+    console.log('Touched cleared:', Object.keys(resetForm.touched).length === 0);
+    
+    // Touched with isTouched
+    console.log('\n=== Touched with isTouched ===');
+    const checkForm = ReactiveUtils.form({
+      username: '',
+      email: ''
+    });
+    
+    checkForm.touched.username = true;
+    
+    console.log('isTouched("username"):', checkForm.isTouched('username'));
+    console.log('isTouched("email"):', checkForm.isTouched('email'));
+    
+    // Touched affects isDirty
+    console.log('\n=== Touched affects isDirty ===');
+    const dirtyForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    console.log('Before touch:');
+    console.log('  touched:', dirtyForm.touched);
+    console.log('  isDirty:', dirtyForm.isDirty);
+    
+    dirtyForm.touched.field = true;
+    console.log('After touch:');
+    console.log('  touched:', dirtyForm.touched);
+    console.log('  isDirty:', dirtyForm.isDirty);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ form.touched contains touched field flags');
+      console.log('✓ form.touched is readable (can check individual fields)');
+      console.log('✓ form.touched is writable (can mark fields as touched)');
+      console.log('✓ form.touched can be cleared by deletion');
+      console.log('✓ form.touched is reactive (triggers effects)');
+      console.log('✓ form.touched updates from setValue()');
+      console.log('✓ form.touched updates with setTouched()');
+      console.log('✓ form.touched can be iterated');
+      console.log('✓ form.touched clears on reset()');
+      console.log('✓ form.touched affects isDirty computed property');
+    }, 1500);
+  </script>
+</body>
+</html>

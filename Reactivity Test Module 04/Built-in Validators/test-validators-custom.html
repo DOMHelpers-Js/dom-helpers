@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Validators.custom()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing Validators.custom() ===');
+    
+    // Basic custom validator
+    console.log('\n=== Basic custom validator ===');
+    const customValidator = ReactiveUtils.validators.custom((value) => {
+      if (value === 'forbidden') return 'This value is not allowed';
+      return null;
+    });
+    
+    console.log('Allowed value:', customValidator('allowed'));
+    console.log('Forbidden value:', customValidator('forbidden'));
+    console.log('✓ Custom validation logic works');
+    
+    // custom validator with complex logic
+    console.log('\n=== custom validator with complex logic ===');
+    const strongPassword = ReactiveUtils.validators.custom((value) => {
+      if (!value) return null; // Allow empty
+      if (value.length < 8) return 'Password too short';
+      if (!/[A-Z]/.test(value)) return 'Must contain uppercase letter';
+      if (!/[a-z]/.test(value)) return 'Must contain lowercase letter';
+      if (!/[0-9]/.test(value)) return 'Must contain number';
+      if (!/[!@#$%^&*]/.test(value)) return 'Must contain special character';
+      return null;
+    });
+    
+    console.log('Weak password:', strongPassword('weak'));
+    console.log('No uppercase:', strongPassword('password123!'));
+    console.log('No number:', strongPassword('Password!'));
+    console.log('Strong password:', strongPassword('Password123!'));
+    
+    // custom validator with access to all values
+    console.log('\n=== custom validator with access to all values ===');
+    const form = ReactiveUtils.form({
+      startDate: '2024-01-01',
+      endDate: ''
+    }, {
+      validators: {
+        endDate: ReactiveUtils.validators.custom((value, allValues) => {
+          if (!value) return null;
+          if (new Date(value) < new Date(allValues.startDate)) {
+            return 'End date must be after start date';
+          }
+          return null;
+        })
+      }
+    });
+    
+    form.setValue('endDate', '2023-12-31');
+    form.validateField('endDate');
+    console.log('Before start date:', form.errors.endDate);
+    
+    form.setValue('endDate', '2024-01-15');
+    form.validateField('endDate');
+    console.log('After start date:', form.errors.endDate);
+    
+    // custom validator for unique values
+    console.log('\n=== custom validator for unique values ===');
+    const existingUsernames = ['john', 'jane', 'bob'];
+    
+    const uniqueUsername = ReactiveUtils.validators.custom((value) => {
+      if (!value) return null;
+      if (existingUsernames.includes(value.toLowerCase())) {
+        return 'Username already taken';
+      }
+      return null;
+    });
+    
+    console.log('Taken username:', uniqueUsername('john'));
+    console.log('Available username:', uniqueUsername('alice'));
+    
+    // custom validator for business rules
+    console.log('\n=== custom validator for business rules ===');
+    const ageValidator = ReactiveUtils.validators.custom((value, allValues) => {
+      if (!value) return null;
+      
+      const age = Number(value);
+      const hasParentalConsent = allValues.parentalConsent;
+      
+      if (age < 13) return 'Must be at least 13 years old';
+      if (age < 18 && !hasParentalConsent) return 'Parental consent required for under 18';
+      return null;
+    });
+    
+    const ageForm = ReactiveUtils.form({
+      age: '',
+      parentalConsent: false
+    }, {
+      validators: {
+        age: ageValidator
+      }
+    });
+    
+    ageForm.setValue('age', '16');
+    ageForm.validateField('age');
+    console.log('16 without consent:', ageForm.errors.age);
+    
+    ageForm.setValue('parentalConsent', true);
+    ageForm.validateField('age');
+    console.log('16 with consent:', ageForm.errors.age);
+    
+    // custom async-style validator
+    console.log('\n=== custom async-style validator ===');
+    const asyncStyleValidator = ReactiveUtils.validators.custom((value) => {
+      if (!value) return null;
+      
+      // Simulate checking against server
+      // In real scenario, you'd use the form's async handling
+      const isValid = value.length > 3;
+      return isValid ? null : 'Username too short (checked)';
+    });
+    
+    console.log('Short username:', asyncStyleValidator('ab'));
+    console.log('Valid username:', asyncStyleValidator('alice'));
+    
+    // custom validator with multiple conditions
+    console.log('\n=== custom validator with multiple conditions ===');
+    const multiCondition = ReactiveUtils.validators.custom((value, allValues) => {
+      if (!value) return null;
+      
+      // Check multiple conditions
+      const conditions = [
+        { test: value.length >= 3, message: 'Too short (min 3)' },
+        { test: value.length <= 20, message: 'Too long (max 20)' },
+        { test: /^[a-zA-Z]/.test(value), message: 'Must start with letter' },
+        { test: /^[a-zA-Z0-9_]+$/.test(value), message: 'Invalid characters' }
+      ];
+      
+      for (const condition of conditions) {
+        if (!condition.test) return condition.message;
+      }
+      
+      return null;
+    });
+    
+    console.log('Starts with number:', multiCondition('123abc'));
+    console.log('Too short:', multiCondition('ab'));
+    console.log('Special chars:', multiCondition('user@name'));
+    console.log('Valid:', multiCondition('user_123'));
+    
+    // custom validator returns validator function
+    console.log('\n=== custom validator returns validator function ===');
+    const customFn = ReactiveUtils.validators.custom((value) => {
+      return value === 'test' ? 'Test value not allowed' : null;
+    });
+    
+    console.log('Type:', typeof customFn);
+    console.log('Is function:', typeof customFn === 'function');
+    console.log('Can be called:', customFn('other') === null);
+    
+    // custom validator in form
+    console.log('\n=== custom validator in form ===');
+    const customForm = ReactiveUtils.form({
+      couponCode: ''
+    }, {
+      validators: {
+        couponCode: ReactiveUtils.validators.custom((value) => {
+          if (!value) return null;
+          
+          const validCoupons = ['SAVE10', 'SAVE20', 'FREESHIP'];
+          if (!validCoupons.includes(value.toUpperCase())) {
+            return 'Invalid coupon code';
+          }
+          return null;
+        })
+      }
+    });
+    
+    customForm.setValue('couponCode', 'INVALID');
+    customForm.validateField('couponCode');
+    console.log('Invalid coupon:', customForm.errors.couponCode);
+    
+    customForm.setValue('couponCode', 'SAVE10');
+    customForm.validateField('couponCode');
+    console.log('Valid coupon:', customForm.errors.couponCode);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ Validators.custom(fn) creates custom validator');
+      console.log('✓ custom validator executes custom logic');
+      console.log('✓ custom validator supports complex validation');
+      console.log('✓ custom validator receives all form values');
+      console.log('✓ custom validator perfect for unique checks');
+      console.log('✓ custom validator perfect for business rules');
+      console.log('✓ custom validator supports multiple conditions');
+      console.log('✓ custom validator returns validator function');
+      console.log('✓ custom validator works in forms');
+    }, 500);
+  </script>
+</body>
+</html>

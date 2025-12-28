@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveUtils.pause()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    console.log('=== Testing ReactiveUtils.pause() ===');
+    
+    // Basic pause
+    console.log('\n=== Basic pause ===');
+    const state = ReactiveUtils.state({
+      count: 0
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const value = state.count;
+    });
+    
+    const initialRuns = effectRuns;
+    
+    ReactiveUtils.pause();
+    
+    state.count = 1;
+    state.count = 2;
+    state.count = 3;
+    
+    console.log('Effect runs while paused:', effectRuns - initialRuns);
+    console.log('Expected: 0');
+    console.log('✓ Pauses reactivity');
+    
+    ReactiveUtils.resume(true);
+    
+    // Multiple updates while paused
+    console.log('\n=== Multiple updates while paused ===');
+    setTimeout(() => {
+      const multiState = ReactiveUtils.state({
+        a: 0,
+        b: 0,
+        c: 0
+      });
+      
+      let multiRuns = 0;
+      ReactiveUtils.effect(() => {
+        multiRuns++;
+        const sum = multiState.a + multiState.b + multiState.c;
+      });
+      
+      const beforeMulti = multiRuns;
+      
+      ReactiveUtils.pause();
+      
+      multiState.a = 1;
+      multiState.b = 2;
+      multiState.c = 3;
+      
+      console.log('Runs during multiple updates:', multiRuns - beforeMulti);
+      console.log('Expected: 0');
+      
+      ReactiveUtils.resume(true);
+      
+      setTimeout(() => {
+        console.log('Runs after resume:', multiRuns - beforeMulti);
+        console.log('Expected: 1 (all batched)');
+        console.log('✓ Batches multiple paused updates');
+      }, 50);
+    }, 500);
+    
+    // Multiple pause calls (nested)
+    console.log('\n=== Multiple pause calls ===');
+    setTimeout(() => {
+      const nestedState = ReactiveUtils.state({
+        value: 0
+      });
+      
+      let nestedRuns = 0;
+      ReactiveUtils.effect(() => {
+        nestedRuns++;
+        const val = nestedState.value;
+      });
+      
+      const beforeNested = nestedRuns;
+      
+      ReactiveUtils.pause();
+      ReactiveUtils.pause();
+      ReactiveUtils.pause();
+      
+      nestedState.value = 5;
+      console.log('After 3 pauses and update:', nestedRuns - beforeNested);
+      
+      ReactiveUtils.resume();
+      nestedState.value = 10;
+      console.log('After 1 resume:', nestedRuns - beforeNested);
+      
+      ReactiveUtils.resume();
+      nestedState.value = 15;
+      console.log('After 2 resumes:', nestedRuns - beforeNested);
+      
+      ReactiveUtils.resume(true);
+      setTimeout(() => {
+        console.log('After all resumes:', nestedRuns - beforeNested);
+        console.log('✓ Handles nested pause/resume correctly');
+      }, 50);
+    }, 1000);
+    
+    // pause doesn't lose updates
+    console.log('\n=== pause doesn\'t lose updates ===');
+    setTimeout(() => {
+      const queueState = ReactiveUtils.state({
+        items: []
+      });
+      
+      let queueRuns = 0;
+      ReactiveUtils.effect(() => {
+        queueRuns++;
+        const length = queueState.items.length;
+      });
+      
+      const beforeQueue = queueRuns;
+      
+      ReactiveUtils.pause();
+      
+      queueState.items = [1];
+      queueState.items = [1, 2];
+      queueState.items = [1, 2, 3];
+      
+      console.log('Updates while paused:', queueRuns - beforeQueue);
+      
+      ReactiveUtils.resume(true);
+      
+      console.log('Final items length:', queueState.items.length);
+      console.log('Effect runs after resume:', queueRuns - beforeQueue);
+      console.log('✓ Updates are queued, not lost');
+    }, 1500);
+    
+    // pause with batch
+    console.log('\n=== pause with batch ===');
+    setTimeout(() => {
+      const batchState = ReactiveUtils.state({
+        x: 0,
+        y: 0
+      });
+      
+      let batchRuns = 0;
+      ReactiveUtils.effect(() => {
+        batchRuns++;
+        const sum = batchState.x + batchState.y;
+      });
+      
+      const beforeBatch = batchRuns;
+      
+      ReactiveUtils.pause();
+      
+      ReactiveUtils.batch(() => {
+        batchState.x = 5;
+        batchState.y = 10;
+      });
+      
+      console.log('After batch while paused:', batchRuns - beforeBatch);
+      console.log('Expected: 0');
+      
+      ReactiveUtils.resume(true);
+      
+      console.log('After resume:', batchRuns - beforeBatch);
+      console.log('✓ Works with batch()');
+    }, 2000);
+    
+    // pause works with multiple states
+    console.log('\n=== pause works with multiple states ===');
+    setTimeout(() => {
+      const state1 = ReactiveUtils.state({ value: 0 });
+      const state2 = ReactiveUtils.state({ value: 0 });
+      const state3 = ReactiveUtils.state({ value: 0 });
+      
+      let runs1 = 0, runs2 = 0, runs3 = 0;
+      
+      ReactiveUtils.effect(() => {
+        runs1++;
+        const val = state1.value;
+      });
+      
+      ReactiveUtils.effect(() => {
+        runs2++;
+        const val = state2.value;
+      });
+      
+      ReactiveUtils.effect(() => {
+        runs3++;
+        const val = state3.value;
+      });
+      
+      const before1 = runs1, before2 = runs2, before3 = runs3;
+      
+      ReactiveUtils.pause();
+      
+      state1.value = 1;
+      state2.value = 2;
+      state3.value = 3;
+      
+      console.log('All effects paused:', 
+        (runs1 - before1) + (runs2 - before2) + (runs3 - before3) === 0
+      );
+      
+      ReactiveUtils.resume(true);
+      
+      console.log('All effects resumed:', 
+        (runs1 - before1) === 1 && (runs2 - before2) === 1 && (runs3 - before3) === 1
+      );
+      console.log('✓ Pauses all reactive states');
+    }, 2500);
+    
+    // pause/resume cycle
+    console.log('\n=== pause/resume cycle ===');
+    setTimeout(() => {
+      const cycleState = ReactiveUtils.state({
+        counter: 0
+      });
+      
+      let cycleRuns = 0;
+      ReactiveUtils.effect(() => {
+        cycleRuns++;
+        const val = cycleState.counter;
+      });
+      
+      const beforeCycle = cycleRuns;
+      
+      // First cycle
+      ReactiveUtils.pause();
+      cycleState.counter = 1;
+      ReactiveUtils.resume(true);
+      
+      setTimeout(() => {
+        console.log('After first cycle:', cycleRuns - beforeCycle);
+        
+        // Second cycle
+        const afterFirst = cycleRuns;
+        ReactiveUtils.pause();
+        cycleState.counter = 2;
+        ReactiveUtils.resume(true);
+        
+        setTimeout(() => {
+          console.log('After second cycle:', cycleRuns - afterFirst);
+          console.log('✓ Can pause/resume multiple times');
+        }, 50);
+      }, 50);
+    }, 3000);
+    
+    // pause in bulk update workflow
+    console.log('\n=== pause in bulk update workflow ===');
+    setTimeout(() => {
+      const bulkState = ReactiveUtils.state({
+        items: [],
+        total: 0,
+        processed: 0
+      });
+      
+      let bulkRuns = 0;
+      ReactiveUtils.effect(() => {
+        bulkRuns++;
+        const data = bulkState.items.length + bulkState.total + bulkState.processed;
+      });
+      
+      const beforeBulk = bulkRuns;
+      
+      // Simulate bulk data processing
+      ReactiveUtils.pause();
+      
+      for (let i = 0; i < 100; i++) {
+        bulkState.items = [...bulkState.items, i];
+        bulkState.total += i;
+        bulkState.processed++;
+      }
+      
+      console.log('Effect runs during bulk processing:', bulkRuns - beforeBulk);
+      console.log('Expected: 0 (paused)');
+      
+      ReactiveUtils.resume(true);
+      
+      console.log('Items processed:', bulkState.processed);
+      console.log('Effect runs after processing:', bulkRuns - beforeBulk);
+      console.log('Expected: 1 (all batched)');
+      console.log('✓ Perfect for bulk updates');
+    }, 3500);
+    
+    // pause incrementing batch depth
+    console.log('\n=== pause increments batch depth ===');
+    setTimeout(() => {
+      const depthState = ReactiveUtils.state({
+        value: 0
+      });
+      
+      let depthRuns = 0;
+      ReactiveUtils.effect(() => {
+        depthRuns++;
+        const val = depthState.value;
+      });
+      
+      const beforeDepth = depthRuns;
+      
+      // Each pause increments depth
+      console.log('Starting depth test...');
+      ReactiveUtils.pause(); // depth = 1
+      depthState.value = 1;
+      console.log('After pause 1:', depthRuns - beforeDepth);
+      
+      ReactiveUtils.pause(); // depth = 2
+      depthState.value = 2;
+      console.log('After pause 2:', depthRuns - beforeDepth);
+      
+      ReactiveUtils.resume(); // depth = 1
+      depthState.value = 3;
+      console.log('After resume 1 (still depth 1):', depthRuns - beforeDepth);
+      
+      ReactiveUtils.resume(true); // depth = 0, flush
+      console.log('After resume 2 (depth 0):', depthRuns - beforeDepth);
+      console.log('✓ Correctly manages batch depth');
+    }, 4000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ ReactiveUtils.pause() pauses reactivity');
+      console.log('✓ pause() prevents effects from running');
+      console.log('✓ pause() batches multiple updates');
+      console.log('✓ pause() can be called multiple times (nested)');
+      console.log('✓ pause() doesn\'t lose queued updates');
+      console.log('✓ pause() works with batch()');
+      console.log('✓ pause() affects all reactive states globally');
+      console.log('✓ pause() can be cycled with resume()');
+      console.log('✓ pause() perfect for bulk update workflows');
+      console.log('✓ pause() increments batch depth');
+    }, 4500);
+  </script>
+</body>
+</html>

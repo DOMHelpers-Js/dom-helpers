@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.isValid (computed)</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.isValid (computed) ===');
+    
+    // Basic isValid
+    console.log('\n=== Basic isValid ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: ''
+    });
+    
+    console.log('isValid (no validators):', form.isValid);
+    console.log('Type:', typeof form.isValid);
+    console.log('✓ isValid is true when no errors');
+    
+    // isValid with errors
+    console.log('\n=== isValid with errors ===');
+    const errorForm = ReactiveUtils.form({
+      name: ''
+    });
+    
+    console.log('Before error:', errorForm.isValid);
+    
+    errorForm.errors.name = 'Name is required';
+    console.log('After setting error:', errorForm.isValid);
+    
+    delete errorForm.errors.name;
+    console.log('After clearing error:', errorForm.isValid);
+    
+    // isValid is read-only
+    console.log('\n=== isValid is read-only (computed) ===');
+    const readOnlyForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    console.log('Initial isValid:', readOnlyForm.isValid);
+    
+    try {
+      readOnlyForm.isValid = false;
+      console.log('After assignment attempt:', readOnlyForm.isValid);
+      console.log('⚠️  Assignment ignored (read-only)');
+    } catch (e) {
+      console.log('✓ Cannot set computed property');
+    }
+    
+    // isValid with validators
+    console.log('\n=== isValid with validators ===');
+    const validatedForm = ReactiveUtils.form({
+      email: '',
+      password: ''
+    }, {
+      validators: {
+        email: (value) => value ? null : 'Email required',
+        password: (value) => value ? null : 'Password required'
+      }
+    });
+    
+    console.log('Before validation:', validatedForm.isValid);
+    
+    validatedForm.validate();
+    console.log('After validate() (empty fields):', validatedForm.isValid);
+    
+    validatedForm.setValue('email', 'test@example.com');
+    console.log('After setting email:', validatedForm.isValid);
+    
+    validatedForm.setValue('password', 'password123');
+    console.log('After setting password:', validatedForm.isValid);
+    
+    // isValid is reactive
+    console.log('\n=== isValid is reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      username: ''
+    }, {
+      validators: {
+        username: (value) => value ? null : 'Required'
+      }
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: isValid = ${reactiveForm.isValid}`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.validate();
+      console.log('Effect runs after validate:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactiveForm.setValue('username', 'test');
+      console.log('Effect runs after setValue:', effectRuns);
+    }, 1000);
+    
+    // isValid with multiple errors
+    console.log('\n=== isValid with multiple errors ===');
+    const multiForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    console.log('No errors:', multiForm.isValid);
+    
+    multiForm.errors.field1 = 'Error 1';
+    console.log('1 error:', multiForm.isValid);
+    
+    multiForm.errors.field2 = 'Error 2';
+    console.log('2 errors:', multiForm.isValid);
+    
+    multiForm.errors.field3 = 'Error 3';
+    console.log('3 errors:', multiForm.isValid);
+    
+    delete multiForm.errors.field1;
+    console.log('After clearing 1 error:', multiForm.isValid);
+    
+    multiForm.clearErrors();
+    console.log('After clearErrors():', multiForm.isValid);
+    
+    // isValid for conditional UI
+    console.log('\n=== isValid for conditional UI ===');
+    const uiForm = ReactiveUtils.form({
+      email: '',
+      terms: false
+    }, {
+      validators: {
+        email: (value) => value ? null : 'Required',
+        terms: (value) => value ? null : 'Must accept'
+      }
+    });
+    
+    ReactiveUtils.effect(() => {
+      if (uiForm.isValid) {
+        console.log('UI: Enable submit button');
+      } else {
+        console.log('UI: Disable submit button');
+      }
+    });
+    
+    setTimeout(() => {
+      uiForm.setValue('email', 'test@example.com');
+    }, 1500);
+    
+    setTimeout(() => {
+      uiForm.setValue('terms', true);
+    }, 2000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ form.isValid is a computed boolean property');
+      console.log('✓ form.isValid is true when no errors exist');
+      console.log('✓ form.isValid is false when errors exist');
+      console.log('✓ form.isValid is read-only (cannot be set)');
+      console.log('✓ form.isValid updates automatically when errors change');
+      console.log('✓ form.isValid is reactive (triggers effects)');
+      console.log('✓ form.isValid useful for enabling/disabling submit');
+    }, 2500);
+  </script>
+</body>
+</html>

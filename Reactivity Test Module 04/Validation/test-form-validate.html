@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.validate()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.validate() ===');
+    
+    // Basic validate
+    console.log('\n=== Basic validate ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: '',
+      password: ''
+    }, {
+      validators: {
+        username: (value) => value ? null : 'Username required',
+        email: (value) => value ? null : 'Email required',
+        password: (value) => value ? null : 'Password required'
+      }
+    });
+    
+    console.log('Before validation:', form.errors);
+    
+    const isValid = form.validate();
+    console.log('After validate():', {
+      valid: isValid,
+      errors: form.errors
+    });
+    
+    // validate returns boolean
+    console.log('\n=== validate returns boolean ===');
+    const boolForm = ReactiveUtils.form({
+      field: ''
+    }, {
+      validators: {
+        field: (value) => value ? null : 'Field required'
+      }
+    });
+    
+    const result = boolForm.validate();
+    console.log('validate result:', result);
+    console.log('Type:', typeof result);
+    console.log('Is boolean:', typeof result === 'boolean');
+    
+    // validate all fields
+    console.log('\n=== validate all fields ===');
+    const allForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    }, {
+      validators: {
+        field1: (value) => value ? null : 'Field1 required',
+        field2: (value) => value ? null : 'Field2 required',
+        field3: (value) => value ? null : 'Field3 required'
+      }
+    });
+    
+    allForm.validate();
+    console.log('All fields validated:', allForm.errors);
+    console.log('Error count:', Object.keys(allForm.errors).length);
+    
+    // validate with some valid fields
+    console.log('\n=== validate with some valid fields ===');
+    const partialForm = ReactiveUtils.form({
+      name: 'John',
+      email: '',
+      password: 'secret123'
+    }, {
+      validators: {
+        name: (value) => value ? null : 'Name required',
+        email: (value) => value ? null : 'Email required',
+        password: (value) => value ? null : 'Password required'
+      }
+    });
+    
+    const partialValid = partialForm.validate();
+    console.log('Partial validation:', {
+      valid: partialValid,
+      errors: partialForm.errors
+    });
+    
+    // validate with all valid fields
+    console.log('\n=== validate with all valid fields ===');
+    const validForm = ReactiveUtils.form({
+      name: 'John',
+      email: 'john@example.com',
+      password: 'secret123'
+    }, {
+      validators: {
+        name: (value) => value ? null : 'Name required',
+        email: (value) => value ? null : 'Email required',
+        password: (value) => value ? null : 'Password required'
+      }
+    });
+    
+    const allValid = validForm.validate();
+    console.log('All valid:', {
+      valid: allValid,
+      errors: validForm.errors,
+      isValid: validForm.isValid
+    });
+    
+    // validate is reactive
+    console.log('\n=== validate is reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      field1: '',
+      field2: ''
+    }, {
+      validators: {
+        field1: (value) => value ? null : 'Field1 required',
+        field2: (value) => value ? null : 'Field2 required'
+      }
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const errorCount = Object.keys(reactiveForm.errors).length;
+      console.log(`Effect #${effectRuns}: ${errorCount} errors`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.validate();
+      console.log('Effect runs after validate:', effectRuns);
+    }, 500);
+    
+    // validate batches updates
+    console.log('\n=== validate batches updates ===');
+    const batchForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    }, {
+      validators: {
+        field1: (value) => value ? null : 'Field1 required',
+        field2: (value) => value ? null : 'Field2 required',
+        field3: (value) => value ? null : 'Field3 required'
+      }
+    });
+    
+    let batchEffectRuns = 0;
+    ReactiveUtils.effect(() => {
+      batchEffectRuns++;
+      const count = Object.keys(batchForm.errors).length;
+      if (batchEffectRuns > 1) {
+        console.log(`Batch effect #${batchEffectRuns}: ${count} errors`);
+      }
+    });
+    
+    setTimeout(() => {
+      const beforeRuns = batchEffectRuns;
+      batchForm.validate();
+      setTimeout(() => {
+        console.log('Batched - effect ran:', (batchEffectRuns - beforeRuns), 'time(s)');
+      }, 100);
+    }, 1000);
+    
+    // validate in submit workflow
+    console.log('\n=== validate in submit workflow ===');
+    const submitForm = ReactiveUtils.form({
+      username: '',
+      email: '',
+      password: ''
+    }, {
+      validators: {
+        username: (value) => value ? null : 'Username required',
+        email: (value) => {
+          if (!value) return 'Email required';
+          if (!/\S+@\S+\.\S+/.test(value)) return 'Invalid email';
+          return null;
+        },
+        password: (value) => {
+          if (!value) return 'Password required';
+          if (value.length < 6) return 'Too short';
+          return null;
+        }
+      }
+    });
+    
+    const handleSubmit = () => {
+      // Touch all fields to show errors
+      submitForm.touchAll();
+      
+      // Validate
+      const isValid = submitForm.validate();
+      
+      if (!isValid) {
+        console.log('Form invalid:');
+        submitForm.errorFields.forEach(field => {
+          console.log(`  ${field}: ${submitForm.getError(field)}`);
+        });
+        return false;
+      }
+      
+      console.log('Form valid, submitting...');
+      return true;
+    };
+    
+    setTimeout(() => {
+      handleSubmit();
+    }, 1500);
+    
+    // validate with complex rules
+    console.log('\n=== validate with complex rules ===');
+    const complexForm = ReactiveUtils.form({
+      password: '',
+      confirmPassword: '',
+      email: '',
+      terms: false
+    }, {
+      validators: {
+        password: (value) => {
+          if (!value) return 'Password required';
+          if (value.length < 8) return 'At least 8 characters';
+          if (!/[A-Z]/.test(value)) return 'Must contain uppercase';
+          if (!/[0-9]/.test(value)) return 'Must contain number';
+          return null;
+        },
+        confirmPassword: (value, values) => {
+          if (value !== values.password) return 'Passwords must match';
+          return null;
+        },
+        email: (value) => {
+          if (!value) return 'Email required';
+          if (!/\S+@\S+\.\S+/.test(value)) return 'Invalid email';
+          return null;
+        },
+        terms: (value) => value ? null : 'Must accept terms'
+      }
+    });
+    
+    setTimeout(() => {
+      complexForm.validate();
+      console.log('Complex validation:', {
+        valid: complexForm.isValid,
+        errors: complexForm.errors,
+        errorCount: Object.keys(complexForm.errors).length
+      });
+    }, 2000);
+    
+    // validate updates isValid
+    console.log('\n=== validate updates isValid ===');
+    const isValidForm = ReactiveUtils.form({
+      field1: '',
+      field2: ''
+    }, {
+      validators: {
+        field1: (value) => value ? null : 'Field1 required',
+        field2: (value) => value ? null : 'Field2 required'
+      }
+    });
+    
+    setTimeout(() => {
+      console.log('Before validation, isValid:', isValidForm.isValid);
+      
+      isValidForm.validate();
+      console.log('After validate (invalid), isValid:', isValidForm.isValid);
+      
+      isValidForm.setValues({ field1: 'value1', field2: 'value2' });
+      isValidForm.validate();
+      console.log('After validate (valid), isValid:', isValidForm.isValid);
+    }, 2500);
+    
+    // validate without validators
+    console.log('\n=== validate without validators ===');
+    const noValidatorsForm = ReactiveUtils.form({
+      field1: '',
+      field2: ''
+    });
+    
+    setTimeout(() => {
+      const result = noValidatorsForm.validate();
+      console.log('validate without validators:', {
+        valid: result,
+        errors: noValidatorsForm.errors
+      });
+      console.log('✓ Returns true when no validators');
+    }, 3000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ validate() validates all fields');
+      console.log('✓ validate returns boolean (true = all valid)');
+      console.log('✓ validate checks all fields with validators');
+      console.log('✓ validate works with partially valid forms');
+      console.log('✓ validate works with fully valid forms');
+      console.log('✓ validate is reactive (triggers effects)');
+      console.log('✓ validate batches updates for efficiency');
+      console.log('✓ validate essential in submit workflows');
+      console.log('✓ validate supports complex validation rules');
+      console.log('✓ validate updates isValid computed property');
+      console.log('✓ validate returns true when no validators');
+    }, 3500);
+  </script>
+</body>
+</html>

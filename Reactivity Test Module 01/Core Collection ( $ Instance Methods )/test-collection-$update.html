@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.$update()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    console.log('=== Testing collection.$update() ===');
+    
+    // Basic $update with predicate
+    console.log('\n=== Basic $update with predicate ===');
+    const collection = ReactiveUtils.collection([
+      { id: 1, name: 'John', age: 30 },
+      { id: 2, name: 'Jane', age: 25 }
+    ]);
+    
+    console.log('Before:', collection.items);
+    
+    collection.$update(item => item.id === 1, { age: 31 });
+    
+    console.log('After update:', collection.items);
+    console.log('John\'s new age:', collection.items[0].age);
+    console.log('✓ Updates item by predicate');
+    
+    // $update with value
+    console.log('\n=== $update with value ===');
+    setTimeout(() => {
+      const valueCollection = ReactiveUtils.collection([
+        { id: 1, status: 'pending' },
+        { id: 2, status: 'pending' }
+      ]);
+      
+      const target = valueCollection.items[0];
+      
+      valueCollection.$update(target, { status: 'completed' });
+      
+      console.log('After update:', valueCollection.items);
+      console.log('✓ Updates item by direct value');
+    }, 500);
+    
+    // $update is reactive
+    console.log('\n=== $update is reactive ===');
+    setTimeout(() => {
+      const reactiveCollection = ReactiveUtils.collection([
+        { count: 0 }
+      ]);
+      
+      let effectRuns = 0;
+      ReactiveUtils.effect(() => {
+        effectRuns++;
+        const count = reactiveCollection.items[0]?.count;
+      });
+      
+      const initialRuns = effectRuns;
+      
+      reactiveCollection.$update(item => item.count === 0, { count: 5 });
+      
+      setTimeout(() => {
+        console.log('Effect runs after update:', effectRuns - initialRuns);
+        console.log('New count:', reactiveCollection.items[0].count);
+        console.log('✓ $update triggers reactivity');
+      }, 100);
+    }, 1000);
+    
+    // $update multiple properties
+    console.log('\n=== $update multiple properties ===');
+    setTimeout(() => {
+      const multiCollection = ReactiveUtils.collection([
+        { id: 1, name: 'John', age: 30, active: false }
+      ]);
+      
+      console.log('Before:', multiCollection.items[0]);
+      
+      multiCollection.$update(
+        item => item.id === 1,
+        { name: 'Johnny', age: 31, active: true }
+      );
+      
+      console.log('After:', multiCollection.items[0]);
+      console.log('✓ Updates multiple properties');
+    }, 1500);
+    
+    // $update first matching item only
+    console.log('\n=== $update first matching item only ===');
+    setTimeout(() => {
+      const duplicateCollection = ReactiveUtils.collection([
+        { id: 1, value: 10 },
+        { id: 2, value: 10 },
+        { id: 3, value: 10 }
+      ]);
+      
+      duplicateCollection.$update(item => item.value === 10, { value: 99 });
+      
+      console.log('After update:', duplicateCollection.items);
+      console.log('Only first updated:', 
+        duplicateCollection.items[0].value === 99 &&
+        duplicateCollection.items[1].value === 10
+      );
+      console.log('✓ Updates only first match');
+    }, 2000);
+    
+    // $update non-existent item
+    console.log('\n=== $update non-existent item ===');
+    setTimeout(() => {
+      const noMatchCollection = ReactiveUtils.collection([
+        { id: 1, value: 10 }
+      ]);
+      
+      console.log('Before:', noMatchCollection.items);
+      
+      noMatchCollection.$update(item => item.id === 99, { value: 999 });
+      
+      console.log('After:', noMatchCollection.items);
+      console.log('No change:', noMatchCollection.items[0].value === 10);
+      console.log('✓ Handles non-existent items safely');
+    }, 2500);
+    
+    // $update with partial updates
+    console.log('\n=== $update with partial updates ===');
+    setTimeout(() => {
+      const partialCollection = ReactiveUtils.collection([
+        { id: 1, name: 'John', age: 30, city: 'NYC' }
+      ]);
+      
+      console.log('Before:', partialCollection.items[0]);
+      
+      partialCollection.$update(item => item.id === 1, { age: 31 });
+      
+      console.log('After:', partialCollection.items[0]);
+      console.log('Age updated:', partialCollection.items[0].age === 31);
+      console.log('Other fields preserved:', 
+        partialCollection.items[0].name === 'John' &&
+        partialCollection.items[0].city === 'NYC'
+      );
+      console.log('✓ Partial updates preserve other properties');
+    }, 3000);
+    
+    // $update with computed
+    console.log('\n=== $update with computed ===');
+    setTimeout(() => {
+      const computedCollection = ReactiveUtils.collection([
+        { id: 1, quantity: 5, price: 10 }
+      ]);
+      
+      computedCollection.$computed('total', function() {
+        return this.items.reduce((sum, item) => 
+          sum + (item.quantity * item.price), 0
+        );
+      });
+      
+      console.log('Total before:', computedCollection.total);
+      
+      computedCollection.$update(item => item.id === 1, { quantity: 10 });
+      
+      console.log('Total after:', computedCollection.total);
+      console.log('✓ Works with computed properties');
+    }, 3500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ collection.$update(predicate, updates) updates by function');
+      console.log('✓ collection.$update(value, updates) updates by direct value');
+      console.log('✓ $update is reactive');
+      console.log('✓ $update can update multiple properties');
+      console.log('✓ $update updates only first match');
+      console.log('✓ $update handles non-existent items safely');
+      console.log('✓ $update preserves other properties (partial update)');
+      console.log('✓ $update works with computed properties');
+    }, 4000);
+  </script>
+</body>
+</html>

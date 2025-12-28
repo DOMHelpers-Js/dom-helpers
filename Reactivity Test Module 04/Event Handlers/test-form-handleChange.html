@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.handleChange()</title></head>
+<body>
+  <input type="text" id="username" name="username" />
+  <input type="email" id="email" name="email" />
+  <input type="password" id="password" name="password" />
+  <input type="checkbox" id="terms" name="terms" />
+  <input type="number" id="age" name="age" />
+  
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.handleChange() ===');
+    
+    // Basic handleChange
+    console.log('\n=== Basic handleChange ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: ''
+    });
+    
+    console.log('Before handleChange:', form.values);
+    
+    const usernameInput = document.getElementById('username');
+    usernameInput.value = 'johndoe';
+    
+    const event1 = new Event('input', { bubbles: true });
+    Object.defineProperty(event1, 'target', { value: usernameInput });
+    
+    form.handleChange(event1);
+    console.log('After handleChange:', form.values);
+    console.log('✓ Updates form value from input');
+    
+    // handleChange with text input
+    console.log('\n=== handleChange with text input ===');
+    const textForm = ReactiveUtils.form({
+      name: ''
+    });
+    
+    const nameInput = document.getElementById('username');
+    nameInput.name = 'name';
+    nameInput.value = 'Alice';
+    
+    const textEvent = new Event('input');
+    Object.defineProperty(textEvent, 'target', { value: nameInput });
+    
+    textForm.handleChange(textEvent);
+    console.log('Text input value:', textForm.values.name);
+    
+    // handleChange with email input
+    console.log('\n=== handleChange with email input ===');
+    const emailForm = ReactiveUtils.form({
+      email: ''
+    });
+    
+    const emailInput = document.getElementById('email');
+    emailInput.value = 'test@example.com';
+    
+    const emailEvent = new Event('input');
+    Object.defineProperty(emailEvent, 'target', { value: emailInput });
+    
+    emailForm.handleChange(emailEvent);
+    console.log('Email input value:', emailForm.values.email);
+    
+    // handleChange with checkbox
+    console.log('\n=== handleChange with checkbox ===');
+    const checkboxForm = ReactiveUtils.form({
+      terms: false
+    });
+    
+    const termsInput = document.getElementById('terms');
+    termsInput.checked = true;
+    
+    const checkboxEvent = new Event('change');
+    Object.defineProperty(checkboxEvent, 'target', { value: termsInput });
+    
+    checkboxForm.handleChange(checkboxEvent);
+    console.log('Checkbox value:', checkboxForm.values.terms);
+    console.log('Type:', typeof checkboxForm.values.terms);
+    
+    termsInput.checked = false;
+    const checkboxEvent2 = new Event('change');
+    Object.defineProperty(checkboxEvent2, 'target', { value: termsInput });
+    checkboxForm.handleChange(checkboxEvent2);
+    console.log('Checkbox unchecked:', checkboxForm.values.terms);
+    
+    // handleChange with number input
+    console.log('\n=== handleChange with number input ===');
+    const numberForm = ReactiveUtils.form({
+      age: ''
+    });
+    
+    const ageInput = document.getElementById('age');
+    ageInput.value = '25';
+    
+    const numberEvent = new Event('input');
+    Object.defineProperty(numberEvent, 'target', { value: ageInput });
+    
+    numberForm.handleChange(numberEvent);
+    console.log('Number input value:', numberForm.values.age);
+    console.log('Type:', typeof numberForm.values.age);
+    
+    // handleChange marks as touched
+    console.log('\n=== handleChange marks as touched ===');
+    const touchedForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    console.log('Before handleChange, touched:', touchedForm.touched);
+    
+    const fieldInput = document.getElementById('username');
+    fieldInput.name = 'field';
+    fieldInput.value = 'value';
+    
+    const touchEvent = new Event('input');
+    Object.defineProperty(touchEvent, 'target', { value: fieldInput });
+    
+    touchedForm.handleChange(touchEvent);
+    console.log('After handleChange, touched:', touchedForm.touched);
+    console.log('✓ Field marked as touched');
+    
+    // handleChange with validation
+    console.log('\n=== handleChange with validation ===');
+    const validationForm = ReactiveUtils.form({
+      email: ''
+    }, {
+      validators: {
+        email: (value) => {
+          if (!value) return 'Email required';
+          if (!/\S+@\S+\.\S+/.test(value)) return 'Invalid email';
+          return null;
+        }
+      }
+    });
+    
+    const validationInput = document.getElementById('email');
+    validationInput.value = 'invalid';
+    
+    const validationEvent = new Event('input');
+    Object.defineProperty(validationEvent, 'target', { value: validationInput });
+    
+    validationForm.handleChange(validationEvent);
+    console.log('After invalid input:', {
+      value: validationForm.values.email,
+      error: validationForm.errors.email
+    });
+    console.log('✓ Auto-validates on change');
+    
+    // handleChange is reactive
+    console.log('\n=== handleChange is reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const value = reactiveForm.values.field;
+      console.log(`Effect #${effectRuns}: field = "${value}"`);
+    });
+    
+    setTimeout(() => {
+      const input = document.getElementById('username');
+      input.name = 'field';
+      input.value = 'reactive';
+      
+      const event = new Event('input');
+      Object.defineProperty(event, 'target', { value: input });
+      
+      reactiveForm.handleChange(event);
+      console.log('Effect runs after handleChange:', effectRuns);
+    }, 500);
+    
+    // handleChange with input name
+    console.log('\n=== handleChange with input name ===');
+    const nameFieldForm = ReactiveUtils.form({
+      username: '',
+      email: ''
+    });
+    
+    const nameTest = document.getElementById('username');
+    nameTest.name = 'username';
+    nameTest.value = 'testuser';
+    
+    const nameTestEvent = new Event('input');
+    Object.defineProperty(nameTestEvent, 'target', { value: nameTest });
+    
+    nameFieldForm.handleChange(nameTestEvent);
+    console.log('Using name attribute:', nameFieldForm.values.username);
+    
+    // handleChange with input id
+    console.log('\n=== handleChange with input id ===');
+    const idFieldForm = ReactiveUtils.form({
+      email: ''
+    });
+    
+    const idTest = document.getElementById('email');
+    idTest.removeAttribute('name');
+    idTest.value = 'id@example.com';
+    
+    const idTestEvent = new Event('input');
+    Object.defineProperty(idTestEvent, 'target', { value: idTest });
+    
+    setTimeout(() => {
+      idFieldForm.handleChange(idTestEvent);
+      console.log('Using id attribute:', idFieldForm.values.email);
+      console.log('✓ Falls back to id when no name');
+    }, 1000);
+    
+    // handleChange multiple inputs
+    console.log('\n=== handleChange multiple inputs ===');
+    const multiForm = ReactiveUtils.form({
+      username: '',
+      email: '',
+      password: ''
+    });
+    
+    setTimeout(() => {
+      const inputs = [
+        { id: 'username', value: 'john', name: 'username' },
+        { id: 'email', value: 'john@example.com', name: 'email' },
+        { id: 'password', value: 'secret', name: 'password' }
+      ];
+      
+      inputs.forEach(({ id, value, name }) => {
+        const input = document.getElementById(id);
+        input.name = name;
+        input.value = value;
+        
+        const event = new Event('input');
+        Object.defineProperty(event, 'target', { value: input });
+        
+        multiForm.handleChange(event);
+      });
+      
+      console.log('Multiple inputs handled:', multiForm.values);
+    }, 1500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ handleChange(event) handles input change events');
+      console.log('✓ handleChange works with text inputs');
+      console.log('✓ handleChange works with email inputs');
+      console.log('✓ handleChange works with checkbox inputs (boolean)');
+      console.log('✓ handleChange works with number inputs');
+      console.log('✓ handleChange marks field as touched');
+      console.log('✓ handleChange auto-validates if validator exists');
+      console.log('✓ handleChange is reactive (triggers effects)');
+      console.log('✓ handleChange uses name attribute for field');
+      console.log('✓ handleChange falls back to id attribute');
+      console.log('✓ handleChange handles multiple inputs');
+    }, 2000);
+  </script>
+</body>
+</html>

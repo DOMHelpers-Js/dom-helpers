@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Forms.create()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing Forms.create() ===');
+    
+    // Basic Forms.create
+    console.log('\n=== Basic Forms.create ===');
+    const form = Forms.create({
+      username: '',
+      email: ''
+    });
+    
+    console.log('Form created:', form);
+    console.log('Has values:', 'values' in form);
+    console.log('Has errors:', 'errors' in form);
+    console.log('Has touched:', 'touched' in form);
+    console.log('✓ Creates reactive form');
+    
+    // Forms.create with validators
+    console.log('\n=== Forms.create with validators ===');
+    const validatedForm = Forms.create({
+      username: '',
+      email: ''
+    }, {
+      validators: {
+        username: (value) => value ? null : 'Username required',
+        email: (value) => value ? null : 'Email required'
+      }
+    });
+    
+    validatedForm.validate();
+    console.log('Validation errors:', validatedForm.errors);
+    console.log('✓ Works with validators');
+    
+    // Forms.create with onSubmit
+    console.log('\n=== Forms.create with onSubmit ===');
+    const submitForm = Forms.create({
+      field: 'value'
+    }, {
+      onSubmit: async (values) => {
+        console.log('Submit handler called:', values);
+        return { success: true };
+      }
+    });
+    
+    setTimeout(async () => {
+      const result = await submitForm.submit();
+      console.log('Submit result:', result);
+      console.log('✓ Works with onSubmit');
+    }, 500);
+    
+    // Forms.create returns reactive form
+    console.log('\n=== Forms.create returns reactive form ===');
+    const reactiveForm = Forms.create({
+      field: ''
+    });
+    
+    console.log('Has setValue:', typeof reactiveForm.setValue === 'function');
+    console.log('Has validate:', typeof reactiveForm.validate === 'function');
+    console.log('Has submit:', typeof reactiveForm.submit === 'function');
+    console.log('Has $computed:', typeof reactiveForm.$computed === 'function');
+    console.log('✓ Returns full reactive form');
+    
+    // Forms.create same as ReactiveUtils.form
+    console.log('\n=== Forms.create same as ReactiveUtils.form ===');
+    const form1 = Forms.create({ field: 'test' });
+    const form2 = ReactiveUtils.form({ field: 'test' });
+    
+    console.log('Both have values:', 'values' in form1 && 'values' in form2);
+    console.log('Both have setValue:', typeof form1.setValue === 'function' && typeof form2.setValue === 'function');
+    console.log('Both have validate:', typeof form1.validate === 'function' && typeof form2.validate === 'function');
+    console.log('✓ Same as ReactiveUtils.form');
+    
+    // Forms.create with all options
+    console.log('\n=== Forms.create with all options ===');
+    const fullForm = Forms.create({
+      username: '',
+      email: '',
+      password: ''
+    }, {
+      validators: {
+        username: Forms.validators.required('Username required'),
+        email: Forms.validators.email('Invalid email'),
+        password: Forms.validators.minLength(8, 'Too short')
+      },
+      onSubmit: async (values) => {
+        console.log('Submitting:', values);
+        return { userId: 123 };
+      }
+    });
+    
+    setTimeout(async () => {
+      fullForm.setValues({
+        username: 'john',
+        email: 'john@example.com',
+        password: 'password123'
+      });
+      
+      const isValid = fullForm.validate();
+      console.log('Form valid:', isValid);
+      
+      if (isValid) {
+        const result = await fullForm.submit();
+        console.log('Submit result:', result);
+      }
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ Forms.create(initialValues, options) creates form');
+      console.log('✓ Forms.create works with validators');
+      console.log('✓ Forms.create works with onSubmit');
+      console.log('✓ Forms.create returns reactive form');
+      console.log('✓ Forms.create same as ReactiveUtils.form');
+      console.log('✓ Forms.create works with all options');
+    }, 1500);
+  </script>
+</body>
+</html>

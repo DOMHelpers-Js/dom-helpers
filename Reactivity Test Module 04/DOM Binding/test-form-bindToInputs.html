@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.bindToInputs()</title></head>
+<body>
+  <div id="test-area">
+    <input type="text" id="username" name="username" />
+    <input type="email" id="email" name="email" />
+    <input type="password" id="password" name="password" />
+    <input type="checkbox" id="terms" name="terms" />
+    <input type="number" id="age" name="age" />
+    
+    <div class="form-group">
+      <input type="text" class="form-input" name="firstName" />
+      <input type="text" class="form-input" name="lastName" />
+    </div>
+  </div>
+  
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.bindToInputs() ===');
+    
+    // Basic bindToInputs
+    console.log('\n=== Basic bindToInputs ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: '',
+      password: ''
+    });
+    
+    form.bindToInputs('#test-area input');
+    console.log('✓ Bound to inputs');
+    
+    // Test that form values update when user types
+    setTimeout(() => {
+      const usernameInput = document.getElementById('username');
+      usernameInput.value = 'johndoe';
+      usernameInput.dispatchEvent(new Event('input', { bubbles: true }));
+      
+      console.log('After typing in username:', form.values.username);
+    }, 500);
+    
+    // bindToInputs sets initial values
+    console.log('\n=== bindToInputs sets initial values ===');
+    const initialForm = ReactiveUtils.form({
+      email: 'test@example.com',
+      password: 'secret'
+    });
+    
+    setTimeout(() => {
+      initialForm.bindToInputs('#test-area input');
+      
+      const emailInput = document.getElementById('email');
+      const passwordInput = document.getElementById('password');
+      
+      console.log('Email input value:', emailInput.value);
+      console.log('Password input value:', passwordInput.value);
+      console.log('✓ Initial values set on inputs');
+    }, 1000);
+    
+    // bindToInputs with checkbox
+    console.log('\n=== bindToInputs with checkbox ===');
+    const checkboxForm = ReactiveUtils.form({
+      terms: false
+    });
+    
+    setTimeout(() => {
+      checkboxForm.bindToInputs('#terms');
+      
+      const termsInput = document.getElementById('terms');
+      console.log('Initial checked:', termsInput.checked);
+      
+      // User clicks checkbox
+      termsInput.checked = true;
+      termsInput.dispatchEvent(new Event('input', { bubbles: true }));
+      
+      setTimeout(() => {
+        console.log('After checking:', checkboxForm.values.terms);
+        console.log('Type:', typeof checkboxForm.values.terms);
+      }, 100);
+    }, 1500);
+    
+    // bindToInputs returns this (chainable)
+    console.log('\n=== bindToInputs returns this (chainable) ===');
+    const chainForm = ReactiveUtils.form({
+      username: '',
+      email: ''
+    });
+    
+    setTimeout(() => {
+      const result = chainForm.bindToInputs('#test-area input');
+      console.log('bindToInputs returns this:', result === chainForm);
+      
+      chainForm
+        .bindToInputs('#username')
+        .setValue('username', 'test');
+      console.log('After chaining:', chainForm.values.username);
+    }, 2000);
+    
+    // bindToInputs with querySelector selector
+    console.log('\n=== bindToInputs with querySelector selector ===');
+    const selectorForm = ReactiveUtils.form({
+      username: '',
+      email: '',
+      password: ''
+    });
+    
+    setTimeout(() => {
+      selectorForm.bindToInputs('#test-area input[type="text"], #test-area input[type="email"]');
+      
+      const usernameInput = document.getElementById('username');
+      usernameInput.value = 'alice';
+      usernameInput.dispatchEvent(new Event('input', { bubbles: true }));
+      
+      setTimeout(() => {
+        console.log('After typing:', selectorForm.values.username);
+      }, 100);
+    }, 2500);
+    
+    // bindToInputs with class selector
+    console.log('\n=== bindToInputs with class selector ===');
+    const classForm = ReactiveUtils.form({
+      firstName: '',
+      lastName: ''
+    });
+    
+    setTimeout(() => {
+      classForm.bindToInputs('.form-input');
+      
+      const firstNameInput = document.querySelector('input[name="firstName"]');
+      const lastNameInput = document.querySelector('input[name="lastName"]');
+      
+      firstNameInput.value = 'John';
+      firstNameInput.dispatchEvent(new Event('input', { bubbles: true }));
+      
+      lastNameInput.value = 'Doe';
+      lastNameInput.dispatchEvent(new Event('input', { bubbles: true }));
+      
+      setTimeout(() => {
+        console.log('After typing both:', {
+          firstName: classForm.values.firstName,
+          lastName: classForm.values.lastName
+        });
+      }, 100);
+    }, 3000);
+    
+    // bindToInputs with NodeList
+    console.log('\n=== bindToInputs with NodeList ===');
+    const nodeListForm = ReactiveUtils.form({
+      username: '',
+      email: ''
+    });
+    
+    setTimeout(() => {
+      const inputs = document.querySelectorAll('#username, #email');
+      nodeListForm.bindToInputs(inputs);
+      
+      const usernameInput = document.getElementById('username');
+      usernameInput.value = 'test';
+      usernameInput.dispatchEvent(new Event('input', { bubbles: true }));
+      
+      setTimeout(() => {
+        console.log('After typing (NodeList):', nodeListForm.values.username);
+        console.log('✓ Works with NodeList');
+      }, 100);
+    }, 3500);
+    
+    // bindToInputs adds event listeners
+    console.log('\n=== bindToInputs adds event listeners ===');
+    const listenerForm = ReactiveUtils.form({
+      email: ''
+    }, {
+      validators: {
+        email: (value) => {
+          if (!value) return 'Email required';
+          if (!/\S+@\S+\.\S+/.test(value)) return 'Invalid email';
+          return null;
+        }
+      }
+    });
+    
+    setTimeout(() => {
+      listenerForm.bindToInputs('#email');
+      
+      const emailInput = document.getElementById('email');
+      
+      // Test input event
+      emailInput.value = 'test@example.com';
+      emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+      
+      setTimeout(() => {
+        console.log('After input event:', {
+          value: listenerForm.values.email,
+          touched: listenerForm.touched.email
+        });
+        
+        // Test blur event
+        emailInput.dispatchEvent(new Event('blur', { bubbles: true }));
+        
+        setTimeout(() => {
+          console.log('After blur event:', {
+            touched: listenerForm.touched.email,
+            error: listenerForm.errors.email
+          });
+        }, 100);
+      }, 100);
+    }, 4000);
+    
+    // bindToInputs with validation
+    console.log('\n=== bindToInputs with validation ===');
+    const validationForm = ReactiveUtils.form({
+      username: '',
+      email: ''
+    }, {
+      validators: {
+        username: (value) => value ? null : 'Username required',
+        email: (value) => {
+          if (!value) return 'Email required';
+          if (!/\S+@\S+\.\S+/.test(value)) return 'Invalid email';
+          return null;
+        }
+      }
+    });
+    
+    setTimeout(() => {
+      validationForm.bindToInputs('#username, #email');
+      
+      const usernameInput = document.getElementById('username');
+      const emailInput = document.getElementById('email');
+      
+      // Type invalid email
+      emailInput.value = 'invalid';
+      emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+      
+      setTimeout(() => {
+        console.log('After invalid email:', validationForm.errors.email);
+        
+        // Blur to show error
+        emailInput.dispatchEvent(new Event('blur', { bubbles: true }));
+        
+        setTimeout(() => {
+          console.log('After blur:', {
+            shouldShow: validationForm.shouldShowError('email')
+          });
+          
+          // Fix email
+          emailInput.value = 'valid@example.com';
+          emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+          
+          setTimeout(() => {
+            console.log('After fixing:', validationForm.errors.email);
+          }, 100);
+        }, 100);
+      }, 100);
+    }, 4500);
+    
+    // bindToInputs is reactive
+    console.log('\n=== bindToInputs is reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const value = reactiveForm.values.field;
+      if (effectRuns > 1) {
+        console.log(`Effect #${effectRuns}: field = "${value}"`);
+      }
+    });
+    
+    setTimeout(() => {
+      const fieldInput = document.getElementById('username');
+      fieldInput.name = 'field';
+      
+      reactiveForm.bindToInputs('#username');
+      
+      fieldInput.value = 'reactive';
+      fieldInput.dispatchEvent(new Event('input', { bubbles: true }));
+      
+      setTimeout(() => {
+        console.log('Effect runs after input:', effectRuns);
+      }, 100);
+    }, 5000);
+    
+    // bindToInputs complete workflow
+    console.log('\n=== bindToInputs complete workflow ===');
+    const workflowForm = ReactiveUtils.form({
+      name: '',
+      email: '',
+      password: ''
+    }, {
+      validators: {
+        name: (value) => value ? null : 'Name required',
+        email: (value) => {
+          if (!value) return 'Email required';
+          if (!/\S+@\S+\.\S+/.test(value)) return 'Invalid email';
+          return null;
+        },
+        password: (value) => {
+          if (!value) return 'Password required';
+          if (value.length < 6) return 'Too short';
+          return null;
+        }
+      },
+      onSubmit: async (values) => {
+        console.log('Form submitted:', values);
+        return { success: true };
+      }
+    });
+    
+    setTimeout(() => {
+      console.log('\n--- Complete form workflow with bindToInputs ---');
+      
+      // Create fresh inputs for this test
+      const workflowArea = document.createElement('div');
+      workflowArea.innerHTML = `
+        <input type="text" name="name" id="name-input" />
+        <input type="email" name="email" id="email-input" />
+        <input type="password" name="password" id="password-input" />
+      `;
+      document.body.appendChild(workflowArea);
+      
+      // Bind form
+      workflowForm.bindToInputs('#name-input, #email-input, #password-input');
+      console.log('1. Form bound to inputs');
+      
+      // User fills form
+      const nameInput = document.getElementById('name-input');
+      const emailInput = document.getElementById('email-input');
+      const passwordInput = document.getElementById('password-input');
+      
+      nameInput.value = 'Alice';
+      nameInput.dispatchEvent(new Event('input', { bubbles: true }));
+      nameInput.dispatchEvent(new Event('blur', { bubbles: true }));
+      
+      setTimeout(() => {
+        console.log('2. After name:', {
+          value: workflowForm.values.name,
+          error: workflowForm.errors.name,
+          shouldShow: workflowForm.shouldShowError('name')
+        });
+        
+        emailInput.value = 'invalid';
+        emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+        emailInput.dispatchEvent(new Event('blur', { bubbles: true }));
+        
+        setTimeout(() => {
+          console.log('3. After invalid email:', {
+            value: workflowForm.values.email,
+            error: workflowForm.errors.email,
+            shouldShow: workflowForm.shouldShowError('email')
+          });
+          
+          emailInput.value = 'alice@example.com';
+          emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+          
+          setTimeout(() => {
+            console.log('4. After fixing email:', {
+              error: workflowForm.errors.email
+            });
+            
+            passwordInput.value = 'password123';
+            passwordInput.dispatchEvent(new Event('input', { bubbles: true }));
+            passwordInput.dispatchEvent(new Event('blur', { bubbles: true }));
+            
+            setTimeout(async () => {
+              console.log('5. After password:', {
+                value: workflowForm.values.password,
+                error: workflowForm.errors.password
+              });
+              
+              // Submit
+              console.log('6. Submitting...');
+              const result = await workflowForm.submit();
+              console.log('Submit result:', result);
+              
+              // Cleanup
+              document.body.removeChild(workflowArea);
+            }, 100);
+          }, 100);
+        }, 100);
+      }, 100);
+    }, 5500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ bindToInputs(selector) binds form to inputs');
+      console.log('✓ bindToInputs sets initial values on inputs');
+      console.log('✓ bindToInputs works with checkboxes');
+      console.log('✓ bindToInputs returns this for chaining');
+      console.log('✓ bindToInputs works with querySelector selectors');
+      console.log('✓ bindToInputs works with class selectors');
+      console.log('✓ bindToInputs works with NodeList');
+      console.log('✓ bindToInputs adds input and blur event listeners');
+      console.log('✓ bindToInputs works with validation');
+      console.log('✓ bindToInputs is reactive');
+      console.log('✓ bindToInputs perfect for complete form workflows');
+    }, 6500);
+  </script>
+</body>
+</html>

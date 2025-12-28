@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test All ReactiveUtils Creators</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing All ReactiveUtils Creator Methods ===');
+    
+    // Test all creators available
+    console.log('\n=== All creators available ===');
+    console.log('Has collection:', typeof ReactiveUtils.collection === 'function');
+    console.log('Has form:', typeof ReactiveUtils.form === 'function');
+    console.log('Has reactive:', typeof ReactiveUtils.reactive === 'function');
+    console.log('Has ref:', typeof ReactiveUtils.ref === 'function');
+    console.log('Has refs:', typeof ReactiveUtils.refs === 'function');
+    
+    // Create instances of each
+    console.log('\n=== Create instances of each ===');
+    
+    const collection = ReactiveUtils.collection([1, 2, 3]);
+    console.log('Collection created:', collection.items);
+    
+    const form = ReactiveUtils.form({ name: '', email: '' });
+    console.log('Form created:', form.values);
+    
+    const builder = ReactiveUtils.reactive({ count: 0 });
+    console.log('Builder created:', builder.state);
+    
+    const singleRef = ReactiveUtils.ref(42);
+    console.log('Ref created:', singleRef.value);
+    
+    const multiRefs = ReactiveUtils.refs({ x: 0, y: 0 });
+    console.log('Refs created:', { x: multiRefs.x.value, y: multiRefs.y.value });
+    
+    // Use them together
+    console.log('\n=== Use them together ===');
+    
+    // Collection with ref for filter
+    const todos = ReactiveUtils.collection([
+      { text: 'Task 1', done: false },
+      { text: 'Task 2', done: true }
+    ]);
+    const filter = ReactiveUtils.ref('all');
+    
+    console.log('Todos:', todos.items);
+    console.log('Filter:', filter.value);
+    
+    // Form with refs for validation state
+    const loginForm = ReactiveUtils.form({ username: '', password: '' });
+    const formState = ReactiveUtils.refs({
+      isValidating: false,
+      showErrors: false
+    });
+    
+    console.log('Form values:', loginForm.values);
+    console.log('Form state:', {
+      isValidating: formState.isValidating.value,
+      showErrors: formState.showErrors.value
+    });
+    
+    // Builder with collection
+    const app = ReactiveUtils.reactive({
+      items: []
+    })
+      .action('addItem', function(item) {
+        this.items.push(item);
+      })
+      .build();
+    
+    console.log('App state:', app.items);
+    app.addItem('Item 1');
+    console.log('After addItem:', app.items);
+    
+    // Complex example
+    console.log('\n=== Complex example ===');
+    
+    // Shopping cart with all creators
+    const cart = {
+      // Collection for items
+      items: ReactiveUtils.collection([]),
+      
+      // Refs for UI state
+      ui: ReactiveUtils.refs({
+        isOpen: false,
+        loading: false
+      }),
+      
+      // Form for checkout
+      checkout: ReactiveUtils.form({
+        name: '',
+        address: '',
+        card: ''
+      }),
+      
+      // Reactive builder for actions
+      actions: ReactiveUtils.reactive({})
+        .action('addToCart', function(item) {
+          cart.items.add(item);
+        })
+        .action('toggleCart', function() {
+          cart.ui.isOpen.value = !cart.ui.isOpen.value;
+        })
+        .build()
+    };
+    
+    console.log('Shopping cart created:', {
+      items: cart.items.items,
+      isOpen: cart.ui.isOpen.value,
+      checkoutValues: cart.checkout.values
+    });
+    
+    setTimeout(() => {
+      cart.actions.addToCart({ name: 'Product 1', price: 10 });
+      cart.actions.toggleCart();
+      cart.checkout.setValue('name', 'John Doe');
+      
+      console.log('After interactions:', {
+        items: cart.items.items,
+        isOpen: cart.ui.isOpen.value,
+        checkoutName: cart.checkout.values.name
+      });
+    }, 500);
+    
+    // Reactivity check
+    console.log('\n=== Reactivity check ===');
+    
+    const reactiveCollection = ReactiveUtils.collection([1]);
+    const reactiveForm = ReactiveUtils.form({ val: '' });
+    const reactiveRef = ReactiveUtils.ref(0);
+    
+    let collectionEffects = 0;
+    let formEffects = 0;
+    let refEffects = 0;
+    
+    ReactiveUtils.effect(() => {
+      collectionEffects++;
+      const _ = reactiveCollection.length;
+    });
+    
+    ReactiveUtils.effect(() => {
+      formEffects++;
+      const _ = reactiveForm.values.val;
+    });
+    
+    ReactiveUtils.effect(() => {
+      refEffects++;
+      const _ = reactiveRef.value;
+    });
+    
+    setTimeout(() => {
+      reactiveCollection.add(2);
+      reactiveForm.setValue('val', 'test');
+      reactiveRef.value = 1;
+      
+      console.log('All are reactive:', {
+        collection: collectionEffects > 1,
+        form: formEffects > 1,
+        ref: refEffects > 1
+      });
+    }, 1000);
+    
+    // Type comparison
+    console.log('\n=== Type comparison ===');
+    
+    const c = ReactiveUtils.collection([]);
+    const f = ReactiveUtils.form({});
+    const b = ReactiveUtils.reactive({}).build();
+    const r = ReactiveUtils.ref(0);
+    const rs = ReactiveUtils.refs({ a: 0 });
+    
+    console.log('Collection has items:', 'items' in c);
+    console.log('Form has values:', 'values' in f);
+    console.log('Builder has destroy:', typeof b.destroy === 'function');
+    console.log('Ref has value:', 'value' in r);
+    console.log('Refs.a has value:', 'value' in rs.a);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ ReactiveUtils.collection() - arrays with methods');
+      console.log('✓ ReactiveUtils.form() - form state management');
+      console.log('✓ ReactiveUtils.reactive() - builder pattern');
+      console.log('✓ ReactiveUtils.ref() - single reactive value');
+      console.log('✓ ReactiveUtils.refs() - multiple reactive values');
+      console.log('✓ All creators work together seamlessly');
+      console.log('✓ All create reactive objects');
+      console.log('✓ Each has specific use case');
+      console.log('✓ Can combine for complex applications');
+      console.log('✓ Complete reactive toolkit');
+    }, 1500);
+  </script>
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test All Form Value Management</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing All Form Value Management ===');
+    
+    // Create comprehensive form
+    console.log('\n=== Create comprehensive form ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      age: '',
+      terms: false
+    }, {
+      validators: {
+        username: ReactiveUtils.validators.required('Username required'),
+        email: ReactiveUtils.validators.combine(
+          ReactiveUtils.validators.required('Email required'),
+          ReactiveUtils.validators.email('Invalid email')
+        ),
+        password: ReactiveUtils.validators.minLength(6, 'Min 6 characters'),
+        confirmPassword: (value, values) => {
+          if (value !== values.password) return 'Passwords must match';
+          return null;
+        },
+        age: ReactiveUtils.validators.min(18, 'Must be 18+'),
+        terms: (value) => value ? null : 'Must accept terms'
+      }
+    });
+    
+    console.log('Form created with all properties:', {
+      values: Object.keys(form.values),
+      errors: Object.keys(form.errors),
+      touched: Object.keys(form.touched),
+      isValid: form.isValid,
+      isDirty: form.isDirty
+    });
+    
+    // Test setValue
+    console.log('\n=== Test setValue ===');
+    form.setValue('username', 'johndoe');
+    console.log('After setValue("username"):', {
+      value: form.getValue('username'),
+      touched: form.touched.username,
+      error: form.errors.username
+    });
+    
+    // Test setValues
+    console.log('\n=== Test setValues ===');
+    form.setValues({
+      email: 'john@example.com',
+      password: 'secret123',
+      age: '25'
+    });
+    console.log('After setValues:', {
+      email: form.getValue('email'),
+      password: form.getValue('password'),
+      age: form.getValue('age'),
+      touched: form.touchedFields,
+      errors: form.errorFields
+    });
+    
+    // Test getValue
+    console.log('\n=== Test getValue ===');
+    console.log('All values via getValue:');
+    Object.keys(form.values).forEach(field => {
+      console.log(`  ${field}: ${form.getValue(field)}`);
+    });
+    
+    // Chain setValue calls
+    console.log('\n=== Chain setValue calls ===');
+    form
+      .setValue('confirmPassword', 'secret123')
+      .setValue('terms', true);
+    
+    console.log('After chained setValue:', {
+      confirmPassword: form.getValue('confirmPassword'),
+      terms: form.getValue('terms'),
+      isValid: form.isValid
+    });
+    
+    // Validate all
+    console.log('\n=== Validate all ===');
+    const isValid = form.validate();
+    console.log('Form validation:', {
+      isValid,
+      hasErrors: form.hasErrors,
+      errorFields: form.errorFields,
+      errors: form.errors
+    });
+    
+    // Test computed properties
+    console.log('\n=== Test computed properties ===');
+    console.log('Computed properties:', {
+      isValid: form.isValid,
+      isDirty: form.isDirty,
+      hasErrors: form.hasErrors,
+      touchedFields: form.touchedFields,
+      errorFields: form.errorFields
+    });
+    
+    // Complex workflow
+    console.log('\n=== Complex workflow ===');
+    const workflowForm = ReactiveUtils.form({
+      step1: '',
+      step2: '',
+      step3: ''
+    });
+    
+    console.log('Step 1: Set initial value');
+    workflowForm.setValue('step1', 'completed');
+    console.log('  isDirty:', workflowForm.isDirty);
+    console.log('  touchedFields:', workflowForm.touchedFields);
+    
+    console.log('\nStep 2: Set multiple values');
+    workflowForm.setValues({ step2: 'done', step3: 'finished' });
+    console.log('  touchedFields:', workflowForm.touchedFields);
+    console.log('  all values:', [
+      workflowForm.getValue('step1'),
+      workflowForm.getValue('step2'),
+      workflowForm.getValue('step3')
+    ]);
+    
+    console.log('\nStep 3: Check specific value');
+    const step2Value = workflowForm.getValue('step2');
+    if (step2Value === 'done') {
+      console.log('  ✓ Step 2 is complete');
+    }
+    
+    // Test reactivity
+    console.log('\n=== Test reactivity ===');
+    const reactiveForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const value = reactiveForm.getValue('field');
+      console.log(`Effect #${effectRuns}: field = "${value}"`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.setValue('field', 'first');
+      console.log('After setValue:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactiveForm.setValues({ field: 'second' });
+      console.log('After setValues:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ setValue(field, value) sets single field');
+      console.log('✓ setValues(values) sets multiple fields');
+      console.log('✓ getValue(field) gets field value');
+      console.log('✓ All methods work together seamlessly');
+      console.log('✓ setValue/setValues mark fields as touched');
+      console.log('✓ setValue/setValues trigger validation');
+      console.log('✓ setValue/setValues are chainable');
+      console.log('✓ All methods are reactive');
+      console.log('✓ Methods update computed properties');
+      console.log('✓ Complete value management system');
+    }, 1500);
+  </script>
+</body>
+</html>

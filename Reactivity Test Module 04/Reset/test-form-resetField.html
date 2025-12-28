@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.resetField()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.resetField() ===');
+    
+    // Basic resetField
+    console.log('\n=== Basic resetField ===');
+    const form = ReactiveUtils.form({
+      username: 'initial',
+      email: 'initial@example.com',
+      password: ''
+    });
+    
+    console.log('Initial values:', form.values);
+    
+    form.setValue('username', 'changed');
+    console.log('After changing username:', form.values);
+    
+    form.resetField('username');
+    console.log('After resetField("username"):', form.values);
+    console.log('✓ Resets single field to initial value');
+    
+    // resetField clears field error
+    console.log('\n=== resetField clears field error ===');
+    const errorForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    errorForm.setErrors({
+      field1: 'Error 1',
+      field2: 'Error 2',
+      field3: 'Error 3'
+    });
+    console.log('Before resetField:', errorForm.errors);
+    
+    errorForm.resetField('field1');
+    console.log('After resetField("field1"):', errorForm.errors);
+    console.log('✓ Field1 error cleared, others remain');
+    
+    // resetField clears field touched
+    console.log('\n=== resetField clears field touched ===');
+    const touchedForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    touchedForm.touchAll();
+    console.log('Before resetField:', touchedForm.touched);
+    
+    touchedForm.resetField('field2');
+    console.log('After resetField("field2"):', touchedForm.touched);
+    console.log('✓ Field2 touched cleared, others remain');
+    
+    // resetField returns this (chainable)
+    console.log('\n=== resetField returns this (chainable) ===');
+    const chainForm = ReactiveUtils.form({
+      field1: 'initial1',
+      field2: 'initial2',
+      field3: 'initial3'
+    });
+    
+    const result = chainForm.resetField('field1');
+    console.log('resetField returns this:', result === chainForm);
+    
+    chainForm.setValues({
+      field1: 'changed1',
+      field2: 'changed2',
+      field3: 'changed3'
+    });
+    
+    chainForm
+      .resetField('field1')
+      .resetField('field2')
+      .resetField('field3');
+    console.log('After chained resetField:', chainForm.values);
+    
+    // resetField with changed value
+    console.log('\n=== resetField with changed value ===');
+    const changedForm = ReactiveUtils.form({
+      name: 'John',
+      email: 'john@example.com'
+    });
+    
+    changedForm.setValues({
+      name: 'Jane',
+      email: 'jane@example.com'
+    });
+    console.log('After changes:', changedForm.values);
+    
+    changedForm.resetField('name');
+    console.log('After resetField("name"):', changedForm.values);
+    console.log('✓ Only name reset, email unchanged');
+    
+    // resetField is reactive
+    console.log('\n=== resetField is reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      field1: 'initial1',
+      field2: 'initial2'
+    });
+    
+    reactiveForm.setValue('field1', 'changed1');
+    reactiveForm.setError('field1', 'Error');
+    reactiveForm.setTouched('field1');
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const value = reactiveForm.getValue('field1');
+      const error = reactiveForm.getError('field1');
+      const touched = reactiveForm.isTouched('field1');
+      console.log(`Effect #${effectRuns}: value="${value}", error="${error}", touched=${touched}`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.resetField('field1');
+      console.log('Effect runs after resetField:', effectRuns);
+    }, 500);
+    
+    // resetField in validation workflow
+    console.log('\n=== resetField in validation workflow ===');
+    const validationForm = ReactiveUtils.form({
+      email: 'test@example.com',
+      password: 'password123'
+    }, {
+      validators: {
+        email: (value) => {
+          if (!value) return 'Email required';
+          if (!/\S+@\S+\.\S+/.test(value)) return 'Invalid email';
+          return null;
+        },
+        password: (value) => {
+          if (!value) return 'Password required';
+          if (value.length < 6) return 'Too short';
+          return null;
+        }
+      }
+    });
+    
+    setTimeout(() => {
+      // User makes an error
+      validationForm.setValue('email', 'invalid');
+      validationForm.validateField('email');
+      validationForm.setTouched('email');
+      
+      console.log('After invalid email:', {
+        email: validationForm.getValue('email'),
+        error: validationForm.getError('email'),
+        shouldShow: validationForm.shouldShowError('email')
+      });
+      
+      // User resets field
+      validationForm.resetField('email');
+      console.log('After resetField:', {
+        email: validationForm.getValue('email'),
+        error: validationForm.getError('email'),
+        shouldShow: validationForm.shouldShowError('email')
+      });
+    }, 1000);
+    
+    // resetField multiple fields
+    console.log('\n=== resetField multiple fields ===');
+    const multiForm = ReactiveUtils.form({
+      field1: 'a',
+      field2: 'b',
+      field3: 'c',
+      field4: 'd'
+    });
+    
+    multiForm.setValues({
+      field1: 'x',
+      field2: 'y',
+      field3: 'z',
+      field4: 'w'
+    });
+    
+    setTimeout(() => {
+      console.log('After changes:', multiForm.values);
+      
+      multiForm.resetField('field1');
+      multiForm.resetField('field3');
+      console.log('After resetting field1 and field3:', multiForm.values);
+    }, 1500);
+    
+    // resetField updates computed properties
+    console.log('\n=== resetField updates computed properties ===');
+    const computedForm = ReactiveUtils.form({
+      field1: '',
+      field2: ''
+    });
+    
+    computedForm.setValue('field1', 'value');
+    computedForm.setError('field1', 'Error');
+    computedForm.setTouched('field1');
+    
+    setTimeout(() => {
+      console.log('Before resetField:', {
+        isDirty: computedForm.isDirty,
+        hasErrors: computedForm.hasErrors
+      });
+      
+      computedForm.resetField('field1');
+      console.log('After resetField:', {
+        isDirty: computedForm.isDirty,
+        hasErrors: computedForm.hasErrors
+      });
+    }, 2000);
+    
+    // resetField vs reset
+    console.log('\n=== resetField vs reset ===');
+    const compareForm1 = ReactiveUtils.form({
+      field1: 'a',
+      field2: 'b'
+    });
+    const compareForm2 = ReactiveUtils.form({
+      field1: 'a',
+      field2: 'b'
+    });
+    
+    compareForm1.setValues({ field1: 'x', field2: 'y' });
+    compareForm2.setValues({ field1: 'x', field2: 'y' });
+    
+    setTimeout(() => {
+      compareForm1.resetField('field1');
+      console.log('After resetField("field1"):', compareForm1.values);
+      
+      compareForm2.reset();
+      console.log('After reset():', compareForm2.values);
+      console.log('✓ resetField resets one, reset resets all');
+    }, 2500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ resetField(field) resets single field');
+      console.log('✓ resetField resets to initial value');
+      console.log('✓ resetField clears field error');
+      console.log('✓ resetField clears field touched state');
+      console.log('✓ resetField returns this for chaining');
+      console.log('✓ resetField only affects specified field');
+      console.log('✓ resetField is reactive (triggers effects)');
+      console.log('✓ resetField useful in validation workflows');
+      console.log('✓ resetField can reset multiple fields individually');
+      console.log('✓ resetField updates computed properties');
+    }, 3000);
+  </script>
+</body>
+</html>

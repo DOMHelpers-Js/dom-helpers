@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.$clear()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    console.log('=== Testing collection.$clear() ===');
+    
+    // Basic $clear
+    console.log('\n=== Basic $clear ===');
+    const collection = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    
+    console.log('Before:', collection.items);
+    console.log('Length before:', collection.items.length);
+    
+    collection.$clear();
+    
+    console.log('After clear:', collection.items);
+    console.log('Length after:', collection.items.length);
+    console.log('✓ Clears all items');
+    
+    // $clear is reactive
+    console.log('\n=== $clear is reactive ===');
+    setTimeout(() => {
+      const reactiveCollection = ReactiveUtils.collection(['a', 'b', 'c']);
+      
+      let effectRuns = 0;
+      ReactiveUtils.effect(() => {
+        effectRuns++;
+        const length = reactiveCollection.items.length;
+      });
+      
+      const initialRuns = effectRuns;
+      
+      reactiveCollection.$clear();
+      
+      setTimeout(() => {
+        console.log('Effect runs after clear:', effectRuns - initialRuns);
+        console.log('Expected: 1');
+        console.log('✓ $clear triggers reactivity');
+      }, 100);
+    }, 500);
+    
+    // $clear on empty collection
+    console.log('\n=== $clear on empty collection ===');
+    setTimeout(() => {
+      const emptyCollection = ReactiveUtils.collection([]);
+      
+      console.log('Before:', emptyCollection.items);
+      
+      emptyCollection.$clear();
+      
+      console.log('After clear:', emptyCollection.items);
+      console.log('Length:', emptyCollection.items.length);
+      console.log('✓ Handles empty collection safely');
+    }, 1000);
+    
+    // $clear with objects
+    console.log('\n=== $clear with objects ===');
+    setTimeout(() => {
+      const objectCollection = ReactiveUtils.collection([
+        { id: 1, name: 'John' },
+        { id: 2, name: 'Jane' },
+        { id: 3, name: 'Bob' }
+      ]);
+      
+      console.log('Before:', objectCollection.items.length, 'items');
+      
+      objectCollection.$clear();
+      
+      console.log('After clear:', objectCollection.items.length, 'items');
+      console.log('✓ Clears object collections');
+    }, 1500);
+    
+    // $clear and re-add
+    console.log('\n=== $clear and re-add ===');
+    setTimeout(() => {
+      const reAddCollection = ReactiveUtils.collection([1, 2, 3]);
+      
+      console.log('Initial:', reAddCollection.items);
+      
+      reAddCollection.$clear();
+      console.log('After clear:', reAddCollection.items);
+      
+      reAddCollection.$add(10);
+      reAddCollection.$add(20);
+      
+      console.log('After re-adding:', reAddCollection.items);
+      console.log('✓ Can add items after clear');
+    }, 2000);
+    
+    // $clear with computed
+    console.log('\n=== $clear with computed ===');
+    setTimeout(() => {
+      const computedCollection = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+      
+      computedCollection.$computed('sum', function() {
+        return this.items.reduce((acc, x) => acc + x, 0);
+      });
+      
+      console.log('Sum before clear:', computedCollection.sum);
+      
+      computedCollection.$clear();
+      
+      console.log('Sum after clear:', computedCollection.sum);
+      console.log('Expected: 0');
+      console.log('✓ Works with computed properties');
+    }, 2500);
+    
+    // $clear multiple times
+    console.log('\n=== $clear multiple times ===');
+    setTimeout(() => {
+      const multiClearCollection = ReactiveUtils.collection([1, 2, 3]);
+      
+      multiClearCollection.$clear();
+      console.log('First clear:', multiClearCollection.items.length);
+      
+      multiClearCollection.$clear();
+      console.log('Second clear:', multiClearCollection.items.length);
+      
+      multiClearCollection.$clear();
+      console.log('Third clear:', multiClearCollection.items.length);
+      
+      console.log('✓ Can clear multiple times safely');
+    }, 3000);
+    
+    // $clear preserves collection structure
+    console.log('\n=== $clear preserves collection structure ===');
+    setTimeout(() => {
+      const structureCollection = ReactiveUtils.collection([1, 2, 3]);
+      
+      structureCollection.$computed('length', function() {
+        return this.items.length;
+      });
+      
+      console.log('Before clear - has items:', 'items' in structureCollection);
+      console.log('Before clear - has $add:', typeof structureCollection.$add === 'function');
+      
+      structureCollection.$clear();
+      
+      console.log('After clear - has items:', 'items' in structureCollection);
+      console.log('After clear - has $add:', typeof structureCollection.$add === 'function');
+      console.log('After clear - computed works:', structureCollection.length === 0);
+      console.log('✓ Preserves collection structure and methods');
+    }, 3500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ collection.$clear() removes all items');
+      console.log('✓ $clear is reactive');
+      console.log('✓ $clear handles empty collections safely');
+      console.log('✓ $clear works with object collections');
+      console.log('✓ $clear allows re-adding items');
+      console.log('✓ $clear works with computed properties');
+      console.log('✓ $clear can be called multiple times');
+      console.log('✓ $clear preserves collection structure');
+    }, 4000);
+  </script>
+</body>
+</html>

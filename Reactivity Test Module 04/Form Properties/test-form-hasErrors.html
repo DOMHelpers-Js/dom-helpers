@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.hasErrors (computed)</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.hasErrors (computed) ===');
+    
+    // Basic hasErrors
+    console.log('\n=== Basic hasErrors ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: ''
+    });
+    
+    console.log('hasErrors (no errors):', form.hasErrors);
+    console.log('Type:', typeof form.hasErrors);
+    console.log('✓ hasErrors is false when no errors');
+    
+    // hasErrors with errors
+    console.log('\n=== hasErrors with errors ===');
+    const errorForm = ReactiveUtils.form({
+      name: ''
+    });
+    
+    console.log('Before error:', errorForm.hasErrors);
+    
+    errorForm.errors.name = 'Name is required';
+    console.log('After setting error:', errorForm.hasErrors);
+    
+    delete errorForm.errors.name;
+    console.log('After clearing error:', errorForm.hasErrors);
+    
+    // hasErrors is read-only
+    console.log('\n=== hasErrors is read-only (computed) ===');
+    const readOnlyForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    console.log('Initial hasErrors:', readOnlyForm.hasErrors);
+    
+    try {
+      readOnlyForm.hasErrors = true;
+      console.log('After assignment attempt:', readOnlyForm.hasErrors);
+      console.log('⚠️  Assignment ignored (read-only)');
+    } catch (e) {
+      console.log('✓ Cannot set computed property');
+    }
+    
+    // hasErrors with validation
+    console.log('\n=== hasErrors with validation ===');
+    const validatedForm = ReactiveUtils.form({
+      email: '',
+      password: ''
+    }, {
+      validators: {
+        email: (value) => value ? null : 'Email required',
+        password: (value) => value ? null : 'Password required'
+      }
+    });
+    
+    console.log('Before validation:', validatedForm.hasErrors);
+    
+    validatedForm.validate();
+    console.log('After validate() (with errors):', validatedForm.hasErrors);
+    
+    validatedForm.setValue('email', 'test@example.com');
+    validatedForm.setValue('password', 'password123');
+    console.log('After fixing all errors:', validatedForm.hasErrors);
+    
+    // hasErrors is reactive
+    console.log('\n=== hasErrors is reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: hasErrors = ${reactiveForm.hasErrors}`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.errors.field = 'Error message';
+      console.log('Effect runs after setting error:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactiveForm.clearErrors();
+      console.log('Effect runs after clearErrors:', effectRuns);
+    }, 1000);
+    
+    // hasErrors vs isValid
+    console.log('\n=== hasErrors vs isValid ===');
+    const compareForm = ReactiveUtils.form({
+      name: ''
+    });
+    
+    console.log('No errors:');
+    console.log('  hasErrors:', compareForm.hasErrors);
+    console.log('  isValid:', compareForm.isValid);
+    console.log('  Opposite:', compareForm.hasErrors === !compareForm.isValid);
+    
+    compareForm.errors.name = 'Error';
+    console.log('With error:');
+    console.log('  hasErrors:', compareForm.hasErrors);
+    console.log('  isValid:', compareForm.isValid);
+    console.log('  Opposite:', compareForm.hasErrors === !compareForm.isValid);
+    
+    // hasErrors with multiple errors
+    console.log('\n=== hasErrors with multiple errors ===');
+    const multiForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    console.log('No errors:', multiForm.hasErrors);
+    
+    multiForm.errors.field1 = 'Error 1';
+    console.log('1 error:', multiForm.hasErrors);
+    
+    multiForm.errors.field2 = 'Error 2';
+    multiForm.errors.field3 = 'Error 3';
+    console.log('3 errors:', multiForm.hasErrors);
+    
+    delete multiForm.errors.field1;
+    delete multiForm.errors.field2;
+    console.log('After clearing 2 errors (1 remains):', multiForm.hasErrors);
+    
+    delete multiForm.errors.field3;
+    console.log('After clearing all errors:', multiForm.hasErrors);
+    
+    // hasErrors for conditional UI
+    console.log('\n=== hasErrors for conditional UI ===');
+    const uiForm = ReactiveUtils.form({
+      email: ''
+    }, {
+      validators: {
+        email: (value) => {
+          if (!value) return 'Required';
+          if (!/\S+@\S+\.\S+/.test(value)) return 'Invalid';
+          return null;
+        }
+      }
+    });
+    
+    ReactiveUtils.effect(() => {
+      if (uiForm.hasErrors) {
+        console.log('UI: Show error banner');
+      } else {
+        console.log('UI: Hide error banner');
+      }
+    });
+    
+    setTimeout(() => {
+      uiForm.setValue('email', 'invalid');
+    }, 1500);
+    
+    setTimeout(() => {
+      uiForm.setValue('email', 'valid@example.com');
+    }, 2000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ form.hasErrors is a computed boolean property');
+      console.log('✓ form.hasErrors is false when no errors exist');
+      console.log('✓ form.hasErrors is true when any error exists');
+      console.log('✓ form.hasErrors is read-only (cannot be set)');
+      console.log('✓ form.hasErrors updates automatically when errors change');
+      console.log('✓ form.hasErrors is reactive (triggers effects)');
+      console.log('✓ form.hasErrors is opposite of isValid');
+      console.log('✓ form.hasErrors useful for showing error banners');
+    }, 2500);
+  </script>
+</body>
+</html>

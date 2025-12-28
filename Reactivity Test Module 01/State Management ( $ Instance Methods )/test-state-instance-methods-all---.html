@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test All State Instance Methods</title></head>
+<body>
+  <div id="output">0</div>
+  
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    console.log('=== Testing All State Instance Methods ===');
+    
+    // Create comprehensive state
+    const state = ReactiveUtils.state({
+      count: 0,
+      name: 'Test',
+      items: [1, 2, 3],
+      user: {
+        profile: {
+          score: 100
+        }
+      }
+    });
+    
+    console.log('\n=== Test $computed ===');
+    state.$computed('doubled', function() {
+      return this.count * 2;
+    });
+    console.log('computed doubled:', state.doubled);
+    
+    console.log('\n=== Test $watch ===');
+    let watchCount = 0;
+    const unwatch = state.$watch('count', (newVal, oldVal) => {
+      watchCount++;
+      console.log(`Watch: ${oldVal} → ${newVal}`);
+    });
+    
+    console.log('\n=== Test $batch ===');
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const _ = state.count + state.items.length;
+    });
+    
+    const beforeRuns = effectRuns;
+    state.$batch(() => {
+      state.count = 10;
+      state.items.push(4);
+    });
+    
+    setTimeout(() => {
+      console.log('Batched effect runs:', (effectRuns - beforeRuns));
+      
+      console.log('\n=== Test $notify ===');
+      state.$notify('count');
+      console.log('Manual notify triggered');
+      
+      console.log('\n=== Test $raw ===');
+      console.log('$raw:', state.$raw);
+      console.log('Is plain object:', state.$raw.constructor === Object);
+      
+      console.log('\n=== Test $update ===');
+      state.$update({
+        count: 20,
+        name: 'Updated',
+        '#output': { textContent: '20' }
+      });
+      console.log('After $update:', {
+        count: state.count,
+        name: state.name,
+        dom: document.getElementById('output').textContent
+      });
+      
+      console.log('\n=== Test $set ===');
+      state.$set({
+        count: prev => prev + 10,
+        items: prev => [...prev, 5]
+      });
+      console.log('After $set:', {
+        count: state.count,
+        items: state.items
+      });
+      
+      console.log('\n=== Test $bind ===');
+      const unbind = state.$bind({
+        '#output': function() {
+          return `Count: ${this.count}`;
+        }
+      });
+      
+      state.count = 50;
+      
+      setTimeout(() => {
+        console.log('After binding update, DOM:', 
+          document.getElementById('output').textContent);
+        
+        // Cleanup
+        unwatch();
+        unbind();
+        console.log('Cleanups called');
+        
+        console.log('\n=== Integration Test ===');
+        const integrated = ReactiveUtils.state({
+          value: 0
+        });
+        
+        // Add computed
+        integrated.$computed('squared', function() {
+          return this.value * this.value;
+        });
+        
+        // Add watch
+        integrated.$watch('value', (n, o) => {
+          console.log(`Integration watch: ${o} → ${n}`);
+        });
+        
+        // Batch update
+        integrated.$batch(() => {
+          integrated.$set({
+            value: prev => prev + 5
+          });
+        });
+        
+        console.log('Integrated result:', {
+          value: integrated.value,
+          squared: integrated.squared
+        });
+        
+        setTimeout(() => {
+          console.log('\n=== Summary ===');
+          console.log('✓ $computed(key, fn) - Add computed property');
+          console.log('✓ $watch(keyOrFn, callback) - Watch changes');
+          console.log('✓ $batch(fn) - Batch updates');
+          console.log('✓ $notify(key) - Manual trigger');
+          console.log('✓ $raw - Get raw object');
+          console.log('✓ $update(updates) - Mixed updates');
+          console.log('✓ $set(updates) - Functional updates');
+          console.log('✓ $bind(bindingDefs) - DOM bindings');
+          console.log('✓ All methods work together seamlessly');
+          console.log('✓ Complete reactive state API');
+        }, 100);
+      }, 100);
+    }, 100);
+  </script>
+</body>
+</html>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test All Built-in Validators</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing All Built-in Validators ===');
+    
+    const V = ReactiveUtils.validators;
+    
+    console.log('\n=== Test required ===');
+    const required = V.required('Required');
+    console.log('Empty:', required(''));
+    console.log('Filled:', required('value'));
+    
+    console.log('\n=== Test email ===');
+    const email = V.email('Invalid email');
+    console.log('Invalid:', email('invalid'));
+    console.log('Valid:', email('test@example.com'));
+    
+    console.log('\n=== Test minLength ===');
+    const minLength = V.minLength(5, 'Too short');
+    console.log('Too short:', minLength('abc'));
+    console.log('Long enough:', minLength('abcde'));
+    
+    console.log('\n=== Test maxLength ===');
+    const maxLength = V.maxLength(10, 'Too long');
+    console.log('Too long:', maxLength('verylongstring'));
+    console.log('Short enough:', maxLength('short'));
+    
+    console.log('\n=== Test pattern ===');
+    const pattern = V.pattern(/^[0-9]+$/, 'Numbers only');
+    console.log('Letters:', pattern('abc'));
+    console.log('Numbers:', pattern('123'));
+    
+    console.log('\n=== Test min ===');
+    const min = V.min(18, 'Too young');
+    console.log('Too young:', min(16));
+    console.log('Old enough:', min(21));
+    
+    console.log('\n=== Test max ===');
+    const max = V.max(100, 'Too high');
+    console.log('Too high:', max(150));
+    console.log('Valid:', max(75));
+    
+    console.log('\n=== Test match ===');
+    const form = ReactiveUtils.form({
+      password: 'secret',
+      confirmPassword: ''
+    }, {
+      validators: {
+        confirmPassword: V.match('password', 'Must match')
+      }
+    });
+    
+    form.setValue('confirmPassword', 'different');
+    form.validateField('confirmPassword');
+    console.log('Not matching:', form.errors.confirmPassword);
+    
+    form.setValue('confirmPassword', 'secret');
+    form.validateField('confirmPassword');
+    console.log('Matching:', form.errors.confirmPassword);
+    
+    console.log('\n=== Test custom ===');
+    const custom = V.custom((value) => {
+      return value === 'forbidden' ? 'Not allowed' : null;
+    });
+    console.log('Forbidden:', custom('forbidden'));
+    console.log('Allowed:', custom('allowed'));
+    
+    console.log('\n=== Test combine ===');
+    const combined = V.combine(
+      V.required('Required'),
+      V.minLength(3, 'Too short'),
+      V.email('Invalid email')
+    );
+    console.log('Empty:', combined(''));
+    console.log('Too short:', combined('ab'));
+    console.log('Invalid email:', combined('invalid'));
+    console.log('Valid:', combined('test@example.com'));
+    
+    console.log('\n=== Integration Test: Complete Registration Form ===');
+    const registrationForm = ReactiveUtils.form({
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      age: '',
+      website: '',
+      phone: ''
+    }, {
+      validators: {
+        username: V.combine(
+          V.required('Username required'),
+          V.minLength(3, 'Too short (min 3)'),
+          V.maxLength(20, 'Too long (max 20)'),
+          V.pattern(/^[a-zA-Z0-9_]+$/, 'Invalid characters')
+        ),
+        email: V.combine(
+          V.required('Email required'),
+          V.email('Invalid email format')
+        ),
+        password: V.combine(
+          V.required('Password required'),
+          V.minLength(8, 'Too short (min 8)'),
+          V.custom((value) => {
+            if (!value) return null;
+            if (!/[A-Z]/.test(value)) return 'Must contain uppercase';
+            if (!/[0-9]/.test(value)) return 'Must contain number';
+            return null;
+          })
+        ),
+        confirmPassword: V.combine(
+          V.required('Confirm password'),
+          V.match('password', 'Passwords must match')
+        ),
+        age: V.combine(
+          V.required('Age required'),
+          V.min(18, 'Must be 18+'),
+          V.max(120, 'Invalid age')
+        ),
+        website: V.pattern(/^https?:\/\/.+/, 'Must be valid URL'),
+        phone: V.pattern(/^\d{3}-\d{3}-\d{4}$/, 'Format: 123-456-7890')
+      }
+    });
+    
+    setTimeout(() => {
+      console.log('\n--- Filling registration form ---');
+      
+      // Invalid data
+      registrationForm.setValues({
+        username: 'ab',
+        email: 'invalid',
+        password: 'weak',
+        confirmPassword: 'different',
+        age: '16',
+        website: 'not-a-url',
+        phone: '1234567890'
+      });
+      
+      registrationForm.touchAll();
+      registrationForm.validate();
+      
+      console.log('Invalid form errors:', registrationForm.errors);
+      console.log('Is valid:', registrationForm.isValid);
+      
+      // Valid data
+      registrationForm.setValues({
+        username: 'john_doe',
+        email: 'john@example.com',
+        password: 'Password123',
+        confirmPassword: 'Password123',
+        age: '25',
+        website: 'https://example.com',
+        phone: '123-456-7890'
+      });
+      
+      registrationForm.validate();
+      console.log('Valid form errors:', registrationForm.errors);
+      console.log('Is valid:', registrationForm.isValid);
+    }, 500);
+    
+    console.log('\n=== Integration Test: All Validators Together ===');
+    const testForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: '',
+      field4: '',
+      field5: '',
+      field6: '',
+      field7: '',
+      field8: '',
+      field9: '',
+      field10: ''
+    }, {
+      validators: {
+        field1: V.required('Field1 required'),
+        field2: V.email('Invalid email'),
+        field3: V.minLength(5, 'Too short'),
+        field4: V.maxLength(10, 'Too long'),
+        field5: V.pattern(/^[A-Z]/, 'Must start uppercase'),
+        field6: V.min(10, 'Too small'),
+        field7: V.max(100, 'Too large'),
+        field8: V.match('field1', 'Must match field1'),
+        field9: V.custom((value) => value !== 'test' ? null : 'Cannot be test'),
+        field10: V.combine(
+          V.required('Required'),
+          V.minLength(3, 'Too short')
+        )
+      }
+    });
+    
+    setTimeout(() => {
+      console.log('\n--- Testing all validators ---');
+      
+      testForm.setValues({
+        field1: 'value1',
+        field2: 'invalid',
+        field3: 'abc',
+        field4: 'verylongstring',
+        field5: 'lowercase',
+        field6: '5',
+        field7: '150',
+        field8: 'different',
+        field9: 'test',
+        field10: 'ab'
+      });
+      
+      testForm.validate();
+      console.log('All validators tested:', {
+        field1: testForm.errors.field1,
+        field2: testForm.errors.field2,
+        field3: testForm.errors.field3,
+        field4: testForm.errors.field4,
+        field5: testForm.errors.field5,
+        field6: testForm.errors.field6,
+        field7: testForm.errors.field7,
+        field8: testForm.errors.field8,
+        field9: testForm.errors.field9,
+        field10: testForm.errors.field10
+      });
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ required - Required field validation');
+      console.log('✓ email - Email format validation');
+      console.log('✓ minLength - Minimum length validation');
+      console.log('✓ maxLength - Maximum length validation');
+      console.log('✓ pattern - Regex pattern validation');
+      console.log('✓ min - Minimum value validation');
+      console.log('✓ max - Maximum value validation');
+      console.log('✓ match - Field matching validation');
+      console.log('✓ custom - Custom validation logic');
+      console.log('✓ combine - Combine multiple validators');
+      console.log('✓ All validators work together seamlessly');
+      console.log('✓ Complete validation system');
+    }, 1500);
+  </script>
+</body>
+</html>

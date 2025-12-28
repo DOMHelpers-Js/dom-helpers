@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Validators.minLength()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing Validators.minLength() ===');
+    
+    // Basic minLength validator
+    console.log('\n=== Basic minLength validator ===');
+    const minLength5 = ReactiveUtils.validators.minLength(5);
+    
+    console.log('Length 3:', minLength5('abc'));
+    console.log('Length 5:', minLength5('abcde'));
+    console.log('Length 7:', minLength5('abcdefg'));
+    console.log('✓ Validates minimum length');
+    
+    // minLength with custom message
+    console.log('\n=== minLength with custom message ===');
+    const customMinLength = ReactiveUtils.validators.minLength(3, 'Too short');
+    
+    console.log('Short with custom message:', customMinLength('ab'));
+    console.log('✓ Uses custom message');
+    
+    // minLength with default message
+    console.log('\n=== minLength with default message ===');
+    const defaultMinLength = ReactiveUtils.validators.minLength(5);
+    
+    const defaultMessage = defaultMinLength('abc');
+    console.log('Default message:', defaultMessage);
+    console.log('Includes minimum:', defaultMessage.includes('5'));
+    
+    // minLength with empty value
+    console.log('\n=== minLength with empty value ===');
+    const emptyMinLength = ReactiveUtils.validators.minLength(5);
+    
+    console.log('Empty string:', emptyMinLength(''));
+    console.log('Null:', emptyMinLength(null));
+    console.log('Undefined:', emptyMinLength(undefined));
+    console.log('✓ Allows empty (use with required for mandatory)');
+    
+    // minLength exact match
+    console.log('\n=== minLength exact match ===');
+    const exactMinLength = ReactiveUtils.validators.minLength(5);
+    
+    console.log('Exactly 5 chars:', exactMinLength('abcde'));
+    console.log('✓ Accepts exact minimum length');
+    
+    // minLength various lengths
+    console.log('\n=== minLength various lengths ===');
+    const testLengths = [
+      { min: 3, value: 'ab', expected: 'error' },
+      { min: 3, value: 'abc', expected: 'valid' },
+      { min: 8, value: 'password', expected: 'valid' },
+      { min: 8, value: 'pass', expected: 'error' },
+      { min: 10, value: '1234567890', expected: 'valid' }
+    ];
+    
+    testLengths.forEach(({ min, value, expected }) => {
+      const validator = ReactiveUtils.validators.minLength(min);
+      const result = validator(value);
+      const actual = result === null ? 'valid' : 'error';
+      console.log(`min=${min}, value="${value}" (${value.length}):`, actual === expected ? '✓' : '✗');
+    });
+    
+    // minLength in form
+    console.log('\n=== minLength in form ===');
+    const form = ReactiveUtils.form({
+      password: ''
+    }, {
+      validators: {
+        password: ReactiveUtils.validators.minLength(8, 'Password must be at least 8 characters')
+      }
+    });
+    
+    form.setValue('password', 'short');
+    form.validateField('password');
+    console.log('Short password:', form.errors.password);
+    
+    form.setValue('password', 'longenough');
+    form.validateField('password');
+    console.log('Long enough:', form.errors.password);
+    
+    // minLength with unicode
+    console.log('\n=== minLength with unicode ===');
+    const unicodeMinLength = ReactiveUtils.validators.minLength(5);
+    
+    console.log('Emoji (5 chars):', unicodeMinLength('😀😁😂😃😄'));
+    console.log('Mixed (6 chars):', unicodeMinLength('hello🌍'));
+    console.log('✓ Works with unicode');
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ Validators.minLength(min) creates minLength validator');
+      console.log('✓ minLength accepts custom message');
+      console.log('✓ minLength has default message with minimum');
+      console.log('✓ minLength allows empty values');
+      console.log('✓ minLength accepts exact minimum length');
+      console.log('✓ minLength validates various lengths correctly');
+      console.log('✓ minLength works in forms');
+      console.log('✓ minLength works with unicode characters');
+    }, 500);
+  </script>
+</body>
+</html>

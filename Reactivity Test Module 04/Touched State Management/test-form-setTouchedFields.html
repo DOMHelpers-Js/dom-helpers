@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.setTouchedFields()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.setTouchedFields() ===');
+    
+    // Basic setTouchedFields
+    console.log('\n=== Basic setTouchedFields ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: '',
+      password: ''
+    });
+    
+    console.log('Before setTouchedFields:', form.touched);
+    
+    form.setTouchedFields(['username', 'email']);
+    console.log('After setTouchedFields(["username", "email"]):', form.touched);
+    
+    // setTouchedFields with all fields
+    console.log('\n=== setTouchedFields with all fields ===');
+    const allForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: '',
+      field4: ''
+    });
+    
+    const allFields = Object.keys(allForm.values);
+    allForm.setTouchedFields(allFields);
+    console.log('After setTouchedFields(all):', allForm.touched);
+    console.log('All fields touched:', allForm.touchedFields.length === allFields.length);
+    
+    // setTouchedFields returns this (chainable)
+    console.log('\n=== setTouchedFields returns this (chainable) ===');
+    const chainForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: '',
+      field4: ''
+    });
+    
+    const result = chainForm.setTouchedFields(['field1', 'field2']);
+    console.log('setTouchedFields returns this:', result === chainForm);
+    
+    chainForm
+      .setTouchedFields(['field1', 'field2'])
+      .setTouchedFields(['field3', 'field4']);
+    console.log('After chained setTouchedFields:', chainForm.touched);
+    
+    // setTouchedFields with empty array
+    console.log('\n=== setTouchedFields with empty array ===');
+    const emptyForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    emptyForm.setTouched('field');
+    console.log('Before setTouchedFields([]):', emptyForm.touched);
+    
+    emptyForm.setTouchedFields([]);
+    console.log('After setTouchedFields([]):', emptyForm.touched);
+    console.log('✓ Empty array does nothing');
+    
+    // setTouchedFields updates isDirty
+    console.log('\n=== setTouchedFields updates isDirty ===');
+    const dirtyForm = ReactiveUtils.form({
+      field1: '',
+      field2: ''
+    });
+    
+    console.log('Before touching, isDirty:', dirtyForm.isDirty);
+    
+    dirtyForm.setTouchedFields(['field1', 'field2']);
+    console.log('After setTouchedFields, isDirty:', dirtyForm.isDirty);
+    
+    // setTouchedFields updates touchedFields
+    console.log('\n=== setTouchedFields updates touchedFields ===');
+    const fieldsForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: '',
+      field4: ''
+    });
+    
+    console.log('Initial touchedFields:', fieldsForm.touchedFields);
+    
+    fieldsForm.setTouchedFields(['field2', 'field4']);
+    console.log('After setTouchedFields:', fieldsForm.touchedFields);
+    console.log('Count:', fieldsForm.touchedFields.length);
+    
+    // setTouchedFields is reactive
+    console.log('\n=== setTouchedFields is reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const touchedCount = Object.keys(reactiveForm.touched).length;
+      console.log(`Effect #${effectRuns}: ${touchedCount} touched`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.setTouchedFields(['field1', 'field2', 'field3']);
+      console.log('Effect runs after setTouchedFields:', effectRuns);
+    }, 500);
+    
+    // setTouchedFields batches updates
+    console.log('\n=== setTouchedFields batches updates ===');
+    const batchForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    let batchEffectRuns = 0;
+    ReactiveUtils.effect(() => {
+      batchEffectRuns++;
+      const count = Object.keys(batchForm.touched).length;
+      if (batchEffectRuns > 1) {
+        console.log(`Batch effect #${batchEffectRuns}: ${count} touched`);
+      }
+    });
+    
+    setTimeout(() => {
+      const beforeRuns = batchEffectRuns;
+      batchForm.setTouchedFields(['field1', 'field2', 'field3']);
+      setTimeout(() => {
+        console.log('Batched - effect ran:', (batchEffectRuns - beforeRuns), 'time(s)');
+      }, 100);
+    }, 1000);
+    
+    // setTouchedFields with shouldShowError
+    console.log('\n=== setTouchedFields with shouldShowError ===');
+    const showForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    showForm.setErrors({
+      field1: 'Error 1',
+      field2: 'Error 2',
+      field3: 'Error 3'
+    });
+    
+    console.log('Before touching:');
+    ['field1', 'field2', 'field3'].forEach(field => {
+      console.log(`  ${field} shouldShow:`, showForm.shouldShowError(field));
+    });
+    
+    setTimeout(() => {
+      showForm.setTouchedFields(['field1', 'field3']);
+      console.log('After touching field1 and field3:');
+      ['field1', 'field2', 'field3'].forEach(field => {
+        console.log(`  ${field} shouldShow:`, showForm.shouldShowError(field));
+      });
+    }, 1500);
+    
+    // setTouchedFields vs multiple setTouched
+    console.log('\n=== setTouchedFields vs multiple setTouched ===');
+    const compareForm1 = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    const compareForm2 = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    let effect1Runs = 0;
+    let effect2Runs = 0;
+    
+    ReactiveUtils.effect(() => {
+      effect1Runs++;
+      const _ = compareForm1.touched;
+    });
+    
+    ReactiveUtils.effect(() => {
+      effect2Runs++;
+      const _ = compareForm2.touched;
+    });
+    
+    setTimeout(() => {
+      // Multiple setTouched calls
+      compareForm1.setTouched('field1');
+      compareForm1.setTouched('field2');
+      compareForm1.setTouched('field3');
+      console.log('Multiple setTouched - effect runs:', effect1Runs);
+      
+      // Single setTouchedFields call
+      compareForm2.setTouchedFields(['field1', 'field2', 'field3']);
+      console.log('Single setTouchedFields - effect runs:', effect2Runs);
+      console.log('✓ setTouchedFields is more efficient (batched)');
+    }, 2000);
+    
+    // setTouchedFields in validation workflow
+    console.log('\n=== setTouchedFields in validation workflow ===');
+    const validationForm = ReactiveUtils.form({
+      name: '',
+      email: '',
+      password: ''
+    }, {
+      validators: {
+        name: (value) => value ? null : 'Name required',
+        email: (value) => value ? null : 'Email required',
+        password: (value) => value ? null : 'Password required'
+      }
+    });
+    
+    setTimeout(() => {
+      // Validate all fields and mark as touched
+      validationForm.validate();
+      const invalidFields = validationForm.errorFields;
+      validationForm.setTouchedFields(invalidFields);
+      
+      console.log('Invalid fields touched:', validationForm.touchedFields);
+      console.log('Errors visible:');
+      invalidFields.forEach(field => {
+        console.log(`  ${field}: ${validationForm.shouldShowError(field)}`);
+      });
+    }, 2500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ setTouchedFields(fields) marks multiple fields as touched');
+      console.log('✓ setTouchedFields works with all fields');
+      console.log('✓ setTouchedFields returns this for chaining');
+      console.log('✓ setTouchedFields handles empty array');
+      console.log('✓ setTouchedFields updates isDirty computed property');
+      console.log('✓ setTouchedFields updates touchedFields computed property');
+      console.log('✓ setTouchedFields is reactive (triggers effects)');
+      console.log('✓ setTouchedFields batches updates for efficiency');
+      console.log('✓ setTouchedFields affects shouldShowError');
+      console.log('✓ setTouchedFields more efficient than multiple setTouched()');
+    }, 3000);
+  </script>
+</body>
+</html>

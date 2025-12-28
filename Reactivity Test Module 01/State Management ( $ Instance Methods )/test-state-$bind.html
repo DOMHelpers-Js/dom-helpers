@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test state.$bind()</title></head>
+<body>
+  <div id="counter">0</div>
+  <div id="message">Initial</div>
+  <div id="userName">Unknown</div>
+  <div class="status">Idle</div>
+  
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    console.log('=== Testing state.$bind() ===');
+    
+    // Basic binding
+    console.log('\n=== Basic binding ===');
+    const state = ReactiveUtils.state({
+      count: 0,
+      message: 'Hello'
+    });
+    
+    state.$bind({
+      '#counter': 'count',
+      '#message': 'message'
+    });
+    
+    console.log('Initial bindings set');
+    console.log('DOM #counter:', document.getElementById('counter').textContent);
+    console.log('DOM #message:', document.getElementById('message').textContent);
+    
+    setTimeout(() => {
+      state.count = 10;
+      state.message = 'Updated!';
+      console.log('\nAfter state update:');
+      console.log('DOM #counter:', document.getElementById('counter').textContent);
+      console.log('DOM #message:', document.getElementById('message').textContent);
+    }, 500);
+    
+    // Binding with functions
+    console.log('\n=== Binding with functions ===');
+    const computed = ReactiveUtils.state({
+      firstName: 'John',
+      lastName: 'Doe'
+    });
+    
+    computed.$bind({
+      '#userName': function() {
+        return this.firstName + ' ' + this.lastName;
+      }
+    });
+    
+    console.log('Function binding set');
+    
+    setTimeout(() => {
+      console.log('Initial DOM #userName:', document.getElementById('userName').textContent);
+      
+      computed.firstName = 'Jane';
+      setTimeout(() => {
+        console.log('After firstName change:', document.getElementById('userName').textContent);
+      }, 100);
+    }, 1000);
+    
+    // Binding with property objects
+    console.log('\n=== Binding with property objects ===');
+    const props = ReactiveUtils.state({
+      text: 'Styled',
+      color: 'blue'
+    });
+    
+    setTimeout(() => {
+      props.$bind({
+        '.status': {
+          textContent: 'text',
+          style: function() {
+            return { color: this.color, fontSize: '18px' };
+          }
+        }
+      });
+      
+      console.log('Property bindings set');
+      
+      setTimeout(() => {
+        props.text = 'Updated Style';
+        props.color = 'red';
+        console.log('After style update:', document.querySelector('.status').style.color);
+      }, 100);
+    }, 1500);
+    
+    // Binding returns cleanup function
+    console.log('\n=== Binding returns cleanup function ===');
+    const cleanup = ReactiveUtils.state({
+      value: 0
+    });
+    
+    setTimeout(() => {
+      const unbind = cleanup.$bind({
+        '#counter': 'value'
+      });
+      
+      console.log('Cleanup function returned:', typeof unbind === 'function');
+      
+      cleanup.value = 100;
+      setTimeout(() => {
+        console.log('Before cleanup, DOM:', document.getElementById('counter').textContent);
+        
+        unbind(); // Remove bindings
+        console.log('Cleanup called');
+        
+        cleanup.value = 200;
+        setTimeout(() => {
+          console.log('After cleanup, DOM (should not update):', 
+            document.getElementById('counter').textContent);
+        }, 100);
+      }, 100);
+    }, 2000);
+    
+    // Multiple bindings
+    console.log('\n=== Multiple bindings ===');
+    const multi = ReactiveUtils.state({
+      count: 0,
+      status: 'active',
+      user: 'Guest'
+    });
+    
+    setTimeout(() => {
+      multi.$bind({
+        '#counter': 'count',
+        '.status': 'status',
+        '#userName': 'user'
+      });
+      
+      setTimeout(() => {
+        multi.count = 99;
+        multi.status = 'working';
+        multi.user = 'Admin';
+        console.log('Multiple elements updated simultaneously');
+      }, 100);
+    }, 3000);
+    
+    // Binding with nested paths
+    console.log('\n=== Binding with nested paths ===');
+    const nested = ReactiveUtils.state({
+      user: {
+        profile: {
+          name: 'Alice'
+        }
+      }
+    });
+    
+    setTimeout(() => {
+      nested.$bind({
+        '#userName': 'user.profile.name'
+      });
+      
+      setTimeout(() => {
+        nested.user.profile.name = 'Bob';
+        console.log('Nested path binding updated');
+      }, 100);
+    }, 3500);
+    
+    // Reactive binding updates
+    console.log('\n=== Reactive binding updates ===');
+    const reactive = ReactiveUtils.state({
+      counter: 0
+    });
+    
+    setTimeout(() => {
+      reactive.$bind({
+        '#counter': function() {
+          return `Count: ${this.counter}`;
+        }
+      });
+      
+      let interval = setInterval(() => {
+        reactive.counter++;
+        if (reactive.counter >= 5) {
+          clearInterval(interval);
+          console.log('Reactive binding stopped');
+        }
+      }, 200);
+    }, 4000);
+    
+    // Binding with computed properties
+    console.log('\n=== Binding with computed properties ===');
+    const withComputed = ReactiveUtils.state({
+      base: 10
+    });
+    
+    withComputed.$computed('doubled', function() {
+      return this.base * 2;
+    });
+    
+    setTimeout(() => {
+      withComputed.$bind({
+        '#counter': 'doubled'
+      });
+      
+      setTimeout(() => {
+        withComputed.base = 25;
+        console.log('Computed binding updated via base change');
+      }, 100);
+    }, 5500);
+    
+    // Class selector binding
+    console.log('\n=== Class selector binding ===');
+    const classBinding = ReactiveUtils.state({
+      statusText: 'Ready'
+    });
+    
+    setTimeout(() => {
+      classBinding.$bind({
+        '.status': 'statusText'
+      });
+      
+      setTimeout(() => {
+        classBinding.statusText = 'Processing...';
+        console.log('Class selector binding updated');
+      }, 100);
+    }, 6000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ $bind(bindingDefs) creates reactive DOM bindings');
+      console.log('✓ Supports string property bindings');
+      console.log('✓ Supports function computed bindings');
+      console.log('✓ Supports property object bindings');
+      console.log('✓ Returns cleanup function to remove bindings');
+      console.log('✓ Can bind multiple elements at once');
+      console.log('✓ Supports nested path bindings');
+      console.log('✓ Updates are reactive and automatic');
+      console.log('✓ Works with computed properties');
+      console.log('✓ Supports ID (#) and class (.) selectors');
+    }, 6500);
+  </script>
+</body>
+</html>

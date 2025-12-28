@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Validators.required()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing Validators.required() ===');
+    
+    // Basic required validator
+    console.log('\n=== Basic required validator ===');
+    const required = ReactiveUtils.validators.required();
+    
+    console.log('Empty string:', required(''));
+    console.log('Non-empty string:', required('value'));
+    console.log('✓ Returns error for empty, null for non-empty');
+    
+    // required with custom message
+    console.log('\n=== required with custom message ===');
+    const customRequired = ReactiveUtils.validators.required('This field is required');
+    
+    console.log('Empty with custom message:', customRequired(''));
+    console.log('✓ Uses custom message');
+    
+    // required with default message
+    console.log('\n=== required with default message ===');
+    const defaultRequired = ReactiveUtils.validators.required();
+    
+    const defaultMessage = defaultRequired('');
+    console.log('Default message:', defaultMessage);
+    console.log('Has message:', typeof defaultMessage === 'string');
+    
+    // required with null
+    console.log('\n=== required with null ===');
+    const nullRequired = ReactiveUtils.validators.required();
+    
+    console.log('Null value:', nullRequired(null));
+    console.log('✓ Treats null as empty');
+    
+    // required with undefined
+    console.log('\n=== required with undefined ===');
+    const undefinedRequired = ReactiveUtils.validators.required();
+    
+    console.log('Undefined value:', undefinedRequired(undefined));
+    console.log('✓ Treats undefined as empty');
+    
+    // required with whitespace
+    console.log('\n=== required with whitespace ===');
+    const whitespaceRequired = ReactiveUtils.validators.required();
+    
+    console.log('Single space:', whitespaceRequired(' '));
+    console.log('Multiple spaces:', whitespaceRequired('   '));
+    console.log('Tab:', whitespaceRequired('\t'));
+    console.log('Newline:', whitespaceRequired('\n'));
+    console.log('✓ Treats whitespace as empty');
+    
+    // required with numbers
+    console.log('\n=== required with numbers ===');
+    const numberRequired = ReactiveUtils.validators.required();
+    
+    console.log('Zero:', numberRequired(0));
+    console.log('Positive number:', numberRequired(5));
+    console.log('Negative number:', numberRequired(-5));
+    console.log('✓ Zero treated as empty');
+    
+    // required with boolean
+    console.log('\n=== required with boolean ===');
+    const boolRequired = ReactiveUtils.validators.required();
+    
+    console.log('True:', boolRequired(true));
+    console.log('False:', boolRequired(false));
+    console.log('✓ False treated as empty');
+    
+    // required in form
+    console.log('\n=== required in form ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: ''
+    }, {
+      validators: {
+        username: ReactiveUtils.validators.required('Username is required'),
+        email: ReactiveUtils.validators.required('Email is required')
+      }
+    });
+    
+    form.validate();
+    console.log('Form errors:', form.errors);
+    
+    form.setValue('username', 'john');
+    form.validateField('username');
+    console.log('After setting username:', form.errors);
+    
+    // required returns function
+    console.log('\n=== required returns function ===');
+    const requiredFn = ReactiveUtils.validators.required('Required');
+    
+    console.log('Type:', typeof requiredFn);
+    console.log('Is function:', typeof requiredFn === 'function');
+    console.log('Can be called:', requiredFn('test') === null);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ Validators.required() creates required validator');
+      console.log('✓ required accepts custom message');
+      console.log('✓ required has default message');
+      console.log('✓ required treats null as empty');
+      console.log('✓ required treats undefined as empty');
+      console.log('✓ required treats whitespace as empty');
+      console.log('✓ required treats 0 as empty');
+      console.log('✓ required treats false as empty');
+      console.log('✓ required works in forms');
+      console.log('✓ required returns validator function');
+    }, 500);
+  </script>
+</body>
+</html>

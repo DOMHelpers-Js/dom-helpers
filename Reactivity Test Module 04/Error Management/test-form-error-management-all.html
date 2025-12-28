@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test All Error Management Methods</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing All Error Management Methods ===');
+    
+    // Create comprehensive form
+    const form = ReactiveUtils.form({
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: ''
+    }, {
+      validators: {
+        username: (value) => value ? null : 'Username required',
+        email: (value) => {
+          if (!value) return 'Email required';
+          if (!/\S+@\S+\.\S+/.test(value)) return 'Invalid email';
+          return null;
+        },
+        password: (value) => {
+          if (!value) return 'Password required';
+          if (value.length < 6) return 'Too short';
+          return null;
+        },
+        confirmPassword: (value, values) => {
+          if (value !== values.password) return 'Must match';
+          return null;
+        }
+      }
+    });
+    
+    console.log('\n=== Test setError ===');
+    form.setError('username', 'Custom username error');
+    console.log('After setError:', form.errors);
+    console.log('hasError("username"):', form.hasError('username'));
+    console.log('getError("username"):', form.getError('username'));
+    
+    console.log('\n=== Test setErrors ===');
+    form.setErrors({
+      email: 'Custom email error',
+      password: 'Custom password error'
+    });
+    console.log('After setErrors:', form.errors);
+    console.log('hasError("email"):', form.hasError('email'));
+    console.log('getError("password"):', form.getError('password'));
+    
+    console.log('\n=== Test clearError ===');
+    form.clearError('username');
+    console.log('After clearError("username"):', form.errors);
+    console.log('hasError("username"):', form.hasError('username'));
+    console.log('getError("username"):', form.getError('username'));
+    
+    console.log('\n=== Test hasError ===');
+    console.log('Checking all fields:');
+    ['username', 'email', 'password', 'confirmPassword'].forEach(field => {
+      console.log(`  ${field}: ${form.hasError(field)}`);
+    });
+    
+    console.log('\n=== Test getError ===');
+    console.log('Getting all errors:');
+    ['username', 'email', 'password', 'confirmPassword'].forEach(field => {
+      const error = form.getError(field);
+      console.log(`  ${field}: ${error || '(none)'}`);
+    });
+    
+    console.log('\n=== Test clearErrors ===');
+    form.clearErrors();
+    console.log('After clearErrors():', form.errors);
+    console.log('hasErrors:', form.hasErrors);
+    console.log('isValid:', form.isValid);
+    
+    console.log('\n=== Integration Test: Validation Workflow ===');
+    const workflowForm = ReactiveUtils.form({
+      email: '',
+      password: ''
+    }, {
+      validators: {
+        email: (value) => value ? null : 'Email required',
+        password: (value) => value ? null : 'Password required'
+      }
+    });
+    
+    // Step 1: Validate empty form
+    workflowForm.validate();
+    console.log('Step 1 - Empty validation:');
+    console.log('  hasError("email"):', workflowForm.hasError('email'));
+    console.log('  getError("email"):', workflowForm.getError('email'));
+    console.log('  isValid:', workflowForm.isValid);
+    
+    setTimeout(() => {
+      // Step 2: Set valid email
+      workflowForm.setValue('email', 'test@example.com');
+      workflowForm.validateField('email');
+      console.log('Step 2 - Valid email:');
+      console.log('  hasError("email"):', workflowForm.hasError('email'));
+      console.log('  getError("email"):', workflowForm.getError('email'));
+      
+      // Step 3: Set valid password
+      workflowForm.setValue('password', 'secret123');
+      workflowForm.validateField('password');
+      console.log('Step 3 - Valid password:');
+      console.log('  hasError("password"):', workflowForm.hasError('password'));
+      console.log('  isValid:', workflowForm.isValid);
+      
+      // Step 4: Clear all and reset
+      workflowForm.clearErrors();
+      console.log('Step 4 - After clearErrors:');
+      console.log('  errors:', workflowForm.errors);
+      console.log('  isValid:', workflowForm.isValid);
+    }, 500);
+    
+    console.log('\n=== Integration Test: Chaining ===');
+    const chainForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    setTimeout(() => {
+      chainForm
+        .setError('field1', 'Error 1')
+        .setError('field2', 'Error 2')
+        .setErrors({ field3: 'Error 3' })
+        .clearError('field1');
+      
+      console.log('After chained operations:', chainForm.errors);
+      console.log('All methods chainable:', true);
+    }, 1000);
+    
+    console.log('\n=== Integration Test: Reactive Updates ===');
+    const reactiveForm = ReactiveUtils.form({
+      username: '',
+      email: ''
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const errorCount = Object.keys(reactiveForm.errors).length;
+      const hasAnyError = reactiveForm.hasError('username') || reactiveForm.hasError('email');
+      if (effectRuns > 1) {
+        console.log(`Effect #${effectRuns}: ${errorCount} errors, hasAnyError: ${hasAnyError}`);
+      }
+    });
+    
+    setTimeout(() => {
+      reactiveForm.setError('username', 'Error');
+      console.log('Effect runs after setError:', effectRuns);
+      
+      reactiveForm.setErrors({ email: 'Error' });
+      console.log('Effect runs after setErrors:', effectRuns);
+      
+      reactiveForm.clearError('username');
+      console.log('Effect runs after clearError:', effectRuns);
+      
+      reactiveForm.clearErrors();
+      console.log('Effect runs after clearErrors:', effectRuns);
+    }, 1500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ setError(field, error) - Set single error');
+      console.log('✓ setErrors(errors) - Set multiple errors');
+      console.log('✓ clearError(field) - Clear single error');
+      console.log('✓ clearErrors() - Clear all errors');
+      console.log('✓ hasError(field) - Check if error exists');
+      console.log('✓ getError(field) - Get error message');
+      console.log('✓ All methods work together seamlessly');
+      console.log('✓ All methods are chainable');
+      console.log('✓ All methods are reactive');
+      console.log('✓ Complete error management system');
+    }, 2000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.getError()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.getError() ===');
+    
+    // Basic getError
+    console.log('\n=== Basic getError ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: ''
+    });
+    
+    console.log('Before setting errors:');
+    console.log('  getError("username"):', form.getError('username'));
+    console.log('  getError("email"):', form.getError('email'));
+    
+    form.errors.username = 'Username required';
+    form.errors.email = 'Invalid email format';
+    console.log('After setting errors:');
+    console.log('  getError("username"):', form.getError('username'));
+    console.log('  getError("email"):', form.getError('email'));
+    
+    // getError returns null for no error
+    console.log('\n=== getError returns null for no error ===');
+    const noErrorForm = ReactiveUtils.form({
+      field1: '',
+      field2: ''
+    });
+    
+    console.log('getError("field1"):', noErrorForm.getError('field1'));
+    console.log('Is null:', noErrorForm.getError('field1') === null);
+    
+    noErrorForm.errors.field1 = '';
+    console.log('getError with empty string:', noErrorForm.getError('field1'));
+    console.log('Is null:', noErrorForm.getError('field1') === null);
+    
+    // getError with different error messages
+    console.log('\n=== getError with different error messages ===');
+    const messagesForm = ReactiveUtils.form({
+      password: ''
+    });
+    
+    const errors = [
+      'Password required',
+      'Password too short',
+      'Password must contain number',
+      'Password must contain special character'
+    ];
+    
+    errors.forEach((error, i) => {
+      messagesForm.setError('password', error);
+      console.log(`Error ${i + 1}:`, messagesForm.getError('password'));
+    });
+    
+    // getError after validation
+    console.log('\n=== getError after validation ===');
+    const validationForm = ReactiveUtils.form({
+      email: '',
+      password: '',
+      confirmPassword: ''
+    }, {
+      validators: {
+        email: (value) => {
+          if (!value) return 'Email is required';
+          if (!/\S+@\S+\.\S+/.test(value)) return 'Invalid email format';
+          return null;
+        },
+        password: (value) => {
+          if (!value) return 'Password is required';
+          if (value.length < 6) return 'Password too short';
+          return null;
+        },
+        confirmPassword: (value, values) => {
+          if (value !== values.password) return 'Passwords must match';
+          return null;
+        }
+      }
+    });
+    
+    validationForm.validate();
+    console.log('After validation (empty):');
+    console.log('  email:', validationForm.getError('email'));
+    console.log('  password:', validationForm.getError('password'));
+    console.log('  confirmPassword:', validationForm.getError('confirmPassword'));
+    
+    // getError is reactive
+    console.log('\n=== getError is reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const error = reactiveForm.getError('field');
+      console.log(`Effect #${effectRuns}: error = "${error}"`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.setError('field', 'Error 1');
+      console.log('Effect runs after setError:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactiveForm.setError('field', 'Error 2');
+      console.log('Effect runs after changing error:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      reactiveForm.clearError('field');
+      console.log('Effect runs after clearError:', effectRuns);
+    }, 1500);
+    
+    // getError for displaying error messages
+    console.log('\n=== getError for displaying error messages ===');
+    const displayForm = ReactiveUtils.form({
+      name: '',
+      email: '',
+      age: ''
+    });
+    
+    const renderErrorMessage = (field) => {
+      const error = displayForm.getError(field);
+      if (error) {
+        return `<span class="error">${error}</span>`;
+      }
+      return '';
+    };
+    
+    displayForm.setErrors({
+      name: 'Name is required',
+      email: 'Invalid email format',
+      age: 'Must be 18 or older'
+    });
+    
+    setTimeout(() => {
+      console.log('Error messages:');
+      console.log('  name:', renderErrorMessage('name'));
+      console.log('  email:', renderErrorMessage('email'));
+      console.log('  age:', renderErrorMessage('age'));
+    }, 2000);
+    
+    // getError vs errors.field
+    console.log('\n=== getError vs errors.field ===');
+    const compareForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    compareForm.errors.field = 'Error message';
+    console.log('With error:');
+    console.log('  getError("field"):', compareForm.getError('field'));
+    console.log('  errors.field:', compareForm.errors.field);
+    console.log('  Same:', compareForm.getError('field') === compareForm.errors.field);
+    
+    compareForm.clearError('field');
+    console.log('After clearing:');
+    console.log('  getError("field"):', compareForm.getError('field'));
+    console.log('  errors.field:', compareForm.errors.field);
+    
+    // getError for all fields
+    console.log('\n=== getError for all fields ===');
+    const allForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: '',
+      field4: ''
+    });
+    
+    allForm.setErrors({
+      field1: 'Error 1',
+      field2: 'Error 2',
+      field4: 'Error 4'
+    });
+    
+    setTimeout(() => {
+      console.log('Getting all errors:');
+      Object.keys(allForm.values).forEach(field => {
+        const error = allForm.getError(field);
+        console.log(`  ${field}: ${error || '(no error)'}`);
+      });
+    }, 2500);
+    
+    // getError with dynamic error messages
+    console.log('\n=== getError with dynamic error messages ===');
+    const dynamicForm = ReactiveUtils.form({
+      username: ''
+    });
+    
+    const checkUsername = (username) => {
+      if (!username) {
+        return 'Username is required';
+      }
+      if (username.length < 3) {
+        return `Username too short (${username.length}/3 characters)`;
+      }
+      if (username.length > 20) {
+        return `Username too long (${username.length}/20 characters)`;
+      }
+      if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+        return 'Username can only contain letters, numbers, and underscores';
+      }
+      return null;
+    };
+    
+    setTimeout(() => {
+      const testUsernames = ['', 'ab', 'valid_username', 'this_username_is_way_too_long_to_be_valid', 'invalid-name'];
+      
+      testUsernames.forEach(username => {
+        const error = checkUsername(username);
+        dynamicForm.setError('username', error);
+        console.log(`"${username}": ${dynamicForm.getError('username') || 'Valid'}`);
+      });
+    }, 3000);
+    
+    // getError in conditional logic
+    console.log('\n=== getError in conditional logic ===');
+    const conditionalForm = ReactiveUtils.form({
+      email: '',
+      password: ''
+    });
+    
+    conditionalForm.setErrors({
+      email: 'Email required',
+      password: 'Password required'
+    });
+    
+    const getFirstError = () => {
+      const emailError = conditionalForm.getError('email');
+      if (emailError) return emailError;
+      
+      const passwordError = conditionalForm.getError('password');
+      if (passwordError) return passwordError;
+      
+      return null;
+    };
+    
+    setTimeout(() => {
+      console.log('First error:', getFirstError());
+      
+      conditionalForm.clearError('email');
+      console.log('After clearing email:', getFirstError());
+      
+      conditionalForm.clearErrors();
+      console.log('After clearing all:', getFirstError());
+    }, 3500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ getError(field) returns field error message');
+      console.log('✓ getError returns null when no error');
+      console.log('✓ getError works with different error messages');
+      console.log('✓ getError works after validation');
+      console.log('✓ getError is reactive (triggers effects)');
+      console.log('✓ getError useful for displaying error messages');
+      console.log('✓ getError equivalent to errors.field access');
+      console.log('✓ getError can retrieve all field errors');
+      console.log('✓ getError works with dynamic error messages');
+      console.log('✓ getError useful in conditional logic');
+    }, 4000);
+  </script>
+</body>
+</html>

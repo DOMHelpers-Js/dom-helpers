@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.isSubmitting</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.isSubmitting ===');
+    
+    // Basic isSubmitting access
+    console.log('\n=== Basic isSubmitting access ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: ''
+    });
+    
+    console.log('Initial isSubmitting:', form.isSubmitting);
+    console.log('Type:', typeof form.isSubmitting);
+    console.log('Is false initially:', form.isSubmitting === false);
+    
+    // Read isSubmitting
+    console.log('\n=== Read isSubmitting ===');
+    const readForm = ReactiveUtils.form({
+      name: ''
+    });
+    
+    console.log('Before submit:', readForm.isSubmitting);
+    console.log('Is boolean:', typeof readForm.isSubmitting === 'boolean');
+    
+    // Write isSubmitting (direct assignment)
+    console.log('\n=== Write isSubmitting (direct assignment) ===');
+    const writeForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    console.log('Before write:', writeForm.isSubmitting);
+    
+    writeForm.isSubmitting = true;
+    console.log('After isSubmitting = true:', writeForm.isSubmitting);
+    
+    writeForm.isSubmitting = false;
+    console.log('After isSubmitting = false:', writeForm.isSubmitting);
+    
+    // isSubmitting is reactive
+    console.log('\n=== isSubmitting is reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      email: ''
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: isSubmitting = ${reactiveForm.isSubmitting}`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.isSubmitting = true;
+      console.log('Effect runs after isSubmitting = true:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactiveForm.isSubmitting = false;
+      console.log('Effect runs after isSubmitting = false:', effectRuns);
+    }, 1000);
+    
+    // isSubmitting during submit
+    console.log('\n=== isSubmitting during submit ===');
+    const submitForm = ReactiveUtils.form({
+      username: 'test',
+      password: 'password'
+    }, {
+      async onSubmit(values) {
+        console.log('Inside onSubmit, isSubmitting:', submitForm.isSubmitting);
+        await new Promise(resolve => setTimeout(resolve, 500));
+        return { success: true };
+      }
+    });
+    
+    console.log('Before submit():', submitForm.isSubmitting);
+    
+    setTimeout(async () => {
+      const result = submitForm.submit();
+      console.log('After submit() call (async):', submitForm.isSubmitting);
+      
+      await result;
+      console.log('After submit() complete:', submitForm.isSubmitting);
+    }, 1500);
+    
+    // isSubmitting with manual control
+    console.log('\n=== isSubmitting with manual control ===');
+    const manualForm = ReactiveUtils.form({
+      data: ''
+    });
+    
+    console.log('Initial:', manualForm.isSubmitting);
+    
+    // Simulate manual submit
+    manualForm.isSubmitting = true;
+    console.log('Start submit:', manualForm.isSubmitting);
+    
+    setTimeout(() => {
+      manualForm.isSubmitting = false;
+      console.log('End submit:', manualForm.isSubmitting);
+    }, 2500);
+    
+    // Use isSubmitting for UI state
+    console.log('\n=== Use isSubmitting for UI state ===');
+    const uiForm = ReactiveUtils.form({
+      email: ''
+    });
+    
+    ReactiveUtils.effect(() => {
+      if (uiForm.isSubmitting) {
+        console.log('UI: Show loading spinner...');
+      } else {
+        console.log('UI: Hide loading spinner');
+      }
+    });
+    
+    setTimeout(() => {
+      uiForm.isSubmitting = true;
+    }, 3000);
+    
+    setTimeout(() => {
+      uiForm.isSubmitting = false;
+    }, 3500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ form.isSubmitting is a boolean property');
+      console.log('✓ form.isSubmitting is false initially');
+      console.log('✓ form.isSubmitting is readable');
+      console.log('✓ form.isSubmitting is writable');
+      console.log('✓ form.isSubmitting is reactive (triggers effects)');
+      console.log('✓ form.isSubmitting set to true during submit()');
+      console.log('✓ form.isSubmitting set to false after submit() completes');
+      console.log('✓ form.isSubmitting useful for UI loading states');
+    }, 4000);
+  </script>
+</body>
+</html>

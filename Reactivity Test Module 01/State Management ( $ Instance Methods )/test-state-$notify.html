@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test state.$notify()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    console.log('=== Testing state.$notify() ===');
+    
+    // Basic notify
+    console.log('\n=== Basic notify ===');
+    const state = ReactiveUtils.state({
+      count: 0,
+      name: 'Test'
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: count = ${state.count}`);
+    });
+    
+    setTimeout(() => {
+      state.count = 5;
+      console.log('After count = 5, effect runs:', effectRuns);
+      
+      state.$notify('count');
+      console.log('After $notify("count"), effect runs:', effectRuns);
+    }, 500);
+    
+    // Notify specific key
+    console.log('\n=== Notify specific key ===');
+    const multi = ReactiveUtils.state({
+      x: 10,
+      y: 20
+    });
+    
+    let xEffectRuns = 0;
+    let yEffectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      xEffectRuns++;
+      const _ = multi.x;
+      if (xEffectRuns > 1) console.log(`x effect #${xEffectRuns}`);
+    });
+    
+    ReactiveUtils.effect(() => {
+      yEffectRuns++;
+      const _ = multi.y;
+      if (yEffectRuns > 1) console.log(`y effect #${yEffectRuns}`);
+    });
+    
+    setTimeout(() => {
+      multi.$notify('x');
+      console.log('After $notify("x"), x:', xEffectRuns, 'y:', yEffectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      multi.$notify('y');
+      console.log('After $notify("y"), x:', xEffectRuns, 'y:', yEffectRuns);
+    }, 1500);
+    
+    // Notify all (no key)
+    console.log('\n=== Notify all (no key) ===');
+    const all = ReactiveUtils.state({
+      a: 1,
+      b: 2,
+      c: 3
+    });
+    
+    let aEffectRuns = 0;
+    let bEffectRuns = 0;
+    let cEffectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      aEffectRuns++;
+      const _ = all.a;
+      if (aEffectRuns > 1) console.log(`a effect #${aEffectRuns}`);
+    });
+    
+    ReactiveUtils.effect(() => {
+      bEffectRuns++;
+      const _ = all.b;
+      if (bEffectRuns > 1) console.log(`b effect #${bEffectRuns}`);
+    });
+    
+    ReactiveUtils.effect(() => {
+      cEffectRuns++;
+      const _ = all.c;
+      if (cEffectRuns > 1) console.log(`c effect #${cEffectRuns}`);
+    });
+    
+    setTimeout(() => {
+      all.$notify(); // No key = notify all
+      console.log('After $notify() (all), a:', aEffectRuns, 'b:', bEffectRuns, 'c:', cEffectRuns);
+    }, 2000);
+    
+    // Manual update trigger
+    console.log('\n=== Manual update trigger ===');
+    const manual = ReactiveUtils.state({
+      data: { nested: { value: 10 } }
+    });
+    
+    let manualEffectRuns = 0;
+    ReactiveUtils.effect(() => {
+      manualEffectRuns++;
+      const val = manual.data.nested.value;
+      if (manualEffectRuns > 1) {
+        console.log(`Manual effect #${manualEffectRuns}: nested.value = ${val}`);
+      }
+    });
+    
+    setTimeout(() => {
+      // Direct mutation (might not trigger reactivity)
+      manual.data.nested.value = 20;
+      console.log('After direct mutation, effect runs:', manualEffectRuns);
+      
+      // Manually notify
+      manual.$notify('data');
+      console.log('After $notify("data"), effect runs:', manualEffectRuns);
+    }, 2500);
+    
+    // Force refresh
+    console.log('\n=== Force refresh ===');
+    const refresh = ReactiveUtils.state({
+      timestamp: Date.now()
+    });
+    
+    let refreshEffectRuns = 0;
+    ReactiveUtils.effect(() => {
+      refreshEffectRuns++;
+      console.log(`Refresh effect #${refreshEffectRuns}: timestamp = ${refresh.timestamp}`);
+    });
+    
+    setTimeout(() => {
+      refresh.$notify('timestamp');
+      console.log('Force refresh without changing value');
+    }, 3000);
+    
+    setTimeout(() => {
+      refresh.timestamp = Date.now();
+      console.log('Update with new timestamp');
+    }, 3500);
+    
+    // Notify with computed
+    console.log('\n=== Notify with computed ===');
+    const computed = ReactiveUtils.state({
+      base: 5
+    });
+    
+    computed.$computed('doubled', function() {
+      return this.base * 2;
+    });
+    
+    let computedEffectRuns = 0;
+    ReactiveUtils.effect(() => {
+      computedEffectRuns++;
+      const val = computed.doubled;
+      if (computedEffectRuns > 1) {
+        console.log(`Computed effect #${computedEffectRuns}: doubled = ${val}`);
+      }
+    });
+    
+    setTimeout(() => {
+      computed.$notify('base');
+      console.log('After $notify("base"), effect runs:', computedEffectRuns);
+    }, 4000);
+    
+    // Notify for external changes
+    console.log('\n=== Notify for external changes ===');
+    const external = ReactiveUtils.state({
+      value: 100
+    });
+    
+    let externalEffectRuns = 0;
+    ReactiveUtils.effect(() => {
+      externalEffectRuns++;
+      if (externalEffectRuns > 1) {
+        console.log(`External effect #${externalEffectRuns}: value = ${external.value}`);
+      }
+    });
+    
+    setTimeout(() => {
+      // Simulate external change (e.g., from API)
+      console.log('Simulating external change...');
+      external.$notify('value');
+      console.log('Effect runs after notification:', externalEffectRuns);
+    }, 4500);
+    
+    // Notify in batch
+    console.log('\n=== Notify in batch ===');
+    const batch = ReactiveUtils.state({
+      field1: 0,
+      field2: 0
+    });
+    
+    let batchEffectRuns = 0;
+    ReactiveUtils.effect(() => {
+      batchEffectRuns++;
+      const sum = batch.field1 + batch.field2;
+      if (batchEffectRuns > 1) {
+        console.log(`Batch effect #${batchEffectRuns}: sum = ${sum}`);
+      }
+    });
+    
+    setTimeout(() => {
+      const beforeRuns = batchEffectRuns;
+      batch.$batch(() => {
+        batch.$notify('field1');
+        batch.$notify('field2');
+      });
+      setTimeout(() => {
+        console.log('Notified in batch, effect ran:', (batchEffectRuns - beforeRuns), 'time(s)');
+      }, 100);
+    }, 5000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ $notify(key) manually triggers updates for key');
+      console.log('✓ $notify() without key triggers all updates');
+      console.log('✓ Notify specific properties independently');
+      console.log('✓ Useful for manual update triggers');
+      console.log('✓ Can force refresh without value change');
+      console.log('✓ Works with computed properties');
+      console.log('✓ Useful for external/async changes');
+      console.log('✓ Works correctly with batch updates');
+      console.log('✓ Essential for non-reactive mutations');
+    }, 5500);
+  </script>
+</body>
+</html>

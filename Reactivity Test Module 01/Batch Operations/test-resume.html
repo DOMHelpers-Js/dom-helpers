@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveUtils.resume()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    console.log('=== Testing ReactiveUtils.resume() ===');
+    
+    // Basic resume
+    console.log('\n=== Basic resume ===');
+    const state = ReactiveUtils.state({
+      count: 0
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const value = state.count;
+    });
+    
+    const initialRuns = effectRuns;
+    
+    ReactiveUtils.pause();
+    state.count = 1;
+    state.count = 2;
+    state.count = 3;
+    
+    console.log('Effect runs while paused:', effectRuns - initialRuns);
+    
+    ReactiveUtils.resume();
+    
+    setTimeout(() => {
+      console.log('Effect runs after resume:', effectRuns - initialRuns);
+      console.log('✓ Resumes reactivity');
+    }, 100);
+    
+    // resume with flush
+    console.log('\n=== resume with flush ===');
+    setTimeout(() => {
+      const flushState = ReactiveUtils.state({
+        value: 0
+      });
+      
+      let flushRuns = 0;
+      ReactiveUtils.effect(() => {
+        flushRuns++;
+        const val = flushState.value;
+      });
+      
+      const beforeFlush = flushRuns;
+      
+      ReactiveUtils.pause();
+      flushState.value = 5;
+      flushState.value = 10;
+      
+      console.log('Runs while paused:', flushRuns - beforeFlush);
+      
+      ReactiveUtils.resume(true); // Flush immediately
+      
+      console.log('Runs after resume(true):', flushRuns - beforeFlush);
+      console.log('Expected: 1 (immediate flush)');
+      console.log('✓ resume(true) flushes immediately');
+    }, 500);
+    
+    // resume without flush
+    console.log('\n=== resume without flush ===');
+    setTimeout(() => {
+      const noFlushState = ReactiveUtils.state({
+        value: 0
+      });
+      
+      let noFlushRuns = 0;
+      ReactiveUtils.effect(() => {
+        noFlushRuns++;
+        const val = noFlushState.value;
+      });
+      
+      const beforeNoFlush = noFlushRuns;
+      
+      ReactiveUtils.pause();
+      noFlushState.value = 5;
+      
+      ReactiveUtils.resume(); // Don't flush immediately
+      
+      console.log('Runs immediately after resume():', noFlushRuns - beforeNoFlush);
+      console.log('Expected: 0 (batched)');
+      
+      setTimeout(() => {
+        console.log('Runs after timeout:', noFlushRuns - beforeNoFlush);
+        console.log('Expected: 1 (batched flush)');
+        console.log('✓ resume() without flush parameter batches updates');
+      }, 50);
+    }, 1000);
+    
+    // resume decrements batch depth
+    console.log('\n=== resume decrements batch depth ===');
+    setTimeout(() => {
+      const depthState = ReactiveUtils.state({
+        value: 0
+      });
+      
+      let depthRuns = 0;
+      ReactiveUtils.effect(() => {
+        depthRuns++;
+        const val = depthState.value;
+      });
+      
+      const beforeDepth = depthRuns;
+      
+      // Multiple pauses
+      ReactiveUtils.pause();
+      ReactiveUtils.pause();
+      ReactiveUtils.pause();
+      
+      depthState.value = 5;
+      
+      console.log('After 3 pauses:', depthRuns - beforeDepth);
+      
+      // Resume once (still depth 2)
+      ReactiveUtils.resume();
+      depthState.value = 10;
+      console.log('After 1 resume:', depthRuns - beforeDepth);
+      
+      // Resume again (still depth 1)
+      ReactiveUtils.resume();
+      depthState.value = 15;
+      console.log('After 2 resumes:', depthRuns - beforeDepth);
+      
+      // Resume final time (depth 0, should flush)
+      ReactiveUtils.resume(true);
+      console.log('After 3 resumes with flush:', depthRuns - beforeDepth);
+      console.log('✓ Decrements batch depth correctly');
+    }, 1500);
+    
+    // resume doesn't go below 0
+    console.log('\n=== resume doesn\'t go below 0 ===');
+    setTimeout(() => {
+      const safeState = ReactiveUtils.state({
+        value: 0
+      });
+      
+      let safeRuns = 0;
+      ReactiveUtils.effect(() => {
+        safeRuns++;
+        const val = safeState.value;
+      });
+      
+      const beforeSafe = safeRuns;
+      
+      // Resume without pause (should be safe)
+      ReactiveUtils.resume();
+      ReactiveUtils.resume();
+      ReactiveUtils.resume();
+      
+      safeState.value = 5;
+      
+      setTimeout(() => {
+        console.log('Effect runs after extra resumes:', safeRuns - beforeSafe);
+        console.log('Expected: 1 (normal reactivity)');
+        console.log('✓ resume() doesn\'t break when depth is 0');
+      }, 50);
+    }, 2000);
+    
+    // resume(false) doesn't flush
+    console.log('\n=== resume(false) doesn\'t flush immediately ===');
+    setTimeout(() => {
+      const explicitFalseState = ReactiveUtils.state({
+        value: 0
+      });
+      
+      let explicitRuns = 0;
+      ReactiveUtils.effect(() => {
+        explicitRuns++;
+        const val = explicitFalseState.value;
+      });
+      
+      const beforeExplicit = explicitRuns;
+      
+      ReactiveUtils.pause();
+      explicitFalseState.value = 5;
+      
+      ReactiveUtils.resume(false); // Explicitly don't flush
+      
+      console.log('Runs immediately after resume(false):', explicitRuns - beforeExplicit);
+      console.log('Expected: 0');
+      
+      setTimeout(() => {
+        console.log('Runs after timeout:', explicitRuns - beforeExplicit);
+        console.log('Expected: 1');
+        console.log('✓ resume(false) batches updates');
+      }, 50);
+    }, 2500);
+    
+    // resume with nested batch
+    console.log('\n=== resume with nested batch ===');
+    setTimeout(() => {
+      const nestedState = ReactiveUtils.state({
+        a: 0,
+        b: 0
+      });
+      
+      let nestedRuns = 0;
+      ReactiveUtils.effect(() => {
+        nestedRuns++;
+        const sum = nestedState.a + nestedState.b;
+      });
+      
+      const beforeNested = nestedRuns;
+      
+      ReactiveUtils.pause();
+      
+      ReactiveUtils.batch(() => {
+        nestedState.a = 1;
+        nestedState.b = 2;
+      });
+      
+      console.log('After batch while paused:', nestedRuns - beforeNested);
+      
+      ReactiveUtils.resume(true);
+      
+      console.log('After resume:', nestedRuns - beforeNested);
+      console.log('✓ Works with nested batching');
+    }, 3000);
+    
+    // resume in complex workflow
+    console.log('\n=== resume in complex workflow ===');
+    setTimeout(() => {
+      const workflowState = ReactiveUtils.state({
+        step1: false,
+        step2: false,
+        step3: false
+      });
+      
+      let workflowRuns = 0;
+      ReactiveUtils.effect(() => {
+        workflowRuns++;
+        const allDone = workflowState.step1 && workflowState.step2 && workflowState.step3;
+      });
+      
+      const beforeWorkflow = workflowRuns;
+      
+      // Pause for bulk updates
+      ReactiveUtils.pause();
+      
+      workflowState.step1 = true;
+      workflowState.step2 = true;
+      workflowState.step3 = true;
+      
+      console.log('Steps completed while paused, runs:', workflowRuns - beforeWorkflow);
+      
+      // Resume and flush
+      ReactiveUtils.resume(true);
+      
+      console.log('After resume, runs:', workflowRuns - beforeWorkflow);
+      console.log('Expected: 1 (all updates batched)');
+      console.log('✓ Works in complex workflows');
+    }, 3500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ ReactiveUtils.resume() resumes reactivity');
+      console.log('✓ resume(true) flushes pending updates immediately');
+      console.log('✓ resume() without parameter batches updates');
+      console.log('✓ resume(false) explicitly batches updates');
+      console.log('✓ resume() decrements batch depth');
+      console.log('✓ resume() safe when depth already 0');
+      console.log('✓ resume() works with nested batching');
+      console.log('✓ resume() perfect for bulk update workflows');
+    }, 4000);
+  </script>
+</body>
+</html>

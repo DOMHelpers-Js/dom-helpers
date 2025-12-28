@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Forms.validators</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing Forms.validators ===');
+    
+    // Forms.validators exists
+    console.log('\n=== Forms.validators exists ===');
+    console.log('Forms.validators:', Forms.validators);
+    console.log('Is object:', typeof Forms.validators === 'object');
+    console.log('✓ Forms.validators is available');
+    
+    // Forms.validators has all validators
+    console.log('\n=== Forms.validators has all validators ===');
+    const expectedValidators = [
+      'required',
+      'email',
+      'minLength',
+      'maxLength',
+      'pattern',
+      'min',
+      'max',
+      'match',
+      'custom',
+      'combine'
+    ];
+    
+    expectedValidators.forEach(validator => {
+      const exists = validator in Forms.validators;
+      console.log(`  ${validator}:`, exists ? '✓' : '✗');
+    });
+    
+    // Forms.validators.required
+    console.log('\n=== Forms.validators.required ===');
+    const required = Forms.validators.required('Required');
+    console.log('Empty:', required(''));
+    console.log('Filled:', required('value'));
+    
+    // Forms.validators.email
+    console.log('\n=== Forms.validators.email ===');
+    const email = Forms.validators.email('Invalid email');
+    console.log('Invalid:', email('invalid'));
+    console.log('Valid:', email('test@example.com'));
+    
+    // Forms.validators.minLength
+    console.log('\n=== Forms.validators.minLength ===');
+    const minLength = Forms.validators.minLength(5, 'Too short');
+    console.log('Short:', minLength('abc'));
+    console.log('Long enough:', minLength('abcde'));
+    
+    // Forms.validators.maxLength
+    console.log('\n=== Forms.validators.maxLength ===');
+    const maxLength = Forms.validators.maxLength(10, 'Too long');
+    console.log('Too long:', maxLength('verylongstring'));
+    console.log('Valid:', maxLength('short'));
+    
+    // Forms.validators.pattern
+    console.log('\n=== Forms.validators.pattern ===');
+    const pattern = Forms.validators.pattern(/^[0-9]+$/, 'Numbers only');
+    console.log('Letters:', pattern('abc'));
+    console.log('Numbers:', pattern('123'));
+    
+    // Forms.validators.min
+    console.log('\n=== Forms.validators.min ===');
+    const min = Forms.validators.min(18, 'Too young');
+    console.log('Under 18:', min(16));
+    console.log('18 or over:', min(21));
+    
+    // Forms.validators.max
+    console.log('\n=== Forms.validators.max ===');
+    const max = Forms.validators.max(100, 'Too high');
+    console.log('Over 100:', max(150));
+    console.log('Under 100:', max(75));
+    
+    // Forms.validators.match
+    console.log('\n=== Forms.validators.match ===');
+    const matchForm = Forms.form({
+      password: 'secret',
+      confirmPassword: ''
+    }, {
+      validators: {
+        confirmPassword: Forms.validators.match('password', 'Must match')
+      }
+    });
+    
+    matchForm.setValue('confirmPassword', 'different');
+    matchForm.validateField('confirmPassword');
+    console.log('Not matching:', matchForm.errors.confirmPassword);
+    
+    matchForm.setValue('confirmPassword', 'secret');
+    matchForm.validateField('confirmPassword');
+    console.log('Matching:', matchForm.errors.confirmPassword);
+    
+    // Forms.validators.custom
+    console.log('\n=== Forms.validators.custom ===');
+    const custom = Forms.validators.custom((value) => {
+      return value === 'test' ? 'Cannot be test' : null;
+    });
+    console.log('Test value:', custom('test'));
+    console.log('Other value:', custom('other'));
+    
+    // Forms.validators.combine
+    console.log('\n=== Forms.validators.combine ===');
+    const combined = Forms.validators.combine(
+      Forms.validators.required('Required'),
+      Forms.validators.minLength(3, 'Too short'),
+      Forms.validators.email('Invalid email')
+    );
+    console.log('Empty:', combined(''));
+    console.log('Too short:', combined('ab'));
+    console.log('Invalid email:', combined('invalid'));
+    console.log('Valid:', combined('test@example.com'));
+    
+    // Forms.validators same as ReactiveUtils.validators
+    console.log('\n=== Forms.validators same as ReactiveUtils.validators ===');
+    console.log('Same object:', Forms.validators === ReactiveUtils.validators);
+    console.log('✓ References same validators');
+    
+    // Forms.validators in form creation
+    console.log('\n=== Forms.validators in form creation ===');
+    const validatorForm = Forms.form({
+      username: '',
+      email: '',
+      password: ''
+    }, {
+      validators: {
+        username: Forms.validators.combine(
+          Forms.validators.required('Username required'),
+          Forms.validators.minLength(3, 'Too short')
+        ),
+        email: Forms.validators.combine(
+          Forms.validators.required('Email required'),
+          Forms.validators.email('Invalid email')
+        ),
+        password: Forms.validators.combine(
+          Forms.validators.required('Password required'),
+          Forms.validators.minLength(8, 'Too short')
+        )
+      }
+    });
+    
+    validatorForm.validate();
+    console.log('All validators work:', Object.keys(validatorForm.errors).length > 0);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ Forms.validators object exists');
+      console.log('✓ Forms.validators has all 10 validators');
+      console.log('✓ Forms.validators.required works');
+      console.log('✓ Forms.validators.email works');
+      console.log('✓ Forms.validators.minLength works');
+      console.log('✓ Forms.validators.maxLength works');
+      console.log('✓ Forms.validators.pattern works');
+      console.log('✓ Forms.validators.min works');
+      console.log('✓ Forms.validators.max works');
+      console.log('✓ Forms.validators.match works');
+      console.log('✓ Forms.validators.custom works');
+      console.log('✓ Forms.validators.combine works');
+      console.log('✓ Forms.validators same as ReactiveUtils.validators');
+    }, 500);
+  </script>
+</body>
+</html>

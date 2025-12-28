@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.submitCount</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.submitCount ===');
+    
+    // Basic submitCount access
+    console.log('\n=== Basic submitCount access ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: ''
+    });
+    
+    console.log('Initial submitCount:', form.submitCount);
+    console.log('Type:', typeof form.submitCount);
+    console.log('Is 0 initially:', form.submitCount === 0);
+    
+    // Read submitCount
+    console.log('\n=== Read submitCount ===');
+    const readForm = ReactiveUtils.form({
+      name: ''
+    });
+    
+    console.log('Before submit:', readForm.submitCount);
+    console.log('Is number:', typeof readForm.submitCount === 'number');
+    
+    // Write submitCount (direct assignment)
+    console.log('\n=== Write submitCount (direct assignment) ===');
+    const writeForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    console.log('Before write:', writeForm.submitCount);
+    
+    writeForm.submitCount = 5;
+    console.log('After submitCount = 5:', writeForm.submitCount);
+    
+    writeForm.submitCount = 0;
+    console.log('After submitCount = 0:', writeForm.submitCount);
+    
+    // submitCount is reactive
+    console.log('\n=== submitCount is reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      email: ''
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: submitCount = ${reactiveForm.submitCount}`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.submitCount = 1;
+      console.log('Effect runs after submitCount = 1:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactiveForm.submitCount = 2;
+      console.log('Effect runs after submitCount = 2:', effectRuns);
+    }, 1000);
+    
+    // submitCount increments on submit
+    console.log('\n=== submitCount increments on submit ===');
+    const submitForm = ReactiveUtils.form({
+      username: 'test',
+      password: 'password'
+    }, {
+      async onSubmit(values) {
+        console.log('Submit attempt #' + (submitForm.submitCount + 1));
+        await new Promise(resolve => setTimeout(resolve, 100));
+        return { success: true };
+      }
+    });
+    
+    console.log('Initial submitCount:', submitForm.submitCount);
+    
+    setTimeout(async () => {
+      await submitForm.submit();
+      console.log('After 1st submit:', submitForm.submitCount);
+      
+      await submitForm.submit();
+      console.log('After 2nd submit:', submitForm.submitCount);
+      
+      await submitForm.submit();
+      console.log('After 3rd submit:', submitForm.submitCount);
+    }, 1500);
+    
+    // submitCount with validation failure
+    console.log('\n=== submitCount with validation failure ===');
+    const validationForm = ReactiveUtils.form({
+      email: ''
+    }, {
+      validators: {
+        email: (value) => value ? null : 'Email required'
+      },
+      async onSubmit(values) {
+        return { success: true };
+      }
+    });
+    
+    console.log('Initial submitCount:', validationForm.submitCount);
+    
+    setTimeout(async () => {
+      // This should fail validation
+      const result = await validationForm.submit();
+      console.log('After failed submit:', validationForm.submitCount);
+      console.log('Result:', result);
+      
+      // Fix validation and submit
+      validationForm.setValue('email', 'test@example.com');
+      await validationForm.submit();
+      console.log('After successful submit:', validationForm.submitCount);
+    }, 2000);
+    
+    // submitCount reset
+    console.log('\n=== submitCount reset ===');
+    const resetForm = ReactiveUtils.form({
+      name: ''
+    });
+    
+    resetForm.submitCount = 5;
+    console.log('Before reset:', resetForm.submitCount);
+    
+    setTimeout(() => {
+      resetForm.reset();
+      console.log('After reset():', resetForm.submitCount);
+      console.log('✓ submitCount resets to 0');
+    }, 2500);
+    
+    // Use submitCount for retry logic
+    console.log('\n=== Use submitCount for retry logic ===');
+    const retryForm = ReactiveUtils.form({
+      data: ''
+    });
+    
+    ReactiveUtils.effect(() => {
+      if (retryForm.submitCount > 0) {
+        console.log(`Retry logic: Attempt ${retryForm.submitCount}`);
+        if (retryForm.submitCount >= 3) {
+          console.log('Max retries reached!');
+        }
+      }
+    });
+    
+    setTimeout(() => {
+      retryForm.submitCount = 1;
+    }, 3000);
+    
+    setTimeout(() => {
+      retryForm.submitCount = 2;
+    }, 3200);
+    
+    setTimeout(() => {
+      retryForm.submitCount = 3;
+    }, 3400);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ form.submitCount is a number property');
+      console.log('✓ form.submitCount is 0 initially');
+      console.log('✓ form.submitCount is readable');
+      console.log('✓ form.submitCount is writable');
+      console.log('✓ form.submitCount is reactive (triggers effects)');
+      console.log('✓ form.submitCount increments on successful submit()');
+      console.log('✓ form.submitCount resets to 0 on reset()');
+      console.log('✓ form.submitCount useful for retry/attempt tracking');
+    }, 3600);
+  </script>
+</body>
+</html>

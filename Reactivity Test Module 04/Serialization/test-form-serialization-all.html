@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test All Serialization Methods</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing All Serialization Methods ===');
+    
+    // Create comprehensive form
+    const form = ReactiveUtils.form({
+      username: 'johndoe',
+      email: 'john@example.com',
+      password: 'secret123',
+      confirmPassword: 'secret123',
+      terms: true
+    }, {
+      validators: {
+        username: (value) => {
+          if (!value) return 'Username required';
+          if (value.length < 3) return 'Too short';
+          return null;
+        },
+        email: (value) => {
+          if (!value) return 'Email required';
+          if (!/\S+@\S+\.\S+/.test(value)) return 'Invalid email';
+          return null;
+        },
+        password: (value) => {
+          if (!value) return 'Password required';
+          if (value.length < 6) return 'Too short';
+          return null;
+        },
+        confirmPassword: (value, values) => {
+          if (value !== values.password) return 'Must match';
+          return null;
+        },
+        terms: (value) => value ? null : 'Must accept'
+      },
+      onSubmit: async (values) => {
+        console.log('Form submitted:', values);
+        return { success: true, userId: 123 };
+      }
+    });
+    
+    console.log('\n=== Test toObject ===');
+    form.touchAll();
+    form.validate();
+    
+    const formState = form.toObject();
+    console.log('Form state object:', {
+      values: formState.values,
+      errors: formState.errors,
+      touched: formState.touched,
+      isValid: formState.isValid,
+      isDirty: formState.isDirty,
+      isSubmitting: formState.isSubmitting,
+      submitCount: formState.submitCount
+    });
+    
+    console.log('\n=== Test JSON serialization ===');
+    const json = JSON.stringify(formState, null, 2);
+    console.log('JSON length:', json.length, 'characters');
+    console.log('Can stringify:', typeof json === 'string');
+    
+    const parsed = JSON.parse(json);
+    console.log('Can parse:', typeof parsed === 'object');
+    console.log('Values preserved:', JSON.stringify(parsed.values) === JSON.stringify(formState.values));
+    
+    console.log('\n=== Integration Test: State Snapshots ===');
+    const snapshotForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    const snapshots = [];
+    
+    setTimeout(() => {
+      // Take initial snapshot
+      snapshots.push({
+        label: 'Initial',
+        state: snapshotForm.toObject()
+      });
+      
+      // Change 1
+      snapshotForm.setValue('field1', 'value1');
+      snapshots.push({
+        label: 'After field1',
+        state: snapshotForm.toObject()
+      });
+      
+      // Change 2
+      snapshotForm.setValues({ field2: 'value2', field3: 'value3' });
+      snapshots.push({
+        label: 'After field2 & field3',
+        state: snapshotForm.toObject()
+      });
+      
+      // Change 3
+      snapshotForm.setError('field1', 'Error');
+      snapshots.push({
+        label: 'After error',
+        state: snapshotForm.toObject()
+      });
+      
+      // Change 4
+      snapshotForm.touchAll();
+      snapshots.push({
+        label: 'After touchAll',
+        state: snapshotForm.toObject()
+      });
+      
+      console.log('State evolution:');
+      snapshots.forEach(({ label, state }) => {
+        console.log(`  ${label}:`, {
+          valueCount: Object.values(state.values).filter(Boolean).length,
+          errorCount: Object.keys(state.errors).length,
+          touchedCount: Object.keys(state.touched).length,
+          isDirty: state.isDirty,
+          isValid: state.isValid
+        });
+      });
+    }, 500);
+    
+    console.log('\n=== Integration Test: Save/Load State ===');
+    const saveForm = ReactiveUtils.form({
+      username: '',
+      email: '',
+      password: ''
+    }, {
+      validators: {
+        username: (value) => value ? null : 'Required',
+        email: (value) => value ? null : 'Required',
+        password: (value) => value ? null : 'Required'
+      }
+    });
+    
+    setTimeout(() => {
+      // User fills form
+      saveForm.setValues({
+        username: 'alice',
+        email: 'alice@example.com',
+        password: 'password123'
+      });
+      saveForm.touchAll();
+      saveForm.validate();
+      
+      // Save state
+      const savedState = saveForm.toObject();
+      const savedJson = JSON.stringify(savedState);
+      console.log('Saved state (simulated localStorage):', savedJson.length, 'bytes');
+      
+      // Reset form
+      saveForm.reset();
+      console.log('After reset:', {
+        valueCount: Object.values(saveForm.values).filter(Boolean).length,
+        isDirty: saveForm.isDirty
+      });
+      
+      // Restore state
+      const restoredState = JSON.parse(savedJson);
+      saveForm.setValues(restoredState.values);
+      saveForm.setErrors(restoredState.errors);
+      saveForm.setTouchedFields(Object.keys(restoredState.touched));
+      
+      console.log('After restore:', {
+        values: saveForm.values,
+        isDirty: saveForm.isDirty,
+        isValid: saveForm.isValid
+      });
+    }, 1000);
+    
+    console.log('\n=== Integration Test: Logging and Debugging ===');
+    const debugForm = ReactiveUtils.form({
+      field1: 'initial1',
+      field2: 'initial2'
+    }, {
+      validators: {
+        field1: (value) => value ? null : 'Required',
+        field2: (value) => value ? null : 'Required'
+      }
+    });
+    
+    setTimeout(() => {
+      console.log('=== Debug Log ===');
+      console.log('Initial state:', debugForm.toObject());
+      
+      debugForm.setValue('field1', '');
+      debugForm.validateField('field1');
+      console.log('After clearing field1:', debugForm.toObject());
+      
+      debugForm.setTouched('field1');
+      console.log('After touching field1:', debugForm.toObject());
+      
+      debugForm.setValue('field1', 'restored');
+      debugForm.validateField('field1');
+      console.log('After restoring field1:', debugForm.toObject());
+      console.log('✓ Perfect for debugging form state');
+    }, 1500);
+    
+    console.log('\n=== Integration Test: State Comparison ===');
+    const compareForm = ReactiveUtils.form({
+      name: '',
+      email: ''
+    });
+    
+    setTimeout(() => {
+      const before = compareForm.toObject();
+      
+      // User makes changes
+      compareForm.setValues({
+        name: 'Alice',
+        email: 'alice@example.com'
+      });
+      compareForm.touchAll();
+      
+      const after = compareForm.toObject();
+      
+      console.log('State comparison:');
+      console.log('  Values changed:', JSON.stringify(before.values) !== JSON.stringify(after.values));
+      console.log('  Touched changed:', JSON.stringify(before.touched) !== JSON.stringify(after.touched));
+      console.log('  isDirty changed:', before.isDirty !== after.isDirty);
+      
+      // Calculate diff
+      const diff = {
+        values: {},
+        touched: {}
+      };
+      
+      Object.keys(after.values).forEach(key => {
+        if (before.values[key] !== after.values[key]) {
+          diff.values[key] = {
+            before: before.values[key],
+            after: after.values[key]
+          };
+        }
+      });
+      
+      console.log('Value diff:', diff.values);
+    }, 2000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ toObject() - Convert form to plain object');
+      console.log('✓ toObject provides complete form state');
+      console.log('✓ toObject works with JSON.stringify');
+      console.log('✓ toObject works with JSON.parse');
+      console.log('✓ toObject perfect for state snapshots');
+      console.log('✓ toObject perfect for save/restore workflows');
+      console.log('✓ toObject perfect for logging/debugging');
+      console.log('✓ toObject perfect for state comparison');
+      console.log('✓ Complete serialization system');
+    }, 2500);
+  </script>
+</body>
+</html>

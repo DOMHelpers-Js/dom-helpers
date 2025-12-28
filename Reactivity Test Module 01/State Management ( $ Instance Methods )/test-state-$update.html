@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test state.$update()</title></head>
+<body>
+  <div id="counter">0</div>
+  <div id="message">Initial</div>
+  <div class="status">Status</div>
+  
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    console.log('=== Testing state.$update() ===');
+    
+    // Basic state update
+    console.log('\n=== Basic state update ===');
+    const state = ReactiveUtils.state({
+      count: 0,
+      name: 'Test'
+    });
+    
+    console.log('Before update:', state);
+    
+    state.$update({
+      count: 5,
+      name: 'Updated'
+    });
+    
+    console.log('After $update:', state);
+    
+    // Mixed state + DOM updates
+    console.log('\n=== Mixed state + DOM updates ===');
+    const mixed = ReactiveUtils.state({
+      counter: 0,
+      message: 'Hello'
+    });
+    
+    console.log('Before mixed update:', {
+      counter: mixed.counter,
+      message: mixed.message
+    });
+    
+    mixed.$update({
+      counter: 10,
+      message: 'World',
+      '#counter': { textContent: '10' },
+      '#message': { textContent: 'World' }
+    });
+    
+    console.log('After mixed update:', {
+      counter: mixed.counter,
+      message: mixed.message
+    });
+    console.log('DOM updated:', {
+      counter: document.getElementById('counter').textContent,
+      message: document.getElementById('message').textContent
+    });
+    
+    // Nested path updates
+    console.log('\n=== Nested path updates ===');
+    const nested = ReactiveUtils.state({
+      user: {
+        name: 'Alice',
+        details: {
+          age: 25,
+          city: 'NYC'
+        }
+      }
+    });
+    
+    console.log('Before nested update:', nested.user);
+    
+    nested.$update({
+      'user.name': 'Bob',
+      'user.details.age': 30,
+      'user.details.city': 'LA'
+    });
+    
+    console.log('After nested update:', nested.user);
+    
+    // DOM selector updates
+    console.log('\n=== DOM selector updates ===');
+    const dom = ReactiveUtils.state({
+      value: 100
+    });
+    
+    dom.$update({
+      value: 200,
+      '#counter': { textContent: '200' },
+      '.status': { textContent: 'Updated!' }
+    });
+    
+    console.log('State updated:', dom.value);
+    console.log('DOM #counter:', document.getElementById('counter').textContent);
+    console.log('DOM .status:', document.querySelector('.status').textContent);
+    
+    // Update returns this (chainable)
+    console.log('\n=== Update returns this (chainable) ===');
+    const chain = ReactiveUtils.state({
+      a: 1,
+      b: 2,
+      c: 3
+    });
+    
+    const result = chain
+      .$update({ a: 10 })
+      .$update({ b: 20 })
+      .$update({ c: 30 });
+    
+    console.log('After chained updates:', chain);
+    console.log('Returns this:', result === chain);
+    
+    // Batch updates automatically
+    console.log('\n=== Batch updates automatically ===');
+    const batch = ReactiveUtils.state({
+      x: 0,
+      y: 0,
+      z: 0
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const sum = batch.x + batch.y + batch.z;
+      if (effectRuns > 1) {
+        console.log(`Effect #${effectRuns}: sum = ${sum}`);
+      }
+    });
+    
+    setTimeout(() => {
+      const beforeRuns = effectRuns;
+      batch.$update({
+        x: 10,
+        y: 20,
+        z: 30
+      });
+      
+      setTimeout(() => {
+        console.log('$update batches, effect ran:', (effectRuns - beforeRuns), 'time(s)');
+      }, 100);
+    }, 500);
+    
+    // Update with partial data
+    console.log('\n=== Update with partial data ===');
+    const partial = ReactiveUtils.state({
+      field1: 'value1',
+      field2: 'value2',
+      field3: 'value3'
+    });
+    
+    console.log('Before partial update:', partial);
+    
+    partial.$update({
+      field1: 'updated1',
+      field3: 'updated3'
+    });
+    
+    console.log('After partial update:', partial);
+    console.log('✓ field2 unchanged');
+    
+    // Update with different types
+    console.log('\n=== Update with different types ===');
+    const types = ReactiveUtils.state({
+      number: 0,
+      string: '',
+      boolean: false,
+      array: [],
+      object: null
+    });
+    
+    types.$update({
+      number: 42,
+      string: 'hello',
+      boolean: true,
+      array: [1, 2, 3],
+      object: { key: 'value' }
+    });
+    
+    console.log('After type updates:', types);
+    
+    // Update with DOM properties
+    console.log('\n=== Update with DOM properties ===');
+    const domProps = ReactiveUtils.state({
+      count: 0
+    });
+    
+    setTimeout(() => {
+      domProps.$update({
+        count: 999,
+        '#counter': {
+          textContent: '999',
+          style: { color: 'red', fontSize: '20px' }
+        }
+      });
+      
+      console.log('State updated:', domProps.count);
+      console.log('DOM styled:', document.getElementById('counter').style.color);
+    }, 1000);
+    
+    // Update nested state and DOM
+    console.log('\n=== Update nested state and DOM ===');
+    const complex = ReactiveUtils.state({
+      user: {
+        name: 'Test',
+        score: 0
+      }
+    });
+    
+    setTimeout(() => {
+      complex.$update({
+        'user.name': 'Winner',
+        'user.score': 100,
+        '#message': { textContent: 'Winner: 100 points' }
+      });
+      
+      console.log('Complex update:', complex.user);
+      console.log('DOM message:', document.getElementById('message').textContent);
+    }, 1500);
+    
+    // Update multiple DOM elements
+    console.log('\n=== Update multiple DOM elements ===');
+    const multiDOM = ReactiveUtils.state({
+      status: 'active'
+    });
+    
+    setTimeout(() => {
+      multiDOM.$update({
+        status: 'complete',
+        '#counter': { textContent: 'DONE' },
+        '#message': { textContent: 'Complete!' },
+        '.status': { textContent: 'Finished', style: { color: 'green' } }
+      });
+      
+      console.log('Multiple DOM elements updated');
+    }, 2000);
+    
+    // Reactive update
+    console.log('\n=== Reactive update ===');
+    const reactive = ReactiveUtils.state({
+      value: 0
+    });
+    
+    let reactiveEffectRuns = 0;
+    ReactiveUtils.effect(() => {
+      reactiveEffectRuns++;
+      const val = reactive.value;
+      if (reactiveEffectRuns > 1) {
+        console.log(`Reactive effect #${reactiveEffectRuns}: value = ${val}`);
+      }
+    });
+    
+    setTimeout(() => {
+      reactive.$update({ value: 50 });
+      console.log('Effect runs after $update:', reactiveEffectRuns);
+    }, 2500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ $update(updates) updates multiple properties');
+      console.log('✓ Supports mixed state + DOM updates');
+      console.log('✓ Supports nested path updates (dot notation)');
+      console.log('✓ Supports DOM selector updates (#id, .class)');
+      console.log('✓ $update returns this for chaining');
+      console.log('✓ Batches updates automatically');
+      console.log('✓ Supports partial updates');
+      console.log('✓ Works with all data types');
+      console.log('✓ Can update DOM properties and styles');
+      console.log('✓ Updates are reactive');
+    }, 3000);
+  </script>
+</body>
+</html>

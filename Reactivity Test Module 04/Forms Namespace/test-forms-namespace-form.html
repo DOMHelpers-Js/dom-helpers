@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Forms.form()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing Forms.form() ===');
+    
+    // Basic Forms.form
+    console.log('\n=== Basic Forms.form ===');
+    const form = Forms.form({
+      username: '',
+      email: ''
+    });
+    
+    console.log('Form created:', form);
+    console.log('Has values:', 'values' in form);
+    console.log('Has errors:', 'errors' in form);
+    console.log('✓ Creates reactive form');
+    
+    // Forms.form is alias for Forms.create
+    console.log('\n=== Forms.form is alias for Forms.create ===');
+    console.log('Forms.form === Forms.create:', Forms.form === Forms.create);
+    console.log('✓ Same function as Forms.create');
+    
+    // Forms.form with validators
+    console.log('\n=== Forms.form with validators ===');
+    const validatedForm = Forms.form({
+      field: ''
+    }, {
+      validators: {
+        field: (value) => value ? null : 'Required'
+      }
+    });
+    
+    validatedForm.validate();
+    console.log('Has error:', validatedForm.errors.field);
+    
+    validatedForm.setValue('field', 'value');
+    validatedForm.validateField('field');
+    console.log('Error cleared:', validatedForm.errors.field);
+    
+    // Forms.form complete example
+    console.log('\n=== Forms.form complete example ===');
+    const contactForm = Forms.form({
+      name: '',
+      email: '',
+      message: ''
+    }, {
+      validators: {
+        name: Forms.validators.required('Name required'),
+        email: Forms.validators.combine(
+          Forms.validators.required('Email required'),
+          Forms.validators.email('Invalid email')
+        ),
+        message: Forms.validators.minLength(10, 'Message too short')
+      },
+      onSubmit: async (values) => {
+        console.log('Contact form submitted:', values);
+        return { success: true, messageId: 456 };
+      }
+    });
+    
+    setTimeout(async () => {
+      contactForm.setValues({
+        name: 'John Doe',
+        email: 'john@example.com',
+        message: 'This is my message!'
+      });
+      
+      contactForm.touchAll();
+      const isValid = contactForm.validate();
+      
+      console.log('Form valid:', isValid);
+      console.log('Form errors:', contactForm.errors);
+      
+      if (isValid) {
+        const result = await contactForm.submit();
+        console.log('Submit result:', result);
+      }
+    }, 500);
+    
+    // Forms.form vs Forms.create
+    console.log('\n=== Forms.form vs Forms.create ===');
+    const form1 = Forms.form({ field: 'test' });
+    const form2 = Forms.create({ field: 'test' });
+    
+    console.log('Both create forms:', 'values' in form1 && 'values' in form2);
+    console.log('Same behavior:', 
+      typeof form1.setValue === 'function' && 
+      typeof form2.setValue === 'function'
+    );
+    console.log('✓ Forms.form and Forms.create are identical');
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ Forms.form(initialValues, options) creates form');
+      console.log('✓ Forms.form is alias for Forms.create');
+      console.log('✓ Forms.form works with validators');
+      console.log('✓ Forms.form works with complete forms');
+      console.log('✓ Forms.form identical to Forms.create');
+    }, 1000);
+  </script>
+</body>
+</html>

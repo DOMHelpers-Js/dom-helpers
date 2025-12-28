@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.validateField()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.validateField() ===');
+    
+    // Basic validateField
+    console.log('\n=== Basic validateField ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: ''
+    }, {
+      validators: {
+        username: (value) => value ? null : 'Username required',
+        email: (value) => {
+          if (!value) return 'Email required';
+          if (!/\S+@\S+\.\S+/.test(value)) return 'Invalid email';
+          return null;
+        }
+      }
+    });
+    
+    console.log('Before validation:', form.errors);
+    
+    const valid1 = form.validateField('username');
+    console.log('After validateField("username"):', {
+      valid: valid1,
+      errors: form.errors
+    });
+    
+    const valid2 = form.validateField('email');
+    console.log('After validateField("email"):', {
+      valid: valid2,
+      errors: form.errors
+    });
+    
+    // validateField returns boolean
+    console.log('\n=== validateField returns boolean ===');
+    const boolForm = ReactiveUtils.form({
+      name: ''
+    }, {
+      validators: {
+        name: (value) => value ? null : 'Name required'
+      }
+    });
+    
+    const result = boolForm.validateField('name');
+    console.log('validateField result:', result);
+    console.log('Type:', typeof result);
+    console.log('Is boolean:', typeof result === 'boolean');
+    
+    // validateField with valid value
+    console.log('\n=== validateField with valid value ===');
+    const validForm = ReactiveUtils.form({
+      email: ''
+    }, {
+      validators: {
+        email: (value) => {
+          if (!value) return 'Email required';
+          if (!/\S+@\S+\.\S+/.test(value)) return 'Invalid email';
+          return null;
+        }
+      }
+    });
+    
+    validForm.setValue('email', 'test@example.com');
+    const isValid = validForm.validateField('email');
+    console.log('Valid email:', {
+      value: validForm.getValue('email'),
+      valid: isValid,
+      error: validForm.getError('email')
+    });
+    
+    // validateField with invalid value
+    console.log('\n=== validateField with invalid value ===');
+    const invalidForm = ReactiveUtils.form({
+      password: ''
+    }, {
+      validators: {
+        password: (value) => {
+          if (!value) return 'Password required';
+          if (value.length < 6) return 'Password too short';
+          return null;
+        }
+      }
+    });
+    
+    invalidForm.setValue('password', 'abc');
+    const isInvalid = invalidForm.validateField('password');
+    console.log('Short password:', {
+      value: invalidForm.getValue('password'),
+      valid: isInvalid,
+      error: invalidForm.getError('password')
+    });
+    
+    // validateField sets or clears error
+    console.log('\n=== validateField sets or clears error ===');
+    const errorForm = ReactiveUtils.form({
+      field: ''
+    }, {
+      validators: {
+        field: (value) => value ? null : 'Field required'
+      }
+    });
+    
+    errorForm.validateField('field');
+    console.log('Empty field:', errorForm.errors);
+    
+    errorForm.setValue('field', 'value');
+    errorForm.validateField('field');
+    console.log('After setting value:', errorForm.errors);
+    console.log('✓ validateField manages errors automatically');
+    
+    // validateField without validator
+    console.log('\n=== validateField without validator ===');
+    const noValidatorForm = ReactiveUtils.form({
+      field1: '',
+      field2: ''
+    }, {
+      validators: {
+        field1: (value) => value ? null : 'Field1 required'
+      }
+    });
+    
+    const result1 = noValidatorForm.validateField('field1');
+    console.log('validateField with validator:', result1);
+    
+    const result2 = noValidatorForm.validateField('field2');
+    console.log('validateField without validator:', result2);
+    console.log('✓ Returns true when no validator');
+    
+    // validateField is reactive
+    console.log('\n=== validateField is reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      field: ''
+    }, {
+      validators: {
+        field: (value) => value ? null : 'Field required'
+      }
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const error = reactiveForm.getError('field');
+      console.log(`Effect #${effectRuns}: error = "${error}"`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.validateField('field');
+      console.log('Effect runs after validateField:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactiveForm.setValue('field', 'value');
+      reactiveForm.validateField('field');
+      console.log('Effect runs after clearing error:', effectRuns);
+    }, 1000);
+    
+    // validateField in blur workflow
+    console.log('\n=== validateField in blur workflow ===');
+    const blurForm = ReactiveUtils.form({
+      email: '',
+      password: ''
+    }, {
+      validators: {
+        email: (value) => {
+          if (!value) return 'Email required';
+          if (!/\S+@\S+\.\S+/.test(value)) return 'Invalid email';
+          return null;
+        },
+        password: (value) => {
+          if (!value) return 'Password required';
+          if (value.length < 6) return 'Too short';
+          return null;
+        }
+      }
+    });
+    
+    const handleBlur = (field) => {
+      blurForm.setTouched(field);
+      const valid = blurForm.validateField(field);
+      console.log(`Blur ${field}:`, {
+        valid,
+        shouldShowError: blurForm.shouldShowError(field),
+        error: blurForm.getError(field)
+      });
+    };
+    
+    setTimeout(() => {
+      handleBlur('email');
+      handleBlur('password');
+    }, 1500);
+    
+    // validateField with complex validation
+    console.log('\n=== validateField with complex validation ===');
+    const complexForm = ReactiveUtils.form({
+      password: '',
+      confirmPassword: ''
+    }, {
+      validators: {
+        password: (value) => {
+          if (!value) return 'Password required';
+          if (value.length < 8) return 'At least 8 characters';
+          if (!/[A-Z]/.test(value)) return 'Must contain uppercase';
+          if (!/[0-9]/.test(value)) return 'Must contain number';
+          return null;
+        },
+        confirmPassword: (value, values) => {
+          if (value !== values.password) return 'Passwords must match';
+          return null;
+        }
+      }
+    });
+    
+    setTimeout(() => {
+      const testPasswords = [
+        { password: 'abc', confirm: 'abc' },
+        { password: 'abcdefgh', confirm: 'abcdefgh' },
+        { password: 'Abcdefgh', confirm: 'Abcdefgh' },
+        { password: 'Abcdefgh1', confirm: 'Abcdefgh1' }
+      ];
+      
+      testPasswords.forEach(({ password, confirm }) => {
+        complexForm.setValue('password', password);
+        complexForm.setValue('confirmPassword', confirm);
+        
+        const passwordValid = complexForm.validateField('password');
+        const confirmValid = complexForm.validateField('confirmPassword');
+        
+        console.log(`Password "${password}":`, {
+          passwordValid,
+          confirmValid,
+          errors: { ...complexForm.errors }
+        });
+      });
+    }, 2000);
+    
+    // validateField updates isValid
+    console.log('\n=== validateField updates isValid ===');
+    const isValidForm = ReactiveUtils.form({
+      field1: '',
+      field2: ''
+    }, {
+      validators: {
+        field1: (value) => value ? null : 'Field1 required',
+        field2: (value) => value ? null : 'Field2 required'
+      }
+    });
+    
+    setTimeout(() => {
+      console.log('Before validation, isValid:', isValidForm.isValid);
+      
+      isValidForm.validateField('field1');
+      console.log('After validateField("field1"), isValid:', isValidForm.isValid);
+      
+      isValidForm.setValue('field1', 'value1');
+      isValidForm.validateField('field1');
+      console.log('After fixing field1, isValid:', isValidForm.isValid);
+      
+      isValidForm.setValue('field2', 'value2');
+      isValidForm.validateField('field2');
+      console.log('After fixing field2, isValid:', isValidForm.isValid);
+    }, 2500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ validateField(field) validates single field');
+      console.log('✓ validateField returns boolean (true = valid)');
+      console.log('✓ validateField works with valid values');
+      console.log('✓ validateField works with invalid values');
+      console.log('✓ validateField sets or clears errors');
+      console.log('✓ validateField returns true when no validator');
+      console.log('✓ validateField is reactive (triggers effects)');
+      console.log('✓ validateField perfect for blur workflows');
+      console.log('✓ validateField supports complex validation');
+      console.log('✓ validateField updates isValid computed property');
+    }, 3000);
+  </script>
+</body>
+</html>

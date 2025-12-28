@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.hasError()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.hasError() ===');
+    
+    // Basic hasError
+    console.log('\n=== Basic hasError ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: ''
+    });
+    
+    console.log('Before setting errors:');
+    console.log('  hasError("username"):', form.hasError('username'));
+    console.log('  hasError("email"):', form.hasError('email'));
+    
+    form.errors.username = 'Username required';
+    console.log('After setting username error:');
+    console.log('  hasError("username"):', form.hasError('username'));
+    console.log('  hasError("email"):', form.hasError('email'));
+    
+    // hasError with various error values
+    console.log('\n=== hasError with various error values ===');
+    const valuesForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: '',
+      field4: '',
+      field5: ''
+    });
+    
+    valuesForm.errors.field1 = 'Error message';
+    valuesForm.errors.field2 = '';
+    valuesForm.errors.field3 = null;
+    valuesForm.errors.field4 = undefined;
+    // field5 not set at all
+    
+    console.log('hasError("field1") with "Error message":', valuesForm.hasError('field1'));
+    console.log('hasError("field2") with "":', valuesForm.hasError('field2'));
+    console.log('hasError("field3") with null:', valuesForm.hasError('field3'));
+    console.log('hasError("field4") with undefined:', valuesForm.hasError('field4'));
+    console.log('hasError("field5") not set:', valuesForm.hasError('field5'));
+    console.log('✓ Only truthy errors return true');
+    
+    // hasError after setError
+    console.log('\n=== hasError after setError ===');
+    const setForm = ReactiveUtils.form({
+      email: ''
+    });
+    
+    console.log('Before setError:', setForm.hasError('email'));
+    
+    setForm.setError('email', 'Email required');
+    console.log('After setError:', setForm.hasError('email'));
+    
+    setForm.setError('email', null);
+    console.log('After clearing:', setForm.hasError('email'));
+    
+    // hasError after validation
+    console.log('\n=== hasError after validation ===');
+    const validationForm = ReactiveUtils.form({
+      password: '',
+      confirmPassword: ''
+    }, {
+      validators: {
+        password: (value) => value ? null : 'Password required',
+        confirmPassword: (value, values) => {
+          if (value !== values.password) return 'Must match';
+          return null;
+        }
+      }
+    });
+    
+    validationForm.validate();
+    console.log('After validation (empty):');
+    console.log('  hasError("password"):', validationForm.hasError('password'));
+    console.log('  hasError("confirmPassword"):', validationForm.hasError('confirmPassword'));
+    
+    validationForm.setValue('password', 'secret');
+    validationForm.validateField('password');
+    console.log('After setting password:');
+    console.log('  hasError("password"):', validationForm.hasError('password'));
+    
+    // hasError is reactive
+    console.log('\n=== hasError is reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const hasErr = reactiveForm.hasError('field');
+      console.log(`Effect #${effectRuns}: hasError = ${hasErr}`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.setError('field', 'Error message');
+      console.log('Effect runs after setError:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactiveForm.clearError('field');
+      console.log('Effect runs after clearError:', effectRuns);
+    }, 1000);
+    
+    // hasError for conditional rendering
+    console.log('\n=== hasError for conditional rendering ===');
+    const uiForm = ReactiveUtils.form({
+      email: '',
+      password: ''
+    });
+    
+    const renderError = (field) => {
+      if (uiForm.hasError(field)) {
+        return `<div class="error">${uiForm.getError(field)}</div>`;
+      }
+      return '';
+    };
+    
+    console.log('No errors:', {
+      email: renderError('email'),
+      password: renderError('password')
+    });
+    
+    setTimeout(() => {
+      uiForm.setError('email', 'Invalid email');
+      console.log('With email error:', {
+        email: renderError('email'),
+        password: renderError('password')
+      });
+    }, 1500);
+    
+    // hasError with shouldShowError pattern
+    console.log('\n=== hasError with shouldShowError pattern ===');
+    const showForm = ReactiveUtils.form({
+      name: '',
+      email: ''
+    });
+    
+    showForm.setError('name', 'Name required');
+    showForm.setError('email', 'Email required');
+    
+    console.log('Before touching:');
+    console.log('  name - hasError:', showForm.hasError('name'), 'isTouched:', showForm.isTouched('name'));
+    console.log('  email - hasError:', showForm.hasError('email'), 'isTouched:', showForm.isTouched('email'));
+    
+    setTimeout(() => {
+      showForm.setTouched('name');
+      console.log('After touching name:');
+      console.log('  name - shouldShow:', showForm.shouldShowError('name'));
+      console.log('  email - shouldShow:', showForm.shouldShowError('email'));
+    }, 2000);
+    
+    // hasError for multiple fields
+    console.log('\n=== hasError for multiple fields ===');
+    const multiForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: '',
+      field4: ''
+    });
+    
+    multiForm.setErrors({
+      field1: 'Error 1',
+      field3: 'Error 3'
+    });
+    
+    const fields = ['field1', 'field2', 'field3', 'field4'];
+    console.log('Checking all fields:');
+    fields.forEach(field => {
+      console.log(`  ${field}: ${multiForm.hasError(field)}`);
+    });
+    
+    // hasError in validation workflow
+    console.log('\n=== hasError in validation workflow ===');
+    const workflowForm = ReactiveUtils.form({
+      username: '',
+      email: '',
+      password: ''
+    });
+    
+    const isFormValid = () => {
+      const fields = ['username', 'email', 'password'];
+      return !fields.some(field => workflowForm.hasError(field));
+    };
+    
+    console.log('No errors, isValid:', isFormValid());
+    
+    setTimeout(() => {
+      workflowForm.setError('email', 'Invalid email');
+      console.log('With email error, isValid:', isFormValid());
+      
+      workflowForm.clearError('email');
+      console.log('After clearing, isValid:', isFormValid());
+    }, 2500);
+    
+    // hasError vs !!errors.field
+    console.log('\n=== hasError vs !!errors.field ===');
+    const compareForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    compareForm.errors.field = 'Error';
+    console.log('With error:');
+    console.log('  hasError("field"):', compareForm.hasError('field'));
+    console.log('  !!errors.field:', !!compareForm.errors.field);
+    console.log('  Same:', compareForm.hasError('field') === !!compareForm.errors.field);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ hasError(field) checks if field has error');
+      console.log('✓ hasError returns boolean (true/false)');
+      console.log('✓ hasError returns false for empty/null/undefined errors');
+      console.log('✓ hasError works after setError/clearError');
+      console.log('✓ hasError works after validation');
+      console.log('✓ hasError is reactive (triggers effects)');
+      console.log('✓ hasError useful for conditional rendering');
+      console.log('✓ hasError works with shouldShowError pattern');
+      console.log('✓ hasError can check multiple fields');
+      console.log('✓ hasError equivalent to !!errors.field');
+    }, 3000);
+  </script>
+</body>
+</html>

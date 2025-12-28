@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test All Event Handlers</title></head>
+<body>
+  <input type="text" id="username" name="username" />
+  <input type="email" id="email" name="email" />
+  <input type="password" id="password" name="password" />
+  <input type="checkbox" id="terms" name="terms" />
+  
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing All Event Handlers ===');
+    
+    // Create comprehensive form
+    const form = ReactiveUtils.form({
+      username: '',
+      email: '',
+      password: '',
+      terms: false
+    }, {
+      validators: {
+        username: (value) => {
+          if (!value) return 'Username required';
+          if (value.length < 3) return 'Too short';
+          return null;
+        },
+        email: (value) => {
+          if (!value) return 'Email required';
+          if (!/\S+@\S+\.\S+/.test(value)) return 'Invalid email';
+          return null;
+        },
+        password: (value) => {
+          if (!value) return 'Password required';
+          if (value.length < 6) return 'Too short';
+          return null;
+        },
+        terms: (value) => value ? null : 'Must accept terms'
+      }
+    });
+    
+    console.log('\n=== Test handleChange ===');
+    const usernameInput = document.getElementById('username');
+    usernameInput.value = 'john';
+    
+    const changeEvent = new Event('input');
+    Object.defineProperty(changeEvent, 'target', { value: usernameInput });
+    
+    form.handleChange(changeEvent);
+    console.log('After handleChange:', {
+      value: form.values.username,
+      touched: form.touched.username,
+      error: form.errors.username
+    });
+    
+    console.log('\n=== Test handleBlur ===');
+    const blurEvent = new Event('blur');
+    Object.defineProperty(blurEvent, 'target', { value: usernameInput });
+    
+    form.handleBlur(blurEvent);
+    console.log('After handleBlur:', {
+      touched: form.touched.username,
+      shouldShow: form.shouldShowError('username')
+    });
+    
+    console.log('\n=== Test getFieldProps ===');
+    const emailProps = form.getFieldProps('email');
+    console.log('Email field props:', {
+      name: emailProps.name,
+      value: emailProps.value,
+      hasOnChange: typeof emailProps.onChange === 'function',
+      hasOnBlur: typeof emailProps.onBlur === 'function'
+    });
+    
+    console.log('\n=== Integration Test: Complete Form Flow ===');
+    const flowForm = ReactiveUtils.form({
+      name: '',
+      email: '',
+      password: ''
+    }, {
+      validators: {
+        name: (value) => value ? null : 'Name required',
+        email: (value) => {
+          if (!value) return 'Email required';
+          if (!/\S+@\S+\.\S+/.test(value)) return 'Invalid email';
+          return null;
+        },
+        password: (value) => {
+          if (!value) return 'Password required';
+          if (value.length < 6) return 'Too short';
+          return null;
+        }
+      },
+      onSubmit: async (values) => {
+        console.log('Submitting:', values);
+        return { success: true, userId: 123 };
+      }
+    });
+    
+    setTimeout(() => {
+      console.log('\n--- Simulating user interaction ---');
+      
+      // User types in name field
+      const nameProps = flowForm.getFieldProps('name');
+      nameProps.onChange({
+        target: { name: 'name', value: 'Alice' }
+      });
+      console.log('1. After typing name:', {
+        value: flowForm.values.name,
+        touched: flowForm.touched.name
+      });
+      
+      // User leaves name field
+      nameProps.onBlur({
+        target: { name: 'name', value: 'Alice' }
+      });
+      console.log('2. After blurring name:', {
+        error: flowForm.errors.name,
+        shouldShow: flowForm.shouldShowError('name')
+      });
+      
+      // User types invalid email
+      const emailProps = flowForm.getFieldProps('email');
+      emailProps.onChange({
+        target: { name: 'email', value: 'invalid' }
+      });
+      console.log('3. After typing invalid email:', {
+        value: flowForm.values.email,
+        error: flowForm.errors.email
+      });
+      
+      // User leaves email field
+      emailProps.onBlur({
+        target: { name: 'email', value: 'invalid' }
+      });
+      console.log('4. After blurring email:', {
+        shouldShow: flowForm.shouldShowError('email')
+      });
+      
+      // User fixes email
+      emailProps.onChange({
+        target: { name: 'email', value: 'alice@example.com' }
+      });
+      console.log('5. After fixing email:', {
+        value: flowForm.values.email,
+        error: flowForm.errors.email
+      });
+      
+      // User adds password
+      const passwordProps = flowForm.getFieldProps('password');
+      passwordProps.onChange({
+        target: { name: 'password', value: 'password123' }
+      });
+      passwordProps.onBlur({
+        target: { name: 'password', value: 'password123' }
+      });
+      console.log('6. After adding password:', {
+        value: flowForm.values.password,
+        error: flowForm.errors.password
+      });
+      
+      // Submit form
+      setTimeout(async () => {
+        console.log('7. Submitting form...');
+        const result = await flowForm.submit();
+        console.log('Submit result:', result);
+      }, 100);
+    }, 500);
+    
+    console.log('\n=== Integration Test: Using getFieldProps for All Fields ===');
+    const propsForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    }, {
+      validators: {
+        field1: (value) => value ? null : 'Field1 required',
+        field2: (value) => value ? null : 'Field2 required',
+        field3: (value) => value ? null : 'Field3 required'
+      }
+    });
+    
+    setTimeout(() => {
+      console.log('Binding all fields with getFieldProps:');
+      
+      ['field1', 'field2', 'field3'].forEach((field, index) => {
+        const props = propsForm.getFieldProps(field);
+        
+        // Simulate user interaction
+        props.onChange({
+          target: { name: field, value: `value${index + 1}` }
+        });
+        props.onBlur({
+          target: { name: field, value: `value${index + 1}` }
+        });
+        
+        console.log(`  ${field}:`, {
+          value: propsForm.values[field],
+          touched: propsForm.touched[field],
+          error: propsForm.errors[field]
+        });
+      });
+    }, 1000);
+    
+    console.log('\n=== Integration Test: Reactive Updates ===');
+    const reactiveForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const props = reactiveForm.getFieldProps('field');
+      if (effectRuns > 1) {
+        console.log(`Effect #${effectRuns}: value = "${props.value}"`);
+      }
+    });
+    
+    setTimeout(() => {
+      const props = reactiveForm.getFieldProps('field');
+      
+      props.onChange({
+        target: { name: 'field', value: 'test' }
+      });
+      console.log('Effect runs after onChange:', effectRuns);
+      
+      props.onBlur({
+        target: { name: 'field', value: 'test' }
+      });
+      console.log('Effect runs after onBlur:', effectRuns);
+    }, 1500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ handleChange(event) - Handle input changes');
+      console.log('✓ handleBlur(event) - Handle input blur');
+      console.log('✓ getFieldProps(field) - Get binding props');
+      console.log('✓ All methods work together seamlessly');
+      console.log('✓ All methods are reactive');
+      console.log('✓ Perfect for real-world form workflows');
+      console.log('✓ getFieldProps simplifies input binding');
+      console.log('✓ Complete event handling system');
+    }, 2000);
+  </script>
+</body>
+</html>

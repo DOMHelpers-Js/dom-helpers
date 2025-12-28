@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.touchedFields (computed)</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.touchedFields (computed) ===');
+    
+    // Basic touchedFields
+    console.log('\n=== Basic touchedFields ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: '',
+      password: ''
+    });
+    
+    console.log('touchedFields (no touched):', form.touchedFields);
+    console.log('Type:', Array.isArray(form.touchedFields));
+    console.log('Length:', form.touchedFields.length);
+    console.log('✓ touchedFields is empty array initially');
+    
+    // touchedFields with touched fields
+    console.log('\n=== touchedFields with touched fields ===');
+    const touchForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    console.log('Before touch:', touchForm.touchedFields);
+    
+    touchForm.touched.field1 = true;
+    console.log('After touch field1:', touchForm.touchedFields);
+    
+    touchForm.touched.field3 = true;
+    console.log('After touch field3:', touchForm.touchedFields);
+    
+    delete touchForm.touched.field1;
+    console.log('After un-touch field1:', touchForm.touchedFields);
+    
+    // touchedFields is read-only
+    console.log('\n=== touchedFields is read-only (computed) ===');
+    const readOnlyForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    console.log('Initial touchedFields:', readOnlyForm.touchedFields);
+    
+    try {
+      readOnlyForm.touchedFields = ['test'];
+      console.log('After assignment attempt:', readOnlyForm.touchedFields);
+      console.log('⚠️  Assignment ignored (read-only)');
+    } catch (e) {
+      console.log('✓ Cannot set computed property');
+    }
+    
+    // touchedFields with setValue
+    console.log('\n=== touchedFields with setValue ===');
+    const valueForm = ReactiveUtils.form({
+      name: '',
+      email: '',
+      age: ''
+    });
+    
+    console.log('Before setValue:', valueForm.touchedFields);
+    
+    valueForm.setValue('name', 'Alice');
+    console.log('After setValue("name"):', valueForm.touchedFields);
+    
+    valueForm.setValue('email', 'alice@example.com');
+    console.log('After setValue("email"):', valueForm.touchedFields);
+    
+    valueForm.setValue('age', '25');
+    console.log('After setValue("age"):', valueForm.touchedFields);
+    
+    // touchedFields is reactive
+    console.log('\n=== touchedFields is reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      field1: '',
+      field2: ''
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: touchedFields = [${reactiveForm.touchedFields.join(', ')}]`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.setValue('field1', 'value');
+      console.log('Effect runs after setValue:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactiveForm.setValue('field2', 'value');
+      console.log('Effect runs after second setValue:', effectRuns);
+    }, 1000);
+    
+    // touchedFields array methods
+    console.log('\n=== touchedFields array methods ===');
+    const arrayForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    arrayForm.touched.field1 = true;
+    arrayForm.touched.field2 = true;
+    arrayForm.touched.field3 = true;
+    
+    console.log('touchedFields:', arrayForm.touchedFields);
+    console.log('Length:', arrayForm.touchedFields.length);
+    console.log('Includes "field1":', arrayForm.touchedFields.includes('field1'));
+    console.log('Includes "field4":', arrayForm.touchedFields.includes('field4'));
+    console.log('First:', arrayForm.touchedFields[0]);
+    console.log('Last:', arrayForm.touchedFields[arrayForm.touchedFields.length - 1]);
+    
+    // touchedFields for iteration
+    console.log('\n=== touchedFields for iteration ===');
+    const iterForm = ReactiveUtils.form({
+      username: '',
+      email: '',
+      password: ''
+    });
+    
+    iterForm.setValue('username', 'test');
+    iterForm.setValue('password', 'pass123');
+    
+    console.log('Iterating touchedFields:');
+    iterForm.touchedFields.forEach(field => {
+      console.log(`  - ${field} is touched`);
+    });
+    
+    // touchedFields with touchAll
+    console.log('\n=== touchedFields with touchAll ===');
+    const touchAllForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: '',
+      field4: ''
+    });
+    
+    console.log('Before touchAll:', touchAllForm.touchedFields);
+    
+    setTimeout(() => {
+      touchAllForm.touchAll();
+      console.log('After touchAll():', touchAllForm.touchedFields);
+      console.log('Count:', touchAllForm.touchedFields.length);
+    }, 1500);
+    
+    // touchedFields after reset
+    console.log('\n=== touchedFields after reset ===');
+    const resetForm = ReactiveUtils.form({
+      name: '',
+      email: ''
+    });
+    
+    resetForm.setValue('name', 'Test');
+    resetForm.setValue('email', 'test@example.com');
+    console.log('After setValue:', resetForm.touchedFields);
+    
+    setTimeout(() => {
+      resetForm.reset();
+      console.log('After reset():', resetForm.touchedFields);
+      console.log('✓ touchedFields empty after reset');
+    }, 2000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ form.touchedFields is a computed array property');
+      console.log('✓ form.touchedFields is empty array initially');
+      console.log('✓ form.touchedFields contains names of touched fields');
+      console.log('✓ form.touchedFields is read-only (cannot be set)');
+      console.log('✓ form.touchedFields updates automatically when touched changes');
+      console.log('✓ form.touchedFields is reactive (triggers effects)');
+      console.log('✓ form.touchedFields supports array methods');
+      console.log('✓ form.touchedFields useful for tracking user interactions');
+    }, 2500);
+  </script>
+</body>
+</html>

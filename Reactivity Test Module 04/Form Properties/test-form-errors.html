@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.errors</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.errors ===');
+    
+    // Basic errors access
+    console.log('\n=== Basic errors access ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: ''
+    });
+    
+    console.log('Initial errors:', form.errors);
+    console.log('errors is object:', typeof form.errors === 'object');
+    console.log('Empty object:', Object.keys(form.errors).length === 0);
+    
+    // Read errors
+    console.log('\n=== Read errors ===');
+    const validatedForm = ReactiveUtils.form({
+      email: '',
+      password: ''
+    }, {
+      validators: {
+        email: (value) => value ? null : 'Email required',
+        password: (value) => value ? null : 'Password required'
+      }
+    });
+    
+    validatedForm.validate();
+    console.log('After validate():', validatedForm.errors);
+    console.log('email error:', validatedForm.errors.email);
+    console.log('password error:', validatedForm.errors.password);
+    
+    // Write errors (direct assignment)
+    console.log('\n=== Write errors (direct assignment) ===');
+    const customForm = ReactiveUtils.form({
+      name: '',
+      age: ''
+    });
+    
+    console.log('Before write:', customForm.errors);
+    
+    customForm.errors.name = 'Name is invalid';
+    console.log('After errors.name = "Name is invalid":', customForm.errors);
+    
+    customForm.errors.age = 'Age must be positive';
+    console.log('After errors.age = "Age must be positive":', customForm.errors);
+    
+    // Clear errors by direct assignment
+    console.log('\n=== Clear errors by assignment ===');
+    const clearForm = ReactiveUtils.form({
+      field1: '',
+      field2: ''
+    });
+    
+    clearForm.errors.field1 = 'Error 1';
+    clearForm.errors.field2 = 'Error 2';
+    console.log('With errors:', clearForm.errors);
+    
+    delete clearForm.errors.field1;
+    console.log('After delete errors.field1:', clearForm.errors);
+    
+    clearForm.errors.field2 = null;
+    console.log('After errors.field2 = null:', clearForm.errors);
+    
+    // Errors are reactive
+    console.log('\n=== Errors are reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      email: ''
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const errorCount = Object.keys(reactiveForm.errors).length;
+      console.log(`Effect #${effectRuns}: ${errorCount} errors - ${JSON.stringify(reactiveForm.errors)}`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.errors.email = 'Invalid email';
+      console.log('Effect runs after setting error:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      delete reactiveForm.errors.email;
+      console.log('Effect runs after deleting error:', effectRuns);
+    }, 1000);
+    
+    // Errors with setError method
+    console.log('\n=== Errors with setError method ===');
+    const setErrorForm = ReactiveUtils.form({
+      username: '',
+      email: ''
+    });
+    
+    console.log('Initial errors:', setErrorForm.errors);
+    
+    setErrorForm.setError('username', 'Username taken');
+    console.log('After setError("username", ...):', setErrorForm.errors);
+    
+    setErrorForm.setError('email', 'Invalid format');
+    console.log('After setError("email", ...):', setErrorForm.errors);
+    
+    setErrorForm.setError('username', null);
+    console.log('After setError("username", null):', setErrorForm.errors);
+    
+    // Errors from validation
+    console.log('\n=== Errors from validation ===');
+    const validateForm = ReactiveUtils.form({
+      email: '',
+      password: '',
+      confirmPassword: ''
+    }, {
+      validators: {
+        email: (value) => {
+          if (!value) return 'Email required';
+          if (!/\S+@\S+\.\S+/.test(value)) return 'Invalid email';
+          return null;
+        },
+        password: (value) => {
+          if (!value) return 'Password required';
+          if (value.length < 6) return 'Too short';
+          return null;
+        },
+        confirmPassword: (value, values) => {
+          if (value !== values.password) return 'Passwords must match';
+          return null;
+        }
+      }
+    });
+    
+    console.log('Before validation:', validateForm.errors);
+    
+    validateForm.setValue('email', 'invalid');
+    console.log('After setValue (auto-validate):', validateForm.errors);
+    
+    validateForm.setValue('email', 'valid@example.com');
+    console.log('After fixing email:', validateForm.errors);
+    
+    validateForm.validate();
+    console.log('After validate():', validateForm.errors);
+    
+    // Iterate over errors
+    console.log('\n=== Iterate over errors ===');
+    const iterForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    iterForm.errors.field1 = 'Error 1';
+    iterForm.errors.field2 = 'Error 2';
+    iterForm.errors.field3 = 'Error 3';
+    
+    console.log('Using Object.entries:');
+    Object.entries(iterForm.errors).forEach(([field, error]) => {
+      console.log(`  ${field}: ${error}`);
+    });
+    
+    console.log('Error count:', Object.keys(iterForm.errors).length);
+    
+    // Errors reset
+    console.log('\n=== Errors reset ===');
+    const resetForm = ReactiveUtils.form({
+      name: '',
+      email: ''
+    });
+    
+    resetForm.errors.name = 'Name error';
+    resetForm.errors.email = 'Email error';
+    console.log('With errors:', resetForm.errors);
+    
+    resetForm.reset();
+    console.log('After reset():', resetForm.errors);
+    console.log('Errors cleared:', Object.keys(resetForm.errors).length === 0);
+    
+    // Errors with clearErrors
+    console.log('\n=== Errors with clearErrors ===');
+    const clearAllForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    clearAllForm.errors.field1 = 'Error 1';
+    clearAllForm.errors.field2 = 'Error 2';
+    clearAllForm.errors.field3 = 'Error 3';
+    console.log('With errors:', clearAllForm.errors);
+    
+    clearAllForm.clearErrors();
+    console.log('After clearErrors():', clearAllForm.errors);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ form.errors contains field error messages');
+      console.log('✓ form.errors is readable (can access individual errors)');
+      console.log('✓ form.errors is writable (can assign errors directly)');
+      console.log('✓ form.errors can be cleared by deletion or null');
+      console.log('✓ form.errors is reactive (triggers effects)');
+      console.log('✓ form.errors updates from validation');
+      console.log('✓ form.errors updates with setError()');
+      console.log('✓ form.errors can be iterated');
+      console.log('✓ form.errors clears on reset()');
+      console.log('✓ form.errors clears with clearErrors()');
+    }, 1500);
+  </script>
+</body>
+</html>

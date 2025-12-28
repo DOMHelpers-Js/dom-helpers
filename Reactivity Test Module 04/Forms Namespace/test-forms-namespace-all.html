@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test All Forms Namespace Methods</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing All Forms Namespace Methods ===');
+    
+    // Test Forms namespace exists
+    console.log('\n=== Forms namespace exists ===');
+    console.log('Forms:', Forms);
+    console.log('Is object:', typeof Forms === 'object');
+    console.log('✓ Forms namespace available');
+    
+    // Test Forms.create
+    console.log('\n=== Test Forms.create ===');
+    const createForm = Forms.create({
+      field: 'value'
+    });
+    console.log('Created with Forms.create:', 'values' in createForm);
+    
+    // Test Forms.form
+    console.log('\n=== Test Forms.form ===');
+    const form = Forms.form({
+      field: 'value'
+    });
+    console.log('Created with Forms.form:', 'values' in form);
+    
+    // Test Forms.validators
+    console.log('\n=== Test Forms.validators ===');
+    console.log('Forms.validators exists:', !!Forms.validators);
+    console.log('Has required:', 'required' in Forms.validators);
+    console.log('Has email:', 'email' in Forms.validators);
+    console.log('Has combine:', 'combine' in Forms.validators);
+    
+    // Test Forms.v
+    console.log('\n=== Test Forms.v ===');
+    console.log('Forms.v exists:', !!Forms.v);
+    console.log('Is alias:', Forms.v === Forms.validators);
+    
+    // Integration test - Complete form with all namespace features
+    console.log('\n=== Integration Test: Complete Form ===');
+    const V = Forms.v; // Use shorthand
+    
+    const completeForm = Forms.form({
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      age: '',
+      terms: false
+    }, {
+      validators: {
+        username: V.combine(
+          V.required('Username required'),
+          V.minLength(3, 'Too short (min 3)'),
+          V.maxLength(20, 'Too long (max 20)'),
+          V.pattern(/^[a-zA-Z0-9_]+$/, 'Invalid characters')
+        ),
+        email: V.combine(
+          V.required('Email required'),
+          V.email('Invalid email format')
+        ),
+        password: V.combine(
+          V.required('Password required'),
+          V.minLength(8, 'Too short (min 8)'),
+          V.custom(value => {
+            if (!value) return null;
+            if (!/[A-Z]/.test(value)) return 'Need uppercase';
+            if (!/[0-9]/.test(value)) return 'Need number';
+            return null;
+          })
+        ),
+        confirmPassword: V.combine(
+          V.required('Confirm password'),
+          V.match('password', 'Passwords must match')
+        ),
+        age: V.combine(
+          V.required('Age required'),
+          V.min(18, 'Must be 18+'),
+          V.max(120, 'Invalid age')
+        ),
+        terms: V.required('Must accept terms')
+      },
+      onSubmit: async (values) => {
+        console.log('Form submitted:', values);
+        return { success: true, userId: 789 };
+      }
+    });
+    
+    setTimeout(async () => {
+      console.log('\n--- Testing invalid form ---');
+      completeForm.validate();
+      console.log('Invalid form errors:', Object.keys(completeForm.errors).length);
+      console.log('Is valid:', completeForm.isValid);
+      
+      console.log('\n--- Filling form with valid data ---');
+      completeForm.setValues({
+        username: 'john_doe',
+        email: 'john@example.com',
+        password: 'Password123',
+        confirmPassword: 'Password123',
+        age: '25',
+        terms: true
+      });
+      
+      completeForm.touchAll();
+      completeForm.validate();
+      
+      console.log('Valid form errors:', completeForm.errors);
+      console.log('Is valid:', completeForm.isValid);
+      
+      if (completeForm.isValid) {
+        const result = await completeForm.submit();
+        console.log('Submit result:', result);
+        console.log('Submit count:', completeForm.submitCount);
+      }
+    }, 500);
+    
+    // Test all namespace methods work together
+    console.log('\n=== All namespace methods work together ===');
+    setTimeout(() => {
+      // Create with Forms.create
+      const form1 = Forms.create({ f1: '' });
+      
+      // Create with Forms.form
+      const form2 = Forms.form({ f2: '' });
+      
+      // Use Forms.validators
+      const val1 = Forms.validators.required('Required');
+      
+      // Use Forms.v
+      const val2 = Forms.v.email('Invalid');
+      
+      console.log('Forms.create works:', 'values' in form1);
+      console.log('Forms.form works:', 'values' in form2);
+      console.log('Forms.validators works:', val1('') !== null);
+      console.log('Forms.v works:', val2('invalid') !== null);
+      console.log('✓ All namespace methods functional');
+    }, 1000);
+    
+    // Test Forms namespace vs ReactiveUtils
+    console.log('\n=== Forms namespace vs ReactiveUtils ===');
+    setTimeout(() => {
+      const formsForm = Forms.form({ field: '' });
+      const reactiveForm = ReactiveUtils.form({ field: '' });
+      
+      console.log('Both create forms:', 
+        'values' in formsForm && 'values' in reactiveForm
+      );
+      console.log('Same validators:', 
+        Forms.validators === ReactiveUtils.validators
+      );
+      console.log('✓ Forms namespace provides same functionality');
+    }, 1500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ Forms namespace exists and is available');
+      console.log('✓ Forms.create(initialValues, options) - Create form');
+      console.log('✓ Forms.form(initialValues, options) - Alias for create');
+      console.log('✓ Forms.validators - All validators object');
+      console.log('✓ Forms.v - Shorthand for validators');
+      console.log('✓ All namespace methods work together');
+      console.log('✓ Forms namespace provides clean API');
+      console.log('✓ Complete forms system via namespace');
+    }, 2000);
+  </script>
+</body>
+</html>

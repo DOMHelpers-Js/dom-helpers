@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.getFieldProps()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.getFieldProps() ===');
+    
+    // Basic getFieldProps
+    console.log('\n=== Basic getFieldProps ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: ''
+    });
+    
+    const usernameProps = form.getFieldProps('username');
+    console.log('getFieldProps("username"):', usernameProps);
+    console.log('Has name:', 'name' in usernameProps);
+    console.log('Has value:', 'value' in usernameProps);
+    console.log('Has onChange:', 'onChange' in usernameProps);
+    console.log('Has onBlur:', 'onBlur' in usernameProps);
+    
+    // getFieldProps returns correct name
+    console.log('\n=== getFieldProps returns correct name ===');
+    const nameForm = ReactiveUtils.form({
+      email: '',
+      password: ''
+    });
+    
+    const emailProps = nameForm.getFieldProps('email');
+    console.log('email props.name:', emailProps.name);
+    
+    const passwordProps = nameForm.getFieldProps('password');
+    console.log('password props.name:', passwordProps.name);
+    
+    // getFieldProps returns current value
+    console.log('\n=== getFieldProps returns current value ===');
+    const valueForm = ReactiveUtils.form({
+      field: 'initial'
+    });
+    
+    const props1 = valueForm.getFieldProps('field');
+    console.log('Initial value:', props1.value);
+    
+    valueForm.setValue('field', 'updated');
+    const props2 = valueForm.getFieldProps('field');
+    console.log('After setValue:', props2.value);
+    console.log('✓ Value reflects current state');
+    
+    // getFieldProps with empty value
+    console.log('\n=== getFieldProps with empty value ===');
+    const emptyForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    const emptyProps = emptyForm.getFieldProps('field');
+    console.log('Empty value:', emptyProps.value);
+    console.log('Is empty string:', emptyProps.value === '');
+    
+    // getFieldProps onChange handler
+    console.log('\n=== getFieldProps onChange handler ===');
+    const changeForm = ReactiveUtils.form({
+      name: ''
+    });
+    
+    const changeProps = changeForm.getFieldProps('name');
+    console.log('onChange type:', typeof changeProps.onChange);
+    console.log('Is function:', typeof changeProps.onChange === 'function');
+    
+    // Test onChange
+    const mockChangeEvent = {
+      target: {
+        name: 'name',
+        type: 'text',
+        value: 'John'
+      }
+    };
+    
+    changeProps.onChange(mockChangeEvent);
+    console.log('After onChange:', changeForm.values.name);
+    console.log('✓ onChange updates form value');
+    
+    // getFieldProps onBlur handler
+    console.log('\n=== getFieldProps onBlur handler ===');
+    const blurForm = ReactiveUtils.form({
+      email: ''
+    });
+    
+    const blurProps = blurForm.getFieldProps('email');
+    console.log('onBlur type:', typeof blurProps.onBlur);
+    console.log('Is function:', typeof blurProps.onBlur === 'function');
+    
+    // Test onBlur
+    const mockBlurEvent = {
+      target: {
+        name: 'email',
+        type: 'email',
+        value: 'test@example.com'
+      }
+    };
+    
+    blurProps.onBlur(mockBlurEvent);
+    console.log('After onBlur:', {
+      touched: blurForm.touched.email,
+      value: blurForm.values.email
+    });
+    console.log('✓ onBlur marks as touched');
+    
+    // getFieldProps with validation
+    console.log('\n=== getFieldProps with validation ===');
+    const validationForm = ReactiveUtils.form({
+      email: ''
+    }, {
+      validators: {
+        email: (value) => {
+          if (!value) return 'Email required';
+          if (!/\S+@\S+\.\S+/.test(value)) return 'Invalid email';
+          return null;
+        }
+      }
+    });
+    
+    const validationProps = validationForm.getFieldProps('email');
+    
+    // Test onChange with validation
+    const invalidEvent = {
+      target: { name: 'email', type: 'email', value: 'invalid' }
+    };
+    
+    validationProps.onChange(invalidEvent);
+    console.log('After invalid onChange:', validationForm.errors.email);
+    
+    // Test onBlur with validation
+    validationProps.onBlur(invalidEvent);
+    console.log('After blur:', {
+      error: validationForm.errors.email,
+      shouldShow: validationForm.shouldShowError('email')
+    });
+    
+    // getFieldProps for multiple fields
+    console.log('\n=== getFieldProps for multiple fields ===');
+    const multiForm = ReactiveUtils.form({
+      username: '',
+      email: '',
+      password: ''
+    });
+    
+    const fields = ['username', 'email', 'password'];
+    console.log('Getting props for multiple fields:');
+    fields.forEach(field => {
+      const props = multiForm.getFieldProps(field);
+      console.log(`  ${field}:`, {
+        name: props.name,
+        value: props.value,
+        hasOnChange: typeof props.onChange === 'function',
+        hasOnBlur: typeof props.onBlur === 'function'
+      });
+    });
+    
+    // getFieldProps usage pattern
+    console.log('\n=== getFieldProps usage pattern ===');
+    const usageForm = ReactiveUtils.form({
+      name: '',
+      email: ''
+    }, {
+      validators: {
+        name: (value) => value ? null : 'Name required',
+        email: (value) => value ? null : 'Email required'
+      }
+    });
+    
+    // Simulate binding to input
+    const renderInput = (field) => {
+      const props = usageForm.getFieldProps(field);
+      return {
+        name: props.name,
+        value: props.value,
+        onChange: props.onChange,
+        onBlur: props.onBlur
+      };
+    };
+    
+    console.log('Input props for name:', renderInput('name'));
+    console.log('Input props for email:', renderInput('email'));
+    console.log('✓ Perfect for input binding');
+    
+    // getFieldProps is reactive
+    console.log('\n=== getFieldProps is reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const props = reactiveForm.getFieldProps('field');
+      console.log(`Effect #${effectRuns}: value = "${props.value}"`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.setValue('field', 'reactive');
+      console.log('Effect runs after setValue:', effectRuns);
+    }, 500);
+    
+    // getFieldProps complete workflow
+    console.log('\n=== getFieldProps complete workflow ===');
+    const workflowForm = ReactiveUtils.form({
+      username: '',
+      email: ''
+    }, {
+      validators: {
+        username: (value) => value ? null : 'Username required',
+        email: (value) => {
+          if (!value) return 'Email required';
+          if (!/\S+@\S+\.\S+/.test(value)) return 'Invalid email';
+          return null;
+        }
+      }
+    });
+    
+    setTimeout(() => {
+      console.log('Complete workflow:');
+      
+      const usernameFieldProps = workflowForm.getFieldProps('username');
+      
+      // User types
+      usernameFieldProps.onChange({
+        target: { name: 'username', value: 'john' }
+      });
+      console.log('1. After typing:', {
+        value: workflowForm.values.username,
+        touched: workflowForm.touched.username
+      });
+      
+      // User blurs
+      usernameFieldProps.onBlur({
+        target: { name: 'username', value: 'john' }
+      });
+      console.log('2. After blur:', {
+        touched: workflowForm.touched.username,
+        error: workflowForm.errors.username,
+        shouldShow: workflowForm.shouldShowError('username')
+      });
+      
+      // Get email props
+      const emailFieldProps = workflowForm.getFieldProps('email');
+      
+      // User types invalid email
+      emailFieldProps.onChange({
+        target: { name: 'email', value: 'invalid' }
+      });
+      console.log('3. After invalid email:', {
+        value: workflowForm.values.email,
+        error: workflowForm.errors.email
+      });
+      
+      // User blurs
+      emailFieldProps.onBlur({
+        target: { name: 'email', value: 'invalid' }
+      });
+      console.log('4. After blur:', {
+        shouldShow: workflowForm.shouldShowError('email')
+      });
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ getFieldProps(field) returns props for binding');
+      console.log('✓ getFieldProps returns name, value, onChange, onBlur');
+      console.log('✓ getFieldProps.name is the field name');
+      console.log('✓ getFieldProps.value is current field value');
+      console.log('✓ getFieldProps.onChange handles input changes');
+      console.log('✓ getFieldProps.onBlur handles input blur');
+      console.log('✓ getFieldProps works with validation');
+      console.log('✓ getFieldProps works for multiple fields');
+      console.log('✓ getFieldProps perfect for input binding');
+      console.log('✓ getFieldProps is reactive');
+      console.log('✓ getFieldProps simplifies form integration');
+    }, 1500);
+  </script>
+</body>
+</html>

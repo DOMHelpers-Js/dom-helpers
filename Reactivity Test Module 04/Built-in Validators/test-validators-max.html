@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Validators.match()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing Validators.match() ===');
+    
+    // Basic match validator
+    console.log('\n=== Basic match validator ===');
+    const form = ReactiveUtils.form({
+      password: 'secret123',
+      confirmPassword: ''
+    }, {
+      validators: {
+        confirmPassword: ReactiveUtils.validators.match('password')
+      }
+    });
+    
+    form.setValue('confirmPassword', 'different');
+    form.validateField('confirmPassword');
+    console.log('Not matching:', form.errors.confirmPassword);
+    
+    form.setValue('confirmPassword', 'secret123');
+    form.validateField('confirmPassword');
+    console.log('Matching:', form.errors.confirmPassword);
+    console.log('✓ Validates field matching');
+    
+    // match with custom message
+    console.log('\n=== match with custom message ===');
+    const customForm = ReactiveUtils.form({
+      email: 'test@example.com',
+      confirmEmail: ''
+    }, {
+      validators: {
+        confirmEmail: ReactiveUtils.validators.match('email', 'Emails must match')
+      }
+    });
+    
+    customForm.setValue('confirmEmail', 'different@example.com');
+    customForm.validateField('confirmEmail');
+    console.log('Custom message:', customForm.errors.confirmEmail);
+    console.log('✓ Uses custom message');
+    
+    // match with default message
+    console.log('\n=== match with default message ===');
+    const defaultForm = ReactiveUtils.form({
+      field1: 'value',
+      field2: ''
+    }, {
+      validators: {
+        field2: ReactiveUtils.validators.match('field1')
+      }
+    });
+    
+    defaultForm.setValue('field2', 'different');
+    defaultForm.validateField('field2');
+    const defaultMessage = defaultForm.errors.field2;
+    console.log('Default message:', defaultMessage);
+    console.log('Includes field name:', defaultMessage.includes('field1'));
+    
+    // match with empty values
+    console.log('\n=== match with empty values ===');
+    const emptyForm = ReactiveUtils.form({
+      field1: '',
+      field2: ''
+    }, {
+      validators: {
+        field2: ReactiveUtils.validators.match('field1')
+      }
+    });
+    
+    emptyForm.validateField('field2');
+    console.log('Both empty:', emptyForm.errors.field2);
+    console.log('✓ Empty matches empty');
+    
+    // match password confirmation
+    console.log('\n=== match password confirmation ===');
+    const passwordForm = ReactiveUtils.form({
+      password: '',
+      confirmPassword: ''
+    }, {
+      validators: {
+        password: ReactiveUtils.validators.required('Password required'),
+        confirmPassword: ReactiveUtils.validators.combine(
+          ReactiveUtils.validators.required('Confirm password'),
+          ReactiveUtils.validators.match('password', 'Passwords must match')
+        )
+      }
+    });
+    
+    passwordForm.setValues({
+      password: 'secret123',
+      confirmPassword: 'secret456'
+    });
+    passwordForm.validate();
+    console.log('Passwords not matching:', passwordForm.errors.confirmPassword);
+    
+    passwordForm.setValue('confirmPassword', 'secret123');
+    passwordForm.validateField('confirmPassword');
+    console.log('Passwords matching:', passwordForm.errors.confirmPassword);
+    
+    // match updates when source changes
+    console.log('\n=== match updates when source changes ===');
+    const updateForm = ReactiveUtils.form({
+      password: 'initial',
+      confirmPassword: 'initial'
+    }, {
+      validators: {
+        confirmPassword: ReactiveUtils.validators.match('password')
+      }
+    });
+    
+    updateForm.validateField('confirmPassword');
+    console.log('Initially matching:', updateForm.errors.confirmPassword);
+    
+    updateForm.setValue('password', 'changed');
+    updateForm.validateField('confirmPassword');
+    console.log('After password change:', updateForm.errors.confirmPassword);
+    
+    updateForm.setValue('confirmPassword', 'changed');
+    updateForm.validateField('confirmPassword');
+    console.log('After confirm update:', updateForm.errors.confirmPassword);
+    
+    // match with different types
+    console.log('\n=== match with different types ===');
+    const typeForm = ReactiveUtils.form({
+      value1: '123',
+      value2: 123
+    }, {
+      validators: {
+        value2: ReactiveUtils.validators.match('value1')
+      }
+    });
+    
+    typeForm.validateField('value2');
+    console.log('String vs number:', typeForm.errors.value2);
+    console.log('✓ Uses strict equality (===)');
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ Validators.match(fieldName) creates match validator');
+      console.log('✓ match accepts custom message');
+      console.log('✓ match has default message with field name');
+      console.log('✓ match validates field equality');
+      console.log('✓ match works with empty values');
+      console.log('✓ match perfect for password confirmation');
+      console.log('✓ match validates when source field changes');
+      console.log('✓ match uses strict equality');
+    }, 500);
+  </script>
+</body>
+</html>

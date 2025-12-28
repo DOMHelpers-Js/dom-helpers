@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.setValues()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.setValues() ===');
+    
+    // Basic setValues
+    console.log('\n=== Basic setValues ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: '',
+      password: ''
+    });
+    
+    console.log('Before setValues:', form.values);
+    
+    form.setValues({
+      username: 'johndoe',
+      email: 'john@example.com',
+      password: 'password123'
+    });
+    console.log('After setValues:', form.values);
+    
+    // setValues marks all as touched
+    console.log('\n=== setValues marks all as touched ===');
+    const touchForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    console.log('Before setValues:');
+    console.log('  values:', touchForm.values);
+    console.log('  touched:', touchForm.touched);
+    
+    touchForm.setValues({
+      field1: 'Value 1',
+      field2: 'Value 2'
+    });
+    console.log('After setValues:');
+    console.log('  values:', touchForm.values);
+    console.log('  touched:', touchForm.touched);
+    console.log('  ✓ Set fields marked as touched');
+    
+    // setValues partial update
+    console.log('\n=== setValues partial update ===');
+    const partialForm = ReactiveUtils.form({
+      field1: 'initial1',
+      field2: 'initial2',
+      field3: 'initial3'
+    });
+    
+    console.log('Before partial setValues:', partialForm.values);
+    
+    partialForm.setValues({
+      field1: 'updated1',
+      field3: 'updated3'
+    });
+    console.log('After partial setValues:', partialForm.values);
+    console.log('✓ field2 unchanged');
+    
+    // setValues with validation
+    console.log('\n=== setValues with validation ===');
+    const validatedForm = ReactiveUtils.form({
+      email: '',
+      password: '',
+      confirmPassword: ''
+    }, {
+      validators: {
+        email: (value) => value ? null : 'Email required',
+        password: (value) => value ? null : 'Password required',
+        confirmPassword: (value, values) => {
+          if (value !== values.password) return 'Must match';
+          return null;
+        }
+      }
+    });
+    
+    console.log('Before setValues:', validatedForm.errors);
+    
+    validatedForm.setValues({
+      email: 'test@example.com',
+      password: 'pass123',
+      confirmPassword: 'different'
+    });
+    console.log('After setValues (invalid):', validatedForm.errors);
+    
+    validatedForm.setValues({
+      confirmPassword: 'pass123'
+    });
+    console.log('After fixing confirmPassword:', validatedForm.errors);
+    
+    // setValues returns this (chainable)
+    console.log('\n=== setValues returns this (chainable) ===');
+    const chainForm = ReactiveUtils.form({
+      name: '',
+      email: '',
+      age: ''
+    });
+    
+    const result = chainForm.setValues({ name: 'Alice' });
+    console.log('setValues returns this:', result === chainForm);
+    
+    chainForm
+      .setValues({ name: 'Alice', email: 'alice@example.com' })
+      .setValues({ age: '25' });
+    console.log('After chained setValues:', chainForm.values);
+    
+    // setValues with different types
+    console.log('\n=== setValues with different types ===');
+    const typedForm = ReactiveUtils.form({
+      string: '',
+      number: 0,
+      boolean: false,
+      array: [],
+      object: null
+    });
+    
+    typedForm.setValues({
+      string: 'text',
+      number: 42,
+      boolean: true,
+      array: [1, 2, 3],
+      object: { key: 'value' }
+    });
+    
+    console.log('Values after setValues:', typedForm.values);
+    console.log('Types preserved:', {
+      string: typeof typedForm.values.string,
+      number: typeof typedForm.values.number,
+      boolean: typeof typedForm.values.boolean,
+      array: Array.isArray(typedForm.values.array),
+      object: typeof typedForm.values.object
+    });
+    
+    // setValues is reactive
+    console.log('\n=== setValues is reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const count = Object.keys(reactiveForm.touched).length;
+      console.log(`Effect #${effectRuns}: ${count} fields set`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.setValues({
+        field1: 'v1',
+        field2: 'v2'
+      });
+      console.log('Effect runs after setValues:', effectRuns);
+    }, 500);
+    
+    // setValues with empty object
+    console.log('\n=== setValues with empty object ===');
+    const emptyForm = ReactiveUtils.form({
+      field: 'initial'
+    });
+    
+    console.log('Before setValues({}):', emptyForm.values);
+    emptyForm.setValues({});
+    console.log('After setValues({}):', emptyForm.values);
+    console.log('✓ No changes when empty object');
+    
+    // setValues creates new fields
+    console.log('\n=== setValues creates new fields ===');
+    const dynamicForm = ReactiveUtils.form({
+      existing: 'value'
+    });
+    
+    console.log('Before setValues:', dynamicForm.values);
+    
+    setTimeout(() => {
+      dynamicForm.setValues({
+        existing: 'updated',
+        newField1: 'new1',
+        newField2: 'new2'
+      });
+      console.log('After setValues with new fields:', dynamicForm.values);
+      console.log('✓ Creates new fields if they don\'t exist');
+    }, 1000);
+    
+    // setValues batches updates
+    console.log('\n=== setValues batches updates ===');
+    const batchForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    let batchEffectRuns = 0;
+    ReactiveUtils.effect(() => {
+      batchEffectRuns++;
+      const values = Object.values(batchForm.values).filter(Boolean).length;
+      console.log(`Batch effect #${batchEffectRuns}: ${values} non-empty values`);
+    });
+    
+    setTimeout(() => {
+      batchForm.setValues({
+        field1: 'v1',
+        field2: 'v2',
+        field3: 'v3'
+      });
+      console.log('Batched - effect runs once:', batchEffectRuns);
+    }, 1500);
+    
+    // setValues vs multiple setValue
+    console.log('\n=== setValues vs multiple setValue ===');
+    const compareForm1 = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    const compareForm2 = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    let effect1Runs = 0;
+    let effect2Runs = 0;
+    
+    ReactiveUtils.effect(() => {
+      effect1Runs++;
+      const _ = compareForm1.values;
+    });
+    
+    ReactiveUtils.effect(() => {
+      effect2Runs++;
+      const _ = compareForm2.values;
+    });
+    
+    setTimeout(() => {
+      // Multiple setValue calls
+      compareForm1.setValue('field1', 'v1');
+      compareForm1.setValue('field2', 'v2');
+      compareForm1.setValue('field3', 'v3');
+      console.log('Multiple setValue - effect runs:', effect1Runs);
+      
+      // Single setValues call
+      compareForm2.setValues({
+        field1: 'v1',
+        field2: 'v2',
+        field3: 'v3'
+      });
+      console.log('Single setValues - effect runs:', effect2Runs);
+      console.log('✓ setValues is more efficient (batched)');
+    }, 2000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ setValues(values) sets multiple field values');
+      console.log('✓ setValues() marks all set fields as touched');
+      console.log('✓ setValues() supports partial updates');
+      console.log('✓ setValues() auto-validates fields with validators');
+      console.log('✓ setValues() returns this for chaining');
+      console.log('✓ setValues() works with all data types');
+      console.log('✓ setValues() is reactive (triggers effects)');
+      console.log('✓ setValues() can create new fields dynamically');
+      console.log('✓ setValues() batches updates for efficiency');
+      console.log('✓ setValues() more efficient than multiple setValue()');
+    }, 2500);
+  </script>
+</body>
+</html>

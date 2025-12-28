@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test state.$batch()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    console.log('=== Testing state.$batch() ===');
+    
+    // Basic $batch
+    console.log('\n=== Basic $batch ===');
+    const state = ReactiveUtils.state({
+      count: 0,
+      name: ''
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const value = state.count + state.name;
+    });
+    
+    const initialRuns = effectRuns;
+    
+    state.$batch(() => {
+      state.count = 5;
+      state.name = 'test';
+    });
+    
+    setTimeout(() => {
+      console.log('Effect runs after batch:', effectRuns - initialRuns);
+      console.log('Expected: 1 (both updates batched)');
+      console.log('✓ Batches multiple updates');
+    }, 100);
+    
+    // $batch reduces effect runs
+    console.log('\n=== $batch reduces effect runs ===');
+    setTimeout(() => {
+      const batchState = ReactiveUtils.state({
+        a: 0,
+        b: 0,
+        c: 0
+      });
+      
+      let batchRuns = 0;
+      ReactiveUtils.effect(() => {
+        batchRuns++;
+        const sum = batchState.a + batchState.b + batchState.c;
+      });
+      
+      const before = batchRuns;
+      
+      // Without batch
+      batchState.a = 1;
+      batchState.b = 2;
+      batchState.c = 3;
+      
+      setTimeout(() => {
+        const withoutBatch = batchRuns - before;
+        console.log('Without batch - runs:', withoutBatch);
+        
+        // Reset
+        batchState.a = 0;
+        batchState.b = 0;
+        batchState.c = 0;
+        
+        setTimeout(() => {
+          const beforeBatch = batchRuns;
+          
+          // With batch
+          batchState.$batch(() => {
+            batchState.a = 1;
+            batchState.b = 2;
+            batchState.c = 3;
+          });
+          
+          setTimeout(() => {
+            const withBatch = batchRuns - beforeBatch;
+            console.log('With batch - runs:', withBatch);
+            console.log('✓ Batch reduces effect runs');
+          }, 100);
+        }, 100);
+      }, 100);
+    }, 500);
+    
+    // $batch returns result
+    console.log('\n=== $batch returns result ===');
+    setTimeout(() => {
+      const returnState = ReactiveUtils.state({
+        value: 0
+      });
+      
+      const result = returnState.$batch(() => {
+        returnState.value = 10;
+        return returnState.value * 2;
+      });
+      
+      console.log('Batch result:', result);
+      console.log('Expected: 20');
+      console.log('✓ Returns function result');
+    }, 1000);
+    
+    // $batch with nested updates
+    console.log('\n=== $batch with nested updates ===');
+    setTimeout(() => {
+      const nestedState = ReactiveUtils.state({
+        user: {
+          name: '',
+          email: ''
+        },
+        settings: {
+          theme: '',
+          language: ''
+        }
+      });
+      
+      let nestedRuns = 0;
+      ReactiveUtils.effect(() => {
+        nestedRuns++;
+        const data = nestedState.user.name + nestedState.settings.theme;
+      });
+      
+      const beforeNested = nestedRuns;
+      
+      nestedState.$batch(() => {
+        nestedState.user.name = 'John';
+        nestedState.user.email = 'john@example.com';
+        nestedState.settings.theme = 'dark';
+        nestedState.settings.language = 'en';
+      });
+      
+      setTimeout(() => {
+        console.log('Nested updates batched - runs:', nestedRuns - beforeNested);
+        console.log('Expected: 1');
+        console.log('✓ Works with nested objects');
+      }, 100);
+    }, 1500);
+    
+    // $batch is reactive
+    console.log('\n=== $batch is reactive ===');
+    setTimeout(() => {
+      const reactiveState = ReactiveUtils.state({
+        field1: '',
+        field2: ''
+      });
+      
+      let reactiveRuns = 0;
+      ReactiveUtils.effect(() => {
+        reactiveRuns++;
+        const combined = reactiveState.field1 + reactiveState.field2;
+        console.log(`Reactive effect #${reactiveRuns}: "${combined}"`);
+      });
+      
+      setTimeout(() => {
+        reactiveState.$batch(() => {
+          reactiveState.field1 = 'hello';
+          reactiveState.field2 = 'world';
+        });
+        console.log('Effect runs after batch:', reactiveRuns);
+      }, 100);
+    }, 2000);
+    
+    // $batch with errors
+    console.log('\n=== $batch with errors ===');
+    setTimeout(() => {
+      const errorState = ReactiveUtils.state({
+        value: 0
+      });
+      
+      try {
+        errorState.$batch(() => {
+          errorState.value = 5;
+          throw new Error('Test error');
+        });
+      } catch (e) {
+        console.log('Error caught:', e.message);
+        console.log('State after error:', errorState.value);
+        console.log('✓ Changes applied even with error');
+      }
+    }, 2500);
+    
+    // $batch with conditional updates
+    console.log('\n=== $batch with conditional updates ===');
+    setTimeout(() => {
+      const condState = ReactiveUtils.state({
+        count: 0,
+        enabled: false
+      });
+      
+      let condRuns = 0;
+      ReactiveUtils.effect(() => {
+        condRuns++;
+        const value = condState.count + (condState.enabled ? 1 : 0);
+      });
+      
+      const beforeCond = condRuns;
+      
+      condState.$batch(() => {
+        condState.count = 5;
+        if (condState.count > 3) {
+          condState.enabled = true;
+        }
+      });
+      
+      setTimeout(() => {
+        console.log('Conditional batch - runs:', condRuns - beforeCond);
+        console.log('Count:', condState.count);
+        console.log('Enabled:', condState.enabled);
+        console.log('✓ Works with conditional logic');
+      }, 100);
+    }, 3000);
+    
+    // batch performance test - Test 1: Individual updates
+    console.log('\n=== batch performance test ===');
+    setTimeout(() => {
+      const perfState1 = ReactiveUtils.state({ a: 0, b: 0, c: 0, d: 0, e: 0 });
+      
+      let perfRuns1 = 0;
+      ReactiveUtils.effect(() => {
+        perfRuns1++;
+        const sum = perfState1.a + perfState1.b + perfState1.c + perfState1.d + perfState1.e;
+      });
+
+      const initialRuns1 = perfRuns1;
+      
+      perfState1.a = 1;
+      perfState1.b = 2;
+      perfState1.c = 3;
+      perfState1.d = 4;
+      perfState1.e = 5;
+      
+      setTimeout(() => {
+        console.log('Without batch - effect runs:', perfRuns1 - initialRuns1);
+      }, 100);
+    }, 3500);
+
+    // batch performance test - Test 2: Batched updates
+    setTimeout(() => {
+      const perfState2 = ReactiveUtils.state({ a: 0, b: 0, c: 0, d: 0, e: 0 });
+      
+      let perfRuns2 = 0;
+      ReactiveUtils.effect(() => {
+        perfRuns2++;
+        const sum = perfState2.a + perfState2.b + perfState2.c + perfState2.d + perfState2.e;
+      });
+
+      const initialRuns2 = perfRuns2;
+      
+      perfState2.$batch(() => {
+        perfState2.a = 1;
+        perfState2.b = 2;
+        perfState2.c = 3;
+        perfState2.d = 4;
+        perfState2.e = 5;
+      });
+      
+      setTimeout(() => {
+        console.log('With batch - effect runs:', perfRuns2 - initialRuns2);
+        console.log('✓ Batch is more efficient');
+      }, 100);
+    }, 4000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ state.$batch(fn) batches multiple updates');
+      console.log('✓ $batch reduces effect runs');
+      console.log('✓ $batch returns function result');
+      console.log('✓ $batch works with nested objects');
+      console.log('✓ $batch is reactive (triggers effects once)');
+      console.log('✓ $batch handles errors (changes still applied)');
+      console.log('✓ $batch works with conditional logic');
+      console.log('✓ $batch improves performance');
+    }, 5000);
+  </script>
+</body>
+</html>

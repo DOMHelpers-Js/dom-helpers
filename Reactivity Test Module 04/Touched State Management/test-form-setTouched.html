@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.setTouched()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.setTouched() ===');
+    
+    // Basic setTouched
+    console.log('\n=== Basic setTouched ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: ''
+    });
+    
+    console.log('Before setTouched:', form.touched);
+    
+    form.setTouched('username');
+    console.log('After setTouched("username"):', form.touched);
+    
+    form.setTouched('email');
+    console.log('After setTouched("email"):', form.touched);
+    
+    // setTouched with true (explicit)
+    console.log('\n=== setTouched with true (explicit) ===');
+    const explicitForm = ReactiveUtils.form({
+      field1: '',
+      field2: ''
+    });
+    
+    explicitForm.setTouched('field1', true);
+    console.log('After setTouched("field1", true):', explicitForm.touched);
+    console.log('✓ Explicitly marking as touched');
+    
+    // setTouched with false (untouching)
+    console.log('\n=== setTouched with false (untouching) ===');
+    const unsetForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    unsetForm.setTouched('field', true);
+    console.log('After touching:', unsetForm.touched);
+    
+    unsetForm.setTouched('field', false);
+    console.log('After setTouched("field", false):', unsetForm.touched);
+    console.log('✓ Can mark as untouched');
+    
+    // setTouched returns this (chainable)
+    console.log('\n=== setTouched returns this (chainable) ===');
+    const chainForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    const result = chainForm.setTouched('field1');
+    console.log('setTouched returns this:', result === chainForm);
+    
+    chainForm
+      .setTouched('field1')
+      .setTouched('field2')
+      .setTouched('field3');
+    console.log('After chained setTouched:', chainForm.touched);
+    
+    // setTouched updates isDirty
+    console.log('\n=== setTouched updates isDirty ===');
+    const dirtyForm = ReactiveUtils.form({
+      name: ''
+    });
+    
+    console.log('Before touching, isDirty:', dirtyForm.isDirty);
+    
+    dirtyForm.setTouched('name');
+    console.log('After setTouched, isDirty:', dirtyForm.isDirty);
+    
+    // setTouched updates touchedFields
+    console.log('\n=== setTouched updates touchedFields ===');
+    const fieldsForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    console.log('Initial touchedFields:', fieldsForm.touchedFields);
+    
+    fieldsForm.setTouched('field1');
+    console.log('After touching field1:', fieldsForm.touchedFields);
+    
+    fieldsForm.setTouched('field3');
+    console.log('After touching field3:', fieldsForm.touchedFields);
+    
+    // setTouched is reactive
+    console.log('\n=== setTouched is reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const touchedCount = Object.keys(reactiveForm.touched).length;
+      console.log(`Effect #${effectRuns}: ${touchedCount} touched`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.setTouched('field');
+      console.log('Effect runs after setTouched:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactiveForm.setTouched('field', false);
+      console.log('Effect runs after untouching:', effectRuns);
+    }, 1000);
+    
+    // setTouched with validation
+    console.log('\n=== setTouched with validation ===');
+    const validationForm = ReactiveUtils.form({
+      email: ''
+    }, {
+      validators: {
+        email: (value) => value ? null : 'Email required'
+      }
+    });
+    
+    validationForm.setError('email', 'Email required');
+    console.log('Error set:', validationForm.errors);
+    console.log('Before touching, shouldShowError:', validationForm.shouldShowError('email'));
+    
+    setTimeout(() => {
+      validationForm.setTouched('email');
+      console.log('After touching, shouldShowError:', validationForm.shouldShowError('email'));
+      console.log('✓ setTouched affects error visibility');
+    }, 1500);
+    
+    // setTouched non-existent field
+    console.log('\n=== setTouched non-existent field ===');
+    const dynamicForm = ReactiveUtils.form({
+      existing: ''
+    });
+    
+    console.log('Before setTouched:', dynamicForm.touched);
+    
+    setTimeout(() => {
+      dynamicForm.setTouched('newField');
+      console.log('After setTouched("newField"):', dynamicForm.touched);
+      console.log('✓ Can touch non-existent fields');
+    }, 2000);
+    
+    // setTouched multiple times
+    console.log('\n=== setTouched multiple times ===');
+    const multiForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    let multiEffectRuns = 0;
+    ReactiveUtils.effect(() => {
+      multiEffectRuns++;
+      const isTouched = multiForm.isTouched('field');
+      if (multiEffectRuns > 1) {
+        console.log(`Multi effect #${multiEffectRuns}: isTouched = ${isTouched}`);
+      }
+    });
+    
+    setTimeout(() => {
+      multiForm.setTouched('field');
+      console.log('First touch, effect runs:', multiEffectRuns);
+      
+      multiForm.setTouched('field', true);
+      console.log('Touch again (no change), effect runs:', multiEffectRuns);
+      
+      multiForm.setTouched('field', false);
+      console.log('Untouch, effect runs:', multiEffectRuns);
+    }, 2500);
+    
+    // setTouched in form workflow
+    console.log('\n=== setTouched in form workflow ===');
+    const workflowForm = ReactiveUtils.form({
+      username: '',
+      email: '',
+      password: ''
+    });
+    
+    const handleBlur = (field) => {
+      workflowForm.setTouched(field);
+      console.log(`Field "${field}" blurred, touched:`, workflowForm.touched);
+    };
+    
+    setTimeout(() => {
+      handleBlur('username');
+      handleBlur('email');
+      handleBlur('password');
+      console.log('All fields touched:', workflowForm.touchedFields);
+    }, 3000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ setTouched(field) marks field as touched');
+      console.log('✓ setTouched(field, true) explicitly marks as touched');
+      console.log('✓ setTouched(field, false) marks as untouched');
+      console.log('✓ setTouched returns this for chaining');
+      console.log('✓ setTouched updates isDirty computed property');
+      console.log('✓ setTouched updates touchedFields computed property');
+      console.log('✓ setTouched is reactive (triggers effects)');
+      console.log('✓ setTouched affects shouldShowError');
+      console.log('✓ setTouched can touch non-existent fields');
+      console.log('✓ setTouched useful in form blur workflows');
+    }, 3500);
+  </script>
+</body>
+</html>

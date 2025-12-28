@@ -236,7 +236,7 @@ function createReactive(target) {
       }
 
       // Deep reactivity - BUT skip built-in objects
-      if (value && typeof value === 'object' && !isReactive(value)) {
+     /* if (value && typeof value === 'object' && !isReactive(value)) {
         // Check if it's a built-in object before making reactive
         const valueConstructor = value.constructor?.name;
         const shouldSkip = valueConstructor && skipReactive.includes(valueConstructor);
@@ -248,7 +248,31 @@ function createReactive(target) {
       }
 
       return value;
+    }, */
+    
+
+// Deep reactivity - BUT skip built-in objects
+if (value && typeof value === 'object' && !isReactive(value)) {
+  // Check if it's a built-in object before making reactive
+  const valueConstructor = value.constructor?.name;
+  const shouldSkip = valueConstructor && skipReactive.includes(valueConstructor);
+  
+  if (!shouldSkip && !(value instanceof Node) && !(value instanceof Element)) {
+    value = createReactive(value);
+    
+    // Check if property is writable before assigning
+    const descriptor = Object.getOwnPropertyDescriptor(obj, key);
+    const isWritable = !descriptor || (descriptor.writable !== false && !descriptor.get);
+    
+    if (isWritable) {
+      obj[key] = value;
+    }
+  }
+}
+
+return value;
     },
+
 
     set(obj, key, value) {
       if (obj[key] === value) return true;

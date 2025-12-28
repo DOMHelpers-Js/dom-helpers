@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.getValue()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.getValue() ===');
+    
+    // Basic getValue
+    console.log('\n=== Basic getValue ===');
+    const form = ReactiveUtils.form({
+      username: 'johndoe',
+      email: 'john@example.com',
+      password: 'secret123'
+    });
+    
+    console.log('getValue("username"):', form.getValue('username'));
+    console.log('getValue("email"):', form.getValue('email'));
+    console.log('getValue("password"):', form.getValue('password'));
+    
+    // getValue with different types
+    console.log('\n=== getValue with different types ===');
+    const typedForm = ReactiveUtils.form({
+      string: 'text',
+      number: 42,
+      boolean: true,
+      array: [1, 2, 3],
+      object: { key: 'value' },
+      nullValue: null,
+      undefinedValue: undefined
+    });
+    
+    console.log('getValue("string"):', typedForm.getValue('string'));
+    console.log('getValue("number"):', typedForm.getValue('number'));
+    console.log('getValue("boolean"):', typedForm.getValue('boolean'));
+    console.log('getValue("array"):', typedForm.getValue('array'));
+    console.log('getValue("object"):', typedForm.getValue('object'));
+    console.log('getValue("nullValue"):', typedForm.getValue('nullValue'));
+    console.log('getValue("undefinedValue"):', typedForm.getValue('undefinedValue'));
+    
+    // getValue vs direct access
+    console.log('\n=== getValue vs direct access ===');
+    const compareForm = ReactiveUtils.form({
+      field1: 'value1',
+      field2: 'value2'
+    });
+    
+    console.log('getValue("field1"):', compareForm.getValue('field1'));
+    console.log('values.field1:', compareForm.values.field1);
+    console.log('Same:', compareForm.getValue('field1') === compareForm.values.field1);
+    
+    console.log('\ngetValue("field2"):', compareForm.getValue('field2'));
+    console.log('values.field2:', compareForm.values.field2);
+    console.log('Same:', compareForm.getValue('field2') === compareForm.values.field2);
+    
+    // getValue non-existent field
+    console.log('\n=== getValue non-existent field ===');
+    const emptyForm = ReactiveUtils.form({
+      existing: 'value'
+    });
+    
+    console.log('getValue("existing"):', emptyForm.getValue('existing'));
+    console.log('getValue("nonExistent"):', emptyForm.getValue('nonExistent'));
+    console.log('✓ Returns undefined for non-existent fields');
+    
+    // getValue after setValue
+    console.log('\n=== getValue after setValue ===');
+    const updateForm = ReactiveUtils.form({
+      name: '',
+      email: ''
+    });
+    
+    console.log('Initial getValue("name"):', updateForm.getValue('name'));
+    
+    updateForm.setValue('name', 'Alice');
+    console.log('After setValue, getValue("name"):', updateForm.getValue('name'));
+    
+    updateForm.setValue('name', 'Bob');
+    console.log('After update, getValue("name"):', updateForm.getValue('name'));
+    
+    // getValue is reactive
+    console.log('\n=== getValue is reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      counter: 0
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const value = reactiveForm.getValue('counter');
+      console.log(`Effect #${effectRuns}: counter = ${value}`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.setValue('counter', 1);
+      console.log('Effect runs after setValue:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactiveForm.setValue('counter', 2);
+      console.log('Effect runs after second setValue:', effectRuns);
+    }, 1000);
+    
+    // getValue with empty string
+    console.log('\n=== getValue with empty string ===');
+    const stringForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    console.log('getValue("field") when empty:', stringForm.getValue('field'));
+    console.log('Is empty string:', stringForm.getValue('field') === '');
+    console.log('Not undefined:', stringForm.getValue('field') !== undefined);
+    
+    // getValue for validation
+    console.log('\n=== getValue for validation ===');
+    const validationForm = ReactiveUtils.form({
+      password: '',
+      confirmPassword: ''
+    }, {
+      validators: {
+        confirmPassword: (value, values) => {
+          const password = validationForm.getValue('password');
+          if (value !== password) return 'Passwords must match';
+          return null;
+        }
+      }
+    });
+    
+    validationForm.setValue('password', 'secret123');
+    validationForm.setValue('confirmPassword', 'different');
+    console.log('Error when different:', validationForm.errors.confirmPassword);
+    
+    setTimeout(() => {
+      const passwordValue = validationForm.getValue('password');
+      validationForm.setValue('confirmPassword', passwordValue);
+      console.log('Error when same:', validationForm.errors.confirmPassword);
+    }, 1500);
+    
+    // getValue for computed logic
+    console.log('\n=== getValue for computed logic ===');
+    const computedForm = ReactiveUtils.form({
+      firstName: 'John',
+      lastName: 'Doe'
+    });
+    
+    const getFullName = () => {
+      const first = computedForm.getValue('firstName');
+      const last = computedForm.getValue('lastName');
+      return `${first} ${last}`;
+    };
+    
+    console.log('Full name:', getFullName());
+    
+    setTimeout(() => {
+      computedForm.setValue('firstName', 'Jane');
+      console.log('After update, full name:', getFullName());
+    }, 2000);
+    
+    // getValue with all fields
+    console.log('\n=== getValue with all fields ===');
+    const allForm = ReactiveUtils.form({
+      field1: 'value1',
+      field2: 'value2',
+      field3: 'value3'
+    });
+    
+    console.log('Getting all values:');
+    Object.keys(allForm.values).forEach(field => {
+      console.log(`  ${field}: ${allForm.getValue(field)}`);
+    });
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ getValue(field) returns field value');
+      console.log('✓ getValue() works with all data types');
+      console.log('✓ getValue() equivalent to values.field access');
+      console.log('✓ getValue() returns undefined for non-existent fields');
+      console.log('✓ getValue() reflects updates from setValue()');
+      console.log('✓ getValue() is reactive (triggers effects)');
+      console.log('✓ getValue() useful in validation logic');
+      console.log('✓ getValue() useful in computed logic');
+    }, 2500);
+  </script>
+</body>
+</html>

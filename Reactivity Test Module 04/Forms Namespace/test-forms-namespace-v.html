@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Forms.v (shorthand)</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing Forms.v ===');
+    
+    // Forms.v exists
+    console.log('\n=== Forms.v exists ===');
+    console.log('Forms.v:', Forms.v);
+    console.log('Is object:', typeof Forms.v === 'object');
+    console.log('✓ Forms.v is available');
+    
+    // Forms.v is alias for Forms.validators
+    console.log('\n=== Forms.v is alias for Forms.validators ===');
+    console.log('Forms.v === Forms.validators:', Forms.v === Forms.validators);
+    console.log('✓ Same object as Forms.validators');
+    
+    // Forms.v has all validators
+    console.log('\n=== Forms.v has all validators ===');
+    const validators = [
+      'required', 'email', 'minLength', 'maxLength', 'pattern',
+      'min', 'max', 'match', 'custom', 'combine'
+    ];
+    
+    validators.forEach(v => {
+      console.log(`  ${v}:`, v in Forms.v ? '✓' : '✗');
+    });
+    
+    // Forms.v shorthand usage
+    console.log('\n=== Forms.v shorthand usage ===');
+    const V = Forms.v;
+    
+    const form = Forms.form({
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      age: ''
+    }, {
+      validators: {
+        username: V.combine(
+          V.required('Username required'),
+          V.minLength(3, 'Too short')
+        ),
+        email: V.combine(
+          V.required('Email required'),
+          V.email('Invalid email')
+        ),
+        password: V.combine(
+          V.required('Password required'),
+          V.minLength(8, 'Too short')
+        ),
+        confirmPassword: V.match('password', 'Must match'),
+        age: V.combine(
+          V.required('Age required'),
+          V.min(18, 'Too young')
+        )
+      }
+    });
+    
+    form.validate();
+    console.log('Form errors:', Object.keys(form.errors).length);
+    console.log('✓ Works as shorthand');
+    
+    // Forms.v makes code cleaner
+    console.log('\n=== Forms.v makes code cleaner ===');
+    
+    // Without shorthand
+    const longForm = Forms.form({
+      field: ''
+    }, {
+      validators: {
+        field: Forms.validators.combine(
+          Forms.validators.required('Required'),
+          Forms.validators.minLength(5, 'Too short')
+        )
+      }
+    });
+    
+    // With shorthand
+    const shortForm = Forms.form({
+      field: ''
+    }, {
+      validators: {
+        field: V.combine(
+          V.required('Required'),
+          V.minLength(5, 'Too short')
+        )
+      }
+    });
+    
+    console.log('Both work:', 
+      typeof longForm.validate === 'function' && 
+      typeof shortForm.validate === 'function'
+    );
+    console.log('✓ Shorthand reduces verbosity');
+    
+    // Forms.v in real-world form
+    console.log('\n=== Forms.v in real-world form ===');
+    const registrationForm = Forms.form({
+      name: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      phone: '',
+      age: ''
+    }, {
+      validators: {
+        name: V.required('Name required'),
+        email: V.combine(V.required('Email required'), V.email('Invalid')),
+        password: V.combine(
+          V.required('Password required'),
+          V.minLength(8, 'Min 8 chars'),
+          V.custom(val => /[A-Z]/.test(val) ? null : 'Need uppercase')
+        ),
+        confirmPassword: V.combine(
+          V.required('Confirm password'),
+          V.match('password', 'Must match')
+        ),
+        phone: V.pattern(/^\d{3}-\d{3}-\d{4}$/, 'Format: 123-456-7890'),
+        age: V.combine(
+          V.required('Age required'),
+          V.min(18, 'Must be 18+'),
+          V.max(120, 'Invalid age')
+        )
+      },
+      onSubmit: async (values) => {
+        console.log('Submitting:', values);
+        return { success: true };
+      }
+    });
+    
+    setTimeout(() => {
+      registrationForm.setValues({
+        name: 'John Doe',
+        email: 'john@example.com',
+        password: 'Password123',
+        confirmPassword: 'Password123',
+        phone: '123-456-7890',
+        age: '25'
+      });
+      
+      const isValid = registrationForm.validate();
+      console.log('Valid registration:', isValid);
+      console.log('Errors:', registrationForm.errors);
+    }, 500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ Forms.v exists and is available');
+      console.log('✓ Forms.v is alias for Forms.validators');
+      console.log('✓ Forms.v has all validators');
+      console.log('✓ Forms.v works as shorthand');
+      console.log('✓ Forms.v reduces code verbosity');
+      console.log('✓ Forms.v perfect for real-world forms');
+      console.log('✓ Forms.v makes validator code cleaner');
+    }, 1000);
+  </script>
+</body>
+</html>

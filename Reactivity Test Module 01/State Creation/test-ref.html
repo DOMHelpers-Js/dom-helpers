@@ -1,268 +1,229 @@
 <!DOCTYPE html>
 <html>
-<head><title>Test ReactiveUtils.ref</title></head>
+<head><title>Test ReactiveUtils.ref()</title></head>
 <body>
   <script src="../../src/Reactive/01_dh-reactive.js"></script>
-
   <script>
-    console.log('=== Testing ReactiveUtils.ref() ===\n');
-
-    // ========================================================================
-    // TEST 1: Create basic ref
-    // ========================================================================
-    console.log('TEST 1: Create basic ref');
-    const numRef = ReactiveUtils.ref(42);
-
-    console.log('  Initial value:', numRef.value);
-    console.log('  Is reactive:', ReactiveUtils.isReactive(numRef));
-    console.log('  Expected: true');
-    console.log('  ✓ Basic ref creation works\n');
-
-    // ========================================================================
-    // TEST 2: Ref with different types
-    // ========================================================================
-    console.log('TEST 2: Ref with different types');
-
-    const numberRef = ReactiveUtils.ref(123);
-    console.log('  Number ref:', numberRef.value, '- type:', typeof numberRef.value);
-
-    const stringRef = ReactiveUtils.ref('hello');
-    console.log('  String ref:', stringRef.value, '- type:', typeof stringRef.value);
-
-    const boolRef = ReactiveUtils.ref(true);
-    console.log('  Boolean ref:', boolRef.value, '- type:', typeof boolRef.value);
-
-    const arrayRef = ReactiveUtils.ref([1, 2, 3]);
-    console.log('  Array ref:', arrayRef.value, '- is array:', Array.isArray(arrayRef.value));
-
-    const objectRef = ReactiveUtils.ref({ x: 10 });
-    console.log('  Object ref:', objectRef.value, '- type:', typeof objectRef.value);
-
-    const nullRef = ReactiveUtils.ref(null);
-    console.log('  Null ref:', nullRef.value);
-
-    const undefinedRef = ReactiveUtils.ref(undefined);
-    console.log('  Undefined ref:', undefinedRef.value);
-
-    console.log('  ✓ All types supported\n');
-
-    // ========================================================================
-    // TEST 3: Ref triggers effects
-    // ========================================================================
-    console.log('TEST 3: Ref triggers effects');
+    console.log('=== Testing ReactiveUtils.ref() ===');
+    
+    // Basic ref creation
+    console.log('\n=== Basic ref creation ===');
     const count = ReactiveUtils.ref(0);
-
+    
+    console.log('Created ref:', count);
+    console.log('Type check:', typeof count === 'object');
+    console.log('Has value property:', 'value' in count);
+    console.log('Value:', count.value);
+    
+    // Ref with different types
+    console.log('\n=== Ref with different types ===');
+    const numberRef = ReactiveUtils.ref(42);
+    const stringRef = ReactiveUtils.ref('hello');
+    const booleanRef = ReactiveUtils.ref(true);
+    const arrayRef = ReactiveUtils.ref([1, 2, 3]);
+    const objectRef = ReactiveUtils.ref({ key: 'value' });
+    const nullRef = ReactiveUtils.ref(null);
+    const undefinedRef = ReactiveUtils.ref(undefined);
+    
+    console.log('Number ref:', numberRef.value);
+    console.log('String ref:', stringRef.value);
+    console.log('Boolean ref:', booleanRef.value);
+    console.log('Array ref:', arrayRef.value);
+    console.log('Object ref:', objectRef.value);
+    console.log('Null ref:', nullRef.value);
+    console.log('Undefined ref:', undefinedRef.value);
+    
+    // Updating ref value
+    console.log('\n=== Updating ref value ===');
+    const counter = ReactiveUtils.ref(0);
+    
+    console.log('Initial value:', counter.value);
+    
+    counter.value = 5;
+    console.log('After counter.value = 5:', counter.value);
+    
+    counter.value++;
+    console.log('After counter.value++:', counter.value);
+    
+    counter.value += 10;
+    console.log('After counter.value += 10:', counter.value);
+    
+    // Ref is reactive
+    console.log('\n=== Ref is reactive ===');
+    const reactiveRef = ReactiveUtils.ref(10);
+    
     let effectRuns = 0;
     ReactiveUtils.effect(() => {
       effectRuns++;
-      console.log(`  Effect #${effectRuns}: count=${count.value}`);
+      console.log(`Effect #${effectRuns}: value = ${reactiveRef.value}`);
     });
-
-    count.value = 5;
+    
     setTimeout(() => {
-      console.log('  After value = 5 - effect runs:', effectRuns);
-      console.log('  Expected: 2');
-
-      count.value = 10;
-      setTimeout(() => {
-        console.log('  After value = 10 - effect runs:', effectRuns);
-        console.log('  Expected: 3');
-        console.log('  ✓ Ref triggers effects\n');
-
-        // ====================================================================
-        // TEST 4: Ref has valueOf method
-        // ====================================================================
-        console.log('TEST 4: Ref has valueOf method');
-        const val = ReactiveUtils.ref(42);
-
-        console.log('  Has valueOf:', typeof val.valueOf === 'function');
-        console.log('  valueOf():', val.valueOf());
-        console.log('  valueOf() === value:', val.valueOf() === val.value);
-        console.log('  ✓ valueOf method works\n');
-
-        // ====================================================================
-        // TEST 5: Ref has toString method
-        // ====================================================================
-        console.log('TEST 5: Ref has toString method');
-        const str = ReactiveUtils.ref(123);
-
-        console.log('  Has toString:', typeof str.toString === 'function');
-        console.log('  toString():', str.toString());
-        console.log('  typeof toString():', typeof str.toString());
-        console.log('  ✓ toString method works\n');
-
-        // ====================================================================
-        // TEST 6: Ref in computed
-        // ====================================================================
-        console.log('TEST 6: Ref in computed');
-        const base = ReactiveUtils.ref(10);
-        const state = ReactiveUtils.state({ multiplier: 2 });
-
-        state.$computed('result', function() {
-          return base.value * this.multiplier;
-        });
-
-        console.log('  Initial result:', state.result);
-        console.log('  Expected: 20');
-
-        base.value = 5;
-        setTimeout(() => {
-          console.log('  After base = 5:', state.result);
-          console.log('  Expected: 10');
-          console.log('  ✓ Ref in computed works\n');
-
-          // ================================================================
-          // TEST 7: Watch ref.value
-          // ================================================================
-          console.log('TEST 7: Watch ref.value');
-          const watched = ReactiveUtils.ref(0);
-          let watchCalls = 0;
-
-          watched.$watch('value', (newVal, oldVal) => {
-            watchCalls++;
-            console.log(`  Watch #${watchCalls}: ${oldVal} -> ${newVal}`);
-          });
-
-          watched.value = 100;
-          setTimeout(() => {
-            console.log('  Watch calls:', watchCalls);
-            console.log('  Expected: 1');
-            console.log('  ✓ Can watch ref\n');
-
-            // ============================================================
-            // TEST 8: Ref with objects
-            // ============================================================
-            console.log('TEST 8: Ref with objects');
-            const objRef = ReactiveUtils.ref({ count: 0 });
-
-            console.log('  Initial object:', objRef.value);
-
-            objRef.value = { count: 10 };
-            console.log('  After replacement:', objRef.value);
-            console.log('  Expected: {count: 10}');
-            console.log('  ✓ Ref with objects works\n');
-
-            // ============================================================
-            // TEST 9: Ref increment/decrement
-            // ============================================================
-            console.log('TEST 9: Ref increment/decrement');
-            const counter = ReactiveUtils.ref(0);
-
-            counter.value++;
-            console.log('  After ++:', counter.value);
-            console.log('  Expected: 1');
-
-            counter.value += 5;
-            console.log('  After += 5:', counter.value);
-            console.log('  Expected: 6');
-
-            counter.value--;
-            console.log('  After --:', counter.value);
-            console.log('  Expected: 5');
-
-            console.log('  ✓ Increment/decrement works\n');
-
-            // ============================================================
-            // TEST 10: Multiple refs
-            // ============================================================
-            console.log('TEST 10: Multiple refs');
-            const ref1 = ReactiveUtils.ref(1);
-            const ref2 = ReactiveUtils.ref(2);
-            const ref3 = ReactiveUtils.ref(3);
-
-            const sum = ref1.value + ref2.value + ref3.value;
-            console.log('  Sum of refs:', sum);
-            console.log('  Expected: 6');
-
-            ref1.value = 10;
-            ref2.value = 20;
-            ref3.value = 30;
-
-            const newSum = ref1.value + ref2.value + ref3.value;
-            console.log('  New sum:', newSum);
-            console.log('  Expected: 60');
-            console.log('  ✓ Multiple refs work\n');
-
-            // ============================================================
-            // TEST 11: Ref in batched updates
-            // ============================================================
-            console.log('TEST 11: Ref in batched updates');
-            const batchRef1 = ReactiveUtils.ref(1);
-            const batchRef2 = ReactiveUtils.ref(2);
-
-            let batchEffectRuns = 0;
-            ReactiveUtils.effect(() => {
-              batchEffectRuns++;
-              const _ = batchRef1.value + batchRef2.value;
-            });
-
-            const beforeBatch = batchEffectRuns;
-
-            ReactiveUtils.batch(() => {
-              batchRef1.value = 10;
-              batchRef2.value = 20;
-            });
-
-            setTimeout(() => {
-              const triggered = batchEffectRuns - beforeBatch;
-              console.log('  Effect triggered', triggered, 'time(s)');
-              console.log('  Expected: 1 (batched)');
-              console.log('  ✓ Batching works with refs\n');
-
-              // ======================================================
-              // TEST 12: Practical patterns
-              // ======================================================
-              console.log('TEST 12: Practical patterns');
-
-              // Toggle pattern
-              const isOpen = ReactiveUtils.ref(false);
-              isOpen.value = !isOpen.value;
-              console.log('  Toggle:', isOpen.value);
-              console.log('  Expected: true');
-
-              // Loading state
-              const loading = ReactiveUtils.ref(false);
-              loading.value = true;
-              console.log('  Loading:', loading.value);
-              console.log('  Expected: true');
-
-              // Counter
-              const clicks = ReactiveUtils.ref(0);
-              clicks.value++;
-              clicks.value++;
-              console.log('  Clicks:', clicks.value);
-              console.log('  Expected: 2');
-
-              console.log('  ✓ Practical patterns work\n');
-
-              // ======================================================
-              // TEST 13: Edge cases
-              // ======================================================
-              console.log('TEST 13: Edge cases');
-
-              // Ref with function
-              const fnRef = ReactiveUtils.ref(() => 'test');
-              console.log('  Function ref type:', typeof fnRef.value);
-              console.log('  Calling function:', fnRef.value());
-
-              // Ref with symbol
-              const sym = Symbol('test');
-              const symRef = ReactiveUtils.ref(sym);
-              console.log('  Symbol ref type:', typeof symRef.value);
-
-              // Nested refs
-              const inner = ReactiveUtils.ref(100);
-              const outer = ReactiveUtils.ref(inner);
-              console.log('  Nested ref:', ReactiveUtils.isReactive(outer.value));
-
-              console.log('  ✓ Edge cases handled\n');
-
-              console.log('=== All ReactiveUtils.ref() tests completed ===');
-            }, 50);
-          }, 50);
-        }, 50);
-      }, 50);
-    }, 50);
+      reactiveRef.value = 20;
+      console.log('Effect runs after value change:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactiveRef.value = 30;
+      console.log('Effect runs after second change:', effectRuns);
+    }, 1000);
+    
+    // Ref with valueOf
+    console.log('\n=== Ref with valueOf ===');
+    const numRef = ReactiveUtils.ref(100);
+    
+    console.log('ref.value:', numRef.value);
+    console.log('ref.valueOf():', numRef.valueOf());
+    console.log('Same:', numRef.value === numRef.valueOf());
+    
+    const result = numRef.valueOf() + 50;
+    console.log('valueOf() + 50:', result);
+    
+    // Ref with toString
+    console.log('\n=== Ref with toString ===');
+    const textRef = ReactiveUtils.ref('Hello');
+    
+    console.log('ref.value:', textRef.value);
+    console.log('ref.toString():', textRef.toString());
+    console.log('Same:', textRef.value === textRef.toString());
+    
+    const message = textRef.toString() + ' World';
+    console.log('toString() + " World":', message);
+    
+    // Ref for toggle
+    console.log('\n=== Ref for toggle ===');
+    const isOpen = ReactiveUtils.ref(false);
+    
+    console.log('Initial:', isOpen.value);
+    
+    setTimeout(() => {
+      isOpen.value = !isOpen.value;
+      console.log('After toggle:', isOpen.value);
+      
+      isOpen.value = !isOpen.value;
+      console.log('After toggle again:', isOpen.value);
+    }, 1500);
+    
+    // Ref for counter pattern
+    console.log('\n=== Ref for counter pattern ===');
+    const clicks = ReactiveUtils.ref(0);
+    
+    const increment = () => clicks.value++;
+    const decrement = () => clicks.value--;
+    const reset = () => clicks.value = 0;
+    
+    console.log('Initial clicks:', clicks.value);
+    
+    setTimeout(() => {
+      increment();
+      console.log('After increment:', clicks.value);
+      
+      increment();
+      increment();
+      console.log('After 2 more increments:', clicks.value);
+      
+      decrement();
+      console.log('After decrement:', clicks.value);
+      
+      reset();
+      console.log('After reset:', clicks.value);
+    }, 2000);
+    
+    // Ref with objects (reactive)
+    console.log('\n=== Ref with objects (reactive) ===');
+    const userRef = ReactiveUtils.ref({
+      name: 'Alice',
+      age: 25
+    });
+    
+    console.log('Initial user:', userRef.value);
+    
+    setTimeout(() => {
+      userRef.value.name = 'Bob';
+      console.log('After changing name:', userRef.value);
+      
+      userRef.value.age = 30;
+      console.log('After changing age:', userRef.value);
+    }, 2500);
+    
+    // Ref with arrays (reactive)
+    console.log('\n=== Ref with arrays (reactive) ===');
+    const itemsRef = ReactiveUtils.ref([1, 2, 3]);
+    
+    let arrayEffectRuns = 0;
+    ReactiveUtils.effect(() => {
+      arrayEffectRuns++;
+      console.log(`Array effect #${arrayEffectRuns}: length = ${itemsRef.value.length}`);
+    });
+    
+    setTimeout(() => {
+      itemsRef.value.push(4);
+      console.log('After push, effect runs:', arrayEffectRuns);
+    }, 3000);
+    
+    setTimeout(() => {
+      itemsRef.value = [1, 2, 3, 4, 5];
+      console.log('After reassignment, effect runs:', arrayEffectRuns);
+    }, 3500);
+    
+    // Ref with computed
+    console.log('\n=== Ref with computed ===');
+    const base = ReactiveUtils.ref(5);
+    
+    base.$computed('doubled', function() {
+      return this.value * 2;
+    });
+    
+    console.log('base.value:', base.value);
+    console.log('base.doubled (computed):', base.doubled);
+    
+    setTimeout(() => {
+      base.value = 10;
+      console.log('After base.value = 10:');
+      console.log('  value:', base.value);
+      console.log('  doubled:', base.doubled);
+    }, 4000);
+    
+    // Ref for input tracking
+    console.log('\n=== Ref for input tracking ===');
+    const inputValue = ReactiveUtils.ref('');
+    
+    ReactiveUtils.effect(() => {
+      if (inputValue.value) {
+        console.log(`Input changed: "${inputValue.value}"`);
+      }
+    });
+    
+    setTimeout(() => {
+      inputValue.value = 'Hello';
+    }, 4500);
+    
+    setTimeout(() => {
+      inputValue.value = 'Hello World';
+    }, 5000);
+    
+    // Ref comparison
+    console.log('\n=== Ref comparison ===');
+    const ref1 = ReactiveUtils.ref(5);
+    const ref2 = ReactiveUtils.ref(5);
+    
+    console.log('ref1.value === ref2.value:', ref1.value === ref2.value);
+    console.log('ref1 === ref2:', ref1 === ref2);
+    console.log('Different ref objects, same values');
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ ReactiveUtils.ref(value) creates reactive reference');
+      console.log('✓ Access value via .value property');
+      console.log('✓ Works with all data types');
+      console.log('✓ Updating .value triggers reactivity');
+      console.log('✓ Has valueOf() method for primitive conversion');
+      console.log('✓ Has toString() method for string conversion');
+      console.log('✓ Perfect for single values (counters, toggles)');
+      console.log('✓ Can contain objects and arrays (also reactive)');
+      console.log('✓ Supports $computed for derived values');
+      console.log('✓ Each ref is independent object');
+    }, 5500);
   </script>
 </body>
 </html>

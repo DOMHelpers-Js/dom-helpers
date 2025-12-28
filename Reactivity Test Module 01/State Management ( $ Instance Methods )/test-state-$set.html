@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test state.$set()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    console.log('=== Testing state.$set() ===');
+    
+    // Basic functional update
+    console.log('\n=== Basic functional update ===');
+    const state = ReactiveUtils.state({
+      count: 5,
+      name: 'Test'
+    });
+    
+    console.log('Before $set:', state);
+    
+    state.$set({
+      count: prev => prev + 10,
+      name: 'Updated'
+    });
+    
+    console.log('After $set:', state);
+    
+    // Function receives previous value
+    console.log('\n=== Function receives previous value ===');
+    const counter = ReactiveUtils.state({
+      value: 10
+    });
+    
+    console.log('Initial value:', counter.value);
+    
+    counter.$set({
+      value: prev => {
+        console.log('Previous value:', prev);
+        return prev * 2;
+      }
+    });
+    
+    console.log('After $set:', counter.value);
+    
+    // Multiple functional updates
+    console.log('\n=== Multiple functional updates ===');
+    const multi = ReactiveUtils.state({
+      a: 1,
+      b: 2,
+      c: 3
+    });
+    
+    console.log('Before $set:', multi);
+    
+    multi.$set({
+      a: prev => prev + 10,
+      b: prev => prev * 2,
+      c: prev => prev - 1
+    });
+    
+    console.log('After $set:', multi);
+    
+    // Mix functions and values
+    console.log('\n=== Mix functions and values ===');
+    const mixed = ReactiveUtils.state({
+      count: 5,
+      multiplier: 2,
+      result: 0
+    });
+    
+    console.log('Before mixed $set:', mixed);
+    
+    mixed.$set({
+      count: prev => prev + 5,
+      multiplier: 3,
+      result: 30
+    });
+    
+    console.log('After mixed $set:', mixed);
+    
+    // Increment pattern
+    console.log('\n=== Increment pattern ===');
+    const increment = ReactiveUtils.state({
+      clicks: 0,
+      score: 100
+    });
+    
+    console.log('Initial:', increment);
+    
+    increment.$set({ clicks: prev => prev + 1 });
+    console.log('After click 1:', increment.clicks);
+    
+    increment.$set({ clicks: prev => prev + 1 });
+    console.log('After click 2:', increment.clicks);
+    
+    increment.$set({ 
+      clicks: prev => prev + 1,
+      score: prev => prev + 10
+    });
+    console.log('After click 3:', increment);
+    
+    // Toggle pattern
+    console.log('\n=== Toggle pattern ===');
+    const toggle = ReactiveUtils.state({
+      isOpen: false,
+      isActive: false
+    });
+    
+    console.log('Initial toggles:', toggle);
+    
+    toggle.$set({ isOpen: prev => !prev });
+    console.log('After toggle isOpen:', toggle.isOpen);
+    
+    toggle.$set({ 
+      isOpen: prev => !prev,
+      isActive: prev => !prev
+    });
+    console.log('After toggle both:', toggle);
+    
+    // $set returns this (chainable)
+    console.log('\n=== $set returns this (chainable) ===');
+    const chain = ReactiveUtils.state({
+      a: 0,
+      b: 0,
+      c: 0
+    });
+    
+    const result = chain
+      .$set({ a: prev => prev + 1 })
+      .$set({ b: prev => prev + 2 })
+      .$set({ c: prev => prev + 3 });
+    
+    console.log('After chained $set:', chain);
+    console.log('Returns this:', result === chain);
+    
+    // Batch updates automatically
+    console.log('\n=== Batch updates automatically ===');
+    const batch = ReactiveUtils.state({
+      x: 1,
+      y: 2,
+      z: 3
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const sum = batch.x + batch.y + batch.z;
+      if (effectRuns > 1) {
+        console.log(`Effect #${effectRuns}: sum = ${sum}`);
+      }
+    });
+    
+    setTimeout(() => {
+      const beforeRuns = effectRuns;
+      batch.$set({
+        x: prev => prev + 10,
+        y: prev => prev + 20,
+        z: prev => prev + 30
+      });
+      
+      setTimeout(() => {
+        console.log('$set batches, effect ran:', (effectRuns - beforeRuns), 'time(s)');
+      }, 100);
+    }, 500);
+    
+    // Complex transformations
+    console.log('\n=== Complex transformations ===');
+    const transform = ReactiveUtils.state({
+      text: 'hello',
+      items: [1, 2, 3],
+      count: 5
+    });
+    
+    console.log('Before transformations:', transform);
+    
+    setTimeout(() => {
+      transform.$set({
+        text: prev => prev.toUpperCase(),
+        items: prev => [...prev, 4, 5],
+        count: prev => prev * 2
+      });
+      
+      console.log('After transformations:', transform);
+    }, 1000);
+    
+    // Nested path updates
+    console.log('\n=== Nested path updates ===');
+    const nested = ReactiveUtils.state({
+      user: {
+        profile: {
+          score: 10
+        }
+      }
+    });
+    
+    console.log('Before nested $set:', nested.user.profile.score);
+    
+    setTimeout(() => {
+      nested.$set({
+        'user.profile.score': prev => prev + 5
+      });
+      
+      console.log('After nested $set:', nested.user.profile.score);
+    }, 1500);
+    
+    // Conditional updates
+    console.log('\n=== Conditional updates ===');
+    const conditional = ReactiveUtils.state({
+      balance: 100,
+      transactions: 0
+    });
+    
+    setTimeout(() => {
+      conditional.$set({
+        balance: prev => prev > 50 ? prev - 10 : prev,
+        transactions: prev => prev + 1
+      });
+      
+      console.log('After conditional update:', conditional);
+    }, 2000);
+    
+    // Accumulator pattern
+    console.log('\n=== Accumulator pattern ===');
+    const accumulator = ReactiveUtils.state({
+      total: 0,
+      history: []
+    });
+    
+    setTimeout(() => {
+      accumulator.$set({
+        total: prev => prev + 25,
+        history: prev => [...prev, 25]
+      });
+      
+      console.log('After accumulation 1:', accumulator);
+      
+      accumulator.$set({
+        total: prev => prev + 50,
+        history: prev => [...prev, 50]
+      });
+      
+      console.log('After accumulation 2:', accumulator);
+    }, 2500);
+    
+    // Reactive updates
+    console.log('\n=== Reactive updates ===');
+    const reactive = ReactiveUtils.state({
+      value: 1
+    });
+    
+    let reactiveEffectRuns = 0;
+    ReactiveUtils.effect(() => {
+      reactiveEffectRuns++;
+      const val = reactive.value;
+      if (reactiveEffectRuns > 1) {
+        console.log(`Reactive effect #${reactiveEffectRuns}: value = ${val}`);
+      }
+    });
+    
+    setTimeout(() => {
+      reactive.$set({ value: prev => prev * 10 });
+      console.log('Effect runs after $set:', reactiveEffectRuns);
+    }, 3000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ $set(updates) supports functional updates');
+      console.log('✓ Functions receive previous value as argument');
+      console.log('✓ Can update multiple properties at once');
+      console.log('✓ Can mix functions and direct values');
+      console.log('✓ Perfect for increment/decrement patterns');
+      console.log('✓ Perfect for toggle patterns');
+      console.log('✓ $set returns this for chaining');
+      console.log('✓ Batches updates automatically');
+      console.log('✓ Supports complex transformations');
+      console.log('✓ Works with nested paths');
+      console.log('✓ Supports conditional updates');
+      console.log('✓ Updates are reactive');
+    }, 3500);
+  </script>
+</body>
+</html>

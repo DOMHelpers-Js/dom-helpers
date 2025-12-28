@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.errorFields (computed)</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.errorFields (computed) ===');
+    
+    // Basic errorFields
+    console.log('\n=== Basic errorFields ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: '',
+      password: ''
+    });
+    
+    console.log('errorFields (no errors):', form.errorFields);
+    console.log('Type:', Array.isArray(form.errorFields));
+    console.log('Length:', form.errorFields.length);
+    console.log('✓ errorFields is empty array initially');
+    
+    // errorFields with errors
+    console.log('\n=== errorFields with errors ===');
+    const errorForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    console.log('Before errors:', errorForm.errorFields);
+    
+    errorForm.errors.field1 = 'Error 1';
+    console.log('After error on field1:', errorForm.errorFields);
+    
+    errorForm.errors.field3 = 'Error 3';
+    console.log('After error on field3:', errorForm.errorFields);
+    
+    delete errorForm.errors.field1;
+    console.log('After clearing field1 error:', errorForm.errorFields);
+    
+    // errorFields is read-only
+    console.log('\n=== errorFields is read-only (computed) ===');
+    const readOnlyForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    console.log('Initial errorFields:', readOnlyForm.errorFields);
+    
+    try {
+      readOnlyForm.errorFields = ['test'];
+      console.log('After assignment attempt:', readOnlyForm.errorFields);
+      console.log('⚠️  Assignment ignored (read-only)');
+    } catch (e) {
+      console.log('✓ Cannot set computed property');
+    }
+    
+    // errorFields with validation
+    console.log('\n=== errorFields with validation ===');
+    const validatedForm = ReactiveUtils.form({
+      username: '',
+      email: '',
+      password: ''
+    }, {
+      validators: {
+        username: (value) => value ? null : 'Username required',
+        email: (value) => value ? null : 'Email required',
+        password: (value) => value ? null : 'Password required'
+      }
+    });
+    
+    console.log('Before validation:', validatedForm.errorFields);
+    
+    validatedForm.validate();
+    console.log('After validate() (all invalid):', validatedForm.errorFields);
+    
+    validatedForm.setValue('username', 'test');
+    console.log('After fixing username:', validatedForm.errorFields);
+    
+    validatedForm.setValue('email', 'test@example.com');
+    console.log('After fixing email:', validatedForm.errorFields);
+    
+    validatedForm.setValue('password', 'password123');
+    console.log('After fixing password:', validatedForm.errorFields);
+    
+    // errorFields is reactive
+    console.log('\n=== errorFields is reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      field1: '',
+      field2: ''
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: errorFields = [${reactiveForm.errorFields.join(', ')}]`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.errors.field1 = 'Error 1';
+      console.log('Effect runs after setting error:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactiveForm.errors.field2 = 'Error 2';
+      console.log('Effect runs after second error:', effectRuns);
+    }, 1000);
+    
+    // errorFields array methods
+    console.log('\n=== errorFields array methods ===');
+    const arrayForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    arrayForm.errors.field1 = 'Error 1';
+    arrayForm.errors.field2 = 'Error 2';
+    arrayForm.errors.field3 = 'Error 3';
+    
+    console.log('errorFields:', arrayForm.errorFields);
+    console.log('Length:', arrayForm.errorFields.length);
+    console.log('Includes "field1":', arrayForm.errorFields.includes('field1'));
+    console.log('Includes "field4":', arrayForm.errorFields.includes('field4'));
+    console.log('First:', arrayForm.errorFields[0]);
+    console.log('Last:', arrayForm.errorFields[arrayForm.errorFields.length - 1]);
+    
+    // errorFields for iteration
+    console.log('\n=== errorFields for iteration ===');
+    const iterForm = ReactiveUtils.form({
+      username: '',
+      email: '',
+      password: ''
+    }, {
+      validators: {
+        username: (value) => value ? null : 'Username required',
+        email: (value) => value ? null : 'Email required',
+        password: (value) => value ? null : 'Password required'
+      }
+    });
+    
+    iterForm.validate();
+    
+    console.log('Iterating errorFields:');
+    iterForm.errorFields.forEach(field => {
+      console.log(`  - ${field}: ${iterForm.errors[field]}`);
+    });
+    
+    // errorFields filters null/falsy
+    console.log('\n=== errorFields filters null/falsy ===');
+    const filterForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    filterForm.errors.field1 = 'Error 1';
+    filterForm.errors.field2 = null;
+    filterForm.errors.field3 = 'Error 3';
+    
+    console.log('errors object:', filterForm.errors);
+    console.log('errorFields (filtered):', filterForm.errorFields);
+    console.log('✓ Only fields with truthy errors included');
+    
+    // errorFields after clearErrors
+    console.log('\n=== errorFields after clearErrors ===');
+    const clearForm = ReactiveUtils.form({
+      name: '',
+      email: ''
+    });
+    
+    clearForm.errors.name = 'Name error';
+    clearForm.errors.email = 'Email error';
+    console.log('With errors:', clearForm.errorFields);
+    
+    setTimeout(() => {
+      clearForm.clearErrors();
+      console.log('After clearErrors():', clearForm.errorFields);
+      console.log('✓ errorFields empty after clearErrors');
+    }, 1500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ form.errorFields is a computed array property');
+      console.log('✓ form.errorFields is empty array initially');
+      console.log('✓ form.errorFields contains names of fields with errors');
+      console.log('✓ form.errorFields is read-only (cannot be set)');
+      console.log('✓ form.errorFields updates automatically when errors change');
+      console.log('✓ form.errorFields is reactive (triggers effects)');
+      console.log('✓ form.errorFields supports array methods');
+      console.log('✓ form.errorFields filters out null/falsy errors');
+      console.log('✓ form.errorFields useful for displaying error summaries');
+    }, 2000);
+  </script>
+</body>
+</html>

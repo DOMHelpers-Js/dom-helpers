@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.setError()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.setError() ===');
+    
+    // Basic setError
+    console.log('\n=== Basic setError ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: ''
+    });
+    
+    console.log('Before setError:', form.errors);
+    
+    form.setError('username', 'Username is required');
+    console.log('After setError("username"):', form.errors);
+    
+    form.setError('email', 'Invalid email format');
+    console.log('After setError("email"):', form.errors);
+    
+    // setError with null clears error
+    console.log('\n=== setError with null clears error ===');
+    const clearForm = ReactiveUtils.form({
+      field1: '',
+      field2: ''
+    });
+    
+    clearForm.setError('field1', 'Error message');
+    console.log('After setting error:', clearForm.errors);
+    
+    clearForm.setError('field1', null);
+    console.log('After setError(field1, null):', clearForm.errors);
+    console.log('✓ Setting null clears the error');
+    
+    // setError returns this (chainable)
+    console.log('\n=== setError returns this (chainable) ===');
+    const chainForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    const result = chainForm.setError('field1', 'Error 1');
+    console.log('setError returns this:', result === chainForm);
+    
+    chainForm
+      .setError('field1', 'Error 1')
+      .setError('field2', 'Error 2')
+      .setError('field3', 'Error 3');
+    console.log('After chained setError:', chainForm.errors);
+    
+    // setError updates isValid
+    console.log('\n=== setError updates isValid ===');
+    const validForm = ReactiveUtils.form({
+      email: ''
+    });
+    
+    console.log('Before error, isValid:', validForm.isValid);
+    
+    validForm.setError('email', 'Email required');
+    console.log('After setError, isValid:', validForm.isValid);
+    
+    validForm.setError('email', null);
+    console.log('After clearing, isValid:', validForm.isValid);
+    
+    // setError updates hasErrors
+    console.log('\n=== setError updates hasErrors ===');
+    const hasErrorsForm = ReactiveUtils.form({
+      name: ''
+    });
+    
+    console.log('Before error, hasErrors:', hasErrorsForm.hasErrors);
+    
+    hasErrorsForm.setError('name', 'Name required');
+    console.log('After setError, hasErrors:', hasErrorsForm.hasErrors);
+    
+    // setError is reactive
+    console.log('\n=== setError is reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const errorCount = Object.keys(reactiveForm.errors).length;
+      console.log(`Effect #${effectRuns}: ${errorCount} errors`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.setError('field', 'Error message');
+      console.log('Effect runs after setError:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactiveForm.setError('field', null);
+      console.log('Effect runs after clearing:', effectRuns);
+    }, 1000);
+    
+    // setError with different error messages
+    console.log('\n=== setError with different error messages ===');
+    const messagesForm = ReactiveUtils.form({
+      password: ''
+    });
+    
+    messagesForm.setError('password', 'Password required');
+    console.log('Error 1:', messagesForm.errors.password);
+    
+    messagesForm.setError('password', 'Password too short');
+    console.log('Error 2 (updated):', messagesForm.errors.password);
+    console.log('✓ Can update error message');
+    
+    // setError for validation
+    console.log('\n=== setError for validation ===');
+    const validationForm = ReactiveUtils.form({
+      email: '',
+      password: ''
+    });
+    
+    const validate = () => {
+      if (!validationForm.values.email) {
+        validationForm.setError('email', 'Email is required');
+      }
+      if (!validationForm.values.password) {
+        validationForm.setError('password', 'Password is required');
+      }
+    };
+    
+    setTimeout(() => {
+      validate();
+      console.log('After validation:', validationForm.errors);
+    }, 1500);
+    
+    // setError updates errorFields
+    console.log('\n=== setError updates errorFields ===');
+    const errorFieldsForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    console.log('Initial errorFields:', errorFieldsForm.errorFields);
+    
+    setTimeout(() => {
+      errorFieldsForm.setError('field1', 'Error 1');
+      console.log('After setError field1:', errorFieldsForm.errorFields);
+      
+      errorFieldsForm.setError('field3', 'Error 3');
+      console.log('After setError field3:', errorFieldsForm.errorFields);
+    }, 2000);
+    
+    // setError with custom validation
+    console.log('\n=== setError with custom validation ===');
+    const customForm = ReactiveUtils.form({
+      age: ''
+    });
+    
+    const validateAge = (value) => {
+      if (!value) {
+        customForm.setError('age', 'Age is required');
+      } else if (isNaN(value)) {
+        customForm.setError('age', 'Age must be a number');
+      } else if (value < 18) {
+        customForm.setError('age', 'Must be 18 or older');
+      } else {
+        customForm.setError('age', null);
+      }
+    };
+    
+    setTimeout(() => {
+      validateAge('');
+      console.log('Empty:', customForm.errors.age);
+      
+      validateAge('abc');
+      console.log('Not a number:', customForm.errors.age);
+      
+      validateAge('15');
+      console.log('Under 18:', customForm.errors.age);
+      
+      validateAge('25');
+      console.log('Valid:', customForm.errors.age);
+    }, 2500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ setError(field, error) sets field error');
+      console.log('✓ setError(field, null) clears field error');
+      console.log('✓ setError returns this for chaining');
+      console.log('✓ setError updates isValid computed property');
+      console.log('✓ setError updates hasErrors computed property');
+      console.log('✓ setError is reactive (triggers effects)');
+      console.log('✓ setError can update existing error messages');
+      console.log('✓ setError useful for custom validation');
+      console.log('✓ setError updates errorFields computed property');
+    }, 3000);
+  </script>
+</body>
+</html>

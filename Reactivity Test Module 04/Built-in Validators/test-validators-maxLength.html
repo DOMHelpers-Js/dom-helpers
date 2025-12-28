@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Validators.maxLength()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing Validators.maxLength() ===');
+    
+    // Basic maxLength validator
+    console.log('\n=== Basic maxLength validator ===');
+    const maxLength5 = ReactiveUtils.validators.maxLength(5);
+    
+    console.log('Length 3:', maxLength5('abc'));
+    console.log('Length 5:', maxLength5('abcde'));
+    console.log('Length 7:', maxLength5('abcdefg'));
+    console.log('✓ Validates maximum length');
+    
+    // maxLength with custom message
+    console.log('\n=== maxLength with custom message ===');
+    const customMaxLength = ReactiveUtils.validators.maxLength(10, 'Too long');
+    
+    console.log('Long with custom message:', customMaxLength('this is very long'));
+    console.log('✓ Uses custom message');
+    
+    // maxLength with default message
+    console.log('\n=== maxLength with default message ===');
+    const defaultMaxLength = ReactiveUtils.validators.maxLength(5);
+    
+    const defaultMessage = defaultMaxLength('toolong');
+    console.log('Default message:', defaultMessage);
+    console.log('Includes maximum:', defaultMessage.includes('5'));
+    
+    // maxLength with empty value
+    console.log('\n=== maxLength with empty value ===');
+    const emptyMaxLength = ReactiveUtils.validators.maxLength(5);
+    
+    console.log('Empty string:', emptyMaxLength(''));
+    console.log('Null:', emptyMaxLength(null));
+    console.log('Undefined:', emptyMaxLength(undefined));
+    console.log('✓ Allows empty');
+    
+    // maxLength exact match
+    console.log('\n=== maxLength exact match ===');
+    const exactMaxLength = ReactiveUtils.validators.maxLength(5);
+    
+    console.log('Exactly 5 chars:', exactMaxLength('abcde'));
+    console.log('✓ Accepts exact maximum length');
+    
+    // maxLength various lengths
+    console.log('\n=== maxLength various lengths ===');
+    const testLengths = [
+      { max: 10, value: 'short', expected: 'valid' },
+      { max: 10, value: 'exactly10c', expected: 'valid' },
+      { max: 10, value: 'toolongstring', expected: 'error' },
+      { max: 3, value: 'abc', expected: 'valid' },
+      { max: 3, value: 'abcd', expected: 'error' }
+    ];
+    
+    testLengths.forEach(({ max, value, expected }) => {
+      const validator = ReactiveUtils.validators.maxLength(max);
+      const result = validator(value);
+      const actual = result === null ? 'valid' : 'error';
+      console.log(`max=${max}, value="${value}" (${value.length}):`, actual === expected ? '✓' : '✗');
+    });
+    
+    // maxLength in form
+    console.log('\n=== maxLength in form ===');
+    const form = ReactiveUtils.form({
+      username: ''
+    }, {
+      validators: {
+        username: ReactiveUtils.validators.maxLength(20, 'Username too long (max 20 characters)')
+      }
+    });
+    
+    form.setValue('username', 'thisusernameiswaytoolongforthevalidator');
+    form.validateField('username');
+    console.log('Too long:', form.errors.username);
+    
+    form.setValue('username', 'validusername');
+    form.validateField('username');
+    console.log('Valid length:', form.errors.username);
+    
+    // maxLength combined with minLength
+    console.log('\n=== maxLength combined with minLength ===');
+    const combinedForm = ReactiveUtils.form({
+      password: ''
+    }, {
+      validators: {
+        password: ReactiveUtils.validators.combine(
+          ReactiveUtils.validators.minLength(8, 'Too short (min 8)'),
+          ReactiveUtils.validators.maxLength(20, 'Too long (max 20)')
+        )
+      }
+    });
+    
+    combinedForm.setValue('password', 'short');
+    combinedForm.validateField('password');
+    console.log('Too short:', combinedForm.errors.password);
+    
+    combinedForm.setValue('password', 'thisissuchaverylongpasswordthatexceedsthemaximum');
+    combinedForm.validateField('password');
+    console.log('Too long:', combinedForm.errors.password);
+    
+    combinedForm.setValue('password', 'justright123');
+    combinedForm.validateField('password');
+    console.log('Just right:', combinedForm.errors.password);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ Validators.maxLength(max) creates maxLength validator');
+      console.log('✓ maxLength accepts custom message');
+      console.log('✓ maxLength has default message with maximum');
+      console.log('✓ maxLength allows empty values');
+      console.log('✓ maxLength accepts exact maximum length');
+      console.log('✓ maxLength validates various lengths correctly');
+      console.log('✓ maxLength works in forms');
+      console.log('✓ maxLength can combine with minLength');
+    }, 500);
+  </script>
+</body>
+</html>

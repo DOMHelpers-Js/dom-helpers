@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test state.$computed()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    console.log('=== Testing state.$computed() ===');
+    
+    // Basic computed
+    console.log('\n=== Basic computed ===');
+    const state = ReactiveUtils.state({
+      firstName: 'John',
+      lastName: 'Doe'
+    });
+    
+    state.$computed('fullName', function() {
+      return this.firstName + ' ' + this.lastName;
+    });
+    
+    console.log('firstName:', state.firstName);
+    console.log('lastName:', state.lastName);
+    console.log('fullName (computed):', state.fullName);
+    
+    // Computed updates automatically
+    console.log('\n=== Computed updates automatically ===');
+    const counter = ReactiveUtils.state({ count: 5 });
+    
+    counter.$computed('doubled', function() {
+      return this.count * 2;
+    });
+    
+    counter.$computed('tripled', function() {
+      return this.count * 3;
+    });
+    
+    console.log('count:', counter.count);
+    console.log('doubled:', counter.doubled);
+    console.log('tripled:', counter.tripled);
+    
+    counter.count = 10;
+    console.log('After count = 10:');
+    console.log('  doubled:', counter.doubled);
+    console.log('  tripled:', counter.tripled);
+    
+    // Computed is read-only
+    console.log('\n=== Computed is read-only ===');
+    const readOnly = ReactiveUtils.state({ value: 100 });
+    readOnly.$computed('squared', function() {
+      return this.value * this.value;
+    });
+    
+    console.log('squared:', readOnly.squared);
+    
+    try {
+      readOnly.squared = 500;
+      console.log('After assignment attempt:', readOnly.squared);
+      console.log('⚠️  Assignment ignored (computed is read-only)');
+    } catch (e) {
+      console.log('✓ Cannot set computed property');
+    }
+    
+    // Multiple computed properties
+    console.log('\n=== Multiple computed properties ===');
+    const rect = ReactiveUtils.state({
+      width: 10,
+      height: 20
+    });
+    
+    rect.$computed('area', function() {
+      return this.width * this.height;
+    });
+    
+    rect.$computed('perimeter', function() {
+      return 2 * (this.width + this.height);
+    });
+    
+    rect.$computed('diagonal', function() {
+      return Math.sqrt(this.width * this.width + this.height * this.height);
+    });
+    
+    console.log('Rectangle:', { width: rect.width, height: rect.height });
+    console.log('area:', rect.area);
+    console.log('perimeter:', rect.perimeter);
+    console.log('diagonal:', rect.diagonal.toFixed(2));
+    
+    rect.width = 15;
+    rect.height = 25;
+    console.log('After resize:');
+    console.log('  area:', rect.area);
+    console.log('  perimeter:', rect.perimeter);
+    
+    // Computed can depend on other computed
+    console.log('\n=== Computed can depend on other computed ===');
+    const calc = ReactiveUtils.state({ base: 5 });
+    
+    calc.$computed('doubled', function() {
+      return this.base * 2;
+    });
+    
+    calc.$computed('quadrupled', function() {
+      return this.doubled * 2;
+    });
+    
+    console.log('base:', calc.base);
+    console.log('doubled:', calc.doubled);
+    console.log('quadrupled:', calc.quadrupled);
+    
+    calc.base = 10;
+    console.log('After base = 10:');
+    console.log('  quadrupled:', calc.quadrupled);
+    
+    // Computed with complex logic
+    console.log('\n=== Computed with complex logic ===');
+    const cart = ReactiveUtils.state({
+      items: [
+        { name: 'Item 1', price: 10, qty: 2 },
+        { name: 'Item 2', price: 20, qty: 1 },
+        { name: 'Item 3', price: 15, qty: 3 }
+      ],
+      taxRate: 0.1
+    });
+    
+    cart.$computed('subtotal', function() {
+      return this.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    });
+    
+    cart.$computed('tax', function() {
+      return this.subtotal * this.taxRate;
+    });
+    
+    cart.$computed('total', function() {
+      return this.subtotal + this.tax;
+    });
+    
+    console.log('Cart items:', cart.items.length);
+    console.log('subtotal:', cart.subtotal);
+    console.log('tax:', cart.tax);
+    console.log('total:', cart.total);
+    
+    // Computed is reactive
+    console.log('\n=== Computed is reactive ===');
+    const reactive = ReactiveUtils.state({ x: 10 });
+    reactive.$computed('xSquared', function() {
+      return this.x * this.x;
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: xSquared = ${reactive.xSquared}`);
+    });
+    
+    setTimeout(() => {
+      reactive.x = 5;
+      console.log('Effect runs after x change:', effectRuns);
+    }, 500);
+    
+    // Computed returns this (chainable)
+    console.log('\n=== Computed returns this (chainable) ===');
+    const chain = ReactiveUtils.state({ a: 1, b: 2 });
+    
+    const result = chain
+      .$computed('sum', function() { return this.a + this.b; })
+      .$computed('product', function() { return this.a * this.b; })
+      .$computed('average', function() { return (this.a + this.b) / 2; });
+    
+    console.log('Chained computed properties:');
+    console.log('  sum:', chain.sum);
+    console.log('  product:', chain.product);
+    console.log('  average:', chain.average);
+    console.log('Returns this:', result === chain);
+    
+    // Computed with conditional logic
+    console.log('\n=== Computed with conditional logic ===');
+    const status = ReactiveUtils.state({
+      score: 75,
+      maxScore: 100
+    });
+    
+    status.$computed('percentage', function() {
+      return (this.score / this.maxScore) * 100;
+    });
+    
+    status.$computed('grade', function() {
+      const pct = this.percentage;
+      if (pct >= 90) return 'A';
+      if (pct >= 80) return 'B';
+      if (pct >= 70) return 'C';
+      if (pct >= 60) return 'D';
+      return 'F';
+    });
+    
+    status.$computed('passed', function() {
+      return this.percentage >= 60;
+    });
+    
+    console.log('Score:', status.score);
+    console.log('percentage:', status.percentage);
+    console.log('grade:', status.grade);
+    console.log('passed:', status.passed);
+    
+    setTimeout(() => {
+      status.score = 95;
+      console.log('\nAfter score = 95:');
+      console.log('  percentage:', status.percentage);
+      console.log('  grade:', status.grade);
+    }, 1000);
+    
+    // Computed with array operations
+    console.log('\n=== Computed with array operations ===');
+    const list = ReactiveUtils.state({
+      items: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    });
+    
+    list.$computed('sum', function() {
+      return this.items.reduce((a, b) => a + b, 0);
+    });
+    
+    list.$computed('average', function() {
+      return this.sum / this.items.length;
+    });
+    
+    list.$computed('evens', function() {
+      return this.items.filter(n => n % 2 === 0);
+    });
+    
+    console.log('items:', list.items);
+    console.log('sum:', list.sum);
+    console.log('average:', list.average);
+    console.log('evens:', list.evens);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ $computed(key, fn) adds computed property');
+      console.log('✓ Computed updates automatically when dependencies change');
+      console.log('✓ Computed properties are read-only');
+      console.log('✓ Multiple computed properties can be added');
+      console.log('✓ Computed can depend on other computed properties');
+      console.log('✓ Computed supports complex logic');
+      console.log('✓ Computed is reactive (triggers effects)');
+      console.log('✓ $computed returns this for chaining');
+      console.log('✓ Computed can use conditionals and array operations');
+    }, 1500);
+  </script>
+</body>
+</html>

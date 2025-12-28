@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test state.$raw</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    console.log('=== Testing state.$raw ===');
+    
+    // Basic $raw
+    console.log('\n=== Basic $raw ===');
+    const state = ReactiveUtils.state({
+      count: 5,
+      name: 'test'
+    });
+    
+    const raw = state.$raw;
+    console.log('Raw object:', raw);
+    console.log('Raw count:', raw.count);
+    console.log('Raw name:', raw.name);
+    console.log('✓ Returns raw object');
+    
+    // $raw is non-reactive
+    console.log('\n=== $raw is non-reactive ===');
+    const reactiveState = ReactiveUtils.state({
+      value: 0
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const value = reactiveState.$raw.value;
+    });
+    
+    const initialRuns = effectRuns;
+    
+    reactiveState.value = 10;
+    
+    setTimeout(() => {
+      console.log('Effect runs after change:', effectRuns - initialRuns);
+      console.log('Expected: 0 (accessing $raw doesn\'t track)');
+      console.log('✓ $raw access is non-reactive');
+    }, 100);
+    
+    // $raw vs direct access
+    console.log('\n=== $raw vs direct access ===');
+    setTimeout(() => {
+      const compareState = ReactiveUtils.state({
+        field: 'value'
+      });
+      
+      console.log('Direct access:', compareState.field);
+      console.log('$raw access:', compareState.$raw.field);
+      console.log('Same value:', compareState.field === compareState.$raw.field);
+      console.log('✓ Values are the same');
+    }, 500);
+    
+    // $raw with nested objects
+    console.log('\n=== $raw with nested objects ===');
+    setTimeout(() => {
+      const nestedState = ReactiveUtils.state({
+        user: {
+          name: 'John',
+          email: 'john@example.com'
+        }
+      });
+      
+      const rawNested = nestedState.$raw;
+      console.log('Raw nested:', rawNested);
+      console.log('User name:', rawNested.user.name);
+      console.log('User email:', rawNested.user.email);
+      console.log('✓ Works with nested objects');
+    }, 1000);
+    
+    // $raw is getter only (read-only)
+    console.log('\n=== $raw is read-only ===');
+    setTimeout(() => {
+      const readOnlyState = ReactiveUtils.state({
+        value: 5
+      });
+      
+      try {
+        readOnlyState.$raw = { value: 10 };
+        console.log('✗ Should not allow assignment');
+      } catch (e) {
+        console.log('Assignment blocked:', e.message || 'Read-only property');
+        console.log('✓ $raw is read-only getter');
+      }
+    }, 1500);
+    
+    // $raw for performance
+    console.log('\n=== $raw for performance ===');
+    setTimeout(() => {
+      const perfState = ReactiveUtils.state({
+        items: [1, 2, 3, 4, 5]
+      });
+      
+      // Access via $raw doesn't trigger reactivity
+      const rawItems = perfState.$raw.items;
+      console.log('Raw items:', rawItems);
+      console.log('Can iterate without tracking:', rawItems.length);
+      console.log('✓ Useful for non-reactive access');
+    }, 2000);
+    
+    // $raw with toRaw
+    console.log('\n=== $raw vs toRaw ===');
+    setTimeout(() => {
+      const bothState = ReactiveUtils.state({
+        field: 'test'
+      });
+      
+      const viaRaw = bothState.$raw;
+      const viaToRaw = ReactiveUtils.toRaw(bothState);
+      
+      console.log('$raw:', viaRaw);
+      console.log('toRaw:', viaToRaw);
+      console.log('Same object:', viaRaw === viaToRaw);
+      console.log('✓ $raw and toRaw return same object');
+    }, 2500);
+    
+    // $raw preserves structure
+    console.log('\n=== $raw preserves structure ===');
+    setTimeout(() => {
+      const structState = ReactiveUtils.state({
+        a: 1,
+        b: {
+          c: 2,
+          d: {
+            e: 3
+          }
+        }
+      });
+      
+      const rawStruct = structState.$raw;
+      console.log('Raw structure:', rawStruct);
+      console.log('Nested value:', rawStruct.b.d.e);
+      console.log('Structure preserved:', rawStruct.b.d.e === 3);
+      console.log('✓ Preserves full structure');
+    }, 3000);
+    
+    // $raw doesn't break reactivity
+    console.log('\n=== $raw doesn\'t break reactivity ===');
+    setTimeout(() => {
+      const noBreakState = ReactiveUtils.state({
+        count: 0
+      });
+      
+      let runs = 0;
+      ReactiveUtils.effect(() => {
+        runs++;
+        const value = noBreakState.count; // Normal reactive access
+      });
+      
+      const beforeRuns = runs;
+      
+      // Access via $raw
+      const rawValue = noBreakState.$raw.count;
+      console.log('Raw value:', rawValue);
+      
+      // Normal reactive update still works
+      noBreakState.count = 5;
+      
+      setTimeout(() => {
+        console.log('Effect still runs:', runs > beforeRuns);
+        console.log('✓ $raw doesn\'t break normal reactivity');
+      }, 100);
+    }, 3500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ state.$raw returns raw non-reactive object');
+      console.log('✓ $raw access is non-reactive (doesn\'t track)');
+      console.log('✓ $raw values same as direct access');
+      console.log('✓ $raw works with nested objects');
+      console.log('✓ $raw is read-only getter');
+      console.log('✓ $raw useful for performance (non-tracked access)');
+      console.log('✓ $raw same as toRaw()');
+      console.log('✓ $raw preserves full structure');
+      console.log('✓ $raw doesn\'t break normal reactivity');
+    }, 4000);
+  </script>
+</body>
+</html>

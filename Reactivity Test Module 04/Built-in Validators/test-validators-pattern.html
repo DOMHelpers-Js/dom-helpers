@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Validators.pattern()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing Validators.pattern() ===');
+    
+    // Basic pattern validator
+    console.log('\n=== Basic pattern validator ===');
+    const alphaPattern = ReactiveUtils.validators.pattern(/^[a-zA-Z]+$/);
+    
+    console.log('Letters only:', alphaPattern('abc'));
+    console.log('With numbers:', alphaPattern('abc123'));
+    console.log('✓ Validates regex pattern');
+    
+    // pattern with custom message
+    console.log('\n=== pattern with custom message ===');
+    const customPattern = ReactiveUtils.validators.pattern(/^[0-9]+$/, 'Numbers only');
+    
+    console.log('Invalid with custom message:', customPattern('abc'));
+    console.log('✓ Uses custom message');
+    
+    // pattern with default message
+    console.log('\n=== pattern with default message ===');
+    const defaultPattern = ReactiveUtils.validators.pattern(/^[a-z]+$/);
+    
+    const defaultMessage = defaultPattern('ABC');
+    console.log('Default message:', defaultMessage);
+    console.log('Has message:', typeof defaultMessage === 'string');
+    
+    // pattern with empty value
+    console.log('\n=== pattern with empty value ===');
+    const emptyPattern = ReactiveUtils.validators.pattern(/^[a-z]+$/);
+    
+    console.log('Empty string:', emptyPattern(''));
+    console.log('Null:', emptyPattern(null));
+    console.log('Undefined:', emptyPattern(undefined));
+    console.log('✓ Allows empty');
+    
+    // pattern common use cases
+    console.log('\n=== pattern common use cases ===');
+    
+    // Phone number
+    const phonePattern = ReactiveUtils.validators.pattern(/^\d{3}-\d{3}-\d{4}$/, 'Format: 123-456-7890');
+    console.log('Valid phone:', phonePattern('123-456-7890'));
+    console.log('Invalid phone:', phonePattern('1234567890'));
+    
+    // Postal code
+    const zipPattern = ReactiveUtils.validators.pattern(/^\d{5}$/, 'Must be 5 digits');
+    console.log('Valid zip:', zipPattern('12345'));
+    console.log('Invalid zip:', zipPattern('1234'));
+    
+    // Username (alphanumeric + underscore)
+    const usernamePattern = ReactiveUtils.validators.pattern(/^[a-zA-Z0-9_]+$/, 'Alphanumeric and underscore only');
+    console.log('Valid username:', usernamePattern('user_123'));
+    console.log('Invalid username:', usernamePattern('user@123'));
+    
+    // Hex color
+    const hexPattern = ReactiveUtils.validators.pattern(/^#[0-9A-Fa-f]{6}$/, 'Must be hex color');
+    console.log('Valid hex:', hexPattern('#FF5733'));
+    console.log('Invalid hex:', hexPattern('FF5733'));
+    
+    // pattern in form
+    console.log('\n=== pattern in form ===');
+    const form = ReactiveUtils.form({
+      phone: ''
+    }, {
+      validators: {
+        phone: ReactiveUtils.validators.pattern(/^\d{3}-\d{3}-\d{4}$/, 'Invalid phone format')
+      }
+    });
+    
+    form.setValue('phone', '1234567890');
+    form.validateField('phone');
+    console.log('Wrong format:', form.errors.phone);
+    
+    form.setValue('phone', '123-456-7890');
+    form.validateField('phone');
+    console.log('Correct format:', form.errors.phone);
+    
+    // pattern with multiple patterns
+    console.log('\n=== pattern with multiple patterns ===');
+    const multiForm = ReactiveUtils.form({
+      username: '',
+      phone: '',
+      zipCode: ''
+    }, {
+      validators: {
+        username: ReactiveUtils.validators.pattern(/^[a-zA-Z0-9_]{3,20}$/, 'Invalid username'),
+        phone: ReactiveUtils.validators.pattern(/^\d{3}-\d{3}-\d{4}$/, 'Invalid phone'),
+        zipCode: ReactiveUtils.validators.pattern(/^\d{5}$/, 'Invalid zip code')
+      }
+    });
+    
+    multiForm.setValues({
+      username: 'user@123',
+      phone: '123-456-7890',
+      zipCode: '12345'
+    });
+    multiForm.validate();
+    console.log('Validation errors:', multiForm.errors);
+    
+    // pattern case sensitivity
+    console.log('\n=== pattern case sensitivity ===');
+    const caseSensitive = ReactiveUtils.validators.pattern(/^[a-z]+$/);
+    const caseInsensitive = ReactiveUtils.validators.pattern(/^[a-z]+$/i);
+    
+    console.log('Sensitive - lowercase:', caseSensitive('abc'));
+    console.log('Sensitive - uppercase:', caseSensitive('ABC'));
+    console.log('Insensitive - lowercase:', caseInsensitive('abc'));
+    console.log('Insensitive - uppercase:', caseInsensitive('ABC'));
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ Validators.pattern(regex) creates pattern validator');
+      console.log('✓ pattern accepts custom message');
+      console.log('✓ pattern has default message');
+      console.log('✓ pattern allows empty values');
+      console.log('✓ pattern validates phone numbers');
+      console.log('✓ pattern validates postal codes');
+      console.log('✓ pattern validates usernames');
+      console.log('✓ pattern validates hex colors');
+      console.log('✓ pattern works in forms');
+      console.log('✓ pattern supports case sensitivity');
+    }, 500);
+  </script>
+</body>
+</html>

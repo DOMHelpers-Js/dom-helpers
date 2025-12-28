@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.setValue()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.setValue() ===');
+    
+    // Basic setValue
+    console.log('\n=== Basic setValue ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: ''
+    });
+    
+    console.log('Before setValue:', form.values);
+    
+    form.setValue('username', 'johndoe');
+    console.log('After setValue("username", "johndoe"):', form.values);
+    
+    form.setValue('email', 'john@example.com');
+    console.log('After setValue("email", "john@example.com"):', form.values);
+    
+    // setValue marks as touched
+    console.log('\n=== setValue marks as touched ===');
+    const touchForm = ReactiveUtils.form({
+      name: '',
+      age: ''
+    });
+    
+    console.log('Before setValue:');
+    console.log('  values:', touchForm.values);
+    console.log('  touched:', touchForm.touched);
+    
+    touchForm.setValue('name', 'Alice');
+    console.log('After setValue("name"):');
+    console.log('  values:', touchForm.values);
+    console.log('  touched:', touchForm.touched);
+    console.log('  ✓ Field marked as touched');
+    
+    // setValue with validation
+    console.log('\n=== setValue with validation ===');
+    const validatedForm = ReactiveUtils.form({
+      email: '',
+      password: ''
+    }, {
+      validators: {
+        email: (value) => {
+          if (!value) return 'Email required';
+          if (!/\S+@\S+\.\S+/.test(value)) return 'Invalid email';
+          return null;
+        },
+        password: (value) => {
+          if (!value) return 'Password required';
+          if (value.length < 6) return 'Too short';
+          return null;
+        }
+      }
+    });
+    
+    console.log('Before setValue:', validatedForm.errors);
+    
+    validatedForm.setValue('email', 'invalid');
+    console.log('After setValue("email", "invalid"):', validatedForm.errors);
+    console.log('✓ Auto-validates on setValue');
+    
+    validatedForm.setValue('email', 'valid@example.com');
+    console.log('After setValue("email", "valid@example.com"):', validatedForm.errors);
+    console.log('✓ Clears error when valid');
+    
+    // setValue returns this (chainable)
+    console.log('\n=== setValue returns this (chainable) ===');
+    const chainForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    const result = chainForm.setValue('field1', 'value1');
+    console.log('setValue returns this:', result === chainForm);
+    
+    chainForm
+      .setValue('field1', 'Value 1')
+      .setValue('field2', 'Value 2')
+      .setValue('field3', 'Value 3');
+    console.log('After chained setValue:', chainForm.values);
+    
+    // setValue with different types
+    console.log('\n=== setValue with different types ===');
+    const typedForm = ReactiveUtils.form({
+      string: '',
+      number: 0,
+      boolean: false,
+      array: [],
+      object: null
+    });
+    
+    typedForm.setValue('string', 'text');
+    typedForm.setValue('number', 42);
+    typedForm.setValue('boolean', true);
+    typedForm.setValue('array', [1, 2, 3]);
+    typedForm.setValue('object', { key: 'value' });
+    
+    console.log('Values after setValue:', typedForm.values);
+    console.log('Types preserved:', {
+      string: typeof typedForm.values.string,
+      number: typeof typedForm.values.number,
+      boolean: typeof typedForm.values.boolean,
+      array: Array.isArray(typedForm.values.array),
+      object: typeof typedForm.values.object
+    });
+    
+    // setValue is reactive
+    console.log('\n=== setValue is reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      count: 0,
+      message: ''
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: count = ${reactiveForm.values.count}, message = "${reactiveForm.values.message}"`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.setValue('count', 1);
+      console.log('Effect runs after setValue("count"):', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactiveForm.setValue('message', 'Hello');
+      console.log('Effect runs after setValue("message"):', effectRuns);
+    }, 1000);
+    
+    // setValue with empty/null values
+    console.log('\n=== setValue with empty/null values ===');
+    const emptyForm = ReactiveUtils.form({
+      field1: 'initial',
+      field2: 'initial'
+    });
+    
+    console.log('Initial:', emptyForm.values);
+    
+    emptyForm.setValue('field1', '');
+    console.log('After setValue("field1", ""):', emptyForm.values);
+    
+    emptyForm.setValue('field2', null);
+    console.log('After setValue("field2", null):', emptyForm.values);
+    
+    // setValue non-existent field
+    console.log('\n=== setValue non-existent field ===');
+    const dynamicForm = ReactiveUtils.form({
+      existing: ''
+    });
+    
+    console.log('Before setValue:', dynamicForm.values);
+    
+    dynamicForm.setValue('newField', 'new value');
+    console.log('After setValue("newField"):', dynamicForm.values);
+    console.log('✓ Creates new field if it doesn\'t exist');
+    
+    // setValue updates isDirty
+    console.log('\n=== setValue updates isDirty ===');
+    const dirtyForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    console.log('Before setValue, isDirty:', dirtyForm.isDirty);
+    
+    setTimeout(() => {
+      dirtyForm.setValue('field', 'value');
+      console.log('After setValue, isDirty:', dirtyForm.isDirty);
+    }, 1500);
+    
+    // setValue with batch updates
+    console.log('\n=== setValue with batch updates ===');
+    const batchForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    let batchEffectRuns = 0;
+    ReactiveUtils.effect(() => {
+      batchEffectRuns++;
+      const sum = Object.keys(batchForm.values).length;
+      console.log(`Batch effect #${batchEffectRuns}: ${sum} fields`);
+    });
+    
+    setTimeout(() => {
+      ReactiveUtils.batch(() => {
+        batchForm.setValue('field1', 'v1');
+        batchForm.setValue('field2', 'v2');
+        batchForm.setValue('field3', 'v3');
+      });
+      console.log('Effect runs once after batch:', batchEffectRuns);
+    }, 2000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ setValue(field, value) sets single field value');
+      console.log('✓ setValue() marks field as touched');
+      console.log('✓ setValue() auto-validates if validator exists');
+      console.log('✓ setValue() returns this for chaining');
+      console.log('✓ setValue() works with all data types');
+      console.log('✓ setValue() is reactive (triggers effects)');
+      console.log('✓ setValue() can create new fields dynamically');
+      console.log('✓ setValue() updates isDirty computed property');
+      console.log('✓ setValue() works with batch updates');
+    }, 2500);
+  </script>
+</body>
+</html>

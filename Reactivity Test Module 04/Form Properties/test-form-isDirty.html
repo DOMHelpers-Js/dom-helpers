@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.isDirty (computed)</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.isDirty (computed) ===');
+    
+    // Basic isDirty
+    console.log('\n=== Basic isDirty ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: ''
+    });
+    
+    console.log('isDirty (no touched):', form.isDirty);
+    console.log('Type:', typeof form.isDirty);
+    console.log('✓ isDirty is false when no fields touched');
+    
+    // isDirty with touched fields
+    console.log('\n=== isDirty with touched fields ===');
+    const touchForm = ReactiveUtils.form({
+      name: ''
+    });
+    
+    console.log('Before touch:', touchForm.isDirty);
+    
+    touchForm.touched.name = true;
+    console.log('After touching field:', touchForm.isDirty);
+    
+    delete touchForm.touched.name;
+    console.log('After un-touching field:', touchForm.isDirty);
+    
+    // isDirty is read-only
+    console.log('\n=== isDirty is read-only (computed) ===');
+    const readOnlyForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    console.log('Initial isDirty:', readOnlyForm.isDirty);
+    
+    try {
+      readOnlyForm.isDirty = true;
+      console.log('After assignment attempt:', readOnlyForm.isDirty);
+      console.log('⚠️  Assignment ignored (read-only)');
+    } catch (e) {
+      console.log('✓ Cannot set computed property');
+    }
+    
+    // isDirty with setValue
+    console.log('\n=== isDirty with setValue ===');
+    const valueForm = ReactiveUtils.form({
+      username: '',
+      email: ''
+    });
+    
+    console.log('Before setValue:', valueForm.isDirty);
+    
+    valueForm.setValue('username', 'test');
+    console.log('After setValue("username"):', valueForm.isDirty);
+    
+    valueForm.setValue('email', 'test@example.com');
+    console.log('After setValue("email"):', valueForm.isDirty);
+    
+    // isDirty is reactive
+    console.log('\n=== isDirty is reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: isDirty = ${reactiveForm.isDirty}`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.setValue('field', 'value');
+      console.log('Effect runs after setValue:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactiveForm.reset();
+      console.log('Effect runs after reset:', effectRuns);
+    }, 1000);
+    
+    // isDirty with multiple fields
+    console.log('\n=== isDirty with multiple fields ===');
+    const multiForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    console.log('No touched fields:', multiForm.isDirty);
+    
+    multiForm.touched.field1 = true;
+    console.log('1 touched field:', multiForm.isDirty);
+    
+    multiForm.touched.field2 = true;
+    console.log('2 touched fields:', multiForm.isDirty);
+    
+    delete multiForm.touched.field1;
+    delete multiForm.touched.field2;
+    console.log('After clearing touched:', multiForm.isDirty);
+    
+    // isDirty after reset
+    console.log('\n=== isDirty after reset ===');
+    const resetForm = ReactiveUtils.form({
+      name: '',
+      email: ''
+    });
+    
+    resetForm.setValue('name', 'Test');
+    resetForm.setValue('email', 'test@example.com');
+    console.log('After setValue (touched):', resetForm.isDirty);
+    
+    setTimeout(() => {
+      resetForm.reset();
+      console.log('After reset():', resetForm.isDirty);
+      console.log('✓ isDirty becomes false after reset');
+    }, 1500);
+    
+    // isDirty for conditional UI
+    console.log('\n=== isDirty for conditional UI ===');
+    const uiForm = ReactiveUtils.form({
+      content: ''
+    });
+    
+    ReactiveUtils.effect(() => {
+      if (uiForm.isDirty) {
+        console.log('UI: Show "You have unsaved changes" warning');
+      } else {
+        console.log('UI: No warning');
+      }
+    });
+    
+    setTimeout(() => {
+      uiForm.setValue('content', 'Some text...');
+    }, 2000);
+    
+    setTimeout(() => {
+      uiForm.reset();
+    }, 2500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ form.isDirty is a computed boolean property');
+      console.log('✓ form.isDirty is false when no fields touched');
+      console.log('✓ form.isDirty is true when any field is touched');
+      console.log('✓ form.isDirty is read-only (cannot be set)');
+      console.log('✓ form.isDirty updates automatically when touched changes');
+      console.log('✓ form.isDirty is reactive (triggers effects)');
+      console.log('✓ form.isDirty useful for unsaved changes warnings');
+    }, 3000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.submit()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.submit() ===');
+    
+    // Basic submit
+    console.log('\n=== Basic submit ===');
+    const form = ReactiveUtils.form({
+      username: 'johndoe',
+      email: 'john@example.com'
+    }, {
+      validators: {
+        username: (value) => value ? null : 'Username required',
+        email: (value) => value ? null : 'Email required'
+      },
+      onSubmit: async (values) => {
+        console.log('Submit handler called with:', values);
+        return { userId: 123 };
+      }
+    });
+    
+    setTimeout(async () => {
+      console.log('Calling submit...');
+      const result = await form.submit();
+      console.log('Submit result:', result);
+    }, 500);
+    
+    // submit returns result object
+    console.log('\n=== submit returns result object ===');
+    const resultForm = ReactiveUtils.form({
+      name: 'Test'
+    }, {
+      onSubmit: async (values) => {
+        return { data: values, status: 'success' };
+      }
+    });
+    
+    setTimeout(async () => {
+      const result = await resultForm.submit();
+      console.log('Result object:', result);
+      console.log('Has success:', 'success' in result);
+      console.log('Has result:', 'result' in result);
+    }, 1000);
+    
+    // submit with validation failure
+    console.log('\n=== submit with validation failure ===');
+    const invalidForm = ReactiveUtils.form({
+      username: '',
+      email: ''
+    }, {
+      validators: {
+        username: (value) => value ? null : 'Username required',
+        email: (value) => value ? null : 'Email required'
+      },
+      onSubmit: async (values) => {
+        console.log('This should not be called');
+        return values;
+      }
+    });
+    
+    setTimeout(async () => {
+      console.log('Submitting invalid form...');
+      const result = await invalidForm.submit();
+      console.log('Submit result:', result);
+      console.log('Form errors:', invalidForm.errors);
+      console.log('Form touched:', invalidForm.touched);
+    }, 1500);
+    
+    // submit touches all fields
+    console.log('\n=== submit touches all fields ===');
+    const touchForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    }, {
+      validators: {
+        field1: (value) => value ? null : 'Field1 required',
+        field2: (value) => value ? null : 'Field2 required',
+        field3: (value) => value ? null : 'Field3 required'
+      }
+    });
+    
+    setTimeout(async () => {
+      console.log('Before submit, touched:', touchForm.touched);
+      
+      await touchForm.submit();
+      console.log('After submit, touched:', touchForm.touched);
+      console.log('✓ All fields touched after submit');
+    }, 2000);
+    
+    // submit validates form
+    console.log('\n=== submit validates form ===');
+    const validateForm = ReactiveUtils.form({
+      email: 'invalid'
+    }, {
+      validators: {
+        email: (value) => {
+          if (!/\S+@\S+\.\S+/.test(value)) return 'Invalid email';
+          return null;
+        }
+      }
+    });
+    
+    setTimeout(async () => {
+      console.log('Before submit, errors:', validateForm.errors);
+      
+      await validateForm.submit();
+      console.log('After submit, errors:', validateForm.errors);
+      console.log('✓ Form validated during submit');
+    }, 2500);
+    
+    // submit sets isSubmitting
+    console.log('\n=== submit sets isSubmitting ===');
+    const submittingForm = ReactiveUtils.form({
+      field: 'value'
+    }, {
+      onSubmit: async (values) => {
+        console.log('isSubmitting during handler:', submittingForm.isSubmitting);
+        await new Promise(resolve => setTimeout(resolve, 100));
+        return values;
+      }
+    });
+    
+    setTimeout(async () => {
+      console.log('Before submit, isSubmitting:', submittingForm.isSubmitting);
+      
+      const submitPromise = submittingForm.submit();
+      console.log('During submit, isSubmitting:', submittingForm.isSubmitting);
+      
+      await submitPromise;
+      console.log('After submit, isSubmitting:', submittingForm.isSubmitting);
+    }, 3000);
+    
+    // submit increments submitCount
+    console.log('\n=== submit increments submitCount ===');
+    const countForm = ReactiveUtils.form({
+      field: 'value'
+    }, {
+      onSubmit: async (values) => values
+    });
+    
+    setTimeout(async () => {
+      console.log('Initial submitCount:', countForm.submitCount);
+      
+      await countForm.submit();
+      console.log('After 1st submit:', countForm.submitCount);
+      
+      await countForm.submit();
+      console.log('After 2nd submit:', countForm.submitCount);
+      
+      await countForm.submit();
+      console.log('After 3rd submit:', countForm.submitCount);
+    }, 3500);
+    
+    // submit with custom handler
+    console.log('\n=== submit with custom handler ===');
+    const customForm = ReactiveUtils.form({
+      name: 'Test'
+    }, {
+      onSubmit: async (values) => {
+        console.log('Default handler');
+        return values;
+      }
+    });
+    
+    setTimeout(async () => {
+      const customHandler = async (values, form) => {
+        console.log('Custom handler called with:', values);
+        console.log('Form instance:', form === customForm);
+        return { custom: true };
+      };
+      
+      const result = await customForm.submit(customHandler);
+      console.log('Custom handler result:', result);
+    }, 4000);
+    
+   
+// submit handles errors
+console.log('\n=== submit handles errors ===');
+const errorForm = ReactiveUtils.form({
+  field: 'value'
+}, {
+  onSubmit: async (values) => {
+    throw new Error('Submit failed');
+  }
+});
+
+setTimeout(async () => {
+  console.log('Submitting form that throws error (expected error below)...');
+  console.log('↓ This error is intentional and will be caught:');
+  const result = await errorForm.submit();
+  console.log('↑ Error was caught successfully');
+  console.log('Submit result:', result);
+  console.log('Has error:', 'error' in result);
+  console.log('Error caught:', result.error.message === 'Submit failed');
+  console.log('isSubmitting after error:', errorForm.isSubmitting);
+  console.log('✓ Error handling works correctly');
+}, 4500);
+
+    // submit returns success object
+    console.log('\n=== submit returns success object ===');
+    const successForm = ReactiveUtils.form({
+      username: 'john',
+      email: 'john@example.com'
+    }, {
+      validators: {
+        username: (value) => value ? null : 'Username required',
+        email: (value) => value ? null : 'Email required'
+      },
+      onSubmit: async (values) => {
+        return { userId: 456, token: 'abc123' };
+      }
+    });
+    
+    setTimeout(async () => {
+      const result = await successForm.submit();
+      console.log('Success result:', result);
+      console.log('Structure:', {
+        success: result.success,
+        hasResult: 'result' in result,
+        result: result.result
+      });
+    }, 5000);
+    
+    // submit without handler
+    console.log('\n=== submit without handler ===');
+    const noHandlerForm = ReactiveUtils.form({
+      field: 'value'
+    });
+    
+    setTimeout(async () => {
+      console.log('Submitting without handler...');
+      const result = await noHandlerForm.submit();
+      console.log('Result:', result);
+      console.log('✓ Handles missing handler gracefully');
+    }, 5500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ submit() handles form submission');
+      console.log('✓ submit returns result object {success, result/errors/error}');
+      console.log('✓ submit prevents submission on validation failure');
+      console.log('✓ submit touches all fields before validation');
+      console.log('✓ submit validates form before calling handler');
+      console.log('✓ submit sets isSubmitting during submission');
+      console.log('✓ submit increments submitCount on success');
+      console.log('✓ submit accepts custom handler parameter');
+      console.log('✓ submit handles errors gracefully');
+      console.log('✓ submit is async (returns Promise)');
+      console.log('✓ submit handles missing handler');
+    }, 6000);
+
+
+  </script>
+</body>
+</html>

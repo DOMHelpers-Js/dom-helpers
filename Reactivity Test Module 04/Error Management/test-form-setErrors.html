@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.setErrors()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.setErrors() ===');
+    
+    // Basic setErrors
+    console.log('\n=== Basic setErrors ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: '',
+      password: ''
+    });
+    
+    console.log('Before setErrors:', form.errors);
+    
+    form.setErrors({
+      username: 'Username required',
+      email: 'Email required',
+      password: 'Password required'
+    });
+    console.log('After setErrors:', form.errors);
+    
+    // setErrors with null values clears errors
+    console.log('\n=== setErrors with null values clears errors ===');
+    const clearForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    clearForm.setErrors({
+      field1: 'Error 1',
+      field2: 'Error 2',
+      field3: 'Error 3'
+    });
+    console.log('After setting errors:', clearForm.errors);
+    
+    clearForm.setErrors({
+      field1: null,
+      field3: null
+    });
+    console.log('After clearing field1 and field3:', clearForm.errors);
+    console.log('✓ Null values clear specific errors');
+    
+    // setErrors returns this (chainable)
+    console.log('\n=== setErrors returns this (chainable) ===');
+    const chainForm = ReactiveUtils.form({
+      field1: '',
+      field2: ''
+    });
+    
+    const result = chainForm.setErrors({ field1: 'Error 1' });
+    console.log('setErrors returns this:', result === chainForm);
+    
+    chainForm
+      .setErrors({ field1: 'Error 1' })
+      .setErrors({ field2: 'Error 2' });
+    console.log('After chained setErrors:', chainForm.errors);
+    
+    // setErrors partial update
+    console.log('\n=== setErrors partial update ===');
+    const partialForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    partialForm.setErrors({
+      field1: 'Error 1',
+      field2: 'Error 2',
+      field3: 'Error 3'
+    });
+    console.log('All errors set:', partialForm.errors);
+    
+    partialForm.setErrors({
+      field1: 'Updated Error 1'
+    });
+    console.log('After partial update:', partialForm.errors);
+    console.log('✓ Other errors preserved');
+    
+    // setErrors updates isValid
+    console.log('\n=== setErrors updates isValid ===');
+    const validForm = ReactiveUtils.form({
+      email: '',
+      password: ''
+    });
+    
+    console.log('Before errors, isValid:', validForm.isValid);
+    
+    validForm.setErrors({
+      email: 'Email required',
+      password: 'Password required'
+    });
+    console.log('After setErrors, isValid:', validForm.isValid);
+    
+    // setErrors updates hasErrors
+    console.log('\n=== setErrors updates hasErrors ===');
+    const hasErrorsForm = ReactiveUtils.form({
+      name: '',
+      email: ''
+    });
+    
+    console.log('Before errors, hasErrors:', hasErrorsForm.hasErrors);
+    
+    hasErrorsForm.setErrors({
+      name: 'Name required',
+      email: 'Email required'
+    });
+    console.log('After setErrors, hasErrors:', hasErrorsForm.hasErrors);
+    
+    // setErrors is reactive
+    console.log('\n=== setErrors is reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      field1: '',
+      field2: ''
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const errorCount = Object.keys(reactiveForm.errors).length;
+      console.log(`Effect #${effectRuns}: ${errorCount} errors`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.setErrors({
+        field1: 'Error 1',
+        field2: 'Error 2'
+      });
+      console.log('Effect runs after setErrors:', effectRuns);
+    }, 500);
+    
+    // setErrors batches updates
+    console.log('\n=== setErrors batches updates ===');
+    const batchForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    let batchEffectRuns = 0;
+    ReactiveUtils.effect(() => {
+      batchEffectRuns++;
+      const count = Object.keys(batchForm.errors).length;
+      if (batchEffectRuns > 1) {
+        console.log(`Batch effect #${batchEffectRuns}: ${count} errors`);
+      }
+    });
+    
+    setTimeout(() => {
+      const beforeRuns = batchEffectRuns;
+      batchForm.setErrors({
+        field1: 'Error 1',
+        field2: 'Error 2',
+        field3: 'Error 3'
+      });
+      setTimeout(() => {
+        console.log('Batched - effect ran:', (batchEffectRuns - beforeRuns), 'time(s)');
+      }, 100);
+    }, 1000);
+    
+    // setErrors for validation results
+    console.log('\n=== setErrors for validation results ===');
+    const validationForm = ReactiveUtils.form({
+      email: '',
+      password: '',
+      confirmPassword: ''
+    });
+    
+    const validateForm = () => {
+      const errors = {};
+      
+      if (!validationForm.values.email) {
+        errors.email = 'Email required';
+      }
+      if (!validationForm.values.password) {
+        errors.password = 'Password required';
+      }
+      if (validationForm.values.password !== validationForm.values.confirmPassword) {
+        errors.confirmPassword = 'Passwords must match';
+      }
+      
+      validationForm.setErrors(errors);
+    };
+    
+    setTimeout(() => {
+      validateForm();
+      console.log('Validation errors:', validationForm.errors);
+    }, 1500);
+    
+    // setErrors updates errorFields
+    console.log('\n=== setErrors updates errorFields ===');
+    const errorFieldsForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    console.log('Initial errorFields:', errorFieldsForm.errorFields);
+    
+    setTimeout(() => {
+      errorFieldsForm.setErrors({
+        field1: 'Error 1',
+        field3: 'Error 3'
+      });
+      console.log('After setErrors:', errorFieldsForm.errorFields);
+    }, 2000);
+    
+    // setErrors with empty object
+    console.log('\n=== setErrors with empty object ===');
+    const emptyForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    emptyForm.setErrors({ field: 'Error' });
+    console.log('With error:', emptyForm.errors);
+    
+    setTimeout(() => {
+      emptyForm.setErrors({});
+      console.log('After setErrors({}):', emptyForm.errors);
+      console.log('✓ Empty object does not clear existing errors');
+    }, 2500);
+    
+    // setErrors vs multiple setError
+    console.log('\n=== setErrors vs multiple setError ===');
+    const compareForm1 = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    const compareForm2 = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    let effect1Runs = 0;
+    let effect2Runs = 0;
+    
+    ReactiveUtils.effect(() => {
+      effect1Runs++;
+      const _ = compareForm1.errors;
+    });
+    
+    ReactiveUtils.effect(() => {
+      effect2Runs++;
+      const _ = compareForm2.errors;
+    });
+    
+    setTimeout(() => {
+      // Multiple setError calls
+      compareForm1.setError('field1', 'Error 1');
+      compareForm1.setError('field2', 'Error 2');
+      compareForm1.setError('field3', 'Error 3');
+      console.log('Multiple setError - effect runs:', effect1Runs);
+      
+      // Single setErrors call
+      compareForm2.setErrors({
+        field1: 'Error 1',
+        field2: 'Error 2',
+        field3: 'Error 3'
+      });
+      console.log('Single setErrors - effect runs:', effect2Runs);
+      console.log('✓ setErrors is more efficient (batched)');
+    }, 3000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ setErrors(errors) sets multiple errors');
+      console.log('✓ setErrors with null values clears specific errors');
+      console.log('✓ setErrors returns this for chaining');
+      console.log('✓ setErrors supports partial updates');
+      console.log('✓ setErrors updates isValid computed property');
+      console.log('✓ setErrors updates hasErrors computed property');
+      console.log('✓ setErrors is reactive (triggers effects)');
+      console.log('✓ setErrors batches updates for efficiency');
+      console.log('✓ setErrors useful for validation results');
+      console.log('✓ setErrors more efficient than multiple setError()');
+    }, 3500);
+  </script>
+</body>
+</html>

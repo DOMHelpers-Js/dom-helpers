@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Validators.combine()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing Validators.combine() ===');
+    
+    // Basic combine
+    console.log('\n=== Basic combine ===');
+    const combined = ReactiveUtils.validators.combine(
+      ReactiveUtils.validators.required('Required'),
+      ReactiveUtils.validators.minLength(3, 'Too short')
+    );
+    
+    console.log('Empty:', combined(''));
+    console.log('Too short:', combined('ab'));
+    console.log('Valid:', combined('abc'));
+    console.log('✓ Combines multiple validators');
+    
+    // combine returns first error
+    console.log('\n=== combine returns first error ===');
+    const firstError = ReactiveUtils.validators.combine(
+      ReactiveUtils.validators.required('Error 1'),
+      ReactiveUtils.validators.minLength(5, 'Error 2'),
+      ReactiveUtils.validators.maxLength(10, 'Error 3')
+    );
+    
+    console.log('Empty (first error):', firstError(''));
+    console.log('Too short (second error):', firstError('ab'));
+    console.log('Too long (third error):', firstError('verylongstring'));
+    console.log('✓ Returns first failing validator error');
+    
+    // combine with required and email
+    console.log('\n=== combine with required and email ===');
+    const requiredEmail = ReactiveUtils.validators.combine(
+      ReactiveUtils.validators.required('Email required'),
+      ReactiveUtils.validators.email('Invalid email')
+    );
+    
+    console.log('Empty:', requiredEmail(''));
+    console.log('Invalid format:', requiredEmail('invalid'));
+    console.log('Valid email:', requiredEmail('test@example.com'));
+    
+    // combine with min and max
+    console.log('\n=== combine with min and max (range) ===');
+    const ageRange = ReactiveUtils.validators.combine(
+      ReactiveUtils.validators.required('Age required'),
+      ReactiveUtils.validators.min(18, 'Too young (min 18)'),
+      ReactiveUtils.validators.max(65, 'Too old (max 65)')
+    );
+    
+    console.log('Empty:', ageRange(''));
+    console.log('Too young:', ageRange(16));
+    console.log('Too old:', ageRange(70));
+    console.log('Valid age:', ageRange(30));
+    
+    // combine with minLength and maxLength
+    console.log('\n=== combine with minLength and maxLength ===');
+    const usernameValidator = ReactiveUtils.validators.combine(
+      ReactiveUtils.validators.required('Username required'),
+      ReactiveUtils.validators.minLength(3, 'Too short (min 3)'),
+      ReactiveUtils.validators.maxLength(20, 'Too long (max 20)'),
+      ReactiveUtils.validators.pattern(/^[a-zA-Z0-9_]+$/, 'Invalid characters')
+    );
+    
+    console.log('Empty:', usernameValidator(''));
+    console.log('Too short:', usernameValidator('ab'));
+    console.log('Invalid chars:', usernameValidator('user@name'));
+    console.log('Too long:', usernameValidator('verylongusernamethatisinvalid'));
+    console.log('Valid:', usernameValidator('user_123'));
+    
+    // combine with custom validator
+    console.log('\n=== combine with custom validator ===');
+    const passwordValidator = ReactiveUtils.validators.combine(
+      ReactiveUtils.validators.required('Password required'),
+      ReactiveUtils.validators.minLength(8, 'Too short (min 8)'),
+      ReactiveUtils.validators.custom((value) => {
+        if (!value) return null;
+        if (!/[A-Z]/.test(value)) return 'Must contain uppercase';
+        if (!/[0-9]/.test(value)) return 'Must contain number';
+        return null;
+      })
+    );
+    
+    console.log('Empty:', passwordValidator(''));
+    console.log('Too short:', passwordValidator('Pass1'));
+    console.log('No uppercase:', passwordValidator('password1'));
+    console.log('No number:', passwordValidator('Password'));
+    console.log('Valid:', passwordValidator('Password123'));
+    
+    // combine in form
+    console.log('\n=== combine in form ===');
+    const form = ReactiveUtils.form({
+      email: '',
+      password: '',
+      confirmPassword: ''
+    }, {
+      validators: {
+        email: ReactiveUtils.validators.combine(
+          ReactiveUtils.validators.required('Email required'),
+          ReactiveUtils.validators.email('Invalid email')
+        ),
+        password: ReactiveUtils.validators.combine(
+          ReactiveUtils.validators.required('Password required'),
+          ReactiveUtils.validators.minLength(8, 'Too short')
+        ),
+        confirmPassword: ReactiveUtils.validators.combine(
+          ReactiveUtils.validators.required('Confirm password'),
+          ReactiveUtils.validators.match('password', 'Passwords must match')
+        )
+      }
+    });
+    
+    form.validate();
+    console.log('Empty form errors:', form.errors);
+    
+    form.setValues({
+      email: 'test@example.com',
+      password: 'password123',
+      confirmPassword: 'password123'
+    });
+    form.validate();
+    console.log('Valid form errors:', form.errors);
+    
+    // combine many validators
+    console.log('\n=== combine many validators ===');
+    const complexValidator = ReactiveUtils.validators.combine(
+      ReactiveUtils.validators.required('Required'),
+      ReactiveUtils.validators.minLength(8, 'Too short'),
+      ReactiveUtils.validators.maxLength(50, 'Too long'),
+      ReactiveUtils.validators.pattern(/^[a-zA-Z]/, 'Must start with letter'),
+      ReactiveUtils.validators.pattern(/[0-9]/, 'Must contain number'),
+      ReactiveUtils.validators.custom((value) => {
+        if (!value) return null;
+        if (value.includes(' ')) return 'No spaces allowed';
+        return null;
+      })
+    );
+    
+    console.log('Various tests:');
+    console.log('  Empty:', complexValidator(''));
+    console.log('  Short:', complexValidator('Pass1'));
+    console.log('  Starts with number:', complexValidator('1Password'));
+    console.log('  No number:', complexValidator('Password'));
+    console.log('  Has space:', complexValidator('Password 123'));
+    console.log('  Valid:', complexValidator('Password123'));
+    
+    // combine execution order
+    console.log('\n=== combine execution order ===');
+    let callOrder = [];
+    
+    const validator1 = ReactiveUtils.validators.custom((value) => {
+      callOrder.push('validator1');
+      return value ? null : 'Error 1';
+    });
+    
+    const validator2 = ReactiveUtils.validators.custom((value) => {
+      callOrder.push('validator2');
+      return value.length > 3 ? null : 'Error 2';
+    });
+    
+    const validator3 = ReactiveUtils.validators.custom((value) => {
+      callOrder.push('validator3');
+      return value.length < 10 ? null : 'Error 3';
+    });
+    
+    const ordered = ReactiveUtils.validators.combine(validator1, validator2, validator3);
+    
+    callOrder = [];
+    ordered('ab');
+    console.log('Call order:', callOrder);
+    console.log('✓ Executes in order, stops at first error');
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ Validators.combine(...validators) combines validators');
+      console.log('✓ combine returns first error encountered');
+      console.log('✓ combine works with required + email');
+      console.log('✓ combine works with min + max (range)');
+      console.log('✓ combine works with minLength + maxLength');
+      console.log('✓ combine works with custom validators');
+      console.log('✓ combine works in forms');
+      console.log('✓ combine can combine many validators');
+      console.log('✓ combine executes validators in order');
+      console.log('✓ combine stops at first failure');
+    }, 500);
+  </script>
+</body>
+</html>

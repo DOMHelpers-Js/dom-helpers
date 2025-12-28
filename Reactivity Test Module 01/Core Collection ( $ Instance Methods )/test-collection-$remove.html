@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.$remove()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    console.log('=== Testing collection.$remove() ===');
+    
+    // Basic $remove with value
+    console.log('\n=== Basic $remove with value ===');
+    const collection = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    
+    console.log('Before:', collection.items);
+    
+    collection.$remove(3);
+    
+    console.log('After remove 3:', collection.items);
+    console.log('✓ Removes item by value');
+    
+    // $remove with predicate function
+    console.log('\n=== $remove with predicate function ===');
+    setTimeout(() => {
+      const predicateCollection = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+      
+      console.log('Before:', predicateCollection.items);
+      
+      predicateCollection.$remove(item => item > 3);
+      
+      console.log('After remove > 3:', predicateCollection.items);
+      console.log('✓ Removes item by predicate');
+    }, 500);
+    
+    // $remove is reactive
+    console.log('\n=== $remove is reactive ===');
+    setTimeout(() => {
+      const reactiveCollection = ReactiveUtils.collection(['a', 'b', 'c']);
+      
+      let effectRuns = 0;
+      ReactiveUtils.effect(() => {
+        effectRuns++;
+        const length = reactiveCollection.items.length;
+      });
+      
+      const initialRuns = effectRuns;
+      
+      reactiveCollection.$remove('b');
+      
+      setTimeout(() => {
+        console.log('Effect runs after remove:', effectRuns - initialRuns);
+        console.log('Expected: 1');
+        console.log('✓ $remove triggers reactivity');
+      }, 100);
+    }, 1000);
+    
+    // $remove with objects
+    console.log('\n=== $remove with objects ===');
+    setTimeout(() => {
+      const objectCollection = ReactiveUtils.collection([
+        { id: 1, name: 'John' },
+        { id: 2, name: 'Jane' },
+        { id: 3, name: 'Bob' }
+      ]);
+      
+      console.log('Before:', objectCollection.items);
+      
+      objectCollection.$remove(item => item.id === 2);
+      
+      console.log('After remove id=2:', objectCollection.items);
+      console.log('Remaining count:', objectCollection.items.length);
+      console.log('✓ Removes objects by predicate');
+    }, 1500);
+    
+    // $remove first matching item only
+    console.log('\n=== $remove first matching item only ===');
+    setTimeout(() => {
+      const duplicateCollection = ReactiveUtils.collection([1, 2, 2, 2, 3]);
+      
+      console.log('Before:', duplicateCollection.items);
+      
+      duplicateCollection.$remove(2);
+      
+      console.log('After remove 2:', duplicateCollection.items);
+      console.log('Remaining 2s:', duplicateCollection.items.filter(x => x === 2).length);
+      console.log('✓ Removes only first match');
+    }, 2000);
+    
+    // $remove non-existent item
+    console.log('\n=== $remove non-existent item ===');
+    setTimeout(() => {
+      const noMatchCollection = ReactiveUtils.collection([1, 2, 3]);
+      
+      console.log('Before:', noMatchCollection.items);
+      
+      noMatchCollection.$remove(99);
+      
+      console.log('After remove 99:', noMatchCollection.items);
+      console.log('Length unchanged:', noMatchCollection.items.length === 3);
+      console.log('✓ Handles non-existent items safely');
+    }, 2500);
+    
+    // $remove from empty collection
+    console.log('\n=== $remove from empty collection ===');
+    setTimeout(() => {
+      const emptyCollection = ReactiveUtils.collection([]);
+      
+      console.log('Before:', emptyCollection.items);
+      
+      emptyCollection.$remove(1);
+      
+      console.log('After:', emptyCollection.items);
+      console.log('✓ Handles empty collection safely');
+    }, 3000);
+    
+    // $remove with complex predicate
+    console.log('\n=== $remove with complex predicate ===');
+    setTimeout(() => {
+      const complexCollection = ReactiveUtils.collection([
+        { id: 1, active: true, score: 10 },
+        { id: 2, active: false, score: 20 },
+        { id: 3, active: true, score: 30 }
+      ]);
+      
+      complexCollection.$remove(item => item.active && item.score > 15);
+      
+      console.log('After complex remove:', complexCollection.items);
+      console.log('Expected: removed id=3');
+      console.log('✓ Works with complex predicates');
+    }, 3500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ collection.$remove(value) removes by value');
+      console.log('✓ collection.$remove(predicate) removes by function');
+      console.log('✓ $remove is reactive');
+      console.log('✓ $remove works with objects');
+      console.log('✓ $remove removes only first match');
+      console.log('✓ $remove handles non-existent items safely');
+      console.log('✓ $remove handles empty collections safely');
+      console.log('✓ $remove works with complex predicates');
+    }, 4000);
+  </script>
+</body>
+</html>

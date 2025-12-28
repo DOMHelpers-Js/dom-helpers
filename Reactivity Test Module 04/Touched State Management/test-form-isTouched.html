@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.isTouched()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.isTouched() ===');
+    
+    // Basic isTouched
+    console.log('\n=== Basic isTouched ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: ''
+    });
+    
+    console.log('Before touching:');
+    console.log('  isTouched("username"):', form.isTouched('username'));
+    console.log('  isTouched("email"):', form.isTouched('email'));
+    
+    form.setTouched('username');
+    console.log('After touching username:');
+    console.log('  isTouched("username"):', form.isTouched('username'));
+    console.log('  isTouched("email"):', form.isTouched('email'));
+    
+    // isTouched returns boolean
+    console.log('\n=== isTouched returns boolean ===');
+    const boolForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    const beforeTouch = boolForm.isTouched('field');
+    console.log('Before touch:', beforeTouch, 'Type:', typeof beforeTouch);
+    
+    boolForm.setTouched('field');
+    const afterTouch = boolForm.isTouched('field');
+    console.log('After touch:', afterTouch, 'Type:', typeof afterTouch);
+    
+    // isTouched with various touched values
+    console.log('\n=== isTouched with various touched values ===');
+    const valuesForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: '',
+      field4: ''
+    });
+    
+    valuesForm.touched.field1 = true;
+    valuesForm.touched.field2 = false;
+    valuesForm.touched.field3 = undefined;
+    // field4 not set at all
+    
+    console.log('isTouched("field1") with true:', valuesForm.isTouched('field1'));
+    console.log('isTouched("field2") with false:', valuesForm.isTouched('field2'));
+    console.log('isTouched("field3") with undefined:', valuesForm.isTouched('field3'));
+    console.log('isTouched("field4") not set:', valuesForm.isTouched('field4'));
+    console.log('✓ Only truthy values return true');
+    
+    // isTouched after setTouched
+    console.log('\n=== isTouched after setTouched ===');
+    const setForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    console.log('Initial:', setForm.isTouched('field'));
+    
+    setForm.setTouched('field', true);
+    console.log('After setTouched(true):', setForm.isTouched('field'));
+    
+    setForm.setTouched('field', false);
+    console.log('After setTouched(false):', setForm.isTouched('field'));
+    
+    // isTouched is reactive
+    console.log('\n=== isTouched is reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const touched = reactiveForm.isTouched('field');
+      console.log(`Effect #${effectRuns}: isTouched = ${touched}`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.setTouched('field');
+      console.log('Effect runs after setTouched:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactiveForm.setTouched('field', false);
+      console.log('Effect runs after untouching:', effectRuns);
+    }, 1000);
+    
+    // isTouched for conditional UI
+    console.log('\n=== isTouched for conditional UI ===');
+    const uiForm = ReactiveUtils.form({
+      name: '',
+      email: ''
+    });
+    
+    const renderField = (field) => {
+      const touched = uiForm.isTouched(field);
+      const className = touched ? 'field touched' : 'field';
+      return `<div class="${className}">${field}</div>`;
+    };
+    
+    console.log('Before touching:', {
+      name: renderField('name'),
+      email: renderField('email')
+    });
+    
+    setTimeout(() => {
+      uiForm.setTouched('name');
+      console.log('After touching name:', {
+        name: renderField('name'),
+        email: renderField('email')
+      });
+    }, 1500);
+    
+    // isTouched for multiple fields
+    console.log('\n=== isTouched for multiple fields ===');
+    const multiForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: '',
+      field4: ''
+    });
+    
+    multiForm.setTouchedFields(['field1', 'field3']);
+    
+    const fields = ['field1', 'field2', 'field3', 'field4'];
+    console.log('Checking all fields:');
+    fields.forEach(field => {
+      console.log(`  ${field}: ${multiForm.isTouched(field)}`);
+    });
+    
+    // isTouched with shouldShowError
+    console.log('\n=== isTouched with shouldShowError ===');
+    const showForm = ReactiveUtils.form({
+      email: ''
+    });
+    
+    showForm.setError('email', 'Email required');
+    
+    console.log('With error, before touch:');
+    console.log('  isTouched:', showForm.isTouched('email'));
+    console.log('  hasError:', showForm.hasError('email'));
+    console.log('  shouldShowError:', showForm.shouldShowError('email'));
+    
+    setTimeout(() => {
+      showForm.setTouched('email');
+      console.log('With error, after touch:');
+      console.log('  isTouched:', showForm.isTouched('email'));
+      console.log('  hasError:', showForm.hasError('email'));
+      console.log('  shouldShowError:', showForm.shouldShowError('email'));
+    }, 2000);
+    
+    // isTouched in validation workflow
+    console.log('\n=== isTouched in validation workflow ===');
+    const workflowForm = ReactiveUtils.form({
+      password: '',
+      confirmPassword: ''
+    });
+    
+    const validateOnBlur = (field) => {
+      if (workflowForm.isTouched(field)) {
+        // Only validate if already touched
+        console.log(`Validating ${field} (already touched)`);
+      } else {
+        console.log(`Skipping ${field} (not touched yet)`);
+      }
+    };
+    
+    setTimeout(() => {
+      validateOnBlur('password');
+      
+      workflowForm.setTouched('password');
+      validateOnBlur('password');
+    }, 2500);
+    
+    // isTouched vs !!touched.field
+    console.log('\n=== isTouched vs !!touched.field ===');
+    const compareForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    compareForm.setTouched('field');
+    console.log('Touched:');
+    console.log('  isTouched("field"):', compareForm.isTouched('field'));
+    console.log('  !!touched.field:', !!compareForm.touched.field);
+    console.log('  Same:', compareForm.isTouched('field') === !!compareForm.touched.field);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ isTouched(field) checks if field is touched');
+      console.log('✓ isTouched returns boolean (true/false)');
+      console.log('✓ isTouched returns false for falsy values');
+      console.log('✓ isTouched works after setTouched');
+      console.log('✓ isTouched is reactive (triggers effects)');
+      console.log('✓ isTouched useful for conditional UI rendering');
+      console.log('✓ isTouched can check multiple fields');
+      console.log('✓ isTouched used with shouldShowError pattern');
+      console.log('✓ isTouched useful in validation workflows');
+      console.log('✓ isTouched equivalent to !!touched.field');
+    }, 3000);
+  </script>
+</body>
+</html>

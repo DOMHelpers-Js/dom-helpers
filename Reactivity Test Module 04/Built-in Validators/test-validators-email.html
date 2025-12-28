@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Validators.email()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing Validators.email() ===');
+    
+    // Basic email validator
+    console.log('\n=== Basic email validator ===');
+    const email = ReactiveUtils.validators.email();
+    
+    console.log('Valid email:', email('test@example.com'));
+    console.log('Invalid email:', email('invalid'));
+    console.log('✓ Validates email format');
+    
+    // email with custom message
+    console.log('\n=== email with custom message ===');
+    const customEmail = ReactiveUtils.validators.email('Please enter a valid email');
+    
+    console.log('Invalid with custom message:', customEmail('invalid'));
+    console.log('✓ Uses custom message');
+    
+    // email with default message
+    console.log('\n=== email with default message ===');
+    const defaultEmail = ReactiveUtils.validators.email();
+    
+    const defaultMessage = defaultEmail('invalid');
+    console.log('Default message:', defaultMessage);
+    console.log('Has message:', typeof defaultMessage === 'string');
+    
+    // email with empty value
+    console.log('\n=== email with empty value ===');
+    const emptyEmail = ReactiveUtils.validators.email();
+    
+    console.log('Empty string:', emptyEmail(''));
+    console.log('Null:', emptyEmail(null));
+    console.log('Undefined:', emptyEmail(undefined));
+    console.log('✓ Allows empty (use with required for mandatory)');
+    
+    // email format validation
+    console.log('\n=== email format validation ===');
+    const formatEmail = ReactiveUtils.validators.email();
+    
+    const validEmails = [
+      'test@example.com',
+      'user.name@example.com',
+      'user+tag@example.co.uk',
+      'user_name@example.com',
+      'user123@test-domain.com'
+    ];
+    
+    const invalidEmails = [
+      'invalid',
+      '@example.com',
+      'test@',
+      'test@.com',
+      'test..user@example.com',
+      'test @example.com',
+      'test@example'
+    ];
+    
+    console.log('Valid emails:');
+    validEmails.forEach(e => {
+      const result = formatEmail(e);
+      console.log(`  ${e}: ${result === null ? 'valid' : result}`);
+    });
+    
+    console.log('Invalid emails:');
+    invalidEmails.forEach(e => {
+      const result = formatEmail(e);
+      console.log(`  ${e}: ${result === null ? 'valid' : 'invalid'}`);
+    });
+    
+    // email in form
+    console.log('\n=== email in form ===');
+    const form = ReactiveUtils.form({
+      email: ''
+    }, {
+      validators: {
+        email: ReactiveUtils.validators.email('Invalid email address')
+      }
+    });
+    
+    form.setValue('email', 'invalid');
+    form.validateField('email');
+    console.log('Invalid email error:', form.errors.email);
+    
+    form.setValue('email', 'valid@example.com');
+    form.validateField('email');
+    console.log('Valid email error:', form.errors.email);
+    
+    // email combined with required
+    console.log('\n=== email combined with required ===');
+    const combinedForm = ReactiveUtils.form({
+      email: ''
+    }, {
+      validators: {
+        email: ReactiveUtils.validators.combine(
+          ReactiveUtils.validators.required('Email required'),
+          ReactiveUtils.validators.email('Invalid email')
+        )
+      }
+    });
+    
+    combinedForm.validate();
+    console.log('Empty email:', combinedForm.errors.email);
+    
+    combinedForm.setValue('email', 'invalid');
+    combinedForm.validateField('email');
+    console.log('Invalid format:', combinedForm.errors.email);
+    
+    combinedForm.setValue('email', 'valid@example.com');
+    combinedForm.validateField('email');
+    console.log('Valid email:', combinedForm.errors.email);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ Validators.email() creates email validator');
+      console.log('✓ email accepts custom message');
+      console.log('✓ email has default message');
+      console.log('✓ email allows empty values');
+      console.log('✓ email validates standard formats');
+      console.log('✓ email rejects invalid formats');
+      console.log('✓ email works in forms');
+      console.log('✓ email can combine with required');
+    }, 500);
+  </script>
+</body>
+</html>

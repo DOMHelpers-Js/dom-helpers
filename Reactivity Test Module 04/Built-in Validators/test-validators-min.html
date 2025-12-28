@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Validators.min()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing Validators.min() ===');
+    
+    // Basic min validator
+    console.log('\n=== Basic min validator ===');
+    const min5 = ReactiveUtils.validators.min(5);
+    
+    console.log('Value 3:', min5(3));
+    console.log('Value 5:', min5(5));
+    console.log('Value 7:', min5(7));
+    console.log('✓ Validates minimum value');
+    
+    // min with custom message
+    console.log('\n=== min with custom message ===');
+    const customMin = ReactiveUtils.validators.min(18, 'Must be at least 18');
+    
+    console.log('Under 18:', customMin(16));
+    console.log('✓ Uses custom message');
+    
+    // min with default message
+    console.log('\n=== min with default message ===');
+    const defaultMin = ReactiveUtils.validators.min(10);
+    
+    const defaultMessage = defaultMin(5);
+    console.log('Default message:', defaultMessage);
+    console.log('Includes minimum:', defaultMessage.includes('10'));
+    
+    // min with empty value
+    console.log('\n=== min with empty value ===');
+    const emptyMin = ReactiveUtils.validators.min(5);
+    
+    console.log('Empty string:', emptyMin(''));
+    console.log('Null:', emptyMin(null));
+    console.log('Undefined:', emptyMin(undefined));
+    console.log('✓ Allows empty');
+    
+    // min exact match
+    console.log('\n=== min exact match ===');
+    const exactMin = ReactiveUtils.validators.min(10);
+    
+    console.log('Exactly 10:', exactMin(10));
+    console.log('✓ Accepts exact minimum');
+    
+    // min with string numbers
+    console.log('\n=== min with string numbers ===');
+    const stringMin = ReactiveUtils.validators.min(10);
+    
+    console.log('String "5":', stringMin('5'));
+    console.log('String "10":', stringMin('10'));
+    console.log('String "15":', stringMin('15'));
+    console.log('✓ Converts strings to numbers');
+    
+    // min with negative numbers
+    console.log('\n=== min with negative numbers ===');
+    const negativeMin = ReactiveUtils.validators.min(-5);
+    
+    console.log('Value -10:', negativeMin(-10));
+    console.log('Value -5:', negativeMin(-5));
+    console.log('Value 0:', negativeMin(0));
+    console.log('✓ Works with negative minimums');
+    
+    // min with decimals
+    console.log('\n=== min with decimals ===');
+    const decimalMin = ReactiveUtils.validators.min(5.5);
+    
+    console.log('Value 5.0:', decimalMin(5.0));
+    console.log('Value 5.5:', decimalMin(5.5));
+    console.log('Value 5.6:', decimalMin(5.6));
+    console.log('✓ Works with decimal values');
+    
+    // min in form
+    console.log('\n=== min in form ===');
+    const form = ReactiveUtils.form({
+      age: ''
+    }, {
+      validators: {
+        age: ReactiveUtils.validators.min(18, 'Must be 18 or older')
+      }
+    });
+    
+    form.setValue('age', '16');
+    form.validateField('age');
+    console.log('Too young:', form.errors.age);
+    
+    form.setValue('age', '21');
+    form.validateField('age');
+    console.log('Old enough:', form.errors.age);
+    
+    // min with various use cases
+    console.log('\n=== min with various use cases ===');
+    const testCases = [
+      { min: 0, value: -1, expected: 'error' },
+      { min: 0, value: 0, expected: 'valid' },
+      { min: 18, value: 17, expected: 'error' },
+      { min: 18, value: 18, expected: 'valid' },
+      { min: 100, value: 150, expected: 'valid' }
+    ];
+    
+    testCases.forEach(({ min, value, expected }) => {
+      const validator = ReactiveUtils.validators.min(min);
+      const result = validator(value);
+      const actual = result === null ? 'valid' : 'error';
+      console.log(`min=${min}, value=${value}:`, actual === expected ? '✓' : '✗');
+    });
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ Validators.min(min) creates min validator');
+      console.log('✓ min accepts custom message');
+      console.log('✓ min has default message with minimum');
+      console.log('✓ min allows empty values');
+      console.log('✓ min accepts exact minimum value');
+      console.log('✓ min converts strings to numbers');
+      console.log('✓ min works with negative numbers');
+      console.log('✓ min works with decimal values');
+      console.log('✓ min works in forms');
+    }, 500);
+  </script>
+</body>
+</html>

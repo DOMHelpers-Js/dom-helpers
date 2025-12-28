@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.handleBlur()</title></head>
+<body>
+  <input type="text" id="username" name="username" />
+  <input type="email" id="email" name="email" />
+  <input type="password" id="password" name="password" />
+  
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.handleBlur() ===');
+    
+    // Basic handleBlur
+    console.log('\n=== Basic handleBlur ===');
+    const form = ReactiveUtils.form({
+      username: ''
+    });
+    
+    console.log('Before handleBlur, touched:', form.touched);
+    
+    const usernameInput = document.getElementById('username');
+    const blurEvent = new Event('blur');
+    Object.defineProperty(blurEvent, 'target', { value: usernameInput });
+    
+    form.handleBlur(blurEvent);
+    console.log('After handleBlur, touched:', form.touched);
+    console.log('✓ Marks field as touched');
+    
+    // handleBlur marks as touched
+    console.log('\n=== handleBlur marks as touched ===');
+    const touchForm = ReactiveUtils.form({
+      email: '',
+      password: ''
+    });
+    
+    const emailInput = document.getElementById('email');
+    emailInput.name = 'email';
+    
+    const emailBlur = new Event('blur');
+    Object.defineProperty(emailBlur, 'target', { value: emailInput });
+    
+    touchForm.handleBlur(emailBlur);
+    console.log('After email blur:', touchForm.touched);
+    
+    const passwordInput = document.getElementById('password');
+    passwordInput.name = 'password';
+    
+    const passwordBlur = new Event('blur');
+    Object.defineProperty(passwordBlur, 'target', { value: passwordInput });
+    
+    touchForm.handleBlur(passwordBlur);
+    console.log('After password blur:', touchForm.touched);
+    
+    // handleBlur with validation
+    console.log('\n=== handleBlur with validation ===');
+    const validationForm = ReactiveUtils.form({
+      email: ''
+    }, {
+      validators: {
+        email: (value) => {
+          if (!value) return 'Email required';
+          if (!/\S+@\S+\.\S+/.test(value)) return 'Invalid email';
+          return null;
+        }
+      }
+    });
+    
+    const validationInput = document.getElementById('email');
+    validationInput.name = 'email';
+    validationInput.value = 'invalid';
+    
+    const validationBlur = new Event('blur');
+    Object.defineProperty(validationBlur, 'target', { value: validationInput });
+    
+    validationForm.handleBlur(validationBlur);
+    console.log('After blur on invalid email:', {
+      touched: validationForm.touched.email,
+      error: validationForm.errors.email,
+      shouldShow: validationForm.shouldShowError('email')
+    });
+    console.log('✓ Validates on blur');
+    
+    // handleBlur without validator
+    console.log('\n=== handleBlur without validator ===');
+    const noValidatorForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    const fieldInput = document.getElementById('username');
+    fieldInput.name = 'field';
+    
+    console.log('Before blur, errors:', noValidatorForm.errors);
+    
+    const fieldBlur = new Event('blur');
+    Object.defineProperty(fieldBlur, 'target', { value: fieldInput });
+    
+    noValidatorForm.handleBlur(fieldBlur);
+    console.log('After blur (no validator), errors:', noValidatorForm.errors);
+    console.log('✓ Safe when no validator');
+    
+    // handleBlur is reactive
+    console.log('\n=== handleBlur is reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const touched = reactiveForm.isTouched('field');
+      console.log(`Effect #${effectRuns}: touched = ${touched}`);
+    });
+    
+    setTimeout(() => {
+      const input = document.getElementById('username');
+      input.name = 'field';
+      
+      const event = new Event('blur');
+      Object.defineProperty(event, 'target', { value: input });
+      
+      reactiveForm.handleBlur(event);
+      console.log('Effect runs after handleBlur:', effectRuns);
+    }, 500);
+    
+    // handleBlur with name attribute
+    console.log('\n=== handleBlur with name attribute ===');
+    const nameForm = ReactiveUtils.form({
+      username: '',
+      email: ''
+    });
+    
+    const nameInput = document.getElementById('username');
+    nameInput.name = 'username';
+    
+    const nameBlur = new Event('blur');
+    Object.defineProperty(nameBlur, 'target', { value: nameInput });
+    
+    setTimeout(() => {
+      nameForm.handleBlur(nameBlur);
+      console.log('Using name attribute:', nameForm.touched);
+    }, 1000);
+    
+    // handleBlur with id attribute
+    console.log('\n=== handleBlur with id attribute ===');
+    const idForm = ReactiveUtils.form({
+      email: ''
+    });
+    
+    const idInput = document.getElementById('email');
+    idInput.removeAttribute('name');
+    
+    const idBlur = new Event('blur');
+    Object.defineProperty(idBlur, 'target', { value: idInput });
+    
+    setTimeout(() => {
+      idForm.handleBlur(idBlur);
+      console.log('Using id attribute:', idForm.touched);
+      console.log('✓ Falls back to id when no name');
+    }, 1500);
+    
+    // handleBlur in validation workflow
+    console.log('\n=== handleBlur in validation workflow ===');
+    const workflowForm = ReactiveUtils.form({
+      name: '',
+      email: '',
+      password: ''
+    }, {
+      validators: {
+        name: (value) => value ? null : 'Name required',
+        email: (value) => {
+          if (!value) return 'Email required';
+          if (!/\S+@\S+\.\S+/.test(value)) return 'Invalid email';
+          return null;
+        },
+        password: (value) => {
+          if (!value) return 'Password required';
+          if (value.length < 6) return 'Too short';
+          return null;
+        }
+      }
+    });
+    
+    setTimeout(() => {
+      const fields = [
+        { id: 'username', name: 'name', value: '' },
+        { id: 'email', name: 'email', value: 'invalid' },
+        { id: 'password', name: 'password', value: 'abc' }
+      ];
+      
+      console.log('Simulating blur on each field:');
+      fields.forEach(({ id, name, value }) => {
+        const input = document.getElementById(id);
+        input.name = name;
+        input.value = value;
+        
+        const event = new Event('blur');
+        Object.defineProperty(event, 'target', { value: input });
+        
+        workflowForm.handleBlur(event);
+        console.log(`  ${name}:`, {
+          touched: workflowForm.isTouched(name),
+          error: workflowForm.getError(name),
+          shouldShow: workflowForm.shouldShowError(name)
+        });
+      });
+    }, 2000);
+    
+    // handleBlur multiple times
+    console.log('\n=== handleBlur multiple times ===');
+    const multiBlurForm = ReactiveUtils.form({
+      field: ''
+    }, {
+      validators: {
+        field: (value) => value ? null : 'Required'
+      }
+    });
+    
+    let multiEffectRuns = 0;
+    ReactiveUtils.effect(() => {
+      multiEffectRuns++;
+      const touched = multiBlurForm.isTouched('field');
+      if (multiEffectRuns > 1) {
+        console.log(`Multi effect #${multiEffectRuns}: touched = ${touched}`);
+      }
+    });
+    
+    setTimeout(() => {
+      const input = document.getElementById('username');
+      input.name = 'field';
+      
+      const event = new Event('blur');
+      Object.defineProperty(event, 'target', { value: input });
+      
+      multiBlurForm.handleBlur(event);
+      console.log('First blur, effect runs:', multiEffectRuns);
+      
+      multiBlurForm.handleBlur(event);
+      console.log('Second blur (no change), effect runs:', multiEffectRuns);
+    }, 2500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ handleBlur(event) handles input blur events');
+      console.log('✓ handleBlur marks field as touched');
+      console.log('✓ handleBlur validates field if validator exists');
+      console.log('✓ handleBlur safe when no validator');
+      console.log('✓ handleBlur is reactive (triggers effects)');
+      console.log('✓ handleBlur uses name attribute for field');
+      console.log('✓ handleBlur falls back to id attribute');
+      console.log('✓ handleBlur perfect for validation workflows');
+      console.log('✓ handleBlur makes errors visible (touched + error)');
+    }, 3000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.touchAll()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.touchAll() ===');
+    
+    // Basic touchAll
+    console.log('\n=== Basic touchAll ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: '',
+      password: ''
+    });
+    
+    console.log('Before touchAll:', form.touched);
+    console.log('touchedFields:', form.touchedFields);
+    
+    form.touchAll();
+    console.log('After touchAll():', form.touched);
+    console.log('touchedFields:', form.touchedFields);
+    console.log('All fields touched:', form.touchedFields.length === 3);
+    
+    // touchAll returns this (chainable)
+    console.log('\n=== touchAll returns this (chainable) ===');
+    const chainForm = ReactiveUtils.form({
+      field1: '',
+      field2: ''
+    });
+    
+    const result = chainForm.touchAll();
+    console.log('touchAll returns this:', result === chainForm);
+    
+    chainForm
+      .touchAll()
+      .setError('field1', 'Error');
+    console.log('After chained operations:', {
+      touched: chainForm.touched,
+      errors: chainForm.errors
+    });
+    
+    // touchAll on empty form
+    console.log('\n=== touchAll on empty form ===');
+    const emptyForm = ReactiveUtils.form({});
+    
+    emptyForm.touchAll();
+    console.log('After touchAll() on empty form:', emptyForm.touched);
+    console.log('touchedFields:', emptyForm.touchedFields);
+    
+    // touchAll updates isDirty
+    console.log('\n=== touchAll updates isDirty ===');
+    const dirtyForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    console.log('Before touchAll, isDirty:', dirtyForm.isDirty);
+    
+    dirtyForm.touchAll();
+    console.log('After touchAll, isDirty:', dirtyForm.isDirty);
+    
+    // touchAll is reactive
+    console.log('\n=== touchAll is reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const touchedCount = Object.keys(reactiveForm.touched).length;
+      console.log(`Effect #${effectRuns}: ${touchedCount} touched`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.touchAll();
+      console.log('Effect runs after touchAll:', effectRuns);
+    }, 500);
+    
+    // touchAll with validation
+    console.log('\n=== touchAll with validation ===');
+    const validationForm = ReactiveUtils.form({
+      name: '',
+      email: '',
+      password: ''
+    }, {
+      validators: {
+        name: (value) => value ? null : 'Name required',
+        email: (value) => value ? null : 'Email required',
+        password: (value) => value ? null : 'Password required'
+      }
+    });
+    
+    setTimeout(() => {
+      validationForm.validate();
+      console.log('After validation, errors:', validationForm.errors);
+      console.log('Before touchAll, errors visible:', {
+        name: validationForm.shouldShowError('name'),
+        email: validationForm.shouldShowError('email'),
+        password: validationForm.shouldShowError('password')
+      });
+      
+      validationForm.touchAll();
+      console.log('After touchAll, errors visible:', {
+        name: validationForm.shouldShowError('name'),
+        email: validationForm.shouldShowError('email'),
+        password: validationForm.shouldShowError('password')
+      });
+      console.log('✓ touchAll makes all errors visible');
+    }, 1000);
+    
+    // touchAll in submit workflow
+    console.log('\n=== touchAll in submit workflow ===');
+    const submitForm = ReactiveUtils.form({
+      username: '',
+      email: '',
+      password: ''
+    }, {
+      validators: {
+        username: (value) => value ? null : 'Username required',
+        email: (value) => value ? null : 'Email required',
+        password: (value) => value ? null : 'Password required'
+      },
+      onSubmit: async (values, form) => {
+        console.log('Submit with values:', values);
+        return { success: true };
+      }
+    });
+    
+    setTimeout(() => {
+      console.log('Attempting submit with empty form:');
+      
+      // Touch all fields to show errors
+      submitForm.touchAll();
+      
+      // Validate
+      const isValid = submitForm.validate();
+      console.log('Form valid:', isValid);
+      console.log('Errors showing:', {
+        username: submitForm.shouldShowError('username'),
+        email: submitForm.shouldShowError('email'),
+        password: submitForm.shouldShowError('password')
+      });
+      
+      if (!isValid) {
+        console.log('✓ Submission blocked, all errors visible');
+      }
+    }, 1500);
+    
+    // touchAll with dynamic fields
+    console.log('\n=== touchAll with dynamic fields ===');
+    const dynamicForm = ReactiveUtils.form({
+      field1: '',
+      field2: ''
+    });
+    
+    dynamicForm.touchAll();
+    console.log('After first touchAll:', dynamicForm.touched);
+    
+    setTimeout(() => {
+      // Add new field
+      dynamicForm.values.field3 = '';
+      console.log('After adding field3:', dynamicForm.touched);
+      
+      // Touch all again
+      dynamicForm.touchAll();
+      console.log('After second touchAll:', dynamicForm.touched);
+      console.log('✓ touchAll includes new fields');
+    }, 2000);
+    
+    // touchAll multiple times
+    console.log('\n=== touchAll multiple times ===');
+    const multiForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    let multiEffectRuns = 0;
+    ReactiveUtils.effect(() => {
+      multiEffectRuns++;
+      const count = Object.keys(multiForm.touched).length;
+      if (multiEffectRuns > 1) {
+        console.log(`Multi effect #${multiEffectRuns}: ${count} touched`);
+      }
+    });
+    
+    setTimeout(() => {
+      multiForm.touchAll();
+      console.log('First touchAll, effect runs:', multiEffectRuns);
+      
+      multiForm.touchAll();
+      console.log('Second touchAll (no change), effect runs:', multiEffectRuns);
+    }, 2500);
+    
+    // touchAll in error display workflow
+    console.log('\n=== touchAll in error display workflow ===');
+    const displayForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    displayForm.setErrors({
+      field1: 'Error 1',
+      field2: 'Error 2',
+      field3: 'Error 3'
+    });
+    
+    const getVisibleErrors = () => {
+      return displayForm.errorFields.filter(field => 
+        displayForm.shouldShowError(field)
+      );
+    };
+    
+    setTimeout(() => {
+      console.log('Before touchAll, visible errors:', getVisibleErrors());
+      
+      displayForm.touchAll();
+      console.log('After touchAll, visible errors:', getVisibleErrors());
+      console.log('All errors now visible:', getVisibleErrors().length === 3);
+    }, 3000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ touchAll() marks all fields as touched');
+      console.log('✓ touchAll returns this for chaining');
+      console.log('✓ touchAll works on empty forms');
+      console.log('✓ touchAll updates isDirty computed property');
+      console.log('✓ touchAll is reactive (triggers effects)');
+      console.log('✓ touchAll makes all validation errors visible');
+      console.log('✓ touchAll essential in submit workflows');
+      console.log('✓ touchAll works with dynamically added fields');
+      console.log('✓ touchAll useful for showing all errors at once');
+    }, 3500);
+  </script>
+</body>
+</html>

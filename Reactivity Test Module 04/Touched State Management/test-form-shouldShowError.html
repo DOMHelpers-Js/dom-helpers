@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.shouldShowError()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.shouldShowError() ===');
+    
+    // Basic shouldShowError
+    console.log('\n=== Basic shouldShowError ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: ''
+    });
+    
+    console.log('No error, not touched:');
+    console.log('  shouldShowError("username"):', form.shouldShowError('username'));
+    
+    form.setError('username', 'Username required');
+    console.log('Has error, not touched:');
+    console.log('  shouldShowError("username"):', form.shouldShowError('username'));
+    
+    form.setTouched('username');
+    console.log('Has error, is touched:');
+    console.log('  shouldShowError("username"):', form.shouldShowError('username'));
+    
+    // shouldShowError requires both touched and error
+    console.log('\n=== shouldShowError requires both touched and error ===');
+    const requiresForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: '',
+      field4: ''
+    });
+    
+    // field1: error only
+    requiresForm.setError('field1', 'Error 1');
+    
+    // field2: touched only
+    requiresForm.setTouched('field2');
+    
+    // field3: both
+    requiresForm.setError('field3', 'Error 3');
+    requiresForm.setTouched('field3');
+    
+    // field4: neither
+    
+    console.log('Checking all combinations:');
+    console.log('  field1 (error only):', requiresForm.shouldShowError('field1'));
+    console.log('  field2 (touched only):', requiresForm.shouldShowError('field2'));
+    console.log('  field3 (both):', requiresForm.shouldShowError('field3'));
+    console.log('  field4 (neither):', requiresForm.shouldShowError('field4'));
+    console.log('✓ Only field3 (both) returns true');
+    
+    // shouldShowError returns boolean
+    console.log('\n=== shouldShowError returns boolean ===');
+    const boolForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    const result = boolForm.shouldShowError('field');
+    console.log('Result:', result, 'Type:', typeof result);
+    console.log('Is boolean:', typeof result === 'boolean');
+    
+    // shouldShowError is reactive
+    console.log('\n=== shouldShowError is reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const shouldShow = reactiveForm.shouldShowError('field');
+      console.log(`Effect #${effectRuns}: shouldShowError = ${shouldShow}`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.setError('field', 'Error');
+      console.log('Effect runs after setError:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactiveForm.setTouched('field');
+      console.log('Effect runs after setTouched:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      reactiveForm.clearError('field');
+      console.log('Effect runs after clearError:', effectRuns);
+    }, 1500);
+    
+    // shouldShowError for error display
+    console.log('\n=== shouldShowError for error display ===');
+    const displayForm = ReactiveUtils.form({
+      email: '',
+      password: ''
+    }, {
+      validators: {
+        email: (value) => {
+          if (!value) return 'Email required';
+          if (!/\S+@\S+\.\S+/.test(value)) return 'Invalid email';
+          return null;
+        },
+        password: (value) => {
+          if (!value) return 'Password required';
+          if (value.length < 6) return 'Too short';
+          return null;
+        }
+      }
+    });
+    
+    const renderErrorMessage = (field) => {
+      if (displayForm.shouldShowError(field)) {
+        return `<span class="error">${displayForm.getError(field)}</span>`;
+      }
+      return '';
+    };
+    
+    displayForm.validate();
+    console.log('After validation (not touched):');
+    console.log('  email:', renderErrorMessage('email'));
+    console.log('  password:', renderErrorMessage('password'));
+    
+    setTimeout(() => {
+      displayForm.setTouched('email');
+      console.log('After touching email:');
+      console.log('  email:', renderErrorMessage('email'));
+      console.log('  password:', renderErrorMessage('password'));
+    }, 2000);
+    
+    // shouldShowError in blur workflow
+    console.log('\n=== shouldShowError in blur workflow ===');
+    const blurForm = ReactiveUtils.form({
+      name: '',
+      email: ''
+    }, {
+      validators: {
+        name: (value) => value ? null : 'Name required',
+        email: (value) => value ? null : 'Email required'
+      }
+    });
+    
+    const handleBlur = (field) => {
+      blurForm.setTouched(field);
+      blurForm.validateField(field);
+      
+      if (blurForm.shouldShowError(field)) {
+        console.log(`Show error for ${field}: ${blurForm.getError(field)}`);
+      } else {
+        console.log(`No error to show for ${field}`);
+      }
+    };
+    
+    setTimeout(() => {
+      handleBlur('name');
+      handleBlur('email');
+    }, 2500);
+    
+    // shouldShowError in submit workflow
+    console.log('\n=== shouldShowError in submit workflow ===');
+    const submitForm = ReactiveUtils.form({
+      username: '',
+      email: '',
+      password: ''
+    }, {
+      validators: {
+        username: (value) => value ? null : 'Username required',
+        email: (value) => value ? null : 'Email required',
+        password: (value) => value ? null : 'Password required'
+      }
+    });
+    
+    const handleSubmit = () => {
+      // Touch all and validate
+      submitForm.touchAll();
+      const isValid = submitForm.validate();
+      
+      if (!isValid) {
+        console.log('Form invalid, showing errors:');
+        submitForm.errorFields.forEach(field => {
+          if (submitForm.shouldShowError(field)) {
+            console.log(`  ${field}: ${submitForm.getError(field)}`);
+          }
+        });
+        return;
+      }
+      
+      console.log('Form valid, submitting...');
+    };
+    
+    setTimeout(() => {
+      handleSubmit();
+    }, 3000);
+    
+    // shouldShowError progressive validation
+    console.log('\n=== shouldShowError progressive validation ===');
+    const progressiveForm = ReactiveUtils.form({
+      step1: '',
+      step2: '',
+      step3: ''
+    }, {
+      validators: {
+        step1: (value) => value ? null : 'Step 1 required',
+        step2: (value) => value ? null : 'Step 2 required',
+        step3: (value) => value ? null : 'Step 3 required'
+      }
+    });
+    
+    setTimeout(() => {
+      console.log('Step 1:');
+      progressiveForm.setValue('step1', '');
+      progressiveForm.validateField('step1');
+      progressiveForm.setTouched('step1');
+      console.log('  shouldShowError:', progressiveForm.shouldShowError('step1'));
+      
+      progressiveForm.setValue('step1', 'valid');
+      progressiveForm.validateField('step1');
+      console.log('  after fixing:', progressiveForm.shouldShowError('step1'));
+      
+      console.log('Step 2:');
+      progressiveForm.setValue('step2', '');
+      progressiveForm.validateField('step2');
+      progressiveForm.setTouched('step2');
+      console.log('  shouldShowError:', progressiveForm.shouldShowError('step2'));
+    }, 3500);
+    
+    // shouldShowError vs manual check
+    console.log('\n=== shouldShowError vs manual check ===');
+    const compareForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    compareForm.setError('field', 'Error');
+    compareForm.setTouched('field');
+    
+    const shouldShow1 = compareForm.shouldShowError('field');
+    const shouldShow2 = compareForm.isTouched('field') && compareForm.hasError('field');
+    
+    console.log('shouldShowError("field"):', shouldShow1);
+    console.log('isTouched && hasError:', shouldShow2);
+    console.log('Same:', shouldShow1 === shouldShow2);
+    console.log('✓ shouldShowError is shorthand for isTouched && hasError');
+    
+    // shouldShowError with all fields
+    console.log('\n=== shouldShowError with all fields ===');
+    const allForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: '',
+      field4: ''
+    });
+    
+    allForm.setErrors({
+      field1: 'Error 1',
+      field2: 'Error 2',
+      field4: 'Error 4'
+    });
+    
+    allForm.setTouchedFields(['field1', 'field3', 'field4']);
+    
+    setTimeout(() => {
+      console.log('Checking all fields:');
+      Object.keys(allForm.values).forEach(field => {
+        const shouldShow = allForm.shouldShowError(field);
+        console.log(`  ${field}: ${shouldShow} (touched: ${allForm.isTouched(field)}, hasError: ${allForm.hasError(field)})`);
+      });
+    }, 4000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ shouldShowError(field) checks if should show error');
+      console.log('✓ shouldShowError requires both touched AND error');
+      console.log('✓ shouldShowError returns boolean (true/false)');
+      console.log('✓ shouldShowError is reactive (triggers effects)');
+      console.log('✓ shouldShowError perfect for conditional error display');
+      console.log('✓ shouldShowError works in blur workflows');
+      console.log('✓ shouldShowError essential in submit workflows');
+      console.log('✓ shouldShowError enables progressive validation');
+      console.log('✓ shouldShowError is shorthand for isTouched && hasError');
+    }, 4500);
+  </script>
+</body>
+</html>

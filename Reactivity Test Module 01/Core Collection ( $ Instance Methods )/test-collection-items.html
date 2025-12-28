@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.items</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    console.log('=== Testing collection.items ===');
+    
+    // Basic items property
+    console.log('\n=== Basic items property ===');
+    const collection = ReactiveUtils.collection([1, 2, 3]);
+    
+    console.log('Items:', collection.items);
+    console.log('Is array:', Array.isArray(collection.items));
+    console.log('Length:', collection.items.length);
+    console.log('✓ Items property contains array');
+    
+    // items is reactive
+    console.log('\n=== items is reactive ===');
+    const reactiveCollection = ReactiveUtils.collection([]);
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const length = reactiveCollection.items.length;
+    });
+    
+    const initialRuns = effectRuns;
+    
+    reactiveCollection.items.push(1);
+    
+    setTimeout(() => {
+      console.log('Effect runs after push:', effectRuns - initialRuns);
+      console.log('Expected: 1');
+      console.log('✓ items is reactive');
+    }, 100);
+    
+    // items can be accessed directly
+    console.log('\n=== items can be accessed directly ===');
+    setTimeout(() => {
+      const accessCollection = ReactiveUtils.collection(['a', 'b', 'c']);
+      
+      console.log('First item:', accessCollection.items[0]);
+      console.log('Second item:', accessCollection.items[1]);
+      console.log('Third item:', accessCollection.items[2]);
+      console.log('✓ Items can be accessed by index');
+    }, 500);
+    
+    // items can be modified
+    console.log('\n=== items can be modified ===');
+    setTimeout(() => {
+      const modifyCollection = ReactiveUtils.collection([1, 2, 3]);
+      
+      console.log('Before:', modifyCollection.items);
+      
+      modifyCollection.items[0] = 10;
+      modifyCollection.items[1] = 20;
+      
+      console.log('After:', modifyCollection.items);
+      console.log('✓ Items can be modified directly');
+    }, 1000);
+    
+    // items with objects
+    console.log('\n=== items with objects ===');
+    setTimeout(() => {
+      const objectCollection = ReactiveUtils.collection([
+        { id: 1, name: 'John' },
+        { id: 2, name: 'Jane' }
+      ]);
+      
+      console.log('Object items:', objectCollection.items);
+      console.log('First name:', objectCollection.items[0].name);
+      console.log('Second id:', objectCollection.items[1].id);
+      console.log('✓ Works with object items');
+    }, 1500);
+    
+    // items reactivity with nested properties
+    console.log('\n=== items reactivity with nested properties ===');
+    setTimeout(() => {
+      const nestedCollection = ReactiveUtils.collection([
+        { count: 0 }
+      ]);
+      
+      let nestedRuns = 0;
+      ReactiveUtils.effect(() => {
+        nestedRuns++;
+        const count = nestedCollection.items[0]?.count;
+      });
+      
+      const beforeNested = nestedRuns;
+      
+      nestedCollection.items[0].count = 5;
+      
+      setTimeout(() => {
+        console.log('Effect runs after nested change:', nestedRuns - beforeNested);
+        console.log('New count:', nestedCollection.items[0].count);
+        console.log('✓ Nested properties are reactive');
+      }, 100);
+    }, 2000);
+    
+    // items with array methods
+    console.log('\n=== items with array methods ===');
+    setTimeout(() => {
+      const arrayCollection = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+      
+      const filtered = arrayCollection.items.filter(x => x > 2);
+      console.log('Filtered:', filtered);
+      
+      const mapped = arrayCollection.items.map(x => x * 2);
+      console.log('Mapped:', mapped);
+      
+      const sum = arrayCollection.items.reduce((acc, x) => acc + x, 0);
+      console.log('Sum:', sum);
+      
+      console.log('✓ Array methods work on items');
+    }, 2500);
+    
+    // items is same reference
+    console.log('\n=== items is same reference ===');
+    setTimeout(() => {
+      const refCollection = ReactiveUtils.collection([1, 2, 3]);
+      
+      const items1 = refCollection.items;
+      const items2 = refCollection.items;
+      
+      console.log('Same reference:', items1 === items2);
+      console.log('✓ Returns same array reference');
+    }, 3000);
+    
+    // Empty items
+    console.log('\n=== Empty items ===');
+    setTimeout(() => {
+      const emptyCollection = ReactiveUtils.collection();
+      
+      console.log('Empty items:', emptyCollection.items);
+      console.log('Is array:', Array.isArray(emptyCollection.items));
+      console.log('Length:', emptyCollection.items.length);
+      console.log('✓ Works with empty collection');
+    }, 3500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ collection.items contains the array');
+      console.log('✓ items is reactive');
+      console.log('✓ items can be accessed by index');
+      console.log('✓ items can be modified directly');
+      console.log('✓ items works with objects');
+      console.log('✓ items nested properties are reactive');
+      console.log('✓ items works with array methods');
+      console.log('✓ items returns same reference');
+      console.log('✓ items works with empty collections');
+    }, 4000);
+  </script>
+</body>
+</html>

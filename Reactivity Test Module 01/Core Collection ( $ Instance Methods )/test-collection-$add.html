@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.$add()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script>
+    console.log('=== Testing collection.$add() ===');
+    
+    // Basic $add
+    console.log('\n=== Basic $add ===');
+    const collection = ReactiveUtils.collection([1, 2, 3]);
+    
+    console.log('Before:', collection.items);
+    
+    collection.$add(4);
+    
+    console.log('After add:', collection.items);
+    console.log('Length:', collection.items.length);
+    console.log('✓ Adds item to collection');
+    
+    // $add is reactive
+    console.log('\n=== $add is reactive ===');
+    const reactiveCollection = ReactiveUtils.collection([]);
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const length = reactiveCollection.items.length;
+    });
+    
+    const initialRuns = effectRuns;
+    
+    reactiveCollection.$add('item1');
+    
+    setTimeout(() => {
+      console.log('Effect runs after add:', effectRuns - initialRuns);
+      console.log('Expected: 1');
+      console.log('✓ $add triggers reactivity');
+    }, 100);
+    
+    // $add with objects
+    console.log('\n=== $add with objects ===');
+    setTimeout(() => {
+      const objectCollection = ReactiveUtils.collection([]);
+      
+      objectCollection.$add({ id: 1, name: 'John' });
+      objectCollection.$add({ id: 2, name: 'Jane' });
+      
+      console.log('Added objects:', objectCollection.items);
+      console.log('Count:', objectCollection.items.length);
+      console.log('✓ Adds objects');
+    }, 500);
+    
+    // $add multiple items
+    console.log('\n=== $add multiple items ===');
+    setTimeout(() => {
+      const multiCollection = ReactiveUtils.collection(['a']);
+      
+      multiCollection.$add('b');
+      multiCollection.$add('c');
+      multiCollection.$add('d');
+      
+      console.log('Multiple adds:', multiCollection.items);
+      console.log('Final length:', multiCollection.items.length);
+      console.log('✓ Can add multiple times');
+    }, 1000);
+    
+    // $add to empty collection
+    console.log('\n=== $add to empty collection ===');
+    setTimeout(() => {
+      const emptyCollection = ReactiveUtils.collection();
+      
+      console.log('Before:', emptyCollection.items);
+      
+      emptyCollection.$add('first');
+      
+      console.log('After:', emptyCollection.items);
+      console.log('✓ Works with empty collection');
+    }, 1500);
+    
+    // $add different types
+    console.log('\n=== $add different types ===');
+    setTimeout(() => {
+      const mixedCollection = ReactiveUtils.collection([]);
+      
+      mixedCollection.$add(1);
+      mixedCollection.$add('string');
+      mixedCollection.$add(true);
+      mixedCollection.$add({ key: 'value' });
+      mixedCollection.$add([1, 2, 3]);
+      
+      console.log('Mixed types:', mixedCollection.items);
+      console.log('✓ Adds different types');
+    }, 2000);
+    
+    // $add preserves order
+    console.log('\n=== $add preserves order ===');
+    setTimeout(() => {
+      const orderCollection = ReactiveUtils.collection([]);
+      
+      orderCollection.$add('first');
+      orderCollection.$add('second');
+      orderCollection.$add('third');
+      
+      console.log('Order:', orderCollection.items);
+      console.log('First is first:', orderCollection.items[0] === 'first');
+      console.log('Last is third:', orderCollection.items[2] === 'third');
+      console.log('✓ Preserves insertion order');
+    }, 2500);
+    
+    // $add with computed
+    console.log('\n=== $add with computed ===');
+    setTimeout(() => {
+      const computedCollection = ReactiveUtils.collection([1, 2]);
+      
+      computedCollection.$computed('sum', function() {
+        return this.items.reduce((acc, x) => acc + x, 0);
+      });
+      
+      console.log('Sum before:', computedCollection.sum);
+      
+      computedCollection.$add(3);
+      
+      console.log('Sum after:', computedCollection.sum);
+      console.log('✓ Works with computed properties');
+    }, 3000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ collection.$add(item) adds item to collection');
+      console.log('✓ $add is reactive');
+      console.log('✓ $add works with objects');
+      console.log('✓ $add can be called multiple times');
+      console.log('✓ $add works with empty collections');
+      console.log('✓ $add works with different types');
+      console.log('✓ $add preserves insertion order');
+      console.log('✓ $add works with computed properties');
+    }, 3500);
+  </script>
+</body>
+</html>

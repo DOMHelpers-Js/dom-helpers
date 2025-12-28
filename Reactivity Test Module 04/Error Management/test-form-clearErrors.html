@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.clearErrors()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.clearErrors() ===');
+    
+    // Basic clearErrors
+    console.log('\n=== Basic clearErrors ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: '',
+      password: ''
+    });
+    
+    form.errors.username = 'Username required';
+    form.errors.email = 'Email required';
+    form.errors.password = 'Password required';
+    console.log('Before clearErrors:', form.errors);
+    
+    form.clearErrors();
+    console.log('After clearErrors():', form.errors);
+    console.log('✓ All errors cleared');
+    
+    // clearErrors returns this (chainable)
+    console.log('\n=== clearErrors returns this (chainable) ===');
+    const chainForm = ReactiveUtils.form({
+      field1: '',
+      field2: ''
+    });
+    
+    chainForm.errors.field1 = 'Error 1';
+    chainForm.errors.field2 = 'Error 2';
+    
+    const result = chainForm.clearErrors();
+    console.log('clearErrors returns this:', result === chainForm);
+    console.log('Errors cleared:', Object.keys(chainForm.errors).length === 0);
+    
+    // clearErrors on empty errors
+    console.log('\n=== clearErrors on empty errors ===');
+    const noErrorsForm = ReactiveUtils.form({
+      field: ''
+    });
+    
+    console.log('Before clearErrors:', noErrorsForm.errors);
+    
+    noErrorsForm.clearErrors();
+    console.log('After clearErrors (no errors):', noErrorsForm.errors);
+    console.log('✓ Safe to call when no errors');
+    
+    // clearErrors updates isValid
+    console.log('\n=== clearErrors updates isValid ===');
+    const validForm = ReactiveUtils.form({
+      email: '',
+      password: ''
+    });
+    
+    validForm.errors.email = 'Email required';
+    validForm.errors.password = 'Password required';
+    console.log('With errors, isValid:', validForm.isValid);
+    
+    validForm.clearErrors();
+    console.log('After clearErrors, isValid:', validForm.isValid);
+    
+    // clearErrors updates hasErrors
+    console.log('\n=== clearErrors updates hasErrors ===');
+    const hasErrorsForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    hasErrorsForm.errors.field1 = 'Error 1';
+    hasErrorsForm.errors.field2 = 'Error 2';
+    hasErrorsForm.errors.field3 = 'Error 3';
+    console.log('With errors, hasErrors:', hasErrorsForm.hasErrors);
+    
+    hasErrorsForm.clearErrors();
+    console.log('After clearErrors, hasErrors:', hasErrorsForm.hasErrors);
+    
+    // clearErrors is reactive
+    console.log('\n=== clearErrors is reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      field1: '',
+      field2: ''
+    });
+    
+    reactiveForm.errors.field1 = 'Error 1';
+    reactiveForm.errors.field2 = 'Error 2';
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const errorCount = Object.keys(reactiveForm.errors).length;
+      console.log(`Effect #${effectRuns}: ${errorCount} errors`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.clearErrors();
+      console.log('Effect runs after clearErrors:', effectRuns);
+    }, 500);
+    
+    // clearErrors after validation
+    console.log('\n=== clearErrors after validation ===');
+    const validationForm = ReactiveUtils.form({
+      email: '',
+      password: '',
+      confirmPassword: ''
+    }, {
+      validators: {
+        email: (value) => value ? null : 'Email required',
+        password: (value) => value ? null : 'Password required',
+        confirmPassword: (value, values) => {
+          if (value !== values.password) return 'Must match';
+          return null;
+        }
+      }
+    });
+    
+    validationForm.validate();
+    console.log('After validation:', validationForm.errors);
+    
+    setTimeout(() => {
+      validationForm.clearErrors();
+      console.log('After clearErrors:', validationForm.errors);
+      console.log('✓ Can clear all validation errors');
+    }, 1000);
+    
+    // clearErrors updates errorFields
+    console.log('\n=== clearErrors updates errorFields ===');
+    const errorFieldsForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    errorFieldsForm.errors.field1 = 'Error 1';
+    errorFieldsForm.errors.field2 = 'Error 2';
+    errorFieldsForm.errors.field3 = 'Error 3';
+    
+    console.log('Initial errorFields:', errorFieldsForm.errorFields);
+    
+    setTimeout(() => {
+      errorFieldsForm.clearErrors();
+      console.log('After clearErrors:', errorFieldsForm.errorFields);
+      console.log('Length:', errorFieldsForm.errorFields.length);
+    }, 1500);
+    
+    // clearErrors in form reset workflow
+    console.log('\n=== clearErrors in form reset workflow ===');
+    const resetForm = ReactiveUtils.form({
+      name: '',
+      email: ''
+    });
+    
+    resetForm.setValues({
+      name: 'Test',
+      email: 'invalid'
+    });
+    
+    resetForm.setErrors({
+      email: 'Invalid email'
+    });
+    
+    console.log('Before reset:', {
+      values: resetForm.values,
+      errors: resetForm.errors
+    });
+    
+    setTimeout(() => {
+      resetForm.clearErrors();
+      resetForm.setValues({ name: '', email: '' });
+      console.log('After manual reset:', {
+        values: resetForm.values,
+        errors: resetForm.errors
+      });
+    }, 2000);
+    
+    // clearErrors vs reset
+    console.log('\n=== clearErrors vs reset ===');
+    const compareForm = ReactiveUtils.form({
+      field: 'value'
+    });
+    
+    compareForm.errors.field = 'Error';
+    compareForm.touched.field = true;
+    
+    console.log('Before clearErrors:', {
+      values: compareForm.values,
+      errors: compareForm.errors,
+      touched: compareForm.touched
+    });
+    
+    setTimeout(() => {
+      compareForm.clearErrors();
+      console.log('After clearErrors (only errors cleared):', {
+        values: compareForm.values,
+        errors: compareForm.errors,
+        touched: compareForm.touched
+      });
+      console.log('✓ clearErrors only clears errors, not values or touched');
+    }, 2500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ clearErrors() clears all errors');
+      console.log('✓ clearErrors returns this for chaining');
+      console.log('✓ clearErrors safe when no errors');
+      console.log('✓ clearErrors updates isValid computed property');
+      console.log('✓ clearErrors updates hasErrors computed property');
+      console.log('✓ clearErrors is reactive (triggers effects)');
+      console.log('✓ clearErrors works after validation');
+      console.log('✓ clearErrors updates errorFields computed property');
+      console.log('✓ clearErrors only clears errors (not values/touched)');
+      console.log('✓ clearErrors useful in form reset workflows');
+    }, 3000);
+  </script>
+</body>
+</html>

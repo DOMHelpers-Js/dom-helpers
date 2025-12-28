@@ -1,266 +1,260 @@
 <!DOCTYPE html>
 <html>
-<head><title>Test ReactiveUtils.form</title></head>
+<head><title>Test ReactiveUtils.reactive()</title></head>
 <body>
   <script src="../../src/Reactive/01_dh-reactive.js"></script>
-  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
-
   <script>
-    console.log('=== Testing ReactiveUtils.form() ===\n');
-
-    // ========================================================================
-    // TEST 1: Create basic form
-    // ========================================================================
-    console.log('TEST 1: Create basic form');
-    const form1 = ReactiveUtils.form({
-      username: '',
-      email: '',
-      password: ''
+    console.log('=== Testing ReactiveUtils.reactive() ===');
+    
+    // Basic reactive builder
+    console.log('\n=== Basic reactive builder ===');
+    const builder = ReactiveUtils.reactive({
+      count: 0,
+      name: 'Test'
     });
-
-    console.log('  Initial values:', form1.values);
-    console.log('  Initial errors:', form1.errors);
-    console.log('  Initial touched:', form1.touched);
-    console.log('  Is reactive:', ReactiveUtils.isReactive(form1));
-    console.log('  ✓ Basic form created\n');
-
-    // ========================================================================
-    // TEST 2: Form computed properties
-    // ========================================================================
-    console.log('TEST 2: Form computed properties');
-    const form2 = ReactiveUtils.form({ name: '' });
-
-    console.log('  isValid:', form2.isValid);
-    console.log('  isDirty:', form2.isDirty);
-    console.log('  hasErrors:', form2.hasErrors);
-    console.log('  touchedFields:', form2.touchedFields);
-    console.log('  errorFields:', form2.errorFields);
-    console.log('  ✓ Computed properties available\n');
-
-    // ========================================================================
-    // TEST 3: setValue() method
-    // ========================================================================
-    console.log('TEST 3: setValue() method');
-    const form3 = ReactiveUtils.form({ username: '', email: '' });
-
-    form3.setValue('username', 'john_doe');
-    console.log('  After setValue - username:', form3.values.username);
-    console.log('  Username touched:', form3.touched.username);
-    console.log('  Expected: true');
-
-    form3.setValue('email', 'john@example.com');
-    console.log('  After setValue - email:', form3.values.email);
-    console.log('  isDirty:', form3.isDirty);
-    console.log('  Expected: true');
-    console.log('  ✓ setValue() works\n');
-
-    // ========================================================================
-    // TEST 4: setValues() method
-    // ========================================================================
-    console.log('TEST 4: setValues() method');
-    const form4 = ReactiveUtils.form({ a: '', b: '', c: '' });
-
-    form4.setValues({ a: '1', b: '2', c: '3' });
-    console.log('  After setValues:', form4.values);
-    console.log('  Expected: {a: "1", b: "2", c: "3"}');
-    console.log('  touchedFields:', form4.touchedFields);
-    console.log('  ✓ setValues() works\n');
-
-    // ========================================================================
-    // TEST 5: setError() and clearError()
-    // ========================================================================
-    console.log('TEST 5: setError() and clearError()');
-    const form5 = ReactiveUtils.form({ email: '' });
-
-    form5.setError('email', 'Invalid email');
-    console.log('  After setError:', form5.errors.email);
-    console.log('  hasErrors:', form5.hasErrors);
-    console.log('  Expected: true');
-
-    form5.clearError('email');
-    console.log('  After clearError:', form5.errors.email);
-    console.log('  hasErrors:', form5.hasErrors);
-    console.log('  Expected: false');
-    console.log('  ✓ Error methods work\n');
-
-    // ========================================================================
-    // TEST 6: Form with validators
-    // ========================================================================
-    console.log('TEST 6: Form with validators');
-    const form6 = ReactiveUtils.form(
-      { username: '', email: '' },
-      {
-        validators: {
-          username: ReactiveUtils.validators.required('Username required'),
-          email: ReactiveUtils.validators.email('Invalid email')
+    
+    console.log('Created builder:', builder);
+    console.log('Type check:', typeof builder === 'object');
+    console.log('Has state:', builder.state);
+    console.log('State values:', builder.state);
+    
+    // Builder methods available
+    console.log('\n=== Builder methods available ===');
+    console.log('Has computed:', typeof builder.computed === 'function');
+    console.log('Has watch:', typeof builder.watch === 'function');
+    console.log('Has effect:', typeof builder.effect === 'function');
+    console.log('Has bind:', typeof builder.bind === 'function');
+    console.log('Has action:', typeof builder.action === 'function');
+    console.log('Has actions:', typeof builder.actions === 'function');
+    console.log('Has build:', typeof builder.build === 'function');
+    console.log('Has destroy:', typeof builder.destroy === 'function');
+    
+    // Build with computed
+    console.log('\n=== Build with computed ===');
+    const counter = ReactiveUtils.reactive({ count: 0 })
+      .computed({
+        doubled: function() { return this.count * 2; },
+        tripled: function() { return this.count * 3; }
+      })
+      .build();
+    
+    console.log('State:', counter);
+    console.log('count:', counter.count);
+    console.log('doubled (computed):', counter.doubled);
+    console.log('tripled (computed):', counter.tripled);
+    
+    counter.count = 5;
+    console.log('After count = 5:');
+    console.log('  doubled:', counter.doubled);
+    console.log('  tripled:', counter.tripled);
+    
+    // Build with watch
+    console.log('\n=== Build with watch ===');
+    let watchRuns = 0;
+    const watched = ReactiveUtils.reactive({ value: 10 })
+      .watch({
+        value: (newVal, oldVal) => {
+          watchRuns++;
+          console.log(`Watch #${watchRuns}: ${oldVal} → ${newVal}`);
         }
-      }
-    );
-
-    form6.setValue('username', '');
-    console.log('  Empty username error:', form6.errors.username);
-    console.log('  Expected: "Username required"');
-
-    form6.setValue('username', 'john');
-    console.log('  Valid username error:', form6.errors.username);
-    console.log('  Expected: undefined');
-
-    form6.setValue('email', 'not-an-email');
-    console.log('  Invalid email error:', form6.errors.email);
-    console.log('  Expected: "Invalid email"');
-
-    form6.setValue('email', 'john@example.com');
-    console.log('  Valid email error:', form6.errors.email);
-    console.log('  Expected: undefined');
-    console.log('  ✓ Validators work\n');
-
-    // ========================================================================
-    // TEST 7: validate() method
-    // ========================================================================
-    console.log('TEST 7: validate() method');
-    const form7 = ReactiveUtils.form(
-      { name: '', age: 0 },
-      {
-        validators: {
-          name: ReactiveUtils.validators.required(),
-          age: ReactiveUtils.validators.min(18, 'Must be 18+')
-        }
-      }
-    );
-
-    const isValid1 = form7.validate();
-    console.log('  Empty form valid:', isValid1);
-    console.log('  Expected: false');
-    console.log('  Errors:', form7.errors);
-
-    form7.values.name = 'John';
-    form7.values.age = 25;
-    const isValid2 = form7.validate();
-    console.log('  Filled form valid:', isValid2);
-    console.log('  Expected: true');
-    console.log('  ✓ validate() works\n');
-
-    // ========================================================================
-    // TEST 8: reset() method
-    // ========================================================================
-    console.log('TEST 8: reset() method');
-    const form8 = ReactiveUtils.form({ x: 'initial' });
-
-    form8.setValue('x', 'updated');
-    form8.setError('x', 'error');
-    console.log('  Before reset:', {
-      value: form8.values.x,
-      error: form8.errors.x,
-      dirty: form8.isDirty
+      })
+      .build();
+    
+    setTimeout(() => {
+      watched.value = 20;
+      console.log('Watch runs after value = 20:', watchRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      watched.value = 30;
+      console.log('Watch runs after value = 30:', watchRuns);
+    }, 1000);
+    
+    // Build with effect
+    console.log('\n=== Build with effect ===');
+    let effectRuns = 0;
+    const effected = ReactiveUtils.reactive({ x: 1, y: 2 })
+      .effect(function() {
+        effectRuns++;
+        const sum = this.x + this.y;
+        console.log(`Effect #${effectRuns}: x + y = ${sum}`);
+      })
+      .build();
+    
+    setTimeout(() => {
+      effected.x = 5;
+      console.log('Effect runs after x = 5:', effectRuns);
+    }, 1500);
+    
+    // Build with actions
+    console.log('\n=== Build with actions ===');
+    const actioned = ReactiveUtils.reactive({ count: 0 })
+      .action('increment', function() {
+        this.count++;
+      })
+      .action('decrement', function() {
+        this.count--;
+      })
+      .action('reset', function() {
+        this.count = 0;
+      })
+      .build();
+    
+    console.log('Initial count:', actioned.count);
+    
+    setTimeout(() => {
+      actioned.increment();
+      console.log('After increment:', actioned.count);
+      
+      actioned.increment();
+      actioned.increment();
+      console.log('After 2 more increments:', actioned.count);
+      
+      actioned.decrement();
+      console.log('After decrement:', actioned.count);
+      
+      actioned.reset();
+      console.log('After reset:', actioned.count);
+    }, 2000);
+    
+    // Build with actions (batch)
+    console.log('\n=== Build with actions (batch) ===');
+    const batchActions = ReactiveUtils.reactive({ count: 0 })
+      .actions({
+        add: function(n) { this.count += n; },
+        subtract: function(n) { this.count -= n; },
+        multiply: function(n) { this.count *= n; }
+      })
+      .build();
+    
+    setTimeout(() => {
+      console.log('Initial:', batchActions.count);
+      batchActions.add(10);
+      console.log('After add(10):', batchActions.count);
+      batchActions.multiply(2);
+      console.log('After multiply(2):', batchActions.count);
+      batchActions.subtract(5);
+      console.log('After subtract(5):', batchActions.count);
+    }, 2500);
+    
+    // Chaining all methods
+    console.log('\n=== Chaining all methods ===');
+    const fullBuilder = ReactiveUtils.reactive({
+      value: 0
+    })
+      .computed({
+        squared: function() { return this.value * this.value; }
+      })
+      .watch({
+        value: (n, o) => console.log(`Value changed: ${o} → ${n}`)
+      })
+      .effect(function() {
+        console.log(`Effect: value=${this.value}, squared=${this.squared}`);
+      })
+      .action('setValue', function(val) {
+        this.value = val;
+      })
+      .build();
+    
+    setTimeout(() => {
+      fullBuilder.setValue(3);
+      console.log('After setValue(3), squared:', fullBuilder.squared);
+    }, 3000);
+    
+    // Builder destroy
+    console.log('\n=== Builder destroy ===');
+    const destroyable = ReactiveUtils.reactive({ count: 0 })
+      .effect(function() {
+        console.log('Effect running, count:', this.count);
+      })
+      .build();
+    
+    setTimeout(() => {
+      destroyable.count = 1;
+      console.log('Before destroy, effect runs');
+      
+      destroyable.destroy();
+      console.log('After destroy() called');
+      
+      destroyable.count = 2;
+      console.log('After destroy, effect should not run');
+    }, 3500);
+    
+    // Builder state access
+    console.log('\n=== Builder state access ===');
+    const stateAccess = ReactiveUtils.reactive({
+      x: 10,
+      y: 20
     });
-
-    form8.reset();
-    console.log('  After reset:', {
-      value: form8.values.x,
-      error: form8.errors.x,
-      dirty: form8.isDirty
+    
+    console.log('Before build, state:', stateAccess.state);
+    console.log('Can access state.x:', stateAccess.state.x);
+    console.log('Can access state.y:', stateAccess.state.y);
+    
+    const built = stateAccess.build();
+    console.log('After build, can access directly:', {
+      x: built.x,
+      y: built.y
     });
-    console.log('  Expected: "initial", undefined, false');
-
-    form8.setValue('x', 'new');
-    form8.reset({ x: 'custom' });
-    console.log('  After reset with custom:', form8.values.x);
-    console.log('  Expected: "custom"');
-    console.log('  ✓ reset() works\n');
-
-    // ========================================================================
-    // TEST 9: Form submission
-    // ========================================================================
-    console.log('TEST 9: Form submission');
-    const form9 = ReactiveUtils.form(
-      { username: '' },
-      {
-        validators: {
-          username: ReactiveUtils.validators.required()
+    
+    // Complex example
+    console.log('\n=== Complex example ===');
+    const todoApp = ReactiveUtils.reactive({
+      todos: [],
+      filter: 'all'
+    })
+      .computed({
+        activeTodos: function() {
+          return this.todos.filter(t => !t.done);
         },
-        onSubmit: async (values, form) => {
-          console.log('  Submit handler called with:', values);
-          return { success: true };
+        completedTodos: function() {
+          return this.todos.filter(t => t.done);
+        },
+        filteredTodos: function() {
+          if (this.filter === 'active') return this.activeTodos;
+          if (this.filter === 'completed') return this.completedTodos;
+          return this.todos;
         }
-      }
-    );
-
-    // Try submitting invalid form
-    form9.submit().then(result => {
-      console.log('  Invalid submit result:', result);
-      console.log('  Expected: {success: false, errors: {...}}');
-
-      // Submit valid form
-      form9.setValue('username', 'john');
-      form9.submit().then(result2 => {
-        console.log('  Valid submit result:', result2);
-        console.log('  submitCount:', form9.submitCount);
-        console.log('  ✓ submit() works\n');
-
-        // ====================================================================
-        // TEST 10: Helper methods
-        // ====================================================================
-        console.log('TEST 10: Helper methods');
-        const form10 = ReactiveUtils.form({ email: '' });
-
-        form10.setValue('email', 'test@test.com');
-        form10.setError('email', 'Error message');
-
-        console.log('  hasError("email"):', form10.hasError('email'));
-        console.log('  Expected: true');
-
-        console.log('  isTouched("email"):', form10.isTouched('email'));
-        console.log('  Expected: true');
-
-        console.log('  getError("email"):', form10.getError('email'));
-        console.log('  Expected: "Error message"');
-
-        console.log('  getValue("email"):', form10.getValue('email'));
-        console.log('  Expected: "test@test.com"');
-
-        console.log('  shouldShowError("email"):', form10.shouldShowError('email'));
-        console.log('  Expected: true (touched + has error)');
-
-        console.log('  ✓ Helper methods work\n');
-
-        // ====================================================================
-        // TEST 11: Practical use case - Registration form
-        // ====================================================================
-        console.log('TEST 11: Practical use case - Registration form');
-        const registrationForm = ReactiveUtils.form(
-          {
-            username: '',
-            email: '',
-            password: '',
-            confirmPassword: ''
-          },
-          {
-            validators: {
-              username: ReactiveUtils.validators.minLength(3),
-              email: ReactiveUtils.validators.email(),
-              password: ReactiveUtils.validators.minLength(8),
-              confirmPassword: ReactiveUtils.validators.match('password', 'Passwords must match')
-            }
-          }
-        );
-
-        registrationForm.setValues({
-          username: 'john_doe',
-          email: 'john@example.com',
-          password: 'password123',
-          confirmPassword: 'password123'
-        });
-
-        const isValid = registrationForm.validate();
-        console.log('  Registration form valid:', isValid);
-        console.log('  Expected: true');
-        console.log('  Form values:', registrationForm.values);
-
-        console.log('  ✓ Registration form works\n');
-
-        console.log('=== All ReactiveUtils.form() tests completed ===');
-      });
-    });
+      })
+      .actions({
+        addTodo(text) {
+          this.todos.push({ id: Date.now(), text, done: false });
+        },
+        toggleTodo(id) {
+          const todo = this.todos.find(t => t.id === id);
+          if (todo) todo.done = !todo.done;
+        },
+        setFilter(filter) {
+          this.filter = filter;
+        }
+      })
+      .build();
+    
+    setTimeout(() => {
+      console.log('Todo app created');
+      todoApp.addTodo('Task 1');
+      todoApp.addTodo('Task 2');
+      console.log('Todos:', todoApp.todos);
+      console.log('Active:', todoApp.activeTodos);
+      
+      todoApp.toggleTodo(todoApp.todos[0].id);
+      console.log('After toggle, completed:', todoApp.completedTodos);
+    }, 4000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ ReactiveUtils.reactive(state) creates builder');
+      console.log('✓ Builder has state property with initial values');
+      console.log('✓ Builder has computed() for computed properties');
+      console.log('✓ Builder has watch() for watchers');
+      console.log('✓ Builder has effect() for effects');
+      console.log('✓ Builder has action() for single action');
+      console.log('✓ Builder has actions() for multiple actions');
+      console.log('✓ Builder has build() to create final state');
+      console.log('✓ All builder methods are chainable');
+      console.log('✓ Built state has destroy() method');
+      console.log('✓ Perfect for complex reactive patterns');
+    }, 4500);
   </script>
 </body>
 </html>

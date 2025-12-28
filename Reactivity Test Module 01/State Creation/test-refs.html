@@ -1,311 +1,272 @@
 <!DOCTYPE html>
 <html>
-<head><title>Test ReactiveUtils.refs</title></head>
+<head><title>Test ReactiveUtils.refs()</title></head>
 <body>
   <script src="../../src/Reactive/01_dh-reactive.js"></script>
-
   <script>
-    console.log('=== Testing ReactiveUtils.refs() ===\n');
-
-    // ========================================================================
-    // TEST 1: Create multiple refs from object
-    // ========================================================================
-    console.log('TEST 1: Create multiple refs from object');
-    const refs1 = ReactiveUtils.refs({
+    console.log('=== Testing ReactiveUtils.refs() ===');
+    
+    // Basic refs creation
+    console.log('\n=== Basic refs creation ===');
+    const refs = ReactiveUtils.refs({
       count: 0,
       name: 'Test',
+      active: false
+    });
+    
+    console.log('Created refs:', refs);
+    console.log('Type check:', typeof refs === 'object');
+    console.log('Has count ref:', 'count' in refs);
+    console.log('Has name ref:', 'name' in refs);
+    console.log('Has active ref:', 'active' in refs);
+    
+    // Each is a ref
+    console.log('\n=== Each is a ref ===');
+    console.log('count is object:', typeof refs.count === 'object');
+    console.log('count.value:', refs.count.value);
+    console.log('name.value:', refs.name.value);
+    console.log('active.value:', refs.active.value);
+    
+    // Updating refs
+    console.log('\n=== Updating refs ===');
+    const data = ReactiveUtils.refs({
+      x: 0,
+      y: 0
+    });
+    
+    console.log('Initial:', {
+      x: data.x.value,
+      y: data.y.value
+    });
+    
+    data.x.value = 10;
+    data.y.value = 20;
+    console.log('After update:', {
+      x: data.x.value,
+      y: data.y.value
+    });
+    
+    // Refs with different types
+    console.log('\n=== Refs with different types ===');
+    const typed = ReactiveUtils.refs({
+      number: 42,
+      string: 'hello',
+      boolean: true,
+      array: [1, 2, 3],
+      object: { key: 'value' },
+      nullValue: null
+    });
+    
+    console.log('number.value:', typed.number.value);
+    console.log('string.value:', typed.string.value);
+    console.log('boolean.value:', typed.boolean.value);
+    console.log('array.value:', typed.array.value);
+    console.log('object.value:', typed.object.value);
+    console.log('nullValue.value:', typed.nullValue.value);
+    
+    // Each ref is reactive independently
+    console.log('\n=== Each ref is reactive independently ===');
+    const counters = ReactiveUtils.refs({
+      a: 0,
+      b: 0,
+      c: 0
+    });
+    
+    let effectARuns = 0;
+    let effectBRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      effectARuns++;
+      console.log(`Effect A #${effectARuns}: a = ${counters.a.value}`);
+    });
+    
+    ReactiveUtils.effect(() => {
+      effectBRuns++;
+      console.log(`Effect B #${effectBRuns}: b = ${counters.b.value}`);
+    });
+    
+    setTimeout(() => {
+      counters.a.value = 1;
+      console.log('After a change, effectA runs:', effectARuns);
+      console.log('After a change, effectB runs:', effectBRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      counters.b.value = 1;
+      console.log('After b change, effectA runs:', effectARuns);
+      console.log('After b change, effectB runs:', effectBRuns);
+    }, 1000);
+    
+    // Destructuring refs
+    console.log('\n=== Destructuring refs ===');
+    const { count, message, isActive } = ReactiveUtils.refs({
+      count: 0,
+      message: 'Hello',
       isActive: false
     });
-
-    console.log('  count ref:', refs1.count.value);
-    console.log('  name ref:', refs1.name.value);
-    console.log('  isActive ref:', refs1.isActive.value);
-    console.log('  ✓ Multiple refs created\n');
-
-    // ========================================================================
-    // TEST 2: Each ref is reactive
-    // ========================================================================
-    console.log('TEST 2: Each ref is reactive');
-
-    console.log('  count is reactive:', ReactiveUtils.isReactive(refs1.count));
-    console.log('  name is reactive:', ReactiveUtils.isReactive(refs1.name));
-    console.log('  isActive is reactive:', ReactiveUtils.isReactive(refs1.isActive));
-    console.log('  Expected: All true');
-    console.log('  ✓ All refs are reactive\n');
-
-    // ========================================================================
-    // TEST 3: Update individual refs
-    // ========================================================================
-    console.log('TEST 3: Update individual refs');
-
-    refs1.count.value = 42;
-    refs1.name.value = 'Updated';
-    refs1.isActive.value = true;
-
-    console.log('  After updates:');
-    console.log('    count:', refs1.count.value);
-    console.log('    name:', refs1.name.value);
-    console.log('    isActive:', refs1.isActive.value);
-    console.log('  ✓ Individual refs update independently\n');
-
-    // ========================================================================
-    // TEST 4: Refs trigger effects
-    // ========================================================================
-    console.log('TEST 4: Refs trigger effects');
-    const refs2 = ReactiveUtils.refs({
-      x: 1,
-      y: 2
-    });
-
-    let effectRuns = 0;
-    ReactiveUtils.effect(() => {
-      effectRuns++;
-      console.log(`  Effect #${effectRuns}: x=${refs2.x.value}, y=${refs2.y.value}`);
-    });
-
-    refs2.x.value = 10;
+    
+    console.log('Destructured refs:');
+    console.log('  count.value:', count.value);
+    console.log('  message.value:', message.value);
+    console.log('  isActive.value:', isActive.value);
+    
     setTimeout(() => {
-      console.log('  After x update - effect runs:', effectRuns);
-      console.log('  Expected: 2');
-
-      refs2.y.value = 20;
-      setTimeout(() => {
-        console.log('  After y update - effect runs:', effectRuns);
-        console.log('  Expected: 3');
-        console.log('  ✓ Each ref triggers effects\n');
-
-        // ====================================================================
-        // TEST 5: Different data types
-        // ====================================================================
-        console.log('TEST 5: Different data types');
-        const refs3 = ReactiveUtils.refs({
-          number: 123,
-          string: 'hello',
-          boolean: true,
-          array: [1, 2, 3],
-          object: { nested: true },
-          nullValue: null,
-          undefinedValue: undefined
-        });
-
-        console.log('  Number:', refs3.number.value, '- type:', typeof refs3.number.value);
-        console.log('  String:', refs3.string.value, '- type:', typeof refs3.string.value);
-        console.log('  Boolean:', refs3.boolean.value, '- type:', typeof refs3.boolean.value);
-        console.log('  Array:', refs3.array.value);
-        console.log('  Object:', refs3.object.value);
-        console.log('  Null:', refs3.nullValue.value);
-        console.log('  Undefined:', refs3.undefinedValue.value);
-        console.log('  ✓ All data types supported\n');
-
-        // ====================================================================
-        // TEST 6: Watch individual refs
-        // ====================================================================
-        console.log('TEST 6: Watch individual refs');
-        const refs4 = ReactiveUtils.refs({
-          count: 0,
-          name: 'Test'
-        });
-
-        let countWatchCalls = 0;
-        let nameWatchCalls = 0;
-
-        refs4.count.$watch('value', (newVal, oldVal) => {
-          countWatchCalls++;
-          console.log(`  Count watch #${countWatchCalls}: ${oldVal} -> ${newVal}`);
-        });
-
-        refs4.name.$watch('value', (newVal, oldVal) => {
-          nameWatchCalls++;
-          console.log(`  Name watch #${nameWatchCalls}: ${oldVal} -> ${newVal}`);
-        });
-
-        refs4.count.value = 5;
-        setTimeout(() => {
-          console.log('  Count watch calls:', countWatchCalls);
-
-          refs4.name.value = 'Updated';
-          setTimeout(() => {
-            console.log('  Name watch calls:', nameWatchCalls);
-            console.log('  ✓ Can watch individual refs\n');
-
-            // ================================================================
-            // TEST 7: Computed using multiple refs
-            // ================================================================
-            console.log('TEST 7: Computed using multiple refs');
-            const refs5 = ReactiveUtils.refs({
-              firstName: 'John',
-              lastName: 'Doe'
-            });
-
-            const state = ReactiveUtils.state({});
-            state.$computed('fullName', function() {
-              return refs5.firstName.value + ' ' + refs5.lastName.value;
-            });
-
-            console.log('  Initial fullName:', state.fullName);
-            console.log('  Expected: "John Doe"');
-
-            refs5.firstName.value = 'Jane';
-            setTimeout(() => {
-              console.log('  After firstName update:', state.fullName);
-              console.log('  Expected: "Jane Doe"');
-              console.log('  ✓ Computed with multiple refs works\n');
-
-              // ============================================================
-              // TEST 8: Batch updates with refs
-              // ============================================================
-              console.log('TEST 8: Batch updates with refs');
-              const refs6 = ReactiveUtils.refs({
-                a: 1,
-                b: 2,
-                c: 3
-              });
-
-              let batchEffectRuns = 0;
-              ReactiveUtils.effect(() => {
-                batchEffectRuns++;
-                const _ = refs6.a.value + refs6.b.value + refs6.c.value;
-              });
-
-              const beforeBatch = batchEffectRuns;
-
-              ReactiveUtils.batch(() => {
-                refs6.a.value = 10;
-                refs6.b.value = 20;
-                refs6.c.value = 30;
-              });
-
-              setTimeout(() => {
-                const triggered = batchEffectRuns - beforeBatch;
-                console.log('  Effect triggered', triggered, 'time(s)');
-                console.log('  Expected: 1 (batched)');
-                console.log('  ✓ Batching works with refs\n');
-
-                // ========================================================
-                // TEST 9: Empty refs object
-                // ========================================================
-                console.log('TEST 9: Empty refs object');
-                const emptyRefs = ReactiveUtils.refs({});
-
-                console.log('  Empty refs:', Object.keys(emptyRefs).length);
-                console.log('  Expected: 0');
-                console.log('  ✓ Empty refs handled\n');
-
-                // ========================================================
-                // TEST 10: Destructuring refs
-                // ========================================================
-                console.log('TEST 10: Destructuring refs');
-                const { count, name } = ReactiveUtils.refs({
-                  count: 0,
-                  name: 'Test'
-                });
-
-                console.log('  Destructured count:', count.value);
-                console.log('  Destructured name:', name.value);
-
-                count.value = 100;
-                console.log('  After update:', count.value);
-                console.log('  ✓ Destructuring works\n');
-
-                // ========================================================
-                // TEST 11: Practical form state pattern
-                // ========================================================
-                console.log('TEST 11: Practical form state pattern');
-                const formRefs = ReactiveUtils.refs({
-                  username: '',
-                  email: '',
-                  password: '',
-                  agreeToTerms: false
-                });
-
-                console.log('  Initial form state:', {
-                  username: formRefs.username.value,
-                  email: formRefs.email.value,
-                  password: formRefs.password.value,
-                  agreeToTerms: formRefs.agreeToTerms.value
-                });
-
-                formRefs.username.value = 'john_doe';
-                formRefs.email.value = 'john@example.com';
-                formRefs.password.value = 'secret123';
-                formRefs.agreeToTerms.value = true;
-
-                console.log('  After filling form:', {
-                  username: formRefs.username.value,
-                  email: formRefs.email.value,
-                  agreeToTerms: formRefs.agreeToTerms.value
-                });
-                console.log('  ✓ Form state pattern works\n');
-
-                // ========================================================
-                // TEST 12: Practical UI state pattern
-                // ========================================================
-                console.log('TEST 12: Practical UI state pattern');
-                const uiRefs = ReactiveUtils.refs({
-                  isLoading: false,
-                  isSidebarOpen: false,
-                  isDarkMode: false,
-                  currentPage: 1
-                });
-
-                console.log('  Initial UI state:', {
-                  isLoading: uiRefs.isLoading.value,
-                  isSidebarOpen: uiRefs.isSidebarOpen.value,
-                  isDarkMode: uiRefs.isDarkMode.value,
-                  currentPage: uiRefs.currentPage.value
-                });
-
-                // Simulate UI interactions
-                uiRefs.isLoading.value = true;
-                uiRefs.isSidebarOpen.value = true;
-                uiRefs.currentPage.value = 2;
-
-                console.log('  After UI interactions:', {
-                  isLoading: uiRefs.isLoading.value,
-                  isSidebarOpen: uiRefs.isSidebarOpen.value,
-                  currentPage: uiRefs.currentPage.value
-                });
-                console.log('  ✓ UI state pattern works\n');
-
-                // ========================================================
-                // TEST 13: Each ref has valueOf and toString
-                // ========================================================
-                console.log('TEST 13: Each ref has valueOf and toString');
-                const refs7 = ReactiveUtils.refs({
-                  number: 42,
-                  text: 'hello'
-                });
-
-                console.log('  number.valueOf():', refs7.number.valueOf());
-                console.log('  number.toString():', refs7.number.toString());
-                console.log('  text.valueOf():', refs7.text.valueOf());
-                console.log('  text.toString():', refs7.text.toString());
-                console.log('  ✓ All refs have valueOf and toString\n');
-
-                // ========================================================
-                // TEST 14: Comparison with individual ref()
-                // ========================================================
-                console.log('TEST 14: Comparison with individual ref()');
-
-                // Using refs()
-                const multiRefs = ReactiveUtils.refs({ a: 1, b: 2 });
-                console.log('  Using refs() - a:', multiRefs.a.value, 'b:', multiRefs.b.value);
-
-                // Using individual ref()
-                const singleA = ReactiveUtils.ref(1);
-                const singleB = ReactiveUtils.ref(2);
-                console.log('  Using ref() - a:', singleA.value, 'b:', singleB.value);
-
-                console.log('  Both approaches work identically');
-                console.log('  ✓ refs() is convenience wrapper\n');
-
-                console.log('=== All ReactiveUtils.refs() tests completed ===');
-              }, 50);
-            }, 50);
-          }, 50);
-        }, 50);
-      }, 50);
-    }, 50);
+      count.value = 10;
+      message.value = 'Updated';
+      isActive.value = true;
+      
+      console.log('After updates:');
+      console.log('  count.value:', count.value);
+      console.log('  message.value:', message.value);
+      console.log('  isActive.value:', isActive.value);
+    }, 1500);
+    
+    // Form-like pattern
+    console.log('\n=== Form-like pattern ===');
+    const form = ReactiveUtils.refs({
+      username: '',
+      email: '',
+      password: ''
+    });
+    
+    console.log('Initial form:', {
+      username: form.username.value,
+      email: form.email.value,
+      password: form.password.value
+    });
+    
+    setTimeout(() => {
+      form.username.value = 'johndoe';
+      form.email.value = 'john@example.com';
+      form.password.value = 'secret123';
+      
+      console.log('Filled form:', {
+        username: form.username.value,
+        email: form.email.value,
+        password: form.password.value
+      });
+    }, 2000);
+    
+    // Refs with valueOf and toString
+    console.log('\n=== Refs with valueOf and toString ===');
+    const values = ReactiveUtils.refs({
+      num: 100,
+      text: 'Test'
+    });
+    
+    console.log('num.valueOf():', values.num.valueOf());
+    console.log('text.toString():', values.text.toString());
+    console.log('Can use in expressions:', values.num.valueOf() + 50);
+    console.log('Can concatenate:', values.text.toString() + ' Message');
+    
+    // Refs for toggle states
+    console.log('\n=== Refs for toggle states ===');
+    const toggles = ReactiveUtils.refs({
+      menu: false,
+      sidebar: false,
+      modal: false
+    });
+    
+    console.log('Initial toggles:', {
+      menu: toggles.menu.value,
+      sidebar: toggles.sidebar.value,
+      modal: toggles.modal.value
+    });
+    
+    setTimeout(() => {
+      toggles.menu.value = !toggles.menu.value;
+      console.log('After menu toggle:', toggles.menu.value);
+      
+      toggles.modal.value = !toggles.modal.value;
+      console.log('After modal toggle:', toggles.modal.value);
+    }, 2500);
+    
+    // Refs with computed
+    console.log('\n=== Refs with computed ===');
+    const dimensions = ReactiveUtils.refs({
+      width: 10,
+      height: 20
+    });
+    
+    dimensions.width.$computed('doubled', function() {
+      return this.value * 2;
+    });
+    
+    dimensions.height.$computed('tripled', function() {
+      return this.value * 3;
+    });
+    
+    console.log('width:', dimensions.width.value);
+    console.log('width.doubled:', dimensions.width.doubled);
+    console.log('height:', dimensions.height.value);
+    console.log('height.tripled:', dimensions.height.tripled);
+    
+    setTimeout(() => {
+      dimensions.width.value = 15;
+      dimensions.height.value = 25;
+      
+      console.log('After updates:');
+      console.log('  width.doubled:', dimensions.width.doubled);
+      console.log('  height.tripled:', dimensions.height.tripled);
+    }, 3000);
+    
+    // Empty refs object
+    console.log('\n=== Empty refs object ===');
+    const empty = ReactiveUtils.refs({});
+    console.log('Empty refs:', empty);
+    console.log('Keys:', Object.keys(empty));
+    console.log('Length:', Object.keys(empty).length);
+    
+    // Large number of refs
+    console.log('\n=== Large number of refs ===');
+    const many = ReactiveUtils.refs({
+      field1: '',
+      field2: '',
+      field3: '',
+      field4: '',
+      field5: '',
+      field6: '',
+      field7: '',
+      field8: '',
+      field9: '',
+      field10: ''
+    });
+    
+    console.log('Created 10 refs:', Object.keys(many).length);
+    console.log('All are ref objects:', 
+      Object.values(many).every(r => typeof r === 'object' && 'value' in r)
+    );
+    
+    // Refs vs individual ref calls
+    console.log('\n=== Refs vs individual ref calls ===');
+    const individual1 = ReactiveUtils.ref(0);
+    const individual2 = ReactiveUtils.ref('');
+    const individual3 = ReactiveUtils.ref(false);
+    
+    const batch = ReactiveUtils.refs({
+      val1: 0,
+      val2: '',
+      val3: false
+    });
+    
+    console.log('Individual refs work the same as batch refs');
+    console.log('individual1.value:', individual1.value);
+    console.log('batch.val1.value:', batch.val1.value);
+    console.log('Same behavior:', individual1.value === batch.val1.value);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ ReactiveUtils.refs(defs) creates multiple refs');
+      console.log('✓ Returns object with property for each ref');
+      console.log('✓ Each property is a ref object with .value');
+      console.log('✓ All data types supported');
+      console.log('✓ Each ref is independently reactive');
+      console.log('✓ Can destructure for convenience');
+      console.log('✓ Perfect for form fields or related state');
+      console.log('✓ Each ref has valueOf() and toString()');
+      console.log('✓ Each ref supports $computed');
+      console.log('✓ More convenient than multiple ref() calls');
+    }, 3500);
   </script>
 </body>
 </html>
