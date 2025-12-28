@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Array unshift()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script>
+    console.log('=== Testing reactive array unshift() ===');
+    
+    const state = ReactiveUtils.state({
+      items: [3, 4, 5]
+    });
+    
+    console.log('Initial items:', state.items);
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: [${state.items.join(', ')}] (length: ${state.items.length})`);
+    });
+    
+    console.log('Initial effect runs:', effectRuns);
+    
+    // Test unshift with single item
+    setTimeout(() => {
+      console.log('\n=== unshift(2) ===');
+      const newLength = state.items.unshift(2);
+      console.log('New length:', newLength);
+      console.log('items:', state.items);
+      console.log('Effect runs:', effectRuns);
+      console.log('✓ Effect should have run');
+    }, 500);
+    
+    // Test unshift with multiple items
+    setTimeout(() => {
+      console.log('\n=== unshift(0, 1) ===');
+      const newLength = state.items.unshift(0, 1);
+      console.log('New length:', newLength);
+      console.log('items:', state.items);
+      console.log('Effect runs:', effectRuns);
+      console.log('✓ Items added at start');
+    }, 1000);
+    
+    // Verify order
+    setTimeout(() => {
+      console.log('\n=== Verifying order ===');
+      console.log('First item:', state.items[0]); // 0
+      console.log('Last item:', state.items[state.items.length - 1]); // 5
+      console.log('✓ Order is correct');
+    }, 1500);
+  </script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test patchReactiveArray()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script>
+    console.log('=== Testing patchReactiveArray() (legacy) ===');
+    console.log('Note: This is the global function name');
+    
+    const state = ReactiveUtils.state({
+      todos: [
+        { id: 1, text: 'Task 1', done: false },
+        { id: 2, text: 'Task 2', done: false }
+      ]
+    });
+    
+    console.log('Initial todos:', state.todos);
+    
+    // Test global patchReactiveArray function
+    console.log('\n=== Using global patchReactiveArray() ===');
+    patchReactiveArray(state, 'todos');
+    console.log('Array patched');
+    
+    // Test reactivity
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: ${state.todos.length} todos`);
+      state.todos.forEach((todo, i) => {
+        console.log(`  [${i}] ${todo.text} (${todo.done ? 'done' : 'pending'})`);
+      });
+    });
+    
+    setTimeout(() => {
+      console.log('\n=== Adding todo ===');
+      state.todos.push({ id: 3, text: 'Task 3', done: false });
+      console.log('Effect runs:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      console.log('\n=== Removing todo ===');
+      state.todos.shift();
+      console.log('Effect runs:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Sorting todos ===');
+      state.todos.sort((a, b) => b.id - a.id);
+      console.log('Effect runs:', effectRuns);
+    }, 1500);
+    
+    // Test that both names work
+    setTimeout(() => {
+      console.log('\n=== Testing both function names ===');
+      console.log('ReactiveUtils.patchArray:', typeof ReactiveUtils.patchArray);
+      console.log('patchReactiveArray (global):', typeof patchReactiveArray);
+      console.log('✓ Both function names available');
+      console.log('✓ They are the same function:', ReactiveUtils.patchArray === patchReactiveArray);
+    }, 2000);
+  </script>
+</body>
+</html>

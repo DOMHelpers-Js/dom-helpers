@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.find()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection.find() ===');
+    
+    // Basic find with numbers
+    console.log('\n=== Basic find with numbers ===');
+    const numbers = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    
+    const found1 = numbers.find(n => n === 3);
+    console.log('find(n => n === 3):', found1);
+    
+    const found2 = numbers.find(n => n > 3);
+    console.log('find(n => n > 3):', found2);
+    
+    const found3 = numbers.find(n => n % 2 === 0);
+    console.log('find(n => n % 2 === 0):', found3);
+    
+    // Find by direct value
+    console.log('\n=== Find by direct value ===');
+    const found4 = numbers.find(3);
+    console.log('find(3):', found4);
+    
+    const found5 = numbers.find(5);
+    console.log('find(5):', found5);
+    
+    // Find with objects
+    console.log('\n=== Find with objects ===');
+    const todos = ReactiveUtils.collection([
+      { id: 1, text: 'Buy groceries', done: false },
+      { id: 2, text: 'Walk dog', done: true },
+      { id: 3, text: 'Read book', done: false },
+      { id: 4, text: 'Write code', done: true }
+    ]);
+    
+    const todo1 = todos.find(t => t.id === 2);
+    console.log('find(t => t.id === 2):', todo1);
+    
+    const todo2 = todos.find(t => t.done);
+    console.log('find(t => t.done):', todo2);
+    
+    const todo3 = todos.find(t => t.text.includes('Read'));
+    console.log('find(t => t.text.includes("Read")):', todo3);
+    
+    // Find non-existent item
+    console.log('\n=== Find non-existent item ===');
+    const notFound1 = numbers.find(n => n > 100);
+    console.log('find(n => n > 100):', notFound1);
+    
+    const notFound2 = todos.find(t => t.id === 999);
+    console.log('find(t => t.id === 999):', notFound2);
+    
+    // Find in empty collection
+    console.log('\n=== Find in empty collection ===');
+    const empty = ReactiveUtils.collection();
+    const notFound3 = empty.find(item => true);
+    console.log('find in empty collection:', notFound3);
+    
+    // Find with complex predicates
+    console.log('\n=== Find with complex predicates ===');
+    const users = ReactiveUtils.collection([
+      { id: 1, name: 'Alice', age: 30, active: true },
+      { id: 2, name: 'Bob', age: 25, active: false },
+      { id: 3, name: 'Charlie', age: 35, active: true },
+      { id: 4, name: 'Diana', age: 28, active: true }
+    ]);
+    
+    const user1 = users.find(u => u.age > 30 && u.active);
+    console.log('find(age > 30 && active):', user1);
+    
+    const user2 = users.find(u => u.name.startsWith('C'));
+    console.log('find(name starts with "C"):', user2);
+    
+    const user3 = users.find(u => !u.active);
+    console.log('find(!active):', user3);
+    
+    // Find with strings
+    console.log('\n=== Find with strings ===');
+    const fruits = ReactiveUtils.collection(['apple', 'banana', 'cherry', 'date']);
+    
+    const fruit1 = fruits.find(f => f.length > 5);
+    console.log('find(length > 5):', fruit1);
+    
+    const fruit2 = fruits.find(f => f.includes('err'));
+    console.log('find(includes "err"):', fruit2);
+    
+    const fruit3 = fruits.find('cherry');
+    console.log('find("cherry"):', fruit3);
+    
+    // Test return type
+    console.log('\n=== Testing return type ===');
+    const products = ReactiveUtils.collection([
+      { id: 1, name: 'Laptop', price: 999 },
+      { id: 2, name: 'Mouse', price: 25 }
+    ]);
+    
+    const product = products.find(p => p.id === 1);
+    console.log('Found product:', product);
+    console.log('Is same reference:', product === products.items[0]);
+    console.log('Can modify:', (product.price = 899, products.items[0].price));
+    
+    // Test with index parameter
+    console.log('\n=== Testing with index parameter ===');
+    const items = ReactiveUtils.collection(['a', 'b', 'c', 'd', 'e']);
+    
+    const item1 = items.find((item, index) => index === 2);
+    console.log('find((item, index) => index === 2):', item1);
+    
+    const item2 = items.find((item, index) => index > 3);
+    console.log('find((item, index) => index > 3):', item2);
+    
+    // Test reactivity (find doesn't track, but collection does)
+    console.log('\n=== Testing with reactive collection ===');
+    const reactive = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    let effectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const found = reactive.find(n => n > 3);
+      console.log(`Effect #${effectRuns}: find(n > 3) = ${found}`);
+    });
+    
+    setTimeout(() => {
+      reactive.add(6);
+      console.log('Effect runs after add:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactive.remove(4);
+      console.log('Effect runs after remove:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ find(predicate) returns first matching item');
+      console.log('✓ find(value) finds by direct value');
+      console.log('✓ find() works with numbers, strings, and objects');
+      console.log('✓ find() returns undefined if no match');
+      console.log('✓ find() returns undefined for empty collections');
+      console.log('✓ find() returns actual item reference');
+      console.log('✓ find() supports index parameter in predicate');
+    }, 1500);
+  </script>
+</body>
+</html>

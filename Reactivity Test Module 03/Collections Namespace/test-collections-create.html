@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Collections.create()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing Collections.create() ===');
+    
+    // Create empty collection
+    const collection1 = Collections.create();
+    console.log('Empty collection:', collection1.items);
+    console.log('isEmpty:', collection1.isEmpty());
+    
+    // Create collection with items
+    const collection2 = Collections.create([1, 2, 3, 4, 5]);
+    console.log('\nCollection with items:', collection2.items);
+    console.log('length:', collection2.length);
+    console.log('first:', collection2.first);
+    console.log('last:', collection2.last);
+    
+    // Test collection methods
+    console.log('\n=== Testing collection methods ===');
+    
+    collection2.add(6);
+    console.log('After add(6):', collection2.items);
+    
+    collection2.remove(3);
+    console.log('After remove(3):', collection2.items);
+    
+    collection2.update(4, { value: 40 });
+    console.log('After update(4, {value: 40}):', collection2.items);
+    
+    // Create collection with objects
+    console.log('\n=== Collection with objects ===');
+    const todos = Collections.create([
+      { id: 1, text: 'Buy milk', done: false },
+      { id: 2, text: 'Walk dog', done: false },
+      { id: 3, text: 'Read book', done: true }
+    ]);
+    
+    console.log('Initial todos:', todos.items);
+    
+    todos.add({ id: 4, text: 'Write code', done: false });
+    console.log('\nAfter add:', todos.items);
+    
+    todos.update(t => t.id === 2, { done: true });
+    console.log('\nAfter marking #2 done:', todos.items);
+    
+    todos.toggle(t => t.id === 1, 'done');
+    console.log('\nAfter toggling #1:', todos.items);
+    
+    // Test array-like methods
+    console.log('\n=== Testing array-like methods ===');
+    const active = todos.filter(t => !t.done);
+    console.log('Active todos:', active);
+    
+    const texts = todos.map(t => t.text);
+    console.log('Todo texts:', texts);
+    
+    const firstTodo = todos.find(t => t.id === 1);
+    console.log('Found todo #1:', firstTodo);
+    
+    // Test reactivity
+    console.log('\n=== Testing reactivity ===');
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: ${collection2.length} items`);
+    });
+    
+    setTimeout(() => {
+      collection2.add(100);
+      console.log('Effect runs after add:', effectRuns);
+    }, 500);
+  </script>
+</body>
+</html>

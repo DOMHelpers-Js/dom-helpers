@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.slice()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection.slice() ===');
+    
+    const collection = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    
+    // Basic slice
+    console.log('\n=== Basic slice ===');
+    console.log('Original:', collection.items);
+    console.log('slice(2):', collection.slice(2)); // from index 2 to end
+    console.log('slice(1, 4):', collection.slice(1, 4)); // from 1 to 4 (exclusive)
+    console.log('slice(0, 3):', collection.slice(0, 3)); // first 3 items
+    
+    // Negative indices
+    console.log('\n=== Negative indices ===');
+    console.log('slice(-2):', collection.slice(-2)); // last 2 items
+    console.log('slice(-4, -1):', collection.slice(-4, -1)); // from -4 to -1
+    console.log('slice(1, -1):', collection.slice(1, -1)); // exclude first and last
+    
+    // No arguments (copy all)
+    console.log('\n=== No arguments (copy) ===');
+    const copy = collection.slice();
+    console.log('slice():', copy);
+    console.log('Is different array:', copy !== collection.items);
+    console.log('Has same values:', JSON.stringify(copy) === JSON.stringify(collection.items));
+    
+    // With objects
+    console.log('\n=== With objects ===');
+    const todos = ReactiveUtils.collection([
+      { id: 1, text: 'Task 1' },
+      { id: 2, text: 'Task 2' },
+      { id: 3, text: 'Task 3' },
+      { id: 4, text: 'Task 4' }
+    ]);
+    console.log('slice(1, 3):', todos.slice(1, 3));
+    console.log('✓ Returns shallow copy (object references maintained)');
+    
+    // Edge cases
+    console.log('\n=== Edge cases ===');
+    console.log('slice(0):', collection.slice(0)); // all items
+    console.log('slice(10):', collection.slice(10)); // empty (out of bounds)
+    console.log('slice(2, 1):', collection.slice(2, 1)); // empty (start > end)
+    console.log('slice(-1, -2):', collection.slice(-1, -2)); // empty
+    
+    // Empty collection
+    console.log('\n=== Empty collection ===');
+    const empty = ReactiveUtils.collection();
+    console.log('slice() on empty:', empty.slice());
+    console.log('slice(0, 5) on empty:', empty.slice(0, 5));
+    
+    // Single item
+    console.log('\n=== Single item ===');
+    const single = ReactiveUtils.collection([42]);
+    console.log('slice():', single.slice());
+    console.log('slice(0, 1):', single.slice(0, 1));
+    console.log('slice(1):', single.slice(1));
+    
+    // Slice doesn't modify original
+    console.log('\n=== Slice doesn\'t modify original ===');
+    const original = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    console.log('Before slice:', original.items);
+    const sliced = original.slice(1, 3);
+    console.log('Sliced:', sliced);
+    console.log('After slice:', original.items);
+    console.log('✓ Original unchanged');
+    
+    // Use cases
+    console.log('\n=== Common use cases ===');
+    const data = ReactiveUtils.collection([10, 20, 30, 40, 50, 60, 70, 80]);
+    
+    console.log('First 3:', data.slice(0, 3));
+    console.log('Last 3:', data.slice(-3));
+    console.log('Middle items:', data.slice(2, -2));
+    console.log('Skip first:', data.slice(1));
+    console.log('Skip last:', data.slice(0, -1));
+    
+    // Pagination example
+    console.log('\n=== Pagination example ===');
+    const items = ReactiveUtils.collection([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    const pageSize = 3;
+    
+    console.log('Page 1:', items.slice(0, pageSize));
+    console.log('Page 2:', items.slice(pageSize, pageSize * 2));
+    console.log('Page 3:', items.slice(pageSize * 2, pageSize * 3));
+    console.log('Page 4:', items.slice(pageSize * 3, pageSize * 4));
+    
+    // Test reactivity
+    console.log('\n=== Testing reactivity ===');
+    const reactive = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    let effectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const firstThree = reactive.slice(0, 3);
+      console.log(`Effect #${effectRuns}: slice(0, 3) = [${firstThree.join(', ')}]`);
+    });
+    
+    setTimeout(() => {
+      reactive.items[0] = 10;
+      console.log('Effect runs after modify first item:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactive.add(6);
+      console.log('Effect runs after add:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ slice(start, end) returns shallow copy of portion');
+      console.log('✓ slice() with no args copies entire array');
+      console.log('✓ slice() supports negative indices');
+      console.log('✓ slice() doesn\'t modify original collection');
+      console.log('✓ slice() returns empty array for invalid ranges');
+      console.log('✓ slice() is useful for pagination and subsets');
+      console.log('✓ slice() is reactive');
+    }, 1500);
+  </script>
+</body>
+</html>

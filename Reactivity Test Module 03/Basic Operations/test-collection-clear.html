@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.clear()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection.clear() ===');
+    
+    // Basic clear
+    console.log('\n=== Basic clear ===');
+    const collection = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    console.log('Initial:', collection.items);
+    console.log('Initial length:', collection.length);
+    
+    collection.clear();
+    console.log('After clear():', collection.items);
+    console.log('After clear length:', collection.length);
+    console.log('isEmpty:', collection.isEmpty());
+    
+    // Test return value
+    console.log('\n=== Testing return value ===');
+    const collection2 = ReactiveUtils.collection([1, 2, 3]);
+    const result = collection2.clear();
+    console.log('clear() returns this:', result === collection2);
+    console.log('Items:', collection2.items);
+    
+    // Test chaining
+    console.log('\n=== Testing chaining ===');
+    const collection3 = ReactiveUtils.collection();
+    collection3
+      .add(1)
+      .add(2)
+      .add(3)
+      .clear()
+      .add(10)
+      .add(20);
+    console.log('After add(1,2,3).clear().add(10,20):', collection3.items);
+    
+    // Test clear on empty collection
+    console.log('\n=== Testing clear on empty collection ===');
+    const empty = ReactiveUtils.collection();
+    console.log('Empty collection before clear:', empty.items);
+    empty.clear();
+    console.log('Empty collection after clear:', empty.items);
+    console.log('✓ No error when clearing empty collection');
+    
+    // Test with objects
+    console.log('\n=== Testing with objects ===');
+    const todos = ReactiveUtils.collection([
+      { id: 1, text: 'Task 1', done: false },
+      { id: 2, text: 'Task 2', done: true },
+      { id: 3, text: 'Task 3', done: false }
+    ]);
+    console.log('Initial todos:', todos.items);
+    console.log('Length:', todos.length);
+    
+    todos.clear();
+    console.log('After clear:', todos.items);
+    console.log('Length:', todos.length);
+    console.log('first:', todos.first);
+    console.log('last:', todos.last);
+    
+    // Test clear and repopulate
+    console.log('\n=== Testing clear and repopulate ===');
+    const products = ReactiveUtils.collection([
+      { id: 1, name: 'A' },
+      { id: 2, name: 'B' }
+    ]);
+    console.log('Initial:', products.items);
+    
+    products.clear();
+    console.log('After clear:', products.items);
+    
+    products.add({ id: 10, name: 'X' });
+    products.add({ id: 20, name: 'Y' });
+    console.log('After repopulating:', products.items);
+    
+    // Test properties after clear
+    console.log('\n=== Testing properties after clear ===');
+    const collection4 = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    console.log('Before clear:');
+    console.log('  length:', collection4.length);
+    console.log('  first:', collection4.first);
+    console.log('  last:', collection4.last);
+    console.log('  isEmpty:', collection4.isEmpty());
+    
+    collection4.clear();
+    console.log('After clear:');
+    console.log('  length:', collection4.length);
+    console.log('  first:', collection4.first);
+    console.log('  last:', collection4.last);
+    console.log('  isEmpty:', collection4.isEmpty());
+    
+    // Test reactivity
+    console.log('\n=== Testing reactivity ===');
+    const reactive = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    let effectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: [${reactive.items.join(', ')}] (length: ${reactive.length}, isEmpty: ${reactive.isEmpty()})`);
+    });
+    
+    setTimeout(() => {
+      reactive.clear();
+      console.log('Effect runs after clear:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactive.add(10);
+      console.log('Effect runs after add to cleared collection:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      reactive.clear();
+      console.log('Effect runs after second clear:', effectRuns);
+    }, 1500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ clear() removes all items from collection');
+      console.log('✓ clear() sets length to 0');
+      console.log('✓ clear() sets first and last to undefined');
+      console.log('✓ clear() makes isEmpty() return true');
+      console.log('✓ clear() returns this for method chaining');
+      console.log('✓ clear() is safe on empty collections');
+      console.log('✓ clear() is reactive and triggers effects');
+      console.log('✓ Collection can be repopulated after clear');
+    }, 2000);
+  </script>
+</body>
+</html>

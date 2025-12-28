@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.add()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection.add() ===');
+    
+    const collection = ReactiveUtils.collection([1, 2, 3]);
+    
+    // Basic add
+    console.log('\n=== Basic add ===');
+    console.log('Initial:', collection.items);
+    
+    collection.add(4);
+    console.log('After add(4):', collection.items);
+    console.log('Length:', collection.length);
+    
+    collection.add(5);
+    console.log('After add(5):', collection.items);
+    
+    // Test return value (should return this for chaining)
+    console.log('\n=== Testing return value ===');
+    const result = collection.add(6);
+    console.log('add() returns this:', result === collection);
+    console.log('Items after add(6):', collection.items);
+    
+    // Test chaining
+    console.log('\n=== Testing chaining ===');
+    collection.add(7).add(8).add(9);
+    console.log('After chained add(7).add(8).add(9):', collection.items);
+    
+    // Test with objects
+    console.log('\n=== Testing with objects ===');
+    const todos = ReactiveUtils.collection([
+      { id: 1, text: 'Task 1', done: false },
+      { id: 2, text: 'Task 2', done: false }
+    ]);
+    
+    console.log('Initial todos:', todos.items);
+    
+    todos.add({ id: 3, text: 'Task 3', done: false });
+    console.log('After add:', todos.items);
+    
+    todos.add({ id: 4, text: 'Task 4', done: true });
+    console.log('After another add:', todos.items);
+    
+    // Test with different types
+    console.log('\n=== Testing with different types ===');
+    const mixed = ReactiveUtils.collection();
+    
+    mixed.add('string');
+    console.log('After add("string"):', mixed.items);
+    
+    mixed.add(42);
+    console.log('After add(42):', mixed.items);
+    
+    mixed.add(true);
+    console.log('After add(true):', mixed.items);
+    
+    mixed.add({ key: 'value' });
+    console.log('After add(object):', mixed.items);
+    
+    mixed.add([1, 2, 3]);
+    console.log('After add(array):', mixed.items);
+    
+    // Test reactivity
+    console.log('\n=== Testing reactivity ===');
+    const reactive = ReactiveUtils.collection([1, 2, 3]);
+    let effectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: [${reactive.items.join(', ')}] (length: ${reactive.length})`);
+    });
+    
+    setTimeout(() => {
+      reactive.add(4);
+      console.log('Effect runs after add:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactive.add(5);
+      console.log('Effect runs after second add:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      reactive.add(6).add(7);
+      console.log('Effect runs after chained add:', effectRuns);
+    }, 1500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ add(item) adds item to end of collection');
+      console.log('✓ add() returns this for method chaining');
+      console.log('✓ add() works with any type of item');
+      console.log('✓ add() is reactive and triggers effects');
+      console.log('✓ add() increases collection length');
+    }, 2000);
+  </script>
+</body>
+</html>

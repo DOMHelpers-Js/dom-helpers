@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.reverse()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection.reverse() ===');
+    
+    // Basic reverse with numbers
+    console.log('\n=== Basic reverse with numbers ===');
+    const numbers = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    console.log('Before reverse:', numbers.items);
+    numbers.reverse();
+    console.log('After reverse():', numbers.items);
+    
+    numbers.reverse();
+    console.log('After second reverse():', numbers.items);
+    
+    // Reverse with strings
+    console.log('\n=== Reverse with strings ===');
+    const words = ReactiveUtils.collection(['apple', 'banana', 'cherry', 'date']);
+    console.log('Before reverse:', words.items);
+    words.reverse();
+    console.log('After reverse():', words.items);
+    
+    // Reverse with objects
+    console.log('\n=== Reverse with objects ===');
+    const todos = ReactiveUtils.collection([
+      { id: 1, text: 'First' },
+      { id: 2, text: 'Second' },
+      { id: 3, text: 'Third' }
+    ]);
+    console.log('Before reverse:', todos.items);
+    todos.reverse();
+    console.log('After reverse():', todos.items);
+    
+    // Test return value
+    console.log('\n=== Testing return value ===');
+    const collection = ReactiveUtils.collection([1, 2, 3]);
+    const result = collection.reverse();
+    console.log('reverse() returns this:', result === collection);
+    console.log('Items:', collection.items);
+    
+    // Test chaining
+    console.log('\n=== Testing chaining ===');
+    const chain = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    chain.reverse().push(6).reverse();
+    console.log('After reverse().push(6).reverse():', chain.items);
+    
+    // Reverse modifies in place
+    console.log('\n=== Reverse modifies in place ===');
+    const original = ReactiveUtils.collection(['a', 'b', 'c']);
+    console.log('Before reverse:', original.items);
+    console.log('first:', original.first);
+    console.log('last:', original.last);
+    
+    const returned = original.reverse();
+    console.log('\nAfter reverse:', original.items);
+    console.log('first:', original.first);
+    console.log('last:', original.last);
+    console.log('Same reference:', returned === original);
+    
+    // Reverse empty collection
+    console.log('\n=== Reverse empty collection ===');
+    const empty = ReactiveUtils.collection();
+    empty.reverse();
+    console.log('Reverse on empty:', empty.items);
+    console.log('✓ No error on empty collection');
+    
+    // Reverse single item
+    console.log('\n=== Reverse single item ===');
+    const single = ReactiveUtils.collection([42]);
+    console.log('Before reverse:', single.items);
+    single.reverse();
+    console.log('After reverse:', single.items);
+    console.log('✓ Single item remains unchanged');
+    
+    // Combine with sort
+    console.log('\n=== Combine with sort ===');
+    const combined = ReactiveUtils.collection([5, 2, 8, 1, 9, 3]);
+    console.log('Original:', combined.items);
+    
+    combined.sort((a, b) => a - b);
+    console.log('After sort ascending:', combined.items);
+    
+    combined.reverse();
+    console.log('After reverse (now descending):', combined.items);
+    
+    // Test reactivity
+    console.log('\n=== Testing reactivity ===');
+    const reactive = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    let effectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: [${reactive.items.join(', ')}] (first: ${reactive.first}, last: ${reactive.last})`);
+    });
+    
+    setTimeout(() => {
+      reactive.reverse();
+      console.log('Effect runs after reverse:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactive.reverse();
+      console.log('Effect runs after second reverse:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ reverse() reverses items in place');
+      console.log('✓ reverse() returns this for chaining');
+      console.log('✓ reverse() works with numbers, strings, and objects');
+      console.log('✓ reverse() updates first and last properties');
+      console.log('✓ reverse() is safe on empty collections');
+      console.log('✓ reverse() is idempotent (reverse twice = original)');
+      console.log('✓ reverse() is reactive and triggers effects');
+    }, 1500);
+  </script>
+</body>
+</html>

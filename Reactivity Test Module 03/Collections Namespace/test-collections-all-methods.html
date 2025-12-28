@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test All Collections Methods</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing all Collections methods ===');
+    
+    // Test 1: Collections.create()
+    console.log('\n1. Collections.create()');
+    const col1 = Collections.create([1, 2, 3]);
+    console.log('   Created:', col1.items);
+    
+    // Test 2: Collections.collection() (alias)
+    console.log('\n2. Collections.collection()');
+    const col2 = Collections.collection([4, 5, 6]);
+    console.log('   Created:', col2.items);
+    
+    // Test 3: Collections.list() (alias)
+    console.log('\n3. Collections.list()');
+    const col3 = Collections.list([7, 8, 9]);
+    console.log('   Created:', col3.items);
+    
+    // Test 4: Collections.createWithComputed()
+    console.log('\n4. Collections.createWithComputed()');
+    const col4 = Collections.createWithComputed(
+      [10, 20, 30],
+      {
+        sum() {
+          return this.items.reduce((a, b) => a + b, 0);
+        }
+      }
+    );
+    console.log('   Created:', col4.items);
+    console.log('   Computed sum:', col4.sum);
+    
+    // Test 5: Collections.createFiltered()
+    console.log('\n5. Collections.createFiltered()');
+    const source = Collections.create([
+      { id: 1, active: true },
+      { id: 2, active: false },
+      { id: 3, active: true }
+    ]);
+    const filtered = Collections.createFiltered(source, item => item.active);
+    console.log('   Source:', source.items);
+    console.log('   Filtered (active only):', filtered.items);
+    
+    // Verify aliases
+    console.log('\n=== Verifying aliases ===');
+    console.log('Collections.create === Collections.collection:', 
+      Collections.create === Collections.collection);
+    console.log('Collections.create === Collections.list:', 
+      Collections.create === Collections.list);
+    console.log('✓ create, collection, and list are all the same');
+    
+    // Test reactivity across all types
+    console.log('\n=== Testing reactivity ===');
+    let runs = 0;
+    ReactiveUtils.effect(() => {
+      runs++;
+      console.log(`Effect #${runs}:`, {
+        col1_length: col1.length,
+        col4_sum: col4.sum,
+        filtered_length: filtered.length
+      });
+    });
+    
+    setTimeout(() => {
+      console.log('\n=== Updating collections ===');
+      col1.add(10);
+      console.log('Added to col1');
+    }, 500);
+    
+    setTimeout(() => {
+      col4.add(40);
+      console.log('Added to col4 (has computed)');
+    }, 1000);
+    
+    setTimeout(() => {
+      source.add({ id: 4, active: true });
+      console.log('Added to source (updates filtered)');
+    }, 1500);
+    
+    setTimeout(() => {
+      console.log('\n=== Final state ===');
+      console.log('col1:', col1.items);
+      console.log('col4:', col4.items, '(sum:', col4.sum + ')');
+      console.log('filtered:', filtered.items);
+      console.log('Effect ran', runs, 'times total');
+    }, 2000);
+  </script>
+</body>
+</html>

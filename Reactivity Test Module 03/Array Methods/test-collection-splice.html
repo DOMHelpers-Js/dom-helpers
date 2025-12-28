@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.splice()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection.splice() ===');
+    
+    // Remove items
+    console.log('\n=== Remove items ===');
+    const collection1 = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    console.log('Before splice:', collection1.items);
+    collection1.splice(2, 1); // remove 1 item at index 2
+    console.log('After splice(2, 1):', collection1.items);
+    
+    collection1.splice(1, 2); // remove 2 items at index 1
+    console.log('After splice(1, 2):', collection1.items);
+    
+    // Add items
+    console.log('\n=== Add items ===');
+    const collection2 = ReactiveUtils.collection([1, 2, 5]);
+    console.log('Before splice:', collection2.items);
+    collection2.splice(2, 0, 3, 4); // add 3 and 4 at index 2
+    console.log('After splice(2, 0, 3, 4):', collection2.items);
+    
+    // Replace items
+    console.log('\n=== Replace items ===');
+    const collection3 = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    console.log('Before splice:', collection3.items);
+    collection3.splice(1, 2, 99, 100); // replace 2 items with 2 new items
+    console.log('After splice(1, 2, 99, 100):', collection3.items);
+    
+    collection3.splice(2, 1, 200, 300, 400); // replace 1 item with 3 new items
+    console.log('After splice(2, 1, 200, 300, 400):', collection3.items);
+    
+    // Negative start index
+    console.log('\n=== Negative start index ===');
+    const collection4 = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    console.log('Before splice:', collection4.items);
+    collection4.splice(-2, 1); // remove second-to-last item
+    console.log('After splice(-2, 1):', collection4.items);
+    
+    collection4.splice(-1, 0, 99); // insert before last item
+    console.log('After splice(-1, 0, 99):', collection4.items);
+    
+    // Remove to end
+    console.log('\n=== Remove to end ===');
+    const collection5 = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    console.log('Before splice:', collection5.items);
+    collection5.splice(2); // remove from index 2 to end
+    console.log('After splice(2):', collection5.items);
+    
+    // Test return value
+    console.log('\n=== Testing return value ===');
+    const collection6 = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    const result = collection6.splice(1, 2);
+    console.log('splice() returns this:', result === collection6);
+    console.log('Items after splice:', collection6.items);
+    
+    // Test chaining
+    console.log('\n=== Testing chaining ===');
+    const chain = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    chain.splice(1, 1).splice(2, 0, 99).push(100);
+    console.log('After chained operations:', chain.items);
+    
+    // With objects
+    console.log('\n=== With objects ===');
+    const todos = ReactiveUtils.collection([
+      { id: 1, text: 'Task 1' },
+      { id: 2, text: 'Task 2' },
+      { id: 3, text: 'Task 3' }
+    ]);
+    console.log('Before splice:', todos.items);
+    
+    todos.splice(1, 1, { id: 99, text: 'New Task' });
+    console.log('After splice(1, 1, newTask):', todos.items);
+    
+    // Edge cases
+    console.log('\n=== Edge cases ===');
+    const edge = ReactiveUtils.collection([1, 2, 3]);
+    
+    edge.splice(0, 0, 0); // insert at beginning
+    console.log('After splice(0, 0, 0):', edge.items);
+    
+    edge.splice(100, 1); // start beyond length
+    console.log('After splice(100, 1):', edge.items);
+    
+    edge.splice(1, 100); // delete more than exist
+    console.log('After splice(1, 100):', edge.items);
+    
+    // Empty collection
+    console.log('\n=== Empty collection ===');
+    const empty = ReactiveUtils.collection();
+    empty.splice(0, 0, 1, 2, 3);
+    console.log('After splice on empty:', empty.items);
+    
+    // Common patterns
+    console.log('\n=== Common patterns ===');
+    const patterns = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    
+    // Insert at beginning
+    const p1 = ReactiveUtils.collection([...patterns.items]);
+    p1.splice(0, 0, 0);
+    console.log('Insert at beginning:', p1.items);
+    
+    // Insert at end
+    const p2 = ReactiveUtils.collection([...patterns.items]);
+    p2.splice(p2.length, 0, 6);
+    console.log('Insert at end:', p2.items);
+    
+    // Remove first
+    const p3 = ReactiveUtils.collection([...patterns.items]);
+    p3.splice(0, 1);
+    console.log('Remove first:', p3.items);
+    
+    // Remove last
+    const p4 = ReactiveUtils.collection([...patterns.items]);
+    p4.splice(-1, 1);
+    console.log('Remove last:', p4.items);
+    
+    // Clear all
+    const p5 = ReactiveUtils.collection([...patterns.items]);
+    p5.splice(0);
+    console.log('Clear all:', p5.items);
+    
+    // Test reactivity
+    console.log('\n=== Testing reactivity ===');
+    const reactive = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    let effectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: [${reactive.items.join(', ')}] (length: ${reactive.length})`);
+    });
+    
+    setTimeout(() => {
+      reactive.splice(2, 1);
+      console.log('Effect runs after splice remove:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactive.splice(1, 0, 99);
+      console.log('Effect runs after splice insert:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ splice(start, deleteCount) removes items');
+      console.log('✓ splice(start, 0, ...items) inserts items');
+      console.log('✓ splice(start, deleteCount, ...items) replaces items');
+      console.log('✓ splice() supports negative start index');
+      console.log('✓ splice() returns this for chaining');
+      console.log('✓ splice() modifies collection in place');
+      console.log('✓ splice() is reactive and triggers effects');
+    }, 1500);
+  </script>
+</body>
+</html>

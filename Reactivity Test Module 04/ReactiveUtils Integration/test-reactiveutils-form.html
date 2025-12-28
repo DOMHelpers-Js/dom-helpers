@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveUtils.form()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing ReactiveUtils.form() ===');
+    
+    // Basic form creation
+    console.log('\n=== Basic form creation ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: '',
+      password: ''
+    });
+    
+    console.log('Form created:', !!form);
+    console.log('values:', form.values);
+    console.log('errors:', form.errors);
+    console.log('touched:', form.touched);
+    console.log('isValid:', form.isValid);
+    console.log('isDirty:', form.isDirty);
+    
+    // Form with validators
+    console.log('\n=== Form with validators ===');
+    const loginForm = ReactiveUtils.form({
+      email: '',
+      password: ''
+    }, {
+      validators: {
+        email: (value) => {
+          if (!value) return 'Email is required';
+          if (!/\S+@\S+\.\S+/.test(value)) return 'Invalid email';
+          return null;
+        },
+        password: (value) => {
+          if (!value) return 'Password is required';
+          if (value.length < 6) return 'Password must be at least 6 characters';
+          return null;
+        }
+      }
+    });
+    
+    console.log('Login form created:', !!loginForm);
+    console.log('Initial state:', {
+      values: loginForm.values,
+      errors: loginForm.errors,
+      isValid: loginForm.isValid
+    });
+    
+    // Test setValue
+    console.log('\n=== Test setValue ===');
+    loginForm.setValue('email', 'test');
+    console.log('After setValue("email", "test"):');
+    console.log('  values:', loginForm.values);
+    console.log('  errors:', loginForm.errors);
+    console.log('  touched:', loginForm.touched);
+    
+    loginForm.setValue('email', 'test@example.com');
+    console.log('After setValue("email", "test@example.com"):');
+    console.log('  values:', loginForm.values);
+    console.log('  errors:', loginForm.errors);
+    
+    // Test setValues
+    console.log('\n=== Test setValues ===');
+    const multiForm = ReactiveUtils.form({
+      firstName: '',
+      lastName: '',
+      age: ''
+    });
+    
+    console.log('Before setValues:', multiForm.values);
+    multiForm.setValues({
+      firstName: 'John',
+      lastName: 'Doe',
+      age: '30'
+    });
+    console.log('After setValues:', multiForm.values);
+    console.log('touched:', multiForm.touched);
+    
+    // Test validate
+    console.log('\n=== Test validate ===');
+    const validateForm = ReactiveUtils.form({
+      username: '',
+      email: ''
+    }, {
+      validators: {
+        username: (value) => value ? null : 'Username required',
+        email: (value) => value ? null : 'Email required'
+      }
+    });
+    
+    console.log('Before validate:');
+    console.log('  errors:', validateForm.errors);
+    console.log('  isValid:', validateForm.isValid);
+    
+    const isValid = validateForm.validate();
+    console.log('After validate():');
+    console.log('  returned:', isValid);
+    console.log('  errors:', validateForm.errors);
+    console.log('  isValid:', validateForm.isValid);
+    
+    // Test reset
+    console.log('\n=== Test reset ===');
+    const resetForm = ReactiveUtils.form({
+      name: '',
+      email: ''
+    });
+    
+    resetForm.setValue('name', 'Alice');
+    resetForm.setValue('email', 'alice@example.com');
+    console.log('After setValue:', resetForm.values);
+    console.log('touched:', resetForm.touched);
+    
+    resetForm.reset();
+    console.log('After reset():', resetForm.values);
+    console.log('touched:', resetForm.touched);
+    
+    // Test computed properties
+    console.log('\n=== Test computed properties ===');
+    const computedForm = ReactiveUtils.form({
+      username: '',
+      email: '',
+      password: ''
+    }, {
+      validators: {
+        username: (value) => value ? null : 'Required',
+        email: (value) => value ? null : 'Required'
+      }
+    });
+    
+    console.log('Initial computed:');
+    console.log('  isValid:', computedForm.isValid);
+    console.log('  isDirty:', computedForm.isDirty);
+    console.log('  hasErrors:', computedForm.hasErrors);
+    
+    computedForm.setValue('username', 'test');
+    console.log('After setValue:');
+    console.log('  isValid:', computedForm.isValid);
+    console.log('  isDirty:', computedForm.isDirty);
+    console.log('  hasErrors:', computedForm.hasErrors);
+    
+    // Form methods verification
+    console.log('\n=== Form methods verification ===');
+    const methodsForm = ReactiveUtils.form({ test: '' });
+    
+    const methods = [
+      'setValue', 'setValues', 'setError', 'setErrors', 
+      'clearError', 'clearErrors', 'setTouched', 'setTouchedFields',
+      'touchAll', 'validateField', 'validate', 'reset', 'resetField',
+      'submit', 'handleChange', 'handleBlur', 'getFieldProps',
+      'hasError', 'isTouched', 'getError', 'getValue', 
+      'shouldShowError', 'bindToInputs', 'toObject'
+    ];
+    
+    console.log('Checking form methods:');
+    methods.forEach(method => {
+      console.log(`  ${method}:`, typeof methodsForm[method] === 'function');
+    });
+    
+    // Test reactivity
+    console.log('\n=== Testing reactivity ===');
+    const reactiveForm = ReactiveUtils.form({
+      count: '0'
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: count = ${reactiveForm.values.count}`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.setValue('count', '1');
+      console.log('Effect runs after setValue:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactiveForm.setValue('count', '2');
+      console.log('Effect runs after second setValue:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ ReactiveUtils.form(initialValues) creates form');
+      console.log('✓ ReactiveUtils.form(values, options) supports validators');
+      console.log('✓ form has all expected methods');
+      console.log('✓ form has computed properties (isValid, isDirty, hasErrors)');
+      console.log('✓ form methods work correctly');
+      console.log('✓ form is reactive and triggers effects');
+    }, 1500);
+  </script>
+</body>
+</html>

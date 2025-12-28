@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Array pop()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script>
+    console.log('=== Testing reactive array pop() ===');
+    
+    const state = ReactiveUtils.state({
+      items: [1, 2, 3, 4, 5]
+    });
+    
+    console.log('Initial items:', state.items);
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: [${state.items.join(', ')}] (length: ${state.items.length})`);
+    });
+    
+    console.log('Initial effect runs:', effectRuns);
+    
+    // Test pop
+    setTimeout(() => {
+      console.log('\n=== pop() ===');
+      const popped = state.items.pop();
+      console.log('Popped value:', popped);
+      console.log('items:', state.items);
+      console.log('Effect runs:', effectRuns);
+      console.log('✓ Effect should have run');
+    }, 500);
+    
+    // Test multiple pops
+    setTimeout(() => {
+      console.log('\n=== pop() again ===');
+      const popped = state.items.pop();
+      console.log('Popped value:', popped);
+      console.log('items:', state.items);
+      console.log('Effect runs:', effectRuns);
+    }, 1000);
+    
+    // Test pop on empty array
+    setTimeout(() => {
+      console.log('\n=== Emptying array ===');
+      while (state.items.length > 0) {
+        state.items.pop();
+      }
+      console.log('items:', state.items);
+      console.log('Effect runs:', effectRuns);
+      
+      const popped = state.items.pop();
+      console.log('\npop() on empty array:', popped); // undefined
+      console.log('Effect runs:', effectRuns);
+    }, 1500);
+  </script>
+</body>
+</html>

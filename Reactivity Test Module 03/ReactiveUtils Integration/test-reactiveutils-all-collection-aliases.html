@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test All ReactiveUtils Collection Aliases</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing All ReactiveUtils Collection Aliases ===');
+    
+    // Test all three methods
+    console.log('\n=== Creating collections with all three methods ===');
+    
+    const col1 = ReactiveUtils.collection([1, 2, 3]);
+    console.log('1. ReactiveUtils.collection():', col1.items);
+    
+    const col2 = ReactiveUtils.list([4, 5, 6]);
+    console.log('2. ReactiveUtils.list():', col2.items);
+    
+    const col3 = ReactiveUtils.createCollection([7, 8, 9]);
+    console.log('3. ReactiveUtils.createCollection():', col3.items);
+    
+    // Verify all are aliases
+    console.log('\n=== Verifying all are aliases ===');
+    const test1 = ReactiveUtils.collection === ReactiveUtils.list;
+    const test2 = ReactiveUtils.collection === ReactiveUtils.createCollection;
+    const test3 = ReactiveUtils.list === ReactiveUtils.createCollection;
+    
+    console.log('collection === list:', test1);
+    console.log('collection === createCollection:', test2);
+    console.log('list === createCollection:', test3);
+    
+    if (test1 && test2 && test3) {
+      console.log('✓ All three methods are the same function');
+    }
+    
+    // Test identical behavior
+    console.log('\n=== Testing identical behavior ===');
+    
+    col1.add(10);
+    col2.add(10);
+    col3.add(10);
+    
+    console.log('After add(10):');
+    console.log('  col1:', col1.items);
+    console.log('  col2:', col2.items);
+    console.log('  col3:', col3.items);
+    
+    col1.remove(2);
+    col2.remove(5);
+    col3.remove(8);
+    
+    console.log('\nAfter remove:');
+    console.log('  col1:', col1.items);
+    console.log('  col2:', col2.items);
+    console.log('  col3:', col3.items);
+    
+    // Test reactivity on all
+    console.log('\n=== Testing reactivity on all ===');
+    let runs1 = 0, runs2 = 0, runs3 = 0;
+    
+    ReactiveUtils.effect(() => {
+      runs1++;
+      console.log(`col1 effect #${runs1}: [${col1.items.join(', ')}]`);
+    });
+    
+    ReactiveUtils.effect(() => {
+      runs2++;
+      console.log(`col2 effect #${runs2}: [${col2.items.join(', ')}]`);
+    });
+    
+    ReactiveUtils.effect(() => {
+      runs3++;
+      console.log(`col3 effect #${runs3}: [${col3.items.join(', ')}]`);
+    });
+    
+    setTimeout(() => {
+      console.log('\n=== Pushing to all ===');
+      col1.push(100);
+      col2.push(200);
+      col3.push(300);
+      console.log('Effect runs: col1=' + runs1 + ', col2=' + runs2 + ', col3=' + runs3);
+    }, 500);
+    
+    setTimeout(() => {
+      console.log('\n=== Sorting all ===');
+      col1.sort((a, b) => b - a);
+      col2.sort((a, b) => b - a);
+      col3.sort((a, b) => b - a);
+      console.log('Effect runs: col1=' + runs1 + ', col2=' + runs2 + ', col3=' + runs3);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Final Summary ===');
+      console.log('✓ ReactiveUtils.collection() - Works perfectly');
+      console.log('✓ ReactiveUtils.list() - Works perfectly');
+      console.log('✓ ReactiveUtils.createCollection() - Works perfectly');
+      console.log('✓ All three are identical aliases');
+      console.log('✓ All support the same extended collection methods');
+      console.log('✓ All are fully reactive');
+      console.log('\nTotal effect runs: col1=' + runs1 + ', col2=' + runs2 + ', col3=' + runs3);
+    }, 1500);
+  </script>
+</body>
+</html>

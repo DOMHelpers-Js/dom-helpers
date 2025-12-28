@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.last</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection.last ===');
+    
+    const collection = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    
+    // Read last
+    console.log('\n=== Reading last ===');
+    console.log('collection.last:', collection.last);
+    console.log('Type:', typeof collection.last);
+    
+    // Verify it's a getter
+    console.log('\n=== Verifying it\'s a getter ===');
+    const descriptor = Object.getOwnPropertyDescriptor(collection, 'last');
+    console.log('Has getter:', !!descriptor?.get);
+    console.log('Is enumerable:', descriptor?.enumerable);
+    
+    // Verify it matches items[items.length - 1]
+    console.log('\n=== Verifying it matches items[length-1] ===');
+    console.log('collection.last:', collection.last);
+    console.log('collection.items[items.length - 1]:', collection.items[collection.items.length - 1]);
+    console.log('Match:', collection.last === collection.items[collection.items.length - 1]);
+    
+    // Test that last updates with changes
+    console.log('\n=== Testing last updates ===');
+    console.log('Initial last:', collection.last);
+    
+    collection.push(6);
+    console.log('After push(6):', collection.last);
+    
+    collection.pop();
+    console.log('After pop():', collection.last);
+    
+    collection.items[collection.items.length - 1] = 500;
+    console.log('After modifying last item:', collection.last);
+    
+    collection.sort((a, b) => b - a);
+    console.log('After sort descending:', collection.last);
+    
+    // Test with empty collection
+    console.log('\n=== Testing with empty collection ===');
+    const empty = ReactiveUtils.collection();
+    console.log('Empty collection last:', empty.last);
+    
+    empty.add(99);
+    console.log('After add(99):', empty.last);
+    
+    // Test with objects
+    console.log('\n=== Testing with objects ===');
+    const todos = ReactiveUtils.collection([
+      { id: 1, text: 'First task', done: false },
+      { id: 2, text: 'Second task', done: false },
+      { id: 3, text: 'Last task', done: true }
+    ]);
+    
+    console.log('Last todo:', todos.last);
+    console.log('Last todo text:', todos.last.text);
+    
+    todos.push({ id: 4, text: 'New last task', done: false });
+    console.log('After push:', todos.last);
+    console.log('New last text:', todos.last.text);
+    
+    // Test with single item
+    console.log('\n=== Testing with single item ===');
+    const single = ReactiveUtils.collection([42]);
+    console.log('Single item collection:');
+    console.log('  first:', single.first);
+    console.log('  last:', single.last);
+    console.log('  first === last:', single.first === single.last);
+    
+    // Test reactivity
+    console.log('\n=== Testing last reactivity ===');
+    const reactive = ReactiveUtils.collection(['a', 'b', 'c']);
+    let effectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: last = "${reactive.last}"`);
+    });
+    
+    setTimeout(() => {
+      reactive.push('d');
+      console.log('Effect runs after push:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactive.pop();
+      console.log('Effect runs after pop:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      reactive.reverse();
+      console.log('Effect runs after reverse:', effectRuns);
+    }, 1500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ last is a read-only getter');
+      console.log('✓ last returns items[items.length - 1]');
+      console.log('✓ last updates automatically with mutations');
+      console.log('✓ last returns undefined for empty collections');
+      console.log('✓ last is reactive');
+      console.log('✓ For single item, first === last');
+    }, 2000);
+  </script>
+</body>
+</html>

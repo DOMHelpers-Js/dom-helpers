@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.toggle()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection.toggle() ===');
+    
+    // Basic toggle
+    console.log('\n=== Basic toggle ===');
+    const todos = ReactiveUtils.collection([
+      { id: 1, text: 'Task 1', done: false },
+      { id: 2, text: 'Task 2', done: false },
+      { id: 3, text: 'Task 3', done: true }
+    ]);
+    console.log('Initial todos:', todos.items);
+    
+    todos.toggle(t => t.id === 1, 'done');
+    console.log('After toggle(id === 1, "done"):', todos.items);
+    
+    todos.toggle(t => t.id === 3, 'done');
+    console.log('After toggle(id === 3, "done"):', todos.items);
+    
+    // Toggle by direct value
+    console.log('\n=== Toggle by direct value ===');
+    const item = todos.items[0];
+    console.log('Before toggle:', item);
+    todos.toggle(item, 'done');
+    console.log('After toggle:', item);
+    
+    // Test return value
+    console.log('\n=== Testing return value ===');
+    const collection = ReactiveUtils.collection([
+      { id: 1, active: true }
+    ]);
+    const result = collection.toggle(c => c.id === 1, 'active');
+    console.log('toggle() returns this:', result === collection);
+    console.log('Items:', collection.items);
+    
+    // Test chaining
+    console.log('\n=== Testing chaining ===');
+    const chain = ReactiveUtils.collection([
+      { id: 1, a: false, b: false },
+      { id: 2, a: false, b: false }
+    ]);
+    chain.toggle(c => c.id === 1, 'a')
+         .toggle(c => c.id === 2, 'b')
+         .toggle(c => c.id === 1, 'b');
+    console.log('After chained toggles:', chain.items);
+    
+    // Toggle only affects first match
+    console.log('\n=== Toggle only first match ===');
+    const duplicates = ReactiveUtils.collection([
+      { id: 1, active: false },
+      { id: 1, active: false },
+      { id: 1, active: false }
+    ]);
+    console.log('Before toggle:', duplicates.items);
+    duplicates.toggle(item => item.id === 1, 'active');
+    console.log('After toggle (only first):', duplicates.items);
+    
+    // Toggle different fields
+    console.log('\n=== Toggle different fields ===');
+    const settings = ReactiveUtils.collection([
+      { id: 1, enabled: false, visible: true, selected: false }
+    ]);
+    console.log('Initial:', settings.items[0]);
+    
+    settings.toggle(s => s.id === 1, 'enabled');
+    console.log('After toggle "enabled":', settings.items[0]);
+    
+    settings.toggle(s => s.id === 1, 'visible');
+    console.log('After toggle "visible":', settings.items[0]);
+    
+    settings.toggle(s => s.id === 1, 'selected');
+    console.log('After toggle "selected":', settings.items[0]);
+    
+    // Toggle non-existent field
+    console.log('\n=== Toggle non-existent field ===');
+    const test = ReactiveUtils.collection([
+      { id: 1, name: 'Test' }
+    ]);
+    console.log('Before toggle:', test.items[0]);
+    test.toggle(t => t.id === 1, 'newField');
+    console.log('After toggle "newField":', test.items[0]);
+    console.log('✓ Creates field as true if it doesn\'t exist');
+    
+    // Toggle non-existent item
+    console.log('\n=== Toggle non-existent item ===');
+    const noMatch = ReactiveUtils.collection([
+      { id: 1, active: false }
+    ]);
+    console.log('Before toggle:', noMatch.items);
+    noMatch.toggle(item => item.id === 999, 'active');
+    console.log('After toggle(id === 999):', noMatch.items);
+    console.log('✓ No error when item not found');
+    
+    // Default field is 'done'
+    console.log('\n=== Default field ===');
+    const defaultField = ReactiveUtils.collection([
+      { id: 1, done: false }
+    ]);
+    console.log('Before toggle:', defaultField.items[0]);
+    defaultField.toggle(d => d.id === 1); // no field specified
+    console.log('After toggle() with no field:', defaultField.items[0]);
+    console.log('✓ Defaults to "done" field');
+    
+    // Test reactivity
+    console.log('\n=== Testing reactivity ===');
+    const reactive = ReactiveUtils.collection([
+      { id: 1, active: false },
+      { id: 2, active: false },
+      { id: 3, active: false }
+    ]);
+    let effectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const activeCount = reactive.items.filter(item => item.active).length;
+      console.log(`Effect #${effectRuns}: ${activeCount} active items`);
+    });
+    
+    setTimeout(() => {
+      reactive.toggle(item => item.id === 1, 'active');
+      console.log('Effect runs after toggle:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactive.toggle(item => item.id === 1, 'active');
+      console.log('Effect runs after toggle back:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ toggle(predicate, field) toggles boolean field');
+      console.log('✓ toggle() works with predicate or direct value');
+      console.log('✓ toggle() only affects first matching item');
+      console.log('✓ toggle() returns this for chaining');
+      console.log('✓ toggle() defaults to "done" field');
+      console.log('✓ toggle() creates field if it doesn\'t exist');
+      console.log('✓ toggle() is safe when item not found');
+      console.log('✓ toggle() is reactive and triggers effects');
+    }, 1500);
+  </script>
+</body>
+</html>

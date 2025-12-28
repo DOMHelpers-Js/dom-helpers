@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.filter()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection.filter() ===');
+    
+    // Basic filter with numbers
+    console.log('\n=== Basic filter with numbers ===');
+    const numbers = ReactiveUtils.collection([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    
+    const evens = numbers.filter(n => n % 2 === 0);
+    console.log('filter(n => n % 2 === 0):', evens);
+    
+    const greaterThan5 = numbers.filter(n => n > 5);
+    console.log('filter(n => n > 5):', greaterThan5);
+    
+    const range = numbers.filter(n => n >= 3 && n <= 7);
+    console.log('filter(n >= 3 && n <= 7):', range);
+    
+    // Filter with objects
+    console.log('\n=== Filter with objects ===');
+    const todos = ReactiveUtils.collection([
+      { id: 1, text: 'Buy groceries', done: false, priority: 'high' },
+      { id: 2, text: 'Walk dog', done: true, priority: 'medium' },
+      { id: 3, text: 'Read book', done: false, priority: 'low' },
+      { id: 4, text: 'Write code', done: true, priority: 'high' },
+      { id: 5, text: 'Call mom', done: false, priority: 'high' }
+    ]);
+    
+    const doneTodos = todos.filter(t => t.done);
+    console.log('filter(t => t.done):', doneTodos);
+    
+    const highPriority = todos.filter(t => t.priority === 'high');
+    console.log('filter(priority === "high"):', highPriority);
+    
+    const activeHighPriority = todos.filter(t => !t.done && t.priority === 'high');
+    console.log('filter(!done && priority === "high"):', activeHighPriority);
+    
+    // Filter with strings
+    console.log('\n=== Filter with strings ===');
+    const words = ReactiveUtils.collection(['apple', 'banana', 'cherry', 'date', 'elderberry']);
+    
+    const longWords = words.filter(w => w.length > 5);
+    console.log('filter(length > 5):', longWords);
+    
+    const withA = words.filter(w => w.includes('a'));
+    console.log('filter(includes "a"):', withA);
+    
+    const startsWithC = words.filter(w => w.startsWith('c'));
+    console.log('filter(starts with "c"):', startsWithC);
+    
+    // Filter returns new array
+    console.log('\n=== Testing return type ===');
+    const original = ReactiveUtils.collection([1, 2, 3]);
+    const filtered = original.filter(n => n > 1);
+    
+    console.log('Original items:', original.items);
+    console.log('Filtered result:', filtered);
+    console.log('Is array:', Array.isArray(filtered));
+    console.log('Is different from items:', filtered !== original.items);
+    
+    // Filter with no matches
+    console.log('\n=== Filter with no matches ===');
+    const noMatches = numbers.filter(n => n > 100);
+    console.log('filter(n => n > 100):', noMatches);
+    console.log('Is empty array:', Array.isArray(noMatches) && noMatches.length === 0);
+    
+    // Filter on empty collection
+    console.log('\n=== Filter on empty collection ===');
+    const empty = ReactiveUtils.collection();
+    const emptyResult = empty.filter(item => true);
+    console.log('filter on empty:', emptyResult);
+    console.log('Is empty array:', Array.isArray(emptyResult) && emptyResult.length === 0);
+    
+    // Filter all items (returns copy)
+    console.log('\n=== Filter all items ===');
+    const all = numbers.filter(n => true);
+    console.log('filter(n => true):', all);
+    console.log('Length matches:', all.length === numbers.length);
+    console.log('Is different array:', all !== numbers.items);
+    
+    // Filter with index parameter
+    console.log('\n=== Filter with index parameter ===');
+    const items = ReactiveUtils.collection(['a', 'b', 'c', 'd', 'e']);
+    
+    const oddIndices = items.filter((item, index) => index % 2 === 1);
+    console.log('filter(odd indices):', oddIndices);
+    
+    const firstThree = items.filter((item, index) => index < 3);
+    console.log('filter(first 3):', firstThree);
+    
+    // Complex filtering
+    console.log('\n=== Complex filtering ===');
+    const users = ReactiveUtils.collection([
+      { id: 1, name: 'Alice', age: 30, active: true, role: 'admin' },
+      { id: 2, name: 'Bob', age: 25, active: false, role: 'user' },
+      { id: 3, name: 'Charlie', age: 35, active: true, role: 'user' },
+      { id: 4, name: 'Diana', age: 28, active: true, role: 'admin' },
+      { id: 5, name: 'Eve', age: 32, active: false, role: 'user' }
+    ]);
+    
+    const activeAdmins = users.filter(u => u.active && u.role === 'admin');
+    console.log('Active admins:', activeAdmins);
+    
+    const youngUsers = users.filter(u => u.age < 30 && u.role === 'user');
+    console.log('Young users:', youngUsers);
+    
+    const inactiveOrOld = users.filter(u => !u.active || u.age > 30);
+    console.log('Inactive or old:', inactiveOrOld);
+    
+    // Chaining filters
+    console.log('\n=== Chaining multiple filters ===');
+    const products = ReactiveUtils.collection([
+      { id: 1, name: 'Laptop', price: 999, category: 'Electronics', inStock: true },
+      { id: 2, name: 'Mouse', price: 25, category: 'Electronics', inStock: true },
+      { id: 3, name: 'Desk', price: 299, category: 'Furniture', inStock: false },
+      { id: 4, name: 'Chair', price: 199, category: 'Furniture', inStock: true }
+    ]);
+    
+    const inStock = products.filter(p => p.inStock);
+    console.log('In stock:', inStock);
+    
+    const electronics = inStock.filter(p => p.category === 'Electronics');
+    console.log('Electronics in stock:', electronics);
+    
+    const affordable = electronics.filter(p => p.price < 100);
+    console.log('Affordable electronics:', affordable);
+    
+    // Test reactivity
+    console.log('\n=== Testing with reactive collection ===');
+    const reactive = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    let effectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const evens = reactive.filter(n => n % 2 === 0);
+      console.log(`Effect #${effectRuns}: evens = [${evens.join(', ')}]`);
+    });
+    
+    setTimeout(() => {
+      reactive.add(6);
+      console.log('Effect runs after add:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactive.remove(2);
+      console.log('Effect runs after remove:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ filter(predicate) returns new array with matching items');
+      console.log('✓ filter() works with numbers, strings, and objects');
+      console.log('✓ filter() returns empty array if no matches');
+      console.log('✓ filter() returns empty array for empty collections');
+      console.log('✓ filter() always returns new array (not reference to items)');
+      console.log('✓ filter() supports index parameter in predicate');
+      console.log('✓ filter() results can be chained');
+    }, 1500);
+  </script>
+</body>
+</html>

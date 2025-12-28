@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test form.values</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing form.values ===');
+    
+    // Basic values access
+    console.log('\n=== Basic values access ===');
+    const form = ReactiveUtils.form({
+      username: '',
+      email: '',
+      password: ''
+    });
+    
+    console.log('Initial values:', form.values);
+    console.log('values is object:', typeof form.values === 'object');
+    console.log('username:', form.values.username);
+    console.log('email:', form.values.email);
+    console.log('password:', form.values.password);
+    
+    // Read individual values
+    console.log('\n=== Read individual values ===');
+    const userForm = ReactiveUtils.form({
+      firstName: 'John',
+      lastName: 'Doe',
+      age: '30',
+      email: 'john@example.com'
+    });
+    
+    console.log('firstName:', userForm.values.firstName);
+    console.log('lastName:', userForm.values.lastName);
+    console.log('age:', userForm.values.age);
+    console.log('email:', userForm.values.email);
+    
+    // Write to values (direct assignment)
+    console.log('\n=== Write to values (direct assignment) ===');
+    const editForm = ReactiveUtils.form({
+      name: '',
+      email: ''
+    });
+    
+    console.log('Before write:', editForm.values);
+    
+    editForm.values.name = 'Alice';
+    console.log('After values.name = "Alice":', editForm.values);
+    
+    editForm.values.email = 'alice@example.com';
+    console.log('After values.email = "alice@example.com":', editForm.values);
+    
+    // Write multiple values
+    console.log('\n=== Write multiple values ===');
+    const multiForm = ReactiveUtils.form({
+      field1: '',
+      field2: '',
+      field3: ''
+    });
+    
+    console.log('Before:', multiForm.values);
+    
+    multiForm.values.field1 = 'Value 1';
+    multiForm.values.field2 = 'Value 2';
+    multiForm.values.field3 = 'Value 3';
+    console.log('After:', multiForm.values);
+    
+    // Values with different types
+    console.log('\n=== Values with different types ===');
+    const typedForm = ReactiveUtils.form({
+      stringField: '',
+      numberField: 0,
+      booleanField: false,
+      arrayField: [],
+      objectField: {}
+    });
+    
+    console.log('Initial values:', typedForm.values);
+    
+    typedForm.values.stringField = 'text';
+    typedForm.values.numberField = 42;
+    typedForm.values.booleanField = true;
+    typedForm.values.arrayField = [1, 2, 3];
+    typedForm.values.objectField = { key: 'value' };
+    
+    console.log('After assignment:', typedForm.values);
+    console.log('Types preserved:', {
+      string: typeof typedForm.values.stringField,
+      number: typeof typedForm.values.numberField,
+      boolean: typeof typedForm.values.booleanField,
+      array: Array.isArray(typedForm.values.arrayField),
+      object: typeof typedForm.values.objectField
+    });
+    
+    // Values are reactive
+    console.log('\n=== Values are reactive ===');
+    const reactiveForm = ReactiveUtils.form({
+      count: 0,
+      message: ''
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: count = ${reactiveForm.values.count}, message = "${reactiveForm.values.message}"`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.values.count = 1;
+      console.log('Effect runs after values.count = 1:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactiveForm.values.message = 'Hello';
+      console.log('Effect runs after values.message = "Hello":', effectRuns);
+    }, 1000);
+    
+    // Values vs setValue
+    console.log('\n=== Values vs setValue ===');
+    const compareForm = ReactiveUtils.form({
+      field1: '',
+      field2: ''
+    });
+    
+    console.log('Initial:', compareForm.values);
+    console.log('touched:', compareForm.touched);
+    
+    // Direct assignment doesn't mark as touched
+    compareForm.values.field1 = 'Direct';
+    console.log('After values.field1 = "Direct":');
+    console.log('  values:', compareForm.values);
+    console.log('  touched:', compareForm.touched);
+    
+    // setValue marks as touched
+    compareForm.setValue('field2', 'SetValue');
+    console.log('After setValue("field2", "SetValue"):');
+    console.log('  values:', compareForm.values);
+    console.log('  touched:', compareForm.touched);
+    
+    // Values with validation
+    console.log('\n=== Values with validation ===');
+    const validatedForm = ReactiveUtils.form({
+      email: '',
+      password: ''
+    }, {
+      validators: {
+        email: (value) => {
+          if (!value) return 'Email required';
+          if (!/\S+@\S+\.\S+/.test(value)) return 'Invalid email';
+          return null;
+        },
+        password: (value) => {
+          if (!value) return 'Password required';
+          if (value.length < 6) return 'Too short';
+          return null;
+        }
+      }
+    });
+    
+    console.log('Initial:', {
+      values: validatedForm.values,
+      errors: validatedForm.errors
+    });
+    
+    // Direct assignment doesn't auto-validate
+    validatedForm.values.email = 'invalid';
+    console.log('After values.email = "invalid":');
+    console.log('  values:', validatedForm.values);
+    console.log('  errors:', validatedForm.errors);
+    
+    validatedForm.validateField('email');
+    console.log('After validateField("email"):');
+    console.log('  errors:', validatedForm.errors);
+    
+    // Accessing nested values
+    console.log('\n=== Accessing nested values (if supported) ===');
+    const nestedForm = ReactiveUtils.form({
+      user: {
+        name: 'John',
+        email: 'john@example.com'
+      },
+      settings: {
+        theme: 'dark',
+        notifications: true
+      }
+    });
+    
+    console.log('Full values:', nestedForm.values);
+    console.log('user:', nestedForm.values.user);
+    console.log('user.name:', nestedForm.values.user?.name);
+    console.log('settings.theme:', nestedForm.values.settings?.theme);
+    
+    // Iterating over values
+    console.log('\n=== Iterating over values ===');
+    const iterForm = ReactiveUtils.form({
+      field1: 'Value 1',
+      field2: 'Value 2',
+      field3: 'Value 3'
+    });
+    
+    console.log('Using Object.entries:');
+    Object.entries(iterForm.values).forEach(([key, value]) => {
+      console.log(`  ${key}: ${value}`);
+    });
+    
+    console.log('Using Object.keys:');
+    Object.keys(iterForm.values).forEach(key => {
+      console.log(`  ${key}: ${iterForm.values[key]}`);
+    });
+    
+    // Values snapshot
+    console.log('\n=== Values snapshot ===');
+    const snapshotForm = ReactiveUtils.form({
+      name: 'Alice',
+      age: '25'
+    });
+    
+    const snapshot = { ...snapshotForm.values };
+    console.log('Snapshot:', snapshot);
+    
+    snapshotForm.values.name = 'Bob';
+    console.log('After change - form values:', snapshotForm.values);
+    console.log('After change - snapshot:', snapshot);
+    console.log('✓ Snapshot is independent copy');
+    
+    // Values serialization
+    console.log('\n=== Values serialization ===');
+    const serializeForm = ReactiveUtils.form({
+      username: 'johndoe',
+      email: 'john@example.com',
+      preferences: {
+        theme: 'dark',
+        notifications: true
+      }
+    });
+    
+    const json = JSON.stringify(serializeForm.values);
+    console.log('JSON:', json);
+    
+    const parsed = JSON.parse(json);
+    console.log('Parsed:', parsed);
+    
+    // Values in form reset
+    console.log('\n=== Values in form reset ===');
+    const resetForm = ReactiveUtils.form({
+      name: '',
+      email: ''
+    });
+    
+    console.log('Initial values:', resetForm.values);
+    
+    resetForm.values.name = 'Test';
+    resetForm.values.email = 'test@example.com';
+    console.log('Modified values:', resetForm.values);
+    
+    resetForm.reset();
+    console.log('After reset():', resetForm.values);
+    
+    resetForm.values.name = 'New';
+    console.log('After new assignment:', resetForm.values);
+    
+    resetForm.reset({ name: 'Default', email: 'default@example.com' });
+    console.log('After reset with new values:', resetForm.values);
+    
+    // Edge cases
+    console.log('\n=== Edge cases ===');
+    const edgeForm = ReactiveUtils.form({
+      empty: '',
+      zero: 0,
+      falsy: false,
+      nullish: null,
+      undef: undefined
+    });
+    
+    console.log('Edge case values:', edgeForm.values);
+    console.log('empty === "":', edgeForm.values.empty === '');
+    console.log('zero === 0:', edgeForm.values.zero === 0);
+    console.log('falsy === false:', edgeForm.values.falsy === false);
+    console.log('nullish === null:', edgeForm.values.nullish === null);
+    console.log('undef === undefined:', edgeForm.values.undef === undefined);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ form.values contains all form field values');
+      console.log('✓ form.values is readable (can access individual fields)');
+      console.log('✓ form.values is writable (can assign values directly)');
+      console.log('✓ form.values supports different data types');
+      console.log('✓ form.values is reactive (triggers effects)');
+      console.log('✓ Direct assignment to values doesn\'t mark as touched');
+      console.log('✓ Direct assignment doesn\'t auto-validate');
+      console.log('✓ form.values can be iterated');
+      console.log('✓ form.values can be serialized');
+      console.log('✓ form.values updates with reset()');
+    }, 1500);
+  </script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Array shift()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script>
+    console.log('=== Testing reactive array shift() ===');
+    
+    const state = ReactiveUtils.state({
+      items: [1, 2, 3, 4, 5]
+    });
+    
+    console.log('Initial items:', state.items);
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: [${state.items.join(', ')}] (length: ${state.items.length})`);
+    });
+    
+    console.log('Initial effect runs:', effectRuns);
+    
+    // Test shift
+    setTimeout(() => {
+      console.log('\n=== shift() ===');
+      const shifted = state.items.shift();
+      console.log('Shifted value:', shifted);
+      console.log('items:', state.items);
+      console.log('Effect runs:', effectRuns);
+      console.log('✓ Effect should have run');
+    }, 500);
+    
+    // Test multiple shifts
+    setTimeout(() => {
+      console.log('\n=== shift() again ===');
+      const shifted = state.items.shift();
+      console.log('Shifted value:', shifted);
+      console.log('items:', state.items);
+      console.log('Effect runs:', effectRuns);
+    }, 1000);
+    
+    // Shift removes from start
+    setTimeout(() => {
+      console.log('\n=== Verifying shift removes from start ===');
+      state.items = ['a', 'b', 'c', 'd'];
+      console.log('Reset to:', state.items);
+      
+      setTimeout(() => {
+        const first = state.items.shift();
+        console.log('Shifted:', first); // 'a'
+        console.log('Remaining:', state.items); // ['b', 'c', 'd']
+        console.log('✓ First element removed');
+      }, 500);
+    }, 1500);
+  </script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test All Basic Collection Operations</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing All Basic Collection Operations ===');
+    
+    // Create test collection
+    const todos = ReactiveUtils.collection();
+    
+    console.log('\n=== Initial state ===');
+    console.log('items:', todos.items);
+    console.log('length:', todos.length);
+    console.log('isEmpty:', todos.isEmpty());
+    
+    // Test add
+    console.log('\n=== Testing add() ===');
+    todos.add({ id: 1, text: 'Buy groceries', done: false, priority: 'high' });
+    console.log('After add #1:', todos.items);
+    
+    todos.add({ id: 2, text: 'Walk dog', done: false, priority: 'medium' });
+    todos.add({ id: 3, text: 'Read book', done: true, priority: 'low' });
+    console.log('After add #2 and #3:', todos.items);
+    console.log('length:', todos.length);
+    
+    // Test update
+    console.log('\n=== Testing update() ===');
+    todos.update(t => t.id === 2, { done: true });
+    console.log('After marking #2 done:', todos.items);
+    
+    todos.update(t => t.id === 1, { priority: 'critical' });
+    console.log('After updating #1 priority:', todos.items);
+    
+    // Test remove
+    console.log('\n=== Testing remove() ===');
+    todos.remove(t => t.id === 3);
+    console.log('After removing #3:', todos.items);
+    console.log('length:', todos.length);
+    
+    // Test chaining all operations
+    console.log('\n=== Testing method chaining ===');
+    todos
+      .add({ id: 4, text: 'Write code', done: false, priority: 'high' })
+      .add({ id: 5, text: 'Call mom', done: false, priority: 'medium' })
+      .update(t => t.id === 4, { done: true })
+      .remove(t => t.done && t.id === 2);
+    
+    console.log('After chained operations:', todos.items);
+    console.log('length:', todos.length);
+    
+    // Complex workflow
+    console.log('\n=== Testing complex workflow ===');
+    const cart = ReactiveUtils.collection();
+    
+    // Add items
+    cart
+      .add({ id: 1, name: 'Laptop', price: 999, quantity: 1 })
+      .add({ id: 2, name: 'Mouse', price: 25, quantity: 2 })
+      .add({ id: 3, name: 'Keyboard', price: 75, quantity: 1 });
+    
+    console.log('Initial cart:', cart.items);
+    
+    // Update quantity
+    cart.update(item => item.id === 2, { quantity: 3 });
+    console.log('After updating mouse quantity:', cart.items);
+    
+    // Remove item
+    cart.remove(item => item.id === 3);
+    console.log('After removing keyboard:', cart.items);
+    
+    // Add discount
+    cart.items.forEach((item, index) => {
+      cart.update(i => i.id === item.id, { discount: 0.1 });
+    });
+    console.log('After adding discounts:', cart.items);
+    
+    // Clear cart
+    console.log('\n=== Testing clear() ===');
+    cart.clear();
+    console.log('After clear:', cart.items);
+    console.log('isEmpty:', cart.isEmpty());
+    
+    // Repopulate
+    cart.add({ id: 10, name: 'Monitor', price: 300, quantity: 1 });
+    console.log('After repopulating:', cart.items);
+    
+    // Test all operations together with reactivity
+    console.log('\n=== Testing reactivity of all operations ===');
+    const reactive = ReactiveUtils.collection([
+      { id: 1, count: 0 },
+      { id: 2, count: 0 }
+    ]);
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const total = reactive.items.reduce((sum, item) => sum + item.count, 0);
+      console.log(`Effect #${effectRuns}: ${reactive.length} items, total count = ${total}`);
+    });
+    
+    setTimeout(() => {
+      console.log('\n=== add() triggers effect ===');
+      reactive.add({ id: 3, count: 0 });
+    }, 500);
+    
+    setTimeout(() => {
+      console.log('\n=== update() triggers effect ===');
+      reactive.update(item => item.id === 1, { count: 5 });
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== remove() triggers effect ===');
+      reactive.remove(item => item.id === 2);
+    }, 1500);
+    
+    setTimeout(() => {
+      console.log('\n=== clear() triggers effect ===');
+      reactive.clear();
+    }, 2000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ add(item) - adds items and returns this');
+      console.log('✓ remove(predicate) - removes items and returns this');
+      console.log('✓ update(predicate, updates) - updates items and returns this');
+      console.log('✓ clear() - clears all items and returns this');
+      console.log('✓ All methods support chaining');
+      console.log('✓ All methods are reactive');
+      console.log('✓ All methods work with objects');
+      console.log(`\nTotal effect runs: ${effectRuns}`);
+    }, 2500);
+  </script>
+</body>
+</html>

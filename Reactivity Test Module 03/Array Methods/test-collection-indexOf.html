@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.indexOf()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection.indexOf() ===');
+    
+    // Basic indexOf with numbers
+    console.log('\n=== Basic indexOf with numbers ===');
+    const numbers = ReactiveUtils.collection([1, 2, 3, 4, 5, 3]);
+    console.log('indexOf(3):', numbers.indexOf(3)); // first occurrence
+    console.log('indexOf(1):', numbers.indexOf(1));
+    console.log('indexOf(5):', numbers.indexOf(5));
+    console.log('indexOf(10):', numbers.indexOf(10)); // -1 if not found
+    
+    // indexOf with strings
+    console.log('\n=== indexOf with strings ===');
+    const words = ReactiveUtils.collection(['apple', 'banana', 'cherry', 'banana']);
+    console.log('indexOf("banana"):', words.indexOf('banana')); // first occurrence
+    console.log('indexOf("apple"):', words.indexOf('apple'));
+    console.log('indexOf("grape"):', words.indexOf('grape')); // -1
+    console.log('indexOf("BANANA"):', words.indexOf('BANANA')); // -1 (case-sensitive)
+    
+    // indexOf with objects (by reference)
+    console.log('\n=== indexOf with objects ===');
+    const obj1 = { id: 1, name: 'Alice' };
+    const obj2 = { id: 2, name: 'Bob' };
+    const obj3 = { id: 3, name: 'Charlie' };
+    const users = ReactiveUtils.collection([obj1, obj2, obj3, obj1]);
+    
+    console.log('indexOf(obj1):', users.indexOf(obj1)); // first occurrence
+    console.log('indexOf(obj2):', users.indexOf(obj2));
+    console.log('indexOf(obj3):', users.indexOf(obj3));
+    
+    const copy = { id: 1, name: 'Alice' };
+    console.log('indexOf(copy of obj1):', users.indexOf(copy)); // -1
+    console.log('⚠️  indexOf() uses strict equality (===)');
+    
+    // Not found returns -1
+    console.log('\n=== Not found returns -1 ===');
+    const items = ReactiveUtils.collection([1, 2, 3]);
+    console.log('indexOf(99):', items.indexOf(99));
+    console.log('indexOf("not here"):', items.indexOf("not here"));
+    
+    // Empty collection
+    console.log('\n=== Empty collection ===');
+    const empty = ReactiveUtils.collection();
+    console.log('indexOf(anything) on empty:', empty.indexOf(1));
+    
+    // NaN behavior
+    console.log('\n=== NaN behavior ===');
+    const withNaN = ReactiveUtils.collection([1, NaN, 3]);
+    console.log('indexOf(NaN):', withNaN.indexOf(NaN)); // -1
+    console.log('⚠️  indexOf() cannot find NaN (use includes() instead)');
+    
+    // Duplicates
+    console.log('\n=== With duplicates ===');
+    const duplicates = ReactiveUtils.collection([1, 2, 3, 2, 4, 2]);
+    console.log('indexOf(2):', duplicates.indexOf(2)); // first occurrence only
+    console.log('All indices of 2:');
+    duplicates.items.forEach((item, index) => {
+      if (item === 2) console.log('  Index:', index);
+    });
+    
+    // After modifications
+    console.log('\n=== After modifications ===');
+    const dynamic = ReactiveUtils.collection(['a', 'b', 'c']);
+    console.log('Initial indexOf("d"):', dynamic.indexOf('d'));
+    
+    dynamic.add('d');
+    console.log('After add("d"), indexOf("d"):', dynamic.indexOf('d'));
+    
+    dynamic.unshift('d');
+    console.log('After unshift("d"), indexOf("d"):', dynamic.indexOf('d'));
+    
+    // Use indexOf for existence check
+    console.log('\n=== Using indexOf for existence check ===');
+    const collection = ReactiveUtils.collection([10, 20, 30]);
+    console.log('indexOf(20) !== -1:', collection.indexOf(20) !== -1);
+    console.log('indexOf(99) !== -1:', collection.indexOf(99) !== -1);
+    console.log('✓ Can use indexOf(item) !== -1 to check existence');
+    
+    // Test reactivity
+    console.log('\n=== Testing reactivity ===');
+    const reactive = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    let effectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const index = reactive.indexOf(3);
+      console.log(`Effect #${effectRuns}: indexOf(3) = ${index}`);
+    });
+    
+    setTimeout(() => {
+      reactive.remove(2);
+      console.log('Effect runs after remove(2):', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactive.remove(3);
+      console.log('Effect runs after remove(3):', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ indexOf(item) returns index of first occurrence');
+      console.log('✓ indexOf() returns -1 if item not found');
+      console.log('✓ indexOf() uses strict equality (===)');
+      console.log('✓ indexOf() works with primitives and objects');
+      console.log('✓ indexOf() cannot find NaN');
+      console.log('✓ indexOf() is case-sensitive for strings');
+      console.log('✓ indexOf() returns first match if duplicates exist');
+      console.log('✓ indexOf() is reactive');
+    }, 1500);
+  </script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.first</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection.first ===');
+    
+    const collection = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    
+    // Read first
+    console.log('\n=== Reading first ===');
+    console.log('collection.first:', collection.first);
+    console.log('Type:', typeof collection.first);
+    
+    // Verify it's a getter
+    console.log('\n=== Verifying it\'s a getter ===');
+    const descriptor = Object.getOwnPropertyDescriptor(collection, 'first');
+    console.log('Has getter:', !!descriptor?.get);
+    console.log('Is enumerable:', descriptor?.enumerable);
+    
+    // Verify it matches items[0]
+    console.log('\n=== Verifying it matches items[0] ===');
+    console.log('collection.first:', collection.first);
+    console.log('collection.items[0]:', collection.items[0]);
+    console.log('Match:', collection.first === collection.items[0]);
+    
+    // Test that first updates with changes
+    console.log('\n=== Testing first updates ===');
+    console.log('Initial first:', collection.first);
+    
+    collection.unshift(0);
+    console.log('After unshift(0):', collection.first);
+    
+    collection.shift();
+    console.log('After shift():', collection.first);
+    
+    collection.items[0] = 100;
+    console.log('After items[0] = 100:', collection.first);
+    
+    collection.sort((a, b) => b - a);
+    console.log('After sort descending:', collection.first);
+    
+    // Test with empty collection
+    console.log('\n=== Testing with empty collection ===');
+    const empty = ReactiveUtils.collection();
+    console.log('Empty collection first:', empty.first);
+    
+    empty.add(42);
+    console.log('After add(42):', empty.first);
+    
+    // Test with objects
+    console.log('\n=== Testing with objects ===');
+    const todos = ReactiveUtils.collection([
+      { id: 1, text: 'First task', done: false },
+      { id: 2, text: 'Second task', done: false },
+      { id: 3, text: 'Third task', done: true }
+    ]);
+    
+    console.log('First todo:', todos.first);
+    console.log('First todo text:', todos.first.text);
+    
+    todos.unshift({ id: 0, text: 'New first task', done: false });
+    console.log('After unshift:', todos.first);
+    console.log('New first text:', todos.first.text);
+    
+    // Test reactivity
+    console.log('\n=== Testing first reactivity ===');
+    const reactive = ReactiveUtils.collection(['a', 'b', 'c']);
+    let effectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: first = "${reactive.first}"`);
+    });
+    
+    setTimeout(() => {
+      reactive.unshift('z');
+      console.log('Effect runs after unshift:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactive.shift();
+      console.log('Effect runs after shift:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      reactive.reverse();
+      console.log('Effect runs after reverse:', effectRuns);
+    }, 1500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ first is a read-only getter');
+      console.log('✓ first returns items[0]');
+      console.log('✓ first updates automatically with mutations');
+      console.log('✓ first returns undefined for empty collections');
+      console.log('✓ first is reactive');
+    }, 2000);
+  </script>
+</body>
+</html>

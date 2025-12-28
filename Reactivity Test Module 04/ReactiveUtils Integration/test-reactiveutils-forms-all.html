@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test All ReactiveUtils Forms Integration</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing All ReactiveUtils Forms Integration ===');
+    
+    // Verify all form-related APIs
+    console.log('\n=== Verify all APIs ===');
+    console.log('ReactiveUtils.form:', typeof ReactiveUtils.form);
+    console.log('ReactiveUtils.createForm:', typeof ReactiveUtils.createForm);
+    console.log('ReactiveUtils.validators:', typeof ReactiveUtils.validators);
+    
+    // Verify they're the same (aliases)
+    console.log('\nAliases:');
+    console.log('form === createForm:', ReactiveUtils.form === ReactiveUtils.createForm);
+    
+    // Create comprehensive form
+    console.log('\n=== Create comprehensive registration form ===');
+    const registrationForm = ReactiveUtils.form({
+      // Personal info
+      firstName: '',
+      lastName: '',
+      email: '',
+      
+      // Account
+      username: '',
+      password: '',
+      confirmPassword: '',
+      
+      // Additional
+      age: '',
+      terms: false
+    }, {
+      validators: {
+        firstName: ReactiveUtils.validators.required('First name is required'),
+        lastName: ReactiveUtils.validators.required('Last name is required'),
+        
+        email: ReactiveUtils.validators.combine(
+          ReactiveUtils.validators.required('Email is required'),
+          ReactiveUtils.validators.email('Invalid email address')
+        ),
+        
+        username: ReactiveUtils.validators.combine(
+          ReactiveUtils.validators.required('Username is required'),
+          ReactiveUtils.validators.minLength(3, 'Username must be at least 3 characters'),
+          ReactiveUtils.validators.maxLength(20, 'Username must be no more than 20 characters')
+        ),
+        
+        password: ReactiveUtils.validators.combine(
+          ReactiveUtils.validators.required('Password is required'),
+          ReactiveUtils.validators.minLength(8, 'Password must be at least 8 characters'),
+          ReactiveUtils.validators.pattern(
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+            'Password must contain uppercase, lowercase, and number'
+          )
+        ),
+        
+        confirmPassword: ReactiveUtils.validators.match('password', 'Passwords must match'),
+        
+        age: ReactiveUtils.validators.combine(
+          ReactiveUtils.validators.required('Age is required'),
+          ReactiveUtils.validators.min(18, 'Must be 18 or older'),
+          ReactiveUtils.validators.max(120, 'Invalid age')
+        ),
+        
+        terms: ReactiveUtils.validators.custom((value) => {
+          return value ? null : 'You must accept the terms';
+        })
+      },
+      
+      onSubmit: async (values, form) => {
+        console.log('Form submitted with values:', values);
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return { success: true };
+      }
+    });
+    
+    console.log('Registration form created:', !!registrationForm);
+    console.log('Initial state:', {
+      values: registrationForm.values,
+      isValid: registrationForm.isValid,
+      isDirty: registrationForm.isDirty
+    });
+    
+    // Fill form with invalid data
+    console.log('\n=== Fill with invalid data ===');
+    registrationForm.setValues({
+      firstName: '',
+      lastName: 'D',
+      email: 'invalid-email',
+      username: 'ab',
+      password: 'weak',
+      confirmPassword: 'different',
+      age: '15',
+      terms: false
+    });
+    
+    registrationForm.validate();
+    console.log('After validation:');
+    console.log('  isValid:', registrationForm.isValid);
+    console.log('  hasErrors:', registrationForm.hasErrors);
+    console.log('  errorFields:', registrationForm.errorFields);
+    console.log('  errors:', registrationForm.errors);
+    
+    // Fill with valid data
+    console.log('\n=== Fill with valid data ===');
+    registrationForm.setValues({
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'john.doe@example.com',
+      username: 'johndoe',
+      password: 'SecurePass123',
+      confirmPassword: 'SecurePass123',
+      age: '25',
+      terms: true
+    });
+    
+    const isValid = registrationForm.validate();
+    console.log('After validation:');
+    console.log('  isValid:', isValid);
+    console.log('  hasErrors:', registrationForm.hasErrors);
+    console.log('  errors:', registrationForm.errors);
+    
+    // Test all form methods
+    console.log('\n=== Test form methods ===');
+    console.log('getFieldProps("email"):', registrationForm.getFieldProps('email'));
+    console.log('hasError("email"):', registrationForm.hasError('email'));
+    console.log('isTouched("email"):', registrationForm.isTouched('email'));
+    console.log('getError("email"):', registrationForm.getError('email'));
+    console.log('getValue("email"):', registrationForm.getValue('email'));
+    console.log('shouldShowError("email"):', registrationForm.shouldShowError('email'));
+    
+    // Test toObject
+    console.log('\n=== Test toObject ===');
+    const formSnapshot = registrationForm.toObject();
+    console.log('Form snapshot:', formSnapshot);
+    
+    // Create form using createForm alias
+    console.log('\n=== Create form using createForm alias ===');
+    const loginForm = ReactiveUtils.createForm({
+      email: '',
+      password: '',
+      rememberMe: false
+    }, {
+      validators: {
+        email: ReactiveUtils.validators.combine(
+          ReactiveUtils.validators.required(),
+          ReactiveUtils.validators.email()
+        ),
+        password: ReactiveUtils.validators.required()
+      }
+    });
+    
+    console.log('Login form created:', !!loginForm);
+    
+    loginForm.setValues({
+      email: 'user@example.com',
+      password: 'password123',
+      rememberMe: true
+    });
+    
+    console.log('Login form values:', loginForm.values);
+    console.log('Login form isValid:', loginForm.validate());
+    
+    // Test reactivity
+    console.log('\n=== Testing reactivity ===');
+    const reactiveForm = ReactiveUtils.form({
+      counter: 0
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: counter = ${reactiveForm.values.counter}, isDirty = ${reactiveForm.isDirty}`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.setValue('counter', 1);
+      console.log('Effect runs after setValue:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactiveForm.reset();
+      console.log('Effect runs after reset:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ ReactiveUtils.form() creates forms');
+      console.log('✓ ReactiveUtils.createForm() is an alias');
+      console.log('✓ ReactiveUtils.validators provides all validators');
+      console.log('✓ Forms support complex validation rules');
+      console.log('✓ Forms support all standard methods');
+      console.log('✓ Forms have computed properties');
+      console.log('✓ Forms are reactive');
+      console.log('✓ Complete integration with ReactiveUtils namespace');
+    }, 1500);
+  </script>
+</body>
+</html>

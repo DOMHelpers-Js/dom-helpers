@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Forms.form</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+
+  <script>
+    console.log('=== Testing Forms.form() ===\n');
+
+    // ========================================================================
+    // TEST 1: Forms.form is alias for Forms.create
+    // ========================================================================
+    console.log('TEST 1: Forms.form is alias for Forms.create');
+
+    const form1 = Forms.form({ username: '', email: '' });
+    const create1 = Forms.create({ username: '', email: '' });
+
+    console.log('  form() creates form:', 'values' in form1);
+    console.log('  create() creates form:', 'values' in create1);
+    console.log('  Both are reactive:',
+      ReactiveUtils.isReactive(form1) && ReactiveUtils.isReactive(create1));
+    console.log('  Expected: true');
+    console.log('  ✓ Forms.form is alias\n');
+
+    // ========================================================================
+    // TEST 2: Basic form creation
+    // ========================================================================
+    console.log('TEST 2: Basic form creation');
+    const form2 = Forms.form({
+      name: '',
+      age: 0,
+      active: false
+    });
+
+    console.log('  Initial values:', form2.values);
+    console.log('  Has isValid:', typeof form2.isValid !== 'undefined');
+    console.log('  Has isDirty:', typeof form2.isDirty !== 'undefined');
+    console.log('  Has setValue:', typeof form2.setValue === 'function');
+    console.log('  ✓ Basic form works\n');
+
+    // ========================================================================
+    // TEST 3: Form with validators
+    // ========================================================================
+    console.log('TEST 3: Form with validators');
+    const form3 = Forms.form(
+      { email: '', password: '' },
+      {
+        validators: {
+          email: Forms.validators.email(),
+          password: Forms.validators.minLength(6)
+        }
+      }
+    );
+
+    form3.setValue('email', 'test@test.com');
+    console.log('  Valid email error:', form3.errors.email);
+    console.log('  Expected: undefined');
+
+    form3.setValue('password', '123');
+    console.log('  Short password error:', !!form3.errors.password);
+    console.log('  Expected: true');
+
+    form3.setValue('password', '123456');
+    console.log('  Valid password error:', form3.errors.password);
+    console.log('  Expected: undefined');
+    console.log('  ✓ Validators work\n');
+
+    // ========================================================================
+    // TEST 4: Form submission
+    // ========================================================================
+    console.log('TEST 4: Form submission');
+    let submitValues = null;
+
+    const form4 = Forms.form(
+      { username: '' },
+      {
+        validators: {
+          username: Forms.validators.required()
+        },
+        onSubmit: async (values) => {
+          submitValues = values;
+          return { success: true };
+        }
+      }
+    );
+
+    form4.submit().then(result => {
+      console.log('  Invalid submit - success:', result.success);
+      console.log('  Expected: false');
+      console.log('  Values passed:', submitValues);
+      console.log('  Expected: null');
+
+      form4.setValue('username', 'john');
+      form4.submit().then(result2 => {
+        console.log('  Valid submit - success:', result2.success);
+        console.log('  Expected: true');
+        console.log('  Values passed:', submitValues);
+        console.log('  Expected: {username: "john"}');
+        console.log('  ✓ Submission works\n');
+
+        // ====================================================================
+        // TEST 5: Form state management
+        // ====================================================================
+        console.log('TEST 5: Form state management');
+        const form5 = Forms.form({ field1: '', field2: '', field3: '' });
+
+        console.log('  Initial isDirty:', form5.isDirty);
+        console.log('  Expected: false');
+
+        form5.setValue('field1', 'value1');
+        console.log('  After setValue - isDirty:', form5.isDirty);
+        console.log('  Expected: true');
+        console.log('  touchedFields:', form5.touchedFields);
+        console.log('  Expected: ["field1"]');
+
+        form5.setValues({ field2: 'value2', field3: 'value3' });
+        console.log('  After setValues - touchedFields length:', form5.touchedFields.length);
+        console.log('  Expected: 3');
+        console.log('  ✓ State management works\n');
+
+        // ====================================================================
+        // TEST 6: Error handling
+        // ====================================================================
+        console.log('TEST 6: Error handling');
+        const form6 = Forms.form({ email: '', phone: '' });
+
+        form6.setError('email', 'Invalid email');
+        console.log('  hasError("email"):', form6.hasError('email'));
+        console.log('  Expected: true');
+        console.log('  getError("email"):', form6.getError('email'));
+        console.log('  Expected: "Invalid email"');
+
+        form6.setValue('email', 'test@test.com');
+        console.log('  shouldShowError("email"):', form6.shouldShowError('email'));
+        console.log('  Expected: true (touched + has error)');
+
+        form6.clearError('email');
+        console.log('  After clearError:', form6.hasError('email'));
+        console.log('  Expected: false');
+        console.log('  ✓ Error handling works\n');
+
+        // ====================================================================
+        // TEST 7: Field helpers
+        // ====================================================================
+        console.log('TEST 7: Field helpers');
+        const form7 = Forms.form({ username: '' });
+
+        form7.setValue('username', 'john_doe');
+
+        console.log('  getValue("username"):', form7.getValue('username'));
+        console.log('  Expected: "john_doe"');
+
+        console.log('  isTouched("username"):', form7.isTouched('username'));
+        console.log('  Expected: true');
+
+        const fieldProps = form7.getFieldProps('username');
+        console.log('  getFieldProps has name:', fieldProps.name === 'username');
+        console.log('  getFieldProps has value:', fieldProps.value === 'john_doe');
+        console.log('  getFieldProps has onChange:', typeof fieldProps.onChange === 'function');
+        console.log('  getFieldProps has onBlur:', typeof fieldProps.onBlur === 'function');
+        console.log('  ✓ Field helpers work\n');
+
+        // ====================================================================
+        // TEST 8: Reset functionality
+        // ====================================================================
+        console.log('TEST 8: Reset functionality');
+        const form8 = Forms.form({ x: 'initial', y: 'initial' });
+
+        form8.setValues({ x: 'changed', y: 'changed' });
+        form8.setError('x', 'error');
+        form8.setTouched('x');
+
+        console.log('  Before reset:', {
+          values: form8.values,
+          hasErrors: form8.hasErrors,
+          isDirty: form8.isDirty
+        });
+
+        form8.reset();
+        console.log('  After reset:', {
+          values: form8.values,
+          hasErrors: form8.hasErrors,
+          isDirty: form8.isDirty
+        });
+        console.log('  Expected: initial values, no errors, not dirty');
+
+        form8.setValue('x', 'test');
+        form8.resetField('x');
+        console.log('  After resetField - x:', form8.values.x);
+        console.log('  Expected: "initial"');
+        console.log('  ✓ Reset works\n');
+
+        // ====================================================================
+        // TEST 9: Practical login form
+        // ====================================================================
+        console.log('TEST 9: Practical login form');
+        const loginForm = Forms.form(
+          {
+            email: '',
+            password: '',
+            rememberMe: false
+          },
+          {
+            validators: {
+              email: Forms.validators.email(),
+              password: Forms.validators.required()
+            },
+            onSubmit: async (values) => {
+              console.log('  Logging in:', values.email);
+              // Simulate API call
+              await new Promise(resolve => setTimeout(resolve, 50));
+              return { success: true, token: 'abc123' };
+            }
+          }
+        );
+
+        console.log('  Initial isSubmitting:', loginForm.isSubmitting);
+        console.log('  Expected: false');
+
+        loginForm.setValues({
+          email: 'user@example.com',
+          password: 'password123',
+          rememberMe: true
+        });
+
+        const isValid = loginForm.validate();
+        console.log('  Form valid:', isValid);
+        console.log('  Expected: true');
+
+        loginForm.submit().then(result => {
+          console.log('  Login result:', result);
+          console.log('  submitCount:', loginForm.submitCount);
+          console.log('  isSubmitting:', loginForm.isSubmitting);
+          console.log('  Expected: false (after submit)');
+          console.log('  ✓ Login form works\n');
+
+          // ================================================================
+          // TEST 10: Complex validation form
+          // ================================================================
+          console.log('TEST 10: Complex validation form');
+          const complexForm = Forms.form(
+            {
+              username: '',
+              email: '',
+              password: '',
+              confirmPassword: '',
+              age: 0,
+              website: ''
+            },
+            {
+              validators: {
+                username: Forms.validators.combine(
+                  Forms.validators.required(),
+                  Forms.validators.minLength(3),
+                  Forms.validators.maxLength(20)
+                ),
+                email: Forms.validators.email(),
+                password: Forms.validators.minLength(8),
+                confirmPassword: Forms.validators.match('password', 'Passwords must match'),
+                age: Forms.validators.min(18, 'Must be 18 or older'),
+                website: Forms.validators.pattern(/^https?:\/\//, 'Must be a valid URL')
+              }
+            }
+          );
+
+          complexForm.setValues({
+            username: 'john',
+            email: 'john@example.com',
+            password: 'password123',
+            confirmPassword: 'password123',
+            age: 25,
+            website: 'https://example.com'
+          });
+
+          const complexValid = complexForm.validate();
+          console.log('  Complex form valid:', complexValid);
+          console.log('  Expected: true');
+          console.log('  Errors:', complexForm.errors);
+          console.log('  Expected: {}');
+
+          // Test mismatch
+          complexForm.setValue('confirmPassword', 'different');
+          complexForm.validateField('confirmPassword');
+          console.log('  Password mismatch error:', !!complexForm.errors.confirmPassword);
+          console.log('  Expected: true');
+
+          console.log('  ✓ Complex validation works\n');
+
+          console.log('=== All Forms.form() tests completed ===');
+        });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Collections.createFiltered()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing Collections.createFiltered() ===');
+    
+    // Create source collection
+    const allTodos = Collections.create([
+      { id: 1, text: 'Buy groceries', done: false, priority: 'high' },
+      { id: 2, text: 'Walk dog', done: true, priority: 'medium' },
+      { id: 3, text: 'Read book', done: false, priority: 'low' },
+      { id: 4, text: 'Write code', done: false, priority: 'high' },
+      { id: 5, text: 'Call mom', done: true, priority: 'high' }
+    ]);
+    
+    console.log('All todos:', allTodos.items);
+    
+    // Create filtered views
+    const activeTodos = Collections.createFiltered(allTodos, t => !t.done);
+    const completedTodos = Collections.createFiltered(allTodos, t => t.done);
+    const highPriority = Collections.createFiltered(allTodos, t => t.priority === 'high');
+    
+    console.log('\n=== Initial filtered views ===');
+    console.log('Active todos:', activeTodos.items);
+    console.log('Completed todos:', completedTodos.items);
+    console.log('High priority todos:', highPriority.items);
+    
+    // Add item to source - filtered views should update
+    console.log('\n=== Adding item to source ===');
+    allTodos.add({ id: 6, text: 'New task', done: false, priority: 'high' });
+    
+    console.log('All todos:', allTodos.items.length);
+    console.log('Active todos:', activeTodos.items.length, '-', activeTodos.items.map(t => t.text));
+    console.log('High priority:', highPriority.items.length, '-', highPriority.items.map(t => t.text));
+    
+    // Update item in source - filtered views should sync
+    console.log('\n=== Marking todo #3 as done ===');
+    allTodos.update(t => t.id === 3, { done: true });
+    
+    console.log('Active todos:', activeTodos.items.length, '-', activeTodos.items.map(t => t.text));
+    console.log('Completed todos:', completedTodos.items.length, '-', completedTodos.items.map(t => t.text));
+    
+    // Remove item from source
+    console.log('\n=== Removing todo #2 ===');
+    allTodos.remove(t => t.id === 2);
+    
+    console.log('All todos:', allTodos.items.length);
+    console.log('Completed todos:', completedTodos.items.length, '-', completedTodos.items.map(t => t.text));
+    
+    // Test reactivity
+    console.log('\n=== Testing filtered view reactivity ===');
+    let activeRuns = 0;
+    ReactiveUtils.effect(() => {
+      activeRuns++;
+      console.log(`Active effect #${activeRuns}: ${activeTodos.items.length} active todos`);
+    });
+    
+    setTimeout(() => {
+      console.log('\n=== Toggling todo #1 ===');
+      allTodos.update(t => t.id === 1, { done: true });
+      console.log('Active runs:', activeRuns);
+      console.log('Active todos now:', activeTodos.items.map(t => t.text));
+    }, 500);
+    
+    setTimeout(() => {
+      console.log('\n=== Adding new active todo ===');
+      allTodos.add({ id: 7, text: 'Another task', done: false, priority: 'medium' });
+      console.log('Active runs:', activeRuns);
+      console.log('Active todos now:', activeTodos.items.map(t => t.text));
+    }, 1000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.isEmpty()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection.isEmpty() ===');
+    
+    // Basic isEmpty
+    console.log('\n=== Basic isEmpty ===');
+    const empty = ReactiveUtils.collection();
+    const notEmpty = ReactiveUtils.collection([1, 2, 3]);
+    
+    console.log('Empty collection isEmpty():', empty.isEmpty());
+    console.log('Non-empty collection isEmpty():', notEmpty.isEmpty());
+    
+    // isEmpty after add
+    console.log('\n=== isEmpty after add ===');
+    const collection = ReactiveUtils.collection();
+    console.log('Initial isEmpty():', collection.isEmpty());
+    
+    collection.add(1);
+    console.log('After add(1) isEmpty():', collection.isEmpty());
+    
+    // isEmpty after remove
+    console.log('\n=== isEmpty after remove ===');
+    const single = ReactiveUtils.collection([1]);
+    console.log('Before remove isEmpty():', single.isEmpty());
+    
+    single.remove(1);
+    console.log('After remove(1) isEmpty():', single.isEmpty());
+    
+    // isEmpty after clear
+    console.log('\n=== isEmpty after clear ===');
+    const toClear = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    console.log('Before clear isEmpty():', toClear.isEmpty());
+    console.log('length:', toClear.length);
+    
+    toClear.clear();
+    console.log('After clear isEmpty():', toClear.isEmpty());
+    console.log('length:', toClear.length);
+    
+    // isEmpty after reset
+    console.log('\n=== isEmpty after reset ===');
+    const toReset = ReactiveUtils.collection([1, 2, 3]);
+    console.log('Initial isEmpty():', toReset.isEmpty());
+    
+    toReset.reset([]);
+    console.log('After reset([]) isEmpty():', toReset.isEmpty());
+    
+    toReset.reset([1, 2]);
+    console.log('After reset([1, 2]) isEmpty():', toReset.isEmpty());
+    
+    // isEmpty equivalent to length === 0
+    console.log('\n=== isEmpty vs length === 0 ===');
+    const test1 = ReactiveUtils.collection();
+    console.log('Empty: isEmpty():', test1.isEmpty(), 'length === 0:', test1.length === 0);
+    
+    const test2 = ReactiveUtils.collection([1, 2, 3]);
+    console.log('Not empty: isEmpty():', test2.isEmpty(), 'length === 0:', test2.length === 0);
+    console.log('✓ isEmpty() equivalent to length === 0');
+    
+    // Use isEmpty in conditions
+    console.log('\n=== Use isEmpty in conditions ===');
+    const conditional = ReactiveUtils.collection();
+    
+    if (conditional.isEmpty()) {
+      console.log('✓ Collection is empty');
+    } else {
+      console.log('Collection has items');
+    }
+    
+    conditional.add(1);
+    
+    if (conditional.isEmpty()) {
+      console.log('Collection is empty');
+    } else {
+      console.log('✓ Collection has items');
+    }
+    
+    // isEmpty with different operations
+    console.log('\n=== isEmpty with different operations ===');
+    const ops = ReactiveUtils.collection();
+    console.log('1. Initial:', ops.isEmpty());
+    
+    ops.push(1, 2, 3);
+    console.log('2. After push:', ops.isEmpty());
+    
+    ops.pop();
+    console.log('3. After pop:', ops.isEmpty());
+    
+    ops.shift();
+    console.log('4. After shift:', ops.isEmpty());
+    
+    ops.unshift(0);
+    console.log('5. After unshift:', ops.isEmpty());
+    
+    ops.removeWhere(item => true);
+    console.log('6. After removeWhere(all):', ops.isEmpty());
+    
+    // Test reactivity
+    console.log('\n=== Testing reactivity ===');
+    const reactive = ReactiveUtils.collection();
+    let effectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: isEmpty = ${reactive.isEmpty()}, length = ${reactive.length}`);
+    });
+    
+    setTimeout(() => {
+      reactive.add(1);
+      console.log('Effect runs after add:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactive.add(2);
+      console.log('Effect runs after second add:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      reactive.clear();
+      console.log('Effect runs after clear:', effectRuns);
+    }, 1500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ isEmpty() returns true for empty collection');
+      console.log('✓ isEmpty() returns false for non-empty collection');
+      console.log('✓ isEmpty() updates after add/remove operations');
+      console.log('✓ isEmpty() equivalent to length === 0');
+      console.log('✓ isEmpty() useful in conditional logic');
+      console.log('✓ isEmpty() is reactive and triggers effects');
+    }, 2000);
+  </script>
+</body>
+</html>

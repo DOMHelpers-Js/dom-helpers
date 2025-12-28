@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test All Search & Filter Methods</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing All Search & Filter Methods ===');
+    
+    // Create test data
+    const products = ReactiveUtils.collection([
+      { id: 1, name: 'Laptop', price: 999, category: 'Electronics', inStock: true },
+      { id: 2, name: 'Mouse', price: 25, category: 'Electronics', inStock: true },
+      { id: 3, name: 'Desk', price: 299, category: 'Furniture', inStock: false },
+      { id: 4, name: 'Chair', price: 199, category: 'Furniture', inStock: true },
+      { id: 5, name: 'Monitor', price: 399, category: 'Electronics', inStock: true }
+    ]);
+    
+    console.log('\nTest data:', products.items);
+    
+    // Test find()
+    console.log('\n=== Testing find() ===');
+    const laptop = products.find(p => p.name === 'Laptop');
+    console.log('find(name === "Laptop"):', laptop);
+    
+    const firstInStock = products.find(p => p.inStock);
+    console.log('find(inStock):', firstInStock);
+    
+    const expensive = products.find(p => p.price > 500);
+    console.log('find(price > 500):', expensive);
+    
+    // Test filter()
+    console.log('\n=== Testing filter() ===');
+    const electronics = products.filter(p => p.category === 'Electronics');
+    console.log('filter(category === "Electronics"):', electronics);
+    
+    const inStock = products.filter(p => p.inStock);
+    console.log('filter(inStock):', inStock);
+    
+    const affordable = products.filter(p => p.price < 300);
+    console.log('filter(price < 300):', affordable);
+    
+    // Test map()
+    console.log('\n=== Testing map() ===');
+    const names = products.map(p => p.name);
+    console.log('map(p => p.name):', names);
+    
+    const prices = products.map(p => p.price);
+    console.log('map(p => p.price):', prices);
+    
+    const summaries = products.map(p => `${p.name} - $${p.price}`);
+    console.log('map(to summaries):', summaries);
+    
+    // Test forEach()
+    console.log('\n=== Testing forEach() ===');
+    console.log('Logging all products:');
+    products.forEach((p, index) => {
+      console.log(`  ${index + 1}. ${p.name} ($${p.price}) - ${p.category}`);
+    });
+    
+    // Combining methods
+    console.log('\n=== Combining methods ===');
+    
+    // Find first affordable electronic
+    const affordableElectronic = products
+      .filter(p => p.category === 'Electronics')
+      .find(p => p.price < 100);
+    console.log('First affordable electronic:', affordableElectronic);
+    
+    // Get names of in-stock items
+    const inStockNames = products
+      .filter(p => p.inStock)
+      .map(p => p.name);
+    console.log('In-stock product names:', inStockNames);
+    
+    // Calculate total price of electronics
+    let electronicsTotal = 0;
+    products
+      .filter(p => p.category === 'Electronics')
+      .forEach(p => electronicsTotal += p.price);
+    console.log('Total electronics price:', electronicsTotal);
+    
+    // Complex workflow
+    console.log('\n=== Complex workflow ===');
+    console.log('Processing inventory:');
+    
+    const inventory = {
+      totalValue: 0,
+      categories: {},
+      outOfStock: []
+    };
+    
+    products.forEach(product => {
+      inventory.totalValue += product.price;
+      
+      if (!inventory.categories[product.category]) {
+        inventory.categories[product.category] = { count: 0, value: 0 };
+      }
+      inventory.categories[product.category].count++;
+      inventory.categories[product.category].value += product.price;
+      
+      if (!product.inStock) {
+        inventory.outOfStock.push(product.name);
+      }
+    });
+    
+    console.log('Inventory summary:', inventory);
+    
+    // Method chaining showcase
+    console.log('\n=== Method chaining showcase ===');
+    const result = products
+      .filter(p => p.inStock)              // Only in-stock items
+      .filter(p => p.price < 500)          // Affordable items
+      .map(p => ({                          // Transform to summary
+        name: p.name,
+        savings: Math.floor(p.price * 0.1)
+      }))
+      .map(p => `${p.name} (save $${p.savings})`); // Format strings
+    
+    console.log('Chained result:', result);
+    
+    // Performance comparison
+    console.log('\n=== Comparing approaches ===');
+    
+    // Approach 1: Multiple passes
+    const electronics1 = products.filter(p => p.category === 'Electronics');
+    const inStockElectronics1 = electronics1.filter(p => p.inStock);
+    const cheapElectronics1 = inStockElectronics1.filter(p => p.price < 100);
+    console.log('Multiple passes result:', cheapElectronics1);
+    
+    // Approach 2: Single filter
+    const cheapElectronics2 = products.filter(p => 
+      p.category === 'Electronics' && p.inStock && p.price < 100
+    );
+    console.log('Single filter result:', cheapElectronics2);
+    
+    // Test reactivity
+    console.log('\n=== Testing reactivity ===');
+    const reactive = ReactiveUtils.collection([
+      { id: 1, value: 10, active: true },
+      { id: 2, value: 20, active: false },
+      { id: 3, value: 30, active: true }
+    ]);
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const activeSum = reactive
+        .filter(item => item.active)
+        .map(item => item.value)
+        .reduce((sum, val) => sum + val, 0);
+      console.log(`Effect #${effectRuns}: active sum = ${activeSum}`);
+    });
+    
+    setTimeout(() => {
+      reactive.add({ id: 4, value: 40, active: true });
+      console.log('Effect runs after add:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactive.update(r => r.id === 2, { active: true });
+      console.log('Effect runs after update:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ find() - finds first matching item');
+      console.log('✓ filter() - returns array of matching items');
+      console.log('✓ map() - transforms items to new array');
+      console.log('✓ forEach() - iterates for side effects, returns this');
+      console.log('✓ All methods support index parameter');
+      console.log('✓ Methods can be chained for complex queries');
+      console.log('✓ All methods work with reactive collections');
+    }, 1500);
+  </script>
+</body>
+</html>

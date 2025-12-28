@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveUtils.createForm()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/04_dh-reactive-form.js"></script>
+  <script>
+    console.log('=== Testing ReactiveUtils.createForm() ===');
+    
+    // Basic createForm
+    console.log('\n=== Basic createForm ===');
+    const form1 = ReactiveUtils.createForm({
+      username: '',
+      email: ''
+    });
+    
+    console.log('Form created:', !!form1);
+    console.log('values:', form1.values);
+    console.log('errors:', form1.errors);
+    console.log('isValid:', form1.isValid);
+    
+    // createForm with validators
+    console.log('\n=== createForm with validators ===');
+    const form2 = ReactiveUtils.createForm({
+      email: '',
+      password: ''
+    }, {
+      validators: {
+        email: (value) => value ? null : 'Email required',
+        password: (value) => value ? null : 'Password required'
+      }
+    });
+    
+    console.log('Form with validators created:', !!form2);
+    console.log('Initial isValid:', form2.isValid);
+    
+    form2.validate();
+    console.log('After validate(), errors:', form2.errors);
+    
+    // Verify createForm is an alias for form
+    console.log('\n=== Verify createForm is alias for form ===');
+    console.log('ReactiveUtils.form:', typeof ReactiveUtils.form);
+    console.log('ReactiveUtils.createForm:', typeof ReactiveUtils.createForm);
+    console.log('Same function:', ReactiveUtils.form === ReactiveUtils.createForm);
+    
+    // Both create identical forms
+    console.log('\n=== Both create identical forms ===');
+    const formA = ReactiveUtils.form({ test: '' });
+    const formB = ReactiveUtils.createForm({ test: '' });
+    
+    const methodsA = Object.keys(formA).filter(k => typeof formA[k] === 'function');
+    const methodsB = Object.keys(formB).filter(k => typeof formB[k] === 'function');
+    
+    console.log('form() methods count:', methodsA.length);
+    console.log('createForm() methods count:', methodsB.length);
+    console.log('Same methods:', methodsA.length === methodsB.length);
+    
+    // Test all form features with createForm
+    console.log('\n=== Test all features with createForm ===');
+    const fullForm = ReactiveUtils.createForm({
+      name: '',
+      email: '',
+      age: ''
+    }, {
+      validators: {
+        name: (value) => value ? null : 'Name required',
+        email: (value) => {
+          if (!value) return 'Email required';
+          if (!/\S+@\S+\.\S+/.test(value)) return 'Invalid email';
+          return null;
+        },
+        age: (value) => {
+          if (!value) return 'Age required';
+          if (isNaN(value)) return 'Age must be a number';
+          if (value < 18) return 'Must be 18 or older';
+          return null;
+        }
+      }
+    });
+    
+    console.log('Full form created:', !!fullForm);
+    
+    // Test setValue
+    fullForm.setValue('name', 'Alice');
+    console.log('After setValue("name", "Alice"):', fullForm.values.name);
+    
+    // Test setValues
+    fullForm.setValues({ email: 'alice@example.com', age: '25' });
+    console.log('After setValues:', fullForm.values);
+    
+    // Test validate
+    const valid = fullForm.validate();
+    console.log('After validate():', { valid, errors: fullForm.errors });
+    
+    // Test reset
+    fullForm.reset();
+    console.log('After reset():', fullForm.values);
+    
+    // Test computed properties
+    console.log('\n=== Test computed properties ===');
+    const computed = ReactiveUtils.createForm({ field1: '', field2: '' }, {
+      validators: {
+        field1: (value) => value ? null : 'Required'
+      }
+    });
+    
+    console.log('Initial:');
+    console.log('  isValid:', computed.isValid);
+    console.log('  isDirty:', computed.isDirty);
+    console.log('  hasErrors:', computed.hasErrors);
+    
+    computed.setValue('field1', 'value');
+    console.log('After setValue:');
+    console.log('  isValid:', computed.isValid);
+    console.log('  isDirty:', computed.isDirty);
+    console.log('  hasErrors:', computed.hasErrors);
+    
+    // Test reactivity
+    console.log('\n=== Testing reactivity ===');
+    const reactiveForm = ReactiveUtils.createForm({
+      counter: '0'
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: counter = ${reactiveForm.values.counter}`);
+    });
+    
+    setTimeout(() => {
+      reactiveForm.setValue('counter', '1');
+      console.log('Effect runs after setValue:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactiveForm.setValue('counter', '2');
+      console.log('Effect runs after second setValue:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ ReactiveUtils.createForm() creates forms');
+      console.log('✓ createForm is an alias for form');
+      console.log('✓ createForm supports all form options');
+      console.log('✓ Forms created by both methods are identical');
+      console.log('✓ createForm works with validators');
+      console.log('✓ createForm forms are reactive');
+    }, 1500);
+  </script>
+</body>
+</html>

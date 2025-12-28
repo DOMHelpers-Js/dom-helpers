@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.sort()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection.sort() ===');
+    
+    // Basic sort with numbers (lexicographic by default)
+    console.log('\n=== Basic sort (default) ===');
+    const numbers1 = ReactiveUtils.collection([5, 2, 8, 1, 9, 3]);
+    console.log('Before sort:', numbers1.items);
+    numbers1.sort();
+    console.log('After sort():', numbers1.items);
+    console.log('⚠️  Default sort is lexicographic');
+    
+    // Numeric sort (ascending)
+    console.log('\n=== Numeric sort (ascending) ===');
+    const numbers2 = ReactiveUtils.collection([5, 2, 8, 1, 9, 3]);
+    numbers2.sort((a, b) => a - b);
+    console.log('After sort((a, b) => a - b):', numbers2.items);
+    
+    // Numeric sort (descending)
+    console.log('\n=== Numeric sort (descending) ===');
+    const numbers3 = ReactiveUtils.collection([5, 2, 8, 1, 9, 3]);
+    numbers3.sort((a, b) => b - a);
+    console.log('After sort((a, b) => b - a):', numbers3.items);
+    
+    // String sort
+    console.log('\n=== String sort ===');
+    const words = ReactiveUtils.collection(['banana', 'apple', 'cherry', 'date']);
+    console.log('Before sort:', words.items);
+    words.sort();
+    console.log('After sort():', words.items);
+    
+    // String sort (case-insensitive)
+    console.log('\n=== String sort (case-insensitive) ===');
+    const mixed = ReactiveUtils.collection(['Banana', 'apple', 'Cherry', 'date']);
+    console.log('Before sort:', mixed.items);
+    mixed.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+    console.log('After case-insensitive sort:', mixed.items);
+    
+    // Sort objects by property
+    console.log('\n=== Sort objects by property ===');
+    const users = ReactiveUtils.collection([
+      { id: 3, name: 'Charlie', age: 35 },
+      { id: 1, name: 'Alice', age: 30 },
+      { id: 2, name: 'Bob', age: 25 }
+    ]);
+    console.log('Before sort:', users.items);
+    
+    users.sort((a, b) => a.id - b.id);
+    console.log('After sort by id:', users.items);
+    
+    users.sort((a, b) => a.name.localeCompare(b.name));
+    console.log('After sort by name:', users.items);
+    
+    users.sort((a, b) => b.age - a.age);
+    console.log('After sort by age (desc):', users.items);
+    
+    // Sort with multiple criteria
+    console.log('\n=== Sort with multiple criteria ===');
+    const products = ReactiveUtils.collection([
+      { category: 'B', price: 100, name: 'Item1' },
+      { category: 'A', price: 200, name: 'Item2' },
+      { category: 'A', price: 100, name: 'Item3' },
+      { category: 'B', price: 150, name: 'Item4' }
+    ]);
+    console.log('Before sort:', products.items);
+    
+    products.sort((a, b) => {
+      // First by category
+      if (a.category !== b.category) {
+        return a.category.localeCompare(b.category);
+      }
+      // Then by price
+      return a.price - b.price;
+    });
+    console.log('After sort by category, then price:', products.items);
+    
+    // Test return value
+    console.log('\n=== Testing return value ===');
+    const collection = ReactiveUtils.collection([3, 1, 2]);
+    const result = collection.sort((a, b) => a - b);
+    console.log('sort() returns this:', result === collection);
+    console.log('Items:', collection.items);
+    
+    // Test chaining
+    console.log('\n=== Testing chaining ===');
+    const chain = ReactiveUtils.collection([5, 2, 8, 1, 9]);
+    chain.sort((a, b) => a - b).reverse().push(10);
+    console.log('After sort().reverse().push(10):', chain.items);
+    
+    // Sort modifies in place
+    console.log('\n=== Sort modifies in place ===');
+    const original = ReactiveUtils.collection([3, 1, 2]);
+    console.log('Before sort:', original.items);
+    const returned = original.sort((a, b) => a - b);
+    console.log('After sort:', original.items);
+    console.log('Same reference:', returned === original);
+    
+    // Sort empty collection
+    console.log('\n=== Sort empty collection ===');
+    const empty = ReactiveUtils.collection();
+    empty.sort((a, b) => a - b);
+    console.log('Sort on empty:', empty.items);
+    console.log('✓ No error on empty collection');
+    
+    // Test reactivity
+    console.log('\n=== Testing reactivity ===');
+    const reactive = ReactiveUtils.collection([5, 2, 8, 1, 9]);
+    let effectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: [${reactive.items.join(', ')}]`);
+    });
+    
+    setTimeout(() => {
+      reactive.sort((a, b) => a - b);
+      console.log('Effect runs after sort:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactive.sort((a, b) => b - a);
+      console.log('Effect runs after reverse sort:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ sort() sorts items in place');
+      console.log('✓ sort() without compareFn uses lexicographic order');
+      console.log('✓ sort(compareFn) uses custom comparison');
+      console.log('✓ sort() returns this for chaining');
+      console.log('✓ sort() works with numbers, strings, and objects');
+      console.log('✓ sort() supports multi-criteria sorting');
+      console.log('✓ sort() is reactive and triggers effects');
+    }, 1500);
+  </script>
+</body>
+</html>

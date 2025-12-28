@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.length</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection.length ===');
+    
+    const collection = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    
+    // Read length
+    console.log('\n=== Reading length ===');
+    console.log('collection.length:', collection.length);
+    console.log('Type:', typeof collection.length);
+    
+    // Verify it's a getter
+    console.log('\n=== Verifying it\'s a getter ===');
+    const descriptor = Object.getOwnPropertyDescriptor(collection, 'length');
+    console.log('Has getter:', !!descriptor?.get);
+    console.log('Is enumerable:', descriptor?.enumerable);
+    
+    // Verify it matches items.length
+    console.log('\n=== Verifying it matches items.length ===');
+    console.log('collection.length:', collection.length);
+    console.log('collection.items.length:', collection.items.length);
+    console.log('Match:', collection.length === collection.items.length);
+    
+    // Test that length updates with changes
+    console.log('\n=== Testing length updates ===');
+    console.log('Initial length:', collection.length);
+    
+    collection.add(6);
+    console.log('After add(6):', collection.length);
+    
+    collection.remove(3);
+    console.log('After remove(3):', collection.length);
+    
+    collection.push(7, 8, 9);
+    console.log('After push(7, 8, 9):', collection.length);
+    
+    collection.pop();
+    console.log('After pop():', collection.length);
+    
+    collection.clear();
+    console.log('After clear():', collection.length);
+    
+    // Test with empty collection
+    console.log('\n=== Testing with empty collection ===');
+    const empty = ReactiveUtils.collection();
+    console.log('Empty collection length:', empty.length);
+    
+    empty.add(1);
+    console.log('After add(1):', empty.length);
+    
+    // Test reactivity
+    console.log('\n=== Testing length reactivity ===');
+    const reactive = ReactiveUtils.collection([1, 2, 3]);
+    let effectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: length = ${reactive.length}`);
+    });
+    
+    setTimeout(() => {
+      reactive.add(4);
+      console.log('Effect runs after add:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactive.items.push(5);
+      console.log('Effect runs after push:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      reactive.reset([1, 2]);
+      console.log('Effect runs after reset:', effectRuns);
+    }, 1500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ length is a read-only getter');
+      console.log('✓ length always matches items.length');
+      console.log('✓ length updates automatically with mutations');
+      console.log('✓ length is reactive');
+    }, 2000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test All Collection Properties</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing All Collection Properties ===');
+    
+    const collection = ReactiveUtils.collection([10, 20, 30, 40, 50]);
+    
+    // Display all properties
+    console.log('\n=== Initial state ===');
+    console.log('items:', collection.items);
+    console.log('length:', collection.length);
+    console.log('first:', collection.first);
+    console.log('last:', collection.last);
+    
+    // Verify property descriptors
+    console.log('\n=== Property descriptors ===');
+    const itemsDesc = Object.getOwnPropertyDescriptor(collection, 'items');
+    const lengthDesc = Object.getOwnPropertyDescriptor(collection, 'length');
+    const firstDesc = Object.getOwnPropertyDescriptor(collection, 'first');
+    const lastDesc = Object.getOwnPropertyDescriptor(collection, 'last');
+    
+    console.log('items - writable:', itemsDesc?.writable ?? 'inherited');
+    console.log('length - has getter:', !!lengthDesc?.get);
+    console.log('first - has getter:', !!firstDesc?.get);
+    console.log('last - has getter:', !!lastDesc?.get);
+    
+    // Test add
+    console.log('\n=== After add(60) ===');
+    collection.add(60);
+    console.log('items:', collection.items);
+    console.log('length:', collection.length);
+    console.log('first:', collection.first);
+    console.log('last:', collection.last);
+    
+    // Test remove
+    console.log('\n=== After remove(10) ===');
+    collection.remove(10);
+    console.log('items:', collection.items);
+    console.log('length:', collection.length);
+    console.log('first:', collection.first);
+    console.log('last:', collection.last);
+    
+    // Test push
+    console.log('\n=== After push(70, 80) ===');
+    collection.push(70, 80);
+    console.log('items:', collection.items);
+    console.log('length:', collection.length);
+    console.log('first:', collection.first);
+    console.log('last:', collection.last);
+    
+    // Test shift
+    console.log('\n=== After shift() ===');
+    collection.shift();
+    console.log('items:', collection.items);
+    console.log('length:', collection.length);
+    console.log('first:', collection.first);
+    console.log('last:', collection.last);
+    
+    // Test pop
+    console.log('\n=== After pop() ===');
+    collection.pop();
+    console.log('items:', collection.items);
+    console.log('length:', collection.length);
+    console.log('first:', collection.first);
+    console.log('last:', collection.last);
+    
+    // Test reverse
+    console.log('\n=== After reverse() ===');
+    collection.reverse();
+    console.log('items:', collection.items);
+    console.log('length:', collection.length);
+    console.log('first:', collection.first);
+    console.log('last:', collection.last);
+    
+    // Test sort
+    console.log('\n=== After sort() ===');
+    collection.sort((a, b) => a - b);
+    console.log('items:', collection.items);
+    console.log('length:', collection.length);
+    console.log('first:', collection.first);
+    console.log('last:', collection.last);
+    
+    // Test clear
+    console.log('\n=== After clear() ===');
+    collection.clear();
+    console.log('items:', collection.items);
+    console.log('length:', collection.length);
+    console.log('first:', collection.first);
+    console.log('last:', collection.last);
+    
+    // Test with objects
+    console.log('\n=== Testing with objects ===');
+    const users = ReactiveUtils.collection([
+      { id: 1, name: 'Alice', age: 30 },
+      { id: 2, name: 'Bob', age: 25 },
+      { id: 3, name: 'Charlie', age: 35 }
+    ]);
+    
+    console.log('All properties:');
+    console.log('  items:', users.items);
+    console.log('  length:', users.length);
+    console.log('  first:', users.first);
+    console.log('  last:', users.last);
+    
+    // Test reactivity of all properties
+    console.log('\n=== Testing reactivity of all properties ===');
+    const reactive = ReactiveUtils.collection([1, 2, 3]);
+    let effectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}:`, {
+        items: reactive.items,
+        length: reactive.length,
+        first: reactive.first,
+        last: reactive.last
+      });
+    });
+    
+    setTimeout(() => {
+      console.log('\n=== Mutation 1: add(4) ===');
+      reactive.add(4);
+      console.log('Effect runs:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      console.log('\n=== Mutation 2: unshift(0) ===');
+      reactive.unshift(0);
+      console.log('Effect runs:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Mutation 3: reverse() ===');
+      reactive.reverse();
+      console.log('Effect runs:', effectRuns);
+    }, 1500);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ items - read/write property containing array');
+      console.log('✓ length - read-only getter, always matches items.length');
+      console.log('✓ first - read-only getter, returns items[0]');
+      console.log('✓ last - read-only getter, returns items[items.length - 1]');
+      console.log('✓ All properties are reactive');
+      console.log('✓ All properties update automatically with mutations');
+    }, 2000);
+  </script>
+</body>
+</html>

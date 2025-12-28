@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.pop()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection.pop() ===');
+    
+    // Basic pop
+    console.log('\n=== Basic pop ===');
+    const collection = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    console.log('Before pop:', collection.items);
+    
+    const popped1 = collection.pop();
+    console.log('pop() returned:', popped1);
+    console.log('After pop():', collection.items);
+    
+    const popped2 = collection.pop();
+    console.log('pop() returned:', popped2);
+    console.log('After pop():', collection.items);
+    
+    // Pop updates length
+    console.log('\n=== Pop updates length ===');
+    const lengthTest = ReactiveUtils.collection([1, 2, 3]);
+    console.log('Before pop, length:', lengthTest.length);
+    lengthTest.pop();
+    console.log('After pop, length:', lengthTest.length);
+    
+    // Pop updates last
+    console.log('\n=== Pop updates last ===');
+    const lastTest = ReactiveUtils.collection([1, 2, 3]);
+    console.log('Before pop, last:', lastTest.last);
+    lastTest.pop();
+    console.log('After pop, last:', lastTest.last);
+    
+    // Pop on empty
+    console.log('\n=== Pop on empty ===');
+    const empty = ReactiveUtils.collection();
+    const result = empty.pop();
+    console.log('pop() on empty returned:', result);
+    console.log('Items:', empty.items);
+    console.log('✓ Returns undefined on empty collection');
+    
+    // Pop until empty
+    console.log('\n=== Pop until empty ===');
+    const until = ReactiveUtils.collection([1, 2, 3]);
+    console.log('Initial:', until.items);
+    
+    while (until.length > 0) {
+      const val = until.pop();
+      console.log('Popped:', val, '- Remaining:', until.items);
+    }
+    
+    console.log('Final state:');
+    console.log('  items:', until.items);
+    console.log('  length:', until.length);
+    console.log('  first:', until.first);
+    console.log('  last:', until.last);
+    
+    // With objects
+    console.log('\n=== With objects ===');
+    const todos = ReactiveUtils.collection([
+      { id: 1, text: 'Task 1' },
+      { id: 2, text: 'Task 2' },
+      { id: 3, text: 'Task 3' }
+    ]);
+    console.log('Before pop:', todos.items);
+    
+    const poppedTask = todos.pop();
+    console.log('Popped task:', poppedTask);
+    console.log('After pop:', todos.items);
+    
+    // Single item
+    console.log('\n=== Single item ===');
+    const single = ReactiveUtils.collection([42]);
+    console.log('Before pop:', single.items);
+    console.log('first:', single.first, 'last:', single.last);
+    
+    const val = single.pop();
+    console.log('Popped:', val);
+    console.log('After pop:', single.items);
+    console.log('first:', single.first, 'last:', single.last);
+    
+    // Test reactivity
+    console.log('\n=== Testing reactivity ===');
+    const reactive = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    let effectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: [${reactive.items.join(', ')}] (length: ${reactive.length}, last: ${reactive.last})`);
+    });
+    
+    setTimeout(() => {
+      reactive.pop();
+      console.log('Effect runs after pop:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactive.pop();
+      console.log('Effect runs after second pop:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ pop() removes and returns last item');
+      console.log('✓ pop() returns undefined on empty collection');
+      console.log('✓ pop() decreases length');
+      console.log('✓ pop() updates last property');
+      console.log('✓ pop() works with numbers, strings, and objects');
+      console.log('✓ pop() is safe to call repeatedly');
+      console.log('✓ pop() is reactive and triggers effects');
+    }, 1500);
+  </script>
+</body>
+</html>

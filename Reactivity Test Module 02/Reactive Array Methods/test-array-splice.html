@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Array splice()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script>
+    console.log('=== Testing reactive array splice() ===');
+    
+    const state = ReactiveUtils.state({
+      items: [1, 2, 3, 4, 5]
+    });
+    
+    console.log('Initial items:', state.items);
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: [${state.items.join(', ')}]`);
+    });
+    
+    // Test removing items
+    setTimeout(() => {
+      console.log('\n=== splice(2, 1) - remove 1 item at index 2 ===');
+      const removed = state.items.splice(2, 1);
+      console.log('Removed:', removed); // [3]
+      console.log('items:', state.items); // [1, 2, 4, 5]
+      console.log('Effect runs:', effectRuns);
+    }, 500);
+    
+    // Test adding items
+    setTimeout(() => {
+      console.log('\n=== splice(1, 0, 99, 100) - add items at index 1 ===');
+      const removed = state.items.splice(1, 0, 99, 100);
+      console.log('Removed:', removed); // []
+      console.log('items:', state.items); // [1, 99, 100, 2, 4, 5]
+      console.log('Effect runs:', effectRuns);
+    }, 1000);
+    
+    // Test replacing items
+    setTimeout(() => {
+      console.log('\n=== splice(2, 2, 200, 300, 400) - replace items ===');
+      const removed = state.items.splice(2, 2, 200, 300, 400);
+      console.log('Removed:', removed);
+      console.log('items:', state.items);
+      console.log('Effect runs:', effectRuns);
+    }, 1500);
+    
+    // Test removing from end
+    setTimeout(() => {
+      console.log('\n=== splice(-2) - remove last 2 items ===');
+      const removed = state.items.splice(-2);
+      console.log('Removed:', removed);
+      console.log('items:', state.items);
+      console.log('Effect runs:', effectRuns);
+    }, 2000);
+  </script>
+</body>
+</html>

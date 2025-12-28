@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.removeWhere()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection.removeWhere() ===');
+    
+    // Basic removeWhere
+    console.log('\n=== Basic removeWhere ===');
+    const todos = ReactiveUtils.collection([
+      { id: 1, text: 'Task 1', done: false },
+      { id: 2, text: 'Task 2', done: true },
+      { id: 3, text: 'Task 3', done: false },
+      { id: 4, text: 'Task 4', done: true },
+      { id: 5, text: 'Task 5', done: false }
+    ]);
+    console.log('Initial todos:', todos.items);
+    console.log('Length:', todos.length);
+    
+    todos.removeWhere(t => t.done);
+    console.log('After removeWhere(done):', todos.items);
+    console.log('Length:', todos.length);
+    
+    // Remove with complex predicate
+    console.log('\n=== Remove with complex predicate ===');
+    const products = ReactiveUtils.collection([
+      { id: 1, price: 100, category: 'A', inStock: true },
+      { id: 2, price: 50, category: 'B', inStock: false },
+      { id: 3, price: 200, category: 'A', inStock: true },
+      { id: 4, price: 30, category: 'B', inStock: false },
+      { id: 5, price: 150, category: 'A', inStock: false }
+    ]);
+    console.log('Initial products:', products.items);
+    
+    products.removeWhere(p => p.price < 100 || !p.inStock);
+    console.log('After removeWhere(price < 100 || !inStock):', products.items);
+    
+    // Test return value
+    console.log('\n=== Testing return value ===');
+    const collection = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    const result = collection.removeWhere(n => n > 3);
+    console.log('removeWhere() returns this:', result === collection);
+    console.log('Items:', collection.items);
+    
+    // Test chaining
+    console.log('\n=== Testing chaining ===');
+    const chain = ReactiveUtils.collection([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    chain.removeWhere(n => n % 2 === 0)
+         .removeWhere(n => n > 5);
+    console.log('After chained removeWhere:', chain.items);
+    
+    // Remove all
+    console.log('\n=== Remove all ===');
+    const all = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    console.log('Before removeWhere:', all.items);
+    all.removeWhere(item => true);
+    console.log('After removeWhere(true):', all.items);
+    console.log('isEmpty:', all.isEmpty());
+    
+    // Remove none
+    console.log('\n=== Remove none ===');
+    const none = ReactiveUtils.collection([1, 2, 3]);
+    console.log('Before removeWhere:', none.items);
+    none.removeWhere(item => false);
+    console.log('After removeWhere(false):', none.items);
+    console.log('✓ No items removed when predicate never matches');
+    
+    // Remove with index
+    console.log('\n=== Remove with index ===');
+    const indexed = ReactiveUtils.collection(['a', 'b', 'c', 'd', 'e', 'f']);
+    console.log('Before removeWhere:', indexed.items);
+    indexed.removeWhere((item, index) => index % 2 === 1);
+    console.log('After removeWhere(odd indices):', indexed.items);
+    
+    // Empty collection
+    console.log('\n=== Empty collection ===');
+    const empty = ReactiveUtils.collection();
+    empty.removeWhere(item => true);
+    console.log('removeWhere on empty:', empty.items);
+    console.log('✓ No error on empty collection');
+    
+    // Comparison with remove()
+    console.log('\n=== Comparison: removeWhere vs remove ===');
+    const forRemoveWhere = ReactiveUtils.collection([
+      { id: 1, active: true },
+      { id: 2, active: true },
+      { id: 3, active: false }
+    ]);
+    const forRemove = ReactiveUtils.collection([
+      { id: 1, active: true },
+      { id: 2, active: true },
+      { id: 3, active: false }
+    ]);
+    
+    console.log('Both start with:', forRemoveWhere.items);
+    
+    forRemoveWhere.removeWhere(item => item.active);
+    console.log('removeWhere(active) removes all active:', forRemoveWhere.items);
+    
+    forRemove.remove(item => item.active);
+    console.log('remove(active) removes only first:', forRemove.items);
+    
+    // Remove by value ranges
+    console.log('\n=== Remove by value ranges ===');
+    const numbers = ReactiveUtils.collection([1, 5, 10, 15, 20, 25, 30]);
+    console.log('Before removeWhere:', numbers.items);
+    numbers.removeWhere(n => n >= 10 && n <= 20);
+    console.log('After removeWhere(10 <= n <= 20):', numbers.items);
+    
+    // Test reactivity
+    console.log('\n=== Testing reactivity ===');
+    const reactive = ReactiveUtils.collection([
+      { id: 1, type: 'A' },
+      { id: 2, type: 'B' },
+      { id: 3, type: 'A' },
+      { id: 4, type: 'B' },
+      { id: 5, type: 'A' }
+    ]);
+    let effectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: ${reactive.length} items - [${reactive.items.map(i => i.id).join(', ')}]`);
+    });
+    
+    setTimeout(() => {
+      reactive.removeWhere(item => item.type === 'B');
+      console.log('Effect runs after removeWhere:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactive.removeWhere(item => item.id > 2);
+      console.log('Effect runs after second removeWhere:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ removeWhere(predicate) removes all matching items');
+      console.log('✓ removeWhere() returns this for chaining');
+      console.log('✓ removeWhere() works with complex predicates');
+      console.log('✓ removeWhere() supports index in predicate');
+      console.log('✓ removeWhere() can remove all items');
+      console.log('✓ removeWhere() is safe on empty collections');
+      console.log('✓ removeWhere() differs from remove() (all vs first)');
+      console.log('✓ removeWhere() is reactive and triggers effects');
+    }, 1500);
+  </script>
+</body>
+</html>

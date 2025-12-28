@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Array push()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script>
+    console.log('=== Testing reactive array push() ===');
+    
+    const state = ReactiveUtils.state({
+      items: [1, 2, 3]
+    });
+    
+    console.log('Initial items:', state.items);
+    
+    // Track reactivity
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: [${state.items.join(', ')}] (length: ${state.items.length})`);
+    });
+    
+    console.log('Initial effect runs:', effectRuns);
+    
+    // Test push with single item
+    setTimeout(() => {
+      console.log('\n=== push(4) ===');
+      state.items.push(4);
+      console.log('items:', state.items);
+      console.log('Effect runs:', effectRuns);
+      console.log('✓ Effect should have run');
+    }, 500);
+    
+    // Test push with multiple items
+    setTimeout(() => {
+      console.log('\n=== push(5, 6, 7) ===');
+      state.items.push(5, 6, 7);
+      console.log('items:', state.items);
+      console.log('Effect runs:', effectRuns);
+      console.log('✓ Effect should have run');
+    }, 1000);
+    
+    // Test push returns new length
+    setTimeout(() => {
+      console.log('\n=== Testing return value ===');
+      const newLength = state.items.push(8);
+      console.log('push(8) returned:', newLength);
+      console.log('items.length:', state.items.length);
+      console.log('✓ Return value matches array length');
+    }, 1500);
+  </script>
+</body>
+</html>

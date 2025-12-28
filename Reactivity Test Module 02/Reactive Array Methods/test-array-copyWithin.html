@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Array copyWithin()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script>
+    console.log('=== Testing reactive array copyWithin() ===');
+    
+    const state = ReactiveUtils.state({
+      items: [1, 2, 3, 4, 5]
+    });
+    
+    console.log('Initial items:', state.items);
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: [${state.items.join(', ')}]`);
+    });
+    
+    // Test basic copyWithin
+    setTimeout(() => {
+      console.log('\n=== copyWithin(0, 3) - copy from index 3 to start ===');
+      state.items.copyWithin(0, 3);
+      console.log('items:', state.items);
+      console.log('Effect runs:', effectRuns);
+    }, 500);
+    
+    // Test copyWithin with end
+    setTimeout(() => {
+      console.log('\n=== copyWithin(1, 3, 5) - copy indices 3-5 to index 1 ===');
+      state.items = [1, 2, 3, 4, 5];
+      setTimeout(() => {
+        state.items.copyWithin(1, 3, 5);
+        console.log('items:', state.items); // [1, 4, 5, 4, 5]
+        console.log('Effect runs:', effectRuns);
+      }, 500);
+    }, 1000);
+    
+    // Test copyWithin with negative indices
+    setTimeout(() => {
+      console.log('\n=== copyWithin(-2, 0) - copy from start to last 2 ===');
+      state.items = [1, 2, 3, 4, 5];
+      setTimeout(() => {
+        state.items.copyWithin(-2, 0);
+        console.log('items:', state.items); // [1, 2, 3, 1, 2]
+        console.log('Effect runs:', effectRuns);
+        console.log('✓ Copied to end using negative index');
+      }, 500);
+    }, 2000);
+    
+    // Test copyWithin overlapping
+    setTimeout(() => {
+      console.log('\n=== copyWithin(2, 0, 3) - overlapping copy ===');
+      state.items = [1, 2, 3, 4, 5];
+      setTimeout(() => {
+        state.items.copyWithin(2, 0, 3);
+        console.log('items:', state.items); // [1, 2, 1, 2, 3]
+        console.log('Effect runs:', effectRuns);
+      }, 500);
+    }, 3000);
+  </script>
+</body>
+</html>

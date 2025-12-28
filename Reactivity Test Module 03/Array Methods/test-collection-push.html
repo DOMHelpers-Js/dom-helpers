@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.push()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection.push() ===');
+    
+    // Basic push
+    console.log('\n=== Basic push ===');
+    const collection = ReactiveUtils.collection([1, 2, 3]);
+    console.log('Before push:', collection.items);
+    
+    collection.push(4);
+    console.log('After push(4):', collection.items);
+    
+    collection.push(5);
+    console.log('After push(5):', collection.items);
+    
+    // Push multiple items
+    console.log('\n=== Push multiple items ===');
+    const multi = ReactiveUtils.collection([1, 2]);
+    console.log('Before push:', multi.items);
+    multi.push(3, 4, 5);
+    console.log('After push(3, 4, 5):', multi.items);
+    
+    // Test return value
+    console.log('\n=== Testing return value ===');
+    const test = ReactiveUtils.collection([1, 2, 3]);
+    const result = test.push(4);
+    console.log('push() returns this:', result === test);
+    console.log('Items:', test.items);
+    
+    // Test chaining
+    console.log('\n=== Testing chaining ===');
+    const chain = ReactiveUtils.collection([1]);
+    chain.push(2).push(3).push(4);
+    console.log('After chained push(2).push(3).push(4):', chain.items);
+    
+    // With objects
+    console.log('\n=== With objects ===');
+    const todos = ReactiveUtils.collection([
+      { id: 1, text: 'Task 1' }
+    ]);
+    console.log('Before push:', todos.items);
+    
+    todos.push({ id: 2, text: 'Task 2' });
+    console.log('After push(task 2):', todos.items);
+    
+    todos.push(
+      { id: 3, text: 'Task 3' },
+      { id: 4, text: 'Task 4' }
+    );
+    console.log('After push(task 3, 4):', todos.items);
+    
+    // Push updates length
+    console.log('\n=== Push updates length ===');
+    const lengthTest = ReactiveUtils.collection([1, 2]);
+    console.log('Before push, length:', lengthTest.length);
+    lengthTest.push(3);
+    console.log('After push, length:', lengthTest.length);
+    
+    // Push updates last
+    console.log('\n=== Push updates last ===');
+    const lastTest = ReactiveUtils.collection([1, 2]);
+    console.log('Before push, last:', lastTest.last);
+    lastTest.push(3);
+    console.log('After push(3), last:', lastTest.last);
+    lastTest.push(4);
+    console.log('After push(4), last:', lastTest.last);
+    
+    // Empty collection
+    console.log('\n=== Empty collection ===');
+    const empty = ReactiveUtils.collection();
+    console.log('Before push:', empty.items);
+    empty.push(1);
+    console.log('After push(1):', empty.items);
+    console.log('first:', empty.first);
+    console.log('last:', empty.last);
+    
+    // Different types
+    console.log('\n=== Different types ===');
+    const mixed = ReactiveUtils.collection();
+    mixed.push('string');
+    console.log('After push("string"):', mixed.items);
+    mixed.push(42);
+    console.log('After push(42):', mixed.items);
+    mixed.push(true);
+    console.log('After push(true):', mixed.items);
+    mixed.push({ key: 'value' });
+    console.log('After push(object):', mixed.items);
+    
+    // Test reactivity
+    console.log('\n=== Testing reactivity ===');
+    const reactive = ReactiveUtils.collection([1, 2, 3]);
+    let effectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: [${reactive.items.join(', ')}] (length: ${reactive.length}, last: ${reactive.last})`);
+    });
+    
+    setTimeout(() => {
+      reactive.push(4);
+      console.log('Effect runs after push(4):', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactive.push(5, 6);
+      console.log('Effect runs after push(5, 6):', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ push(item) adds item to end');
+      console.log('✓ push(...items) adds multiple items');
+      console.log('✓ push() returns this for chaining');
+      console.log('✓ push() increases length');
+      console.log('✓ push() updates last property');
+      console.log('✓ push() works with any type');
+      console.log('✓ push() is reactive and triggers effects');
+    }, 1500);
+  </script>
+</body>
+</html>

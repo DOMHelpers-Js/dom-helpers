@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.unshift()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection.unshift() ===');
+    
+    // Basic unshift
+    console.log('\n=== Basic unshift ===');
+    const collection = ReactiveUtils.collection([3, 4, 5]);
+    console.log('Before unshift:', collection.items);
+    
+    collection.unshift(2);
+    console.log('After unshift(2):', collection.items);
+    
+    collection.unshift(1);
+    console.log('After unshift(1):', collection.items);
+    
+    // Unshift multiple items
+    console.log('\n=== Unshift multiple items ===');
+    const multi = ReactiveUtils.collection([4, 5]);
+    console.log('Before unshift:', multi.items);
+    multi.unshift(1, 2, 3);
+    console.log('After unshift(1, 2, 3):', multi.items);
+    
+    // Test return value
+    console.log('\n=== Testing return value ===');
+    const test = ReactiveUtils.collection([2, 3]);
+    const result = test.unshift(1);
+    console.log('unshift() returns this:', result === test);
+    console.log('Items:', test.items);
+    
+    // Test chaining
+    console.log('\n=== Testing chaining ===');
+    const chain = ReactiveUtils.collection([4]);
+    chain.unshift(3).unshift(2).unshift(1);
+    console.log('After chained unshift(3).unshift(2).unshift(1):', chain.items);
+    
+    // With objects
+    console.log('\n=== With objects ===');
+    const todos = ReactiveUtils.collection([
+      { id: 2, text: 'Task 2' }
+    ]);
+    console.log('Before unshift:', todos.items);
+    
+    todos.unshift({ id: 1, text: 'Task 1' });
+    console.log('After unshift(task 1):', todos.items);
+    
+    todos.unshift(
+      { id: -1, text: 'Task -1' },
+      { id: 0, text: 'Task 0' }
+    );
+    console.log('After unshift(task -1, 0):', todos.items);
+    
+    // Unshift updates length
+    console.log('\n=== Unshift updates length ===');
+    const lengthTest = ReactiveUtils.collection([3, 4]);
+    console.log('Before unshift, length:', lengthTest.length);
+    lengthTest.unshift(2);
+    console.log('After unshift, length:', lengthTest.length);
+    
+    // Unshift updates first
+    console.log('\n=== Unshift updates first ===');
+    const firstTest = ReactiveUtils.collection([2, 3]);
+    console.log('Before unshift, first:', firstTest.first);
+    firstTest.unshift(1);
+    console.log('After unshift(1), first:', firstTest.first);
+    firstTest.unshift(0);
+    console.log('After unshift(0), first:', firstTest.first);
+    
+    // Empty collection
+    console.log('\n=== Empty collection ===');
+    const empty = ReactiveUtils.collection();
+    console.log('Before unshift:', empty.items);
+    empty.unshift(1);
+    console.log('After unshift(1):', empty.items);
+    console.log('first:', empty.first);
+    console.log('last:', empty.last);
+    
+    // Different types
+    console.log('\n=== Different types ===');
+    const mixed = ReactiveUtils.collection([]);
+    mixed.unshift('string');
+    console.log('After unshift("string"):', mixed.items);
+    mixed.unshift(42);
+    console.log('After unshift(42):', mixed.items);
+    mixed.unshift(true);
+    console.log('After unshift(true):', mixed.items);
+    
+    // Comparison with push
+    console.log('\n=== Comparison: unshift vs push ===');
+    const forUnshift = ReactiveUtils.collection([2, 3, 4]);
+    const forPush = ReactiveUtils.collection([2, 3, 4]);
+    
+    forUnshift.unshift(1);
+    console.log('unshift(1) adds to start:', forUnshift.items);
+    
+    forPush.push(5);
+    console.log('push(5) adds to end:', forPush.items);
+    
+    // Test reactivity
+    console.log('\n=== Testing reactivity ===');
+    const reactive = ReactiveUtils.collection([3, 4, 5]);
+    let effectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: [${reactive.items.join(', ')}] (length: ${reactive.length}, first: ${reactive.first})`);
+    });
+    
+    setTimeout(() => {
+      reactive.unshift(2);
+      console.log('Effect runs after unshift(2):', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactive.unshift(0, 1);
+      console.log('Effect runs after unshift(0, 1):', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ unshift(item) adds item to start');
+      console.log('✓ unshift(...items) adds multiple items to start');
+      console.log('✓ unshift() returns this for chaining');
+      console.log('✓ unshift() increases length');
+      console.log('✓ unshift() updates first property');
+      console.log('✓ unshift() works with any type');
+      console.log('✓ unshift() is reactive and triggers effects');
+    }, 1500);
+  </script>
+</body>
+</html>

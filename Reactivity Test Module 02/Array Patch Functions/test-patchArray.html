@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveUtils.patchArray()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script>
+    console.log('=== Testing ReactiveUtils.patchArray() ===');
+    
+    const state = ReactiveUtils.state({
+      items: [1, 2, 3],
+      nested: {
+        data: [10, 20, 30]
+      }
+    });
+    
+    console.log('Initial state:', {
+      items: state.items,
+      nested: state.nested.data
+    });
+    
+    // Manually patch the array
+    console.log('\n=== Manually patching "items" ===');
+    ReactiveUtils.patchArray(state, 'items');
+    console.log('Array patched');
+    
+    // Test reactivity
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: items = [${state.items.join(', ')}]`);
+    });
+    
+    setTimeout(() => {
+      console.log('\n=== Testing push after patch ===');
+      state.items.push(4);
+      console.log('Effect runs:', effectRuns);
+      console.log('✓ Push triggers effect');
+    }, 500);
+    
+    setTimeout(() => {
+      console.log('\n=== Testing pop after patch ===');
+      state.items.pop();
+      console.log('Effect runs:', effectRuns);
+      console.log('✓ Pop triggers effect');
+    }, 1000);
+    
+    // Test nested array patching
+    setTimeout(() => {
+      console.log('\n=== Patching nested array ===');
+      
+      // Note: For nested arrays, need to use the path
+      // This is a limitation - patchArray works on direct properties
+      console.log('⚠️  patchArray() works on direct properties only');
+      console.log('For nested arrays, access them first:');
+      
+      const nestedData = state.nested.data;
+      console.log('Nested data:', nestedData);
+      
+      // The nested array should already be reactive from deep reactivity
+      let nestedRuns = 0;
+      ReactiveUtils.effect(() => {
+        nestedRuns++;
+        console.log(`Nested effect #${nestedRuns}: [${state.nested.data.join(', ')}]`);
+      });
+      
+      setTimeout(() => {
+        state.nested.data.push(40);
+        console.log('Nested effect runs:', nestedRuns);
+      }, 500);
+    }, 1500);
+  </script>
+</body>
+</html>

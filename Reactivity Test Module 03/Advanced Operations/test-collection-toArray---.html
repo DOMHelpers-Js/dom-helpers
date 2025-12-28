@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.toArray()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection.toArray() ===');
+    
+    // Basic toArray
+    console.log('\n=== Basic toArray ===');
+    const collection = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    const array = collection.toArray();
+    console.log('collection.items:', collection.items);
+    console.log('toArray():', array);
+    console.log('Is array:', Array.isArray(array));
+    
+    // toArray creates a copy
+    console.log('\n=== toArray creates a copy ===');
+    const original = ReactiveUtils.collection([1, 2, 3]);
+    const copy = original.toArray();
+    console.log('Original:', original.items);
+    console.log('Copy:', copy);
+    console.log('Same reference:', copy === original.items);
+    console.log('✓ Returns a new array (not a reference)');
+    
+    // Modifying copy doesn't affect collection
+    console.log('\n=== Modifying copy doesn\'t affect collection ===');
+    const source = ReactiveUtils.collection([1, 2, 3]);
+    const arr = source.toArray();
+    console.log('Before modify copy:');
+    console.log('  collection:', source.items);
+    console.log('  array:', arr);
+    
+    arr.push(4);
+    arr[0] = 100;
+    console.log('After modify copy:');
+    console.log('  collection:', source.items);
+    console.log('  array:', arr);
+    console.log('✓ Collection unchanged');
+    
+    // With objects (shallow copy)
+    console.log('\n=== With objects (shallow copy) ===');
+    const todos = ReactiveUtils.collection([
+      { id: 1, text: 'Task 1' },
+      { id: 2, text: 'Task 2' }
+    ]);
+    const todosArray = todos.toArray();
+    console.log('Collection:', todos.items);
+    console.log('Array:', todosArray);
+    console.log('Object reference same:', todosArray[0] === todos.items[0]);
+    console.log('✓ Shallow copy (object references maintained)');
+    
+    // Empty collection
+    console.log('\n=== Empty collection ===');
+    const empty = ReactiveUtils.collection();
+    const emptyArray = empty.toArray();
+    console.log('toArray() on empty:', emptyArray);
+    console.log('Is array:', Array.isArray(emptyArray));
+    console.log('Length:', emptyArray.length);
+    
+    // Use with array methods
+    console.log('\n=== Use with array methods ===');
+    const nums = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    const numsArray = nums.toArray();
+    
+    console.log('Original:', numsArray);
+    console.log('Doubled:', numsArray.map(n => n * 2));
+    console.log('Filtered:', numsArray.filter(n => n > 2));
+    console.log('Sum:', numsArray.reduce((a, b) => a + b, 0));
+    
+    // toArray for serialization
+    console.log('\n=== toArray for serialization ===');
+    const data = ReactiveUtils.collection([
+      { id: 1, name: 'Alice' },
+      { id: 2, name: 'Bob' }
+    ]);
+    const json = JSON.stringify(data.toArray());
+    console.log('JSON:', json);
+    
+    const parsed = JSON.parse(json);
+    console.log('Parsed:', parsed);
+    console.log('Is array:', Array.isArray(parsed));
+    
+    // toArray vs items
+    console.log('\n=== toArray() vs .items ===');
+    const compare = ReactiveUtils.collection([1, 2, 3]);
+    
+    console.log('Accessing items directly:');
+    console.log('  compare.items:', compare.items);
+    console.log('  Is reactive:', !!compare.items.__patched);
+    
+    console.log('\nUsing toArray():');
+    console.log('  compare.toArray():', compare.toArray());
+    console.log('  Is reactive:', !!compare.toArray().__patched);
+    console.log('✓ toArray() returns plain array');
+    
+    // Multiple calls return different arrays
+    console.log('\n=== Multiple calls return different arrays ===');
+    const multi = ReactiveUtils.collection([1, 2, 3]);
+    const array1 = multi.toArray();
+    const array2 = multi.toArray();
+    console.log('First call:', array1);
+    console.log('Second call:', array2);
+    console.log('Same reference:', array1 === array2);
+    console.log('✓ Each call creates a new array');
+    
+    // After modifications
+    console.log('\n=== After modifications ===');
+    const modified = ReactiveUtils.collection([1, 2, 3]);
+    console.log('Initial toArray():', modified.toArray());
+    
+    modified.add(4);
+    console.log('After add(4):', modified.toArray());
+    
+    modified.remove(2);
+    console.log('After remove(2):', modified.toArray());
+    
+    modified.reset([10, 20]);
+    console.log('After reset([10, 20]):', modified.toArray());
+    
+    console.log('\n=== Summary ===');
+    console.log('✓ toArray() returns a plain array copy');
+    console.log('✓ toArray() creates a new array (not a reference)');
+    console.log('✓ Modifying result doesn\'t affect collection');
+    console.log('✓ toArray() creates shallow copy (object refs maintained)');
+    console.log('✓ toArray() works on empty collections');
+    console.log('✓ toArray() useful for serialization');
+    console.log('✓ Each toArray() call creates a new array');
+  </script>
+</body>
+</html>

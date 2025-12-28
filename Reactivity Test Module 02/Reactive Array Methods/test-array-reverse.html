@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Array reverse()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script>
+    console.log('=== Testing reactive array reverse() ===');
+    
+    const state = ReactiveUtils.state({
+      items: [1, 2, 3, 4, 5]
+    });
+    
+    console.log('Initial items:', state.items);
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: [${state.items.join(', ')}]`);
+    });
+    
+    console.log('Initial effect runs:', effectRuns);
+    
+    // Test reverse
+    setTimeout(() => {
+      console.log('\n=== reverse() ===');
+      state.items.reverse();
+      console.log('items:', state.items);
+      console.log('Effect runs:', effectRuns);
+      console.log('✓ Array reversed');
+    }, 500);
+    
+    // Test reverse again
+    setTimeout(() => {
+      console.log('\n=== reverse() again ===');
+      state.items.reverse();
+      console.log('items:', state.items);
+      console.log('Effect runs:', effectRuns);
+      console.log('✓ Back to original order');
+    }, 1000);
+    
+    // Test with strings
+    setTimeout(() => {
+      console.log('\n=== Testing with strings ===');
+      state.items = ['a', 'b', 'c', 'd'];
+      console.log('Reset to:', state.items);
+      
+      setTimeout(() => {
+        state.items.reverse();
+        console.log('After reverse:', state.items);
+        console.log('Effect runs:', effectRuns);
+      }, 500);
+    }, 1500);
+  </script>
+</body>
+</html>

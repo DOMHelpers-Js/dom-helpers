@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.toggleAll()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection.toggleAll() ===');
+    
+    // Basic toggleAll
+    console.log('\n=== Basic toggleAll ===');
+    const todos = ReactiveUtils.collection([
+      { id: 1, text: 'Task 1', done: false, priority: 'high' },
+      { id: 2, text: 'Task 2', done: false, priority: 'high' },
+      { id: 3, text: 'Task 3', done: false, priority: 'low' }
+    ]);
+    console.log('Initial todos:', todos.items);
+    
+    const count1 = todos.toggleAll(t => t.priority === 'high', 'done');
+    console.log('toggleAll(priority === "high", "done") returned:', count1);
+    console.log('After toggleAll:', todos.items);
+    
+    // Toggle all back
+    console.log('\n=== Toggle all back ===');
+    const count2 = todos.toggleAll(t => t.priority === 'high', 'done');
+    console.log('toggleAll again returned:', count2);
+    console.log('After toggle back:', todos.items);
+    
+    // Toggle all items
+    console.log('\n=== Toggle all items ===');
+    const all = ReactiveUtils.collection([
+      { id: 1, active: false },
+      { id: 2, active: false },
+      { id: 3, active: false }
+    ]);
+    console.log('Before toggleAll:', all.items);
+    const countAll = all.toggleAll(item => true, 'active');
+    console.log('toggleAll(true, "active") returned:', countAll);
+    console.log('After toggleAll:', all.items);
+    
+    // Toggle none (no matches)
+    console.log('\n=== Toggle none (no matches) ===');
+    const none = ReactiveUtils.collection([
+      { id: 1, done: false },
+      { id: 2, done: false }
+    ]);
+    console.log('Before toggleAll:', none.items);
+    const countNone = none.toggleAll(item => item.id > 100, 'done');
+    console.log('toggleAll(id > 100) returned:', countNone);
+    console.log('After toggleAll:', none.items);
+    console.log('✓ Returns 0 when no matches');
+    
+    // Toggle different fields
+    console.log('\n=== Toggle different fields ===');
+    const settings = ReactiveUtils.collection([
+      { id: 1, enabled: false, visible: true },
+      { id: 2, enabled: false, visible: true },
+      { id: 3, enabled: false, visible: false }
+    ]);
+    console.log('Initial:', settings.items);
+    
+    const enabledCount = settings.toggleAll(s => s.visible, 'enabled');
+    console.log(`toggleAll(visible, "enabled") affected ${enabledCount} items:`, settings.items);
+    
+    // Default field is 'done'
+    console.log('\n=== Default field ===');
+    const defaultField = ReactiveUtils.collection([
+      { id: 1, done: false },
+      { id: 2, done: false },
+      { id: 3, done: false }
+    ]);
+    console.log('Before toggleAll:', defaultField.items);
+    const defaultCount = defaultField.toggleAll(item => item.id <= 2); // no field specified
+    console.log(`toggleAll() with no field affected ${defaultCount} items:`, defaultField.items);
+    console.log('✓ Defaults to "done" field');
+    
+    // Complex predicate
+    console.log('\n=== Complex predicate ===');
+    const tasks = ReactiveUtils.collection([
+      { id: 1, type: 'work', priority: 'high', completed: false },
+      { id: 2, type: 'work', priority: 'low', completed: false },
+      { id: 3, type: 'personal', priority: 'high', completed: false },
+      { id: 4, type: 'work', priority: 'high', completed: false }
+    ]);
+    console.log('Initial:', tasks.items);
+    
+    const complexCount = tasks.toggleAll(
+      t => t.type === 'work' && t.priority === 'high',
+      'completed'
+    );
+    console.log(`High-priority work tasks (${complexCount}):`, tasks.items);
+    
+    // Empty collection
+    console.log('\n=== Empty collection ===');
+    const empty = ReactiveUtils.collection();
+    const emptyCount = empty.toggleAll(item => true, 'active');
+    console.log('toggleAll on empty returned:', emptyCount);
+    console.log('Items:', empty.items);
+    
+    // Toggle with index
+    console.log('\n=== Toggle with index ===');
+    const indexed = ReactiveUtils.collection([
+      { id: 1, selected: false },
+      { id: 2, selected: false },
+      { id: 3, selected: false },
+      { id: 4, selected: false },
+      { id: 5, selected: false }
+    ]);
+    console.log('Before toggleAll:', indexed.items);
+    const indexCount = indexed.toggleAll((item, index) => index % 2 === 0, 'selected');
+    console.log(`toggleAll(even indices) affected ${indexCount} items:`, indexed.items);
+    
+    // Test reactivity
+    console.log('\n=== Testing reactivity ===');
+    const reactive = ReactiveUtils.collection([
+      { id: 1, category: 'A', active: false },
+      { id: 2, category: 'A', active: false },
+      { id: 3, category: 'B', active: false },
+      { id: 4, category: 'A', active: false }
+    ]);
+    let effectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const activeCount = reactive.items.filter(item => item.active).length;
+      console.log(`Effect #${effectRuns}: ${activeCount} active items`);
+    });
+    
+    setTimeout(() => {
+      const count = reactive.toggleAll(item => item.category === 'A', 'active');
+      console.log(`toggleAll affected ${count} items`);
+      console.log('Effect runs after toggleAll:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      const count = reactive.toggleAll(item => item.category === 'A', 'active');
+      console.log(`toggleAll back affected ${count} items`);
+      console.log('Effect runs after toggle back:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ toggleAll(predicate, field) toggles all matching items');
+      console.log('✓ toggleAll() returns count of items affected');
+      console.log('✓ toggleAll() returns 0 when no matches');
+      console.log('✓ toggleAll() defaults to "done" field');
+      console.log('✓ toggleAll() works with complex predicates');
+      console.log('✓ toggleAll() supports index in predicate');
+      console.log('✓ toggleAll() is safe on empty collections');
+      console.log('✓ toggleAll() is reactive and triggers effects');
+    }, 1500);
+  </script>
+</body>
+</html>

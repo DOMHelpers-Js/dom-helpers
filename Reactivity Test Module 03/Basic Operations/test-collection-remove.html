@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.remove()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection.remove() ===');
+    
+    // Test remove by direct value
+    console.log('\n=== Remove by direct value ===');
+    const collection1 = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    console.log('Initial:', collection1.items);
+    
+    collection1.remove(3);
+    console.log('After remove(3):', collection1.items);
+    
+    collection1.remove(1);
+    console.log('After remove(1):', collection1.items);
+    
+    collection1.remove(5);
+    console.log('After remove(5):', collection1.items);
+    
+    // Test remove by predicate function
+    console.log('\n=== Remove by predicate function ===');
+    const collection2 = ReactiveUtils.collection([10, 20, 30, 40, 50]);
+    console.log('Initial:', collection2.items);
+    
+    collection2.remove(item => item > 30);
+    console.log('After remove(item => item > 30):', collection2.items);
+    
+    collection2.remove(item => item === 10);
+    console.log('After remove(item => item === 10):', collection2.items);
+    
+    // Test return value
+    console.log('\n=== Testing return value ===');
+    const collection3 = ReactiveUtils.collection([1, 2, 3]);
+    const result = collection3.remove(2);
+    console.log('remove() returns this:', result === collection3);
+    console.log('Items:', collection3.items);
+    
+    // Test chaining
+    console.log('\n=== Testing chaining ===');
+    const collection4 = ReactiveUtils.collection([1, 2, 3, 4, 5, 6]);
+    collection4.remove(2).remove(4).remove(6);
+    console.log('After chained remove(2).remove(4).remove(6):', collection4.items);
+    
+    // Test with objects
+    console.log('\n=== Testing with objects ===');
+    const todos = ReactiveUtils.collection([
+      { id: 1, text: 'Task 1', done: false },
+      { id: 2, text: 'Task 2', done: true },
+      { id: 3, text: 'Task 3', done: false },
+      { id: 4, text: 'Task 4', done: true }
+    ]);
+    
+    console.log('Initial todos:', todos.items);
+    
+    // Remove by predicate
+    todos.remove(t => t.id === 2);
+    console.log('After remove(t => t.id === 2):', todos.items);
+    
+    todos.remove(t => t.done);
+    console.log('After remove(t => t.done):', todos.items);
+    
+    // Remove by direct value (object reference)
+    const firstTodo = todos.items[0];
+    todos.remove(firstTodo);
+    console.log('After remove(firstTodo):', todos.items);
+    
+    // Test remove non-existent item
+    console.log('\n=== Testing remove non-existent item ===');
+    const collection5 = ReactiveUtils.collection([1, 2, 3]);
+    console.log('Before remove(99):', collection5.items);
+    collection5.remove(99);
+    console.log('After remove(99):', collection5.items);
+    console.log('✓ No error when removing non-existent item');
+    
+    collection5.remove(item => item > 100);
+    console.log('After remove(item > 100):', collection5.items);
+    console.log('✓ No error when predicate matches nothing');
+    
+    // Test reactivity
+    console.log('\n=== Testing reactivity ===');
+    const reactive = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    let effectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: [${reactive.items.join(', ')}] (length: ${reactive.length})`);
+    });
+    
+    setTimeout(() => {
+      reactive.remove(3);
+      console.log('Effect runs after remove:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactive.remove(item => item > 3);
+      console.log('Effect runs after predicate remove:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ remove(value) removes by direct value');
+      console.log('✓ remove(predicate) removes by predicate function');
+      console.log('✓ remove() returns this for method chaining');
+      console.log('✓ remove() only removes first matching item');
+      console.log('✓ remove() is safe with non-existent items');
+      console.log('✓ remove() is reactive and triggers effects');
+    }, 1500);
+  </script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.update()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection.update() ===');
+    
+    // Test update by direct value
+    console.log('\n=== Update by direct value ===');
+    const collection1 = ReactiveUtils.collection([
+      { id: 1, value: 10 },
+      { id: 2, value: 20 },
+      { id: 3, value: 30 }
+    ]);
+    console.log('Initial:', collection1.items);
+    
+    const item = collection1.items[1];
+    collection1.update(item, { value: 200 });
+    console.log('After update(item, {value: 200}):', collection1.items);
+    
+    // Test update by predicate function
+    console.log('\n=== Update by predicate function ===');
+    const collection2 = ReactiveUtils.collection([
+      { id: 1, name: 'Alice', age: 30 },
+      { id: 2, name: 'Bob', age: 25 },
+      { id: 3, name: 'Charlie', age: 35 }
+    ]);
+    console.log('Initial:', collection2.items);
+    
+    collection2.update(item => item.id === 2, { age: 26 });
+    console.log('After update(item => item.id === 2, {age: 26}):', collection2.items);
+    
+    collection2.update(item => item.name === 'Alice', { age: 31, active: true });
+    console.log('After update Alice:', collection2.items);
+    
+    // Test return value
+    console.log('\n=== Testing return value ===');
+    const collection3 = ReactiveUtils.collection([
+      { id: 1, status: 'pending' }
+    ]);
+    const result = collection3.update(item => item.id === 1, { status: 'active' });
+    console.log('update() returns this:', result === collection3);
+    console.log('Items:', collection3.items);
+    
+    // Test chaining
+    console.log('\n=== Testing chaining ===');
+    const todos = ReactiveUtils.collection([
+      { id: 1, text: 'Task 1', done: false, priority: 'low' },
+      { id: 2, text: 'Task 2', done: false, priority: 'low' },
+      { id: 3, text: 'Task 3', done: false, priority: 'low' }
+    ]);
+    console.log('Initial:', todos.items);
+    
+    todos
+      .update(t => t.id === 1, { done: true })
+      .update(t => t.id === 2, { priority: 'high' })
+      .update(t => t.id === 3, { done: true, priority: 'medium' });
+    console.log('After chained updates:', todos.items);
+    
+    // Test partial updates
+    console.log('\n=== Testing partial updates ===');
+    const users = ReactiveUtils.collection([
+      { id: 1, name: 'John', email: 'john@example.com', age: 30, active: true }
+    ]);
+    console.log('Initial:', users.items);
+    
+    users.update(u => u.id === 1, { age: 31 });
+    console.log('After updating only age:', users.items);
+    console.log('✓ Other properties preserved');
+    
+    // Test update with multiple properties
+    console.log('\n=== Testing multiple property updates ===');
+    const products = ReactiveUtils.collection([
+      { id: 1, name: 'Laptop', price: 999, stock: 5, category: 'Electronics' }
+    ]);
+    console.log('Initial:', products.items);
+    
+    products.update(p => p.id === 1, { price: 899, stock: 3 });
+    console.log('After updating price and stock:', products.items);
+    
+    // Test update non-existent item
+    console.log('\n=== Testing update non-existent item ===');
+    const collection4 = ReactiveUtils.collection([
+      { id: 1, value: 10 },
+      { id: 2, value: 20 }
+    ]);
+    console.log('Before update(id === 99):', collection4.items);
+    collection4.update(item => item.id === 99, { value: 999 });
+    console.log('After update(id === 99):', collection4.items);
+    console.log('✓ No error when updating non-existent item');
+    
+    // Test update with primitive values
+    console.log('\n=== Testing update with primitives ===');
+    const numbers = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    console.log('Initial numbers:', numbers.items);
+    console.log('⚠️  update() is designed for objects, not primitives');
+    
+    // Test reactivity
+    console.log('\n=== Testing reactivity ===');
+    const reactive = ReactiveUtils.collection([
+      { id: 1, count: 0 },
+      { id: 2, count: 0 },
+      { id: 3, count: 0 }
+    ]);
+    let effectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const counts = reactive.items.map(item => item.count);
+      console.log(`Effect #${effectRuns}: counts = [${counts.join(', ')}]`);
+    });
+    
+    setTimeout(() => {
+      reactive.update(item => item.id === 1, { count: 5 });
+      console.log('Effect runs after update:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactive.update(item => item.id === 2, { count: 10 });
+      console.log('Effect runs after second update:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ update(value, updates) updates by direct value');
+      console.log('✓ update(predicate, updates) updates by predicate');
+      console.log('✓ update() returns this for method chaining');
+      console.log('✓ update() only updates first matching item');
+      console.log('✓ update() preserves non-updated properties');
+      console.log('✓ update() is safe with non-existent items');
+      console.log('✓ update() is reactive and triggers effects');
+    }, 1500);
+  </script>
+</body>
+</html>

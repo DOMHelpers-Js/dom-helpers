@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Array fill()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script>
+    console.log('=== Testing reactive array fill() ===');
+    
+    const state = ReactiveUtils.state({
+      items: [1, 2, 3, 4, 5]
+    });
+    
+    console.log('Initial items:', state.items);
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: [${state.items.join(', ')}]`);
+    });
+    
+    // Test fill all
+    setTimeout(() => {
+      console.log('\n=== fill(0) - fill all with 0 ===');
+      state.items.fill(0);
+      console.log('items:', state.items);
+      console.log('Effect runs:', effectRuns);
+    }, 500);
+    
+    // Test fill with start
+    setTimeout(() => {
+      console.log('\n=== fill(7, 2) - fill from index 2 ===');
+      state.items = [1, 2, 3, 4, 5];
+      setTimeout(() => {
+        state.items.fill(7, 2);
+        console.log('items:', state.items); // [1, 2, 7, 7, 7]
+        console.log('Effect runs:', effectRuns);
+      }, 500);
+    }, 1000);
+    
+    // Test fill with start and end
+    setTimeout(() => {
+      console.log('\n=== fill(9, 1, 4) - fill from index 1 to 4 ===');
+      state.items = [1, 2, 3, 4, 5];
+      setTimeout(() => {
+        state.items.fill(9, 1, 4);
+        console.log('items:', state.items); // [1, 9, 9, 9, 5]
+        console.log('Effect runs:', effectRuns);
+        console.log('✓ Filled range [1, 4)');
+      }, 500);
+    }, 2000);
+    
+    // Test fill with negative indices
+    setTimeout(() => {
+      console.log('\n=== fill(0, -2) - fill last 2 items ===');
+      state.items = [1, 2, 3, 4, 5];
+      setTimeout(() => {
+        state.items.fill(0, -2);
+        console.log('items:', state.items); // [1, 2, 3, 0, 0]
+        console.log('Effect runs:', effectRuns);
+      }, 500);
+    }, 3000);
+  </script>
+</body>
+</html>

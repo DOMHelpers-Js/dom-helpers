@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.forEach()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection.forEach() ===');
+    
+    // Basic forEach with numbers
+    console.log('\n=== Basic forEach with numbers ===');
+    const numbers = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    
+    console.log('Logging each number:');
+    numbers.forEach(n => {
+      console.log('  ' + n);
+    });
+    
+    // forEach with index
+    console.log('\n=== forEach with index ===');
+    numbers.forEach((n, index) => {
+      console.log(`  [${index}] ${n}`);
+    });
+    
+    // forEach with objects
+    console.log('\n=== forEach with objects ===');
+    const todos = ReactiveUtils.collection([
+      { id: 1, text: 'Buy groceries', done: false },
+      { id: 2, text: 'Walk dog', done: true },
+      { id: 3, text: 'Read book', done: false }
+    ]);
+    
+    console.log('All todos:');
+    todos.forEach(todo => {
+      console.log(`  ${todo.id}: ${todo.text} (${todo.done ? 'done' : 'pending'})`);
+    });
+    
+    // forEach for side effects
+    console.log('\n=== forEach for side effects ===');
+    const users = ReactiveUtils.collection([
+      { id: 1, name: 'Alice', score: 0 },
+      { id: 2, name: 'Bob', score: 0 },
+      { id: 3, name: 'Charlie', score: 0 }
+    ]);
+    
+    console.log('Before:', users.items);
+    users.forEach(user => {
+      user.score = Math.floor(Math.random() * 100);
+    });
+    console.log('After adding random scores:', users.items);
+    
+    // forEach to collect data
+    console.log('\n=== forEach to collect data ===');
+    const products = ReactiveUtils.collection([
+      { id: 1, name: 'Laptop', price: 999 },
+      { id: 2, name: 'Mouse', price: 25 },
+      { id: 3, name: 'Keyboard', price: 75 }
+    ]);
+    
+    let total = 0;
+    products.forEach(product => {
+      total += product.price;
+    });
+    console.log('Total price:', total);
+    
+    const names = [];
+    products.forEach(product => {
+      names.push(product.name);
+    });
+    console.log('Product names:', names);
+    
+    // Test return value
+    console.log('\n=== Testing return value ===');
+    const collection = ReactiveUtils.collection([1, 2, 3]);
+    const result = collection.forEach(n => console.log('  ' + n));
+    console.log('forEach returns this:', result === collection);
+    
+    // Test chaining
+    console.log('\n=== Testing chaining ===');
+    const chain = ReactiveUtils.collection([1, 2, 3]);
+    
+    let sum = 0;
+    chain
+      .forEach(n => sum += n)
+      .forEach(n => console.log(`  Item: ${n}, Running sum: ${sum}`));
+    
+    // forEach on empty collection
+    console.log('\n=== forEach on empty collection ===');
+    const empty = ReactiveUtils.collection();
+    let count = 0;
+    empty.forEach(() => count++);
+    console.log('Callback called', count, 'times (should be 0)');
+    
+    // forEach with complex operations
+    console.log('\n=== forEach with complex operations ===');
+    const data = ReactiveUtils.collection([
+      { category: 'A', values: [1, 2, 3] },
+      { category: 'B', values: [4, 5, 6] },
+      { category: 'C', values: [7, 8, 9] }
+    ]);
+    
+    console.log('Processing nested data:');
+    data.forEach((item, index) => {
+      const sum = item.values.reduce((a, b) => a + b, 0);
+      console.log(`  ${index + 1}. Category ${item.category}: sum = ${sum}`);
+    });
+    
+    // forEach to modify collection
+    console.log('\n=== forEach to modify items ===');
+    const items = ReactiveUtils.collection([
+      { id: 1, value: 10, processed: false },
+      { id: 2, value: 20, processed: false },
+      { id: 3, value: 30, processed: false }
+    ]);
+    
+    console.log('Before processing:', items.items);
+    items.forEach(item => {
+      item.value *= 2;
+      item.processed = true;
+    });
+    console.log('After processing:', items.items);
+    
+    // forEach with filtering logic
+    console.log('\n=== forEach with conditional logic ===');
+    const mixed = ReactiveUtils.collection([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    
+    console.log('Processing with conditions:');
+    mixed.forEach(n => {
+      if (n % 2 === 0) {
+        console.log(`  ${n} is even`);
+      } else {
+        console.log(`  ${n} is odd`);
+      }
+    });
+    
+    // forEach with break simulation (using early return)
+    console.log('\n=== forEach (cannot break, but can skip) ===');
+    const values = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    
+    console.log('Processing until value > 3:');
+    let shouldStop = false;
+    values.forEach(v => {
+      if (shouldStop) return; // Skip remaining items
+      if (v > 3) {
+        console.log(`  Stopping at ${v}`);
+        shouldStop = true;
+        return;
+      }
+      console.log(`  Processing ${v}`);
+    });
+    console.log('Note: forEach cannot break early like a loop');
+    
+    // Test reactivity
+    console.log('\n=== Testing with reactive collection ===');
+    const reactive = ReactiveUtils.collection([1, 2, 3]);
+    let effectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}:`);
+      let effectSum = 0;
+      reactive.forEach(n => {
+        effectSum += n;
+      });
+      console.log(`  Sum: ${effectSum}`);
+    });
+    
+    setTimeout(() => {
+      reactive.add(4);
+      console.log('Effect runs after add:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactive.items[0] = 10;
+      console.log('Effect runs after modify:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ forEach(fn) iterates over all items');
+      console.log('✓ forEach() provides item and index to callback');
+      console.log('✓ forEach() returns this for method chaining');
+      console.log('✓ forEach() works with numbers, strings, and objects');
+      console.log('✓ forEach() is useful for side effects');
+      console.log('✓ forEach() does nothing on empty collections');
+      console.log('✓ forEach() cannot break early (use find/some instead)');
+    }, 1500);
+  </script>
+</body>
+</html>

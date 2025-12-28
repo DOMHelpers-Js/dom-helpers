@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.updateWhere()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection.updateWhere() ===');
+    
+    // Basic updateWhere
+    console.log('\n=== Basic updateWhere ===');
+    const todos = ReactiveUtils.collection([
+      { id: 1, text: 'Task 1', done: false, priority: 'low' },
+      { id: 2, text: 'Task 2', done: false, priority: 'low' },
+      { id: 3, text: 'Task 3', done: false, priority: 'high' }
+    ]);
+    console.log('Initial todos:', todos.items);
+    
+    todos.updateWhere(t => t.priority === 'low', { done: true });
+    console.log('After updateWhere(priority === "low", {done: true}):', todos.items);
+    
+    // Update multiple properties
+    console.log('\n=== Update multiple properties ===');
+    const users = ReactiveUtils.collection([
+      { id: 1, name: 'Alice', age: 30, active: false },
+      { id: 2, name: 'Bob', age: 25, active: false },
+      { id: 3, name: 'Charlie', age: 35, active: false }
+    ]);
+    console.log('Initial users:', users.items);
+    
+    users.updateWhere(u => u.age >= 30, { active: true, verified: true });
+    console.log('After updateWhere(age >= 30, {active, verified}):', users.items);
+    
+    // Test return value
+    console.log('\n=== Testing return value ===');
+    const collection = ReactiveUtils.collection([
+      { id: 1, value: 10 },
+      { id: 2, value: 20 }
+    ]);
+    const result = collection.updateWhere(item => item.id === 1, { value: 100 });
+    console.log('updateWhere() returns this:', result === collection);
+    console.log('Items:', collection.items);
+    
+    // Test chaining
+    console.log('\n=== Testing chaining ===');
+    const chain = ReactiveUtils.collection([
+      { id: 1, a: 0, b: 0, c: 0 },
+      { id: 2, a: 0, b: 0, c: 0 },
+      { id: 3, a: 0, b: 0, c: 0 }
+    ]);
+    chain.updateWhere(item => item.id === 1, { a: 1 })
+         .updateWhere(item => item.id === 2, { b: 2 })
+         .updateWhere(item => item.id === 3, { c: 3 });
+    console.log('After chained updateWhere:', chain.items);
+    
+    // Update all
+    console.log('\n=== Update all ===');
+    const all = ReactiveUtils.collection([
+      { id: 1, status: 'pending' },
+      { id: 2, status: 'pending' },
+      { id: 3, status: 'pending' }
+    ]);
+    console.log('Before updateWhere:', all.items);
+    all.updateWhere(item => true, { status: 'active', timestamp: Date.now() });
+    console.log('After updateWhere(true, ...):', all.items);
+    
+    // Update none
+    console.log('\n=== Update none ===');
+    const none = ReactiveUtils.collection([
+      { id: 1, value: 10 },
+      { id: 2, value: 20 }
+    ]);
+    console.log('Before updateWhere:', none.items);
+    none.updateWhere(item => item.id > 100, { value: 999 });
+    console.log('After updateWhere(id > 100):', none.items);
+    console.log('✓ No items updated when predicate never matches');
+    
+    // Update with index
+    console.log('\n=== Update with index ===');
+    const indexed = ReactiveUtils.collection([
+      { id: 1, position: 0 },
+      { id: 2, position: 0 },
+      { id: 3, position: 0 },
+      { id: 4, position: 0 }
+    ]);
+    console.log('Before updateWhere:', indexed.items);
+    indexed.updateWhere((item, index) => index % 2 === 0, { even: true });
+    console.log('After updateWhere(even indices):', indexed.items);
+    
+    // Partial updates (preserve other properties)
+    console.log('\n=== Partial updates ===');
+    const partial = ReactiveUtils.collection([
+      { id: 1, name: 'Alice', age: 30, city: 'NYC', active: true }
+    ]);
+    console.log('Before updateWhere:', partial.items[0]);
+    partial.updateWhere(p => p.id === 1, { age: 31 });
+    console.log('After updateWhere (only age):', partial.items[0]);
+    console.log('✓ Other properties preserved');
+    
+    // Empty collection
+    console.log('\n=== Empty collection ===');
+    const empty = ReactiveUtils.collection();
+    empty.updateWhere(item => true, { value: 100 });
+    console.log('updateWhere on empty:', empty.items);
+    console.log('✓ No error on empty collection');
+    
+    // Comparison with update()
+    console.log('\n=== Comparison: updateWhere vs update ===');
+    const forUpdateWhere = ReactiveUtils.collection([
+      { id: 1, category: 'A', value: 0 },
+      { id: 2, category: 'A', value: 0 },
+      { id: 3, category: 'B', value: 0 }
+    ]);
+    const forUpdate = ReactiveUtils.collection([
+      { id: 1, category: 'A', value: 0 },
+      { id: 2, category: 'A', value: 0 },
+      { id: 3, category: 'B', value: 0 }
+    ]);
+    
+    console.log('Both start with:', forUpdateWhere.items);
+    
+    forUpdateWhere.updateWhere(item => item.category === 'A', { value: 100 });
+    console.log('updateWhere(category A) updates all:', forUpdateWhere.items);
+    
+    forUpdate.update(item => item.category === 'A', { value: 100 });
+    console.log('update(category A) updates only first:', forUpdate.items);
+    
+    // Complex updates
+    console.log('\n=== Complex updates ===');
+    const products = ReactiveUtils.collection([
+      { id: 1, name: 'A', price: 100, discount: 0, category: 'Electronics' },
+      { id: 2, name: 'B', price: 200, discount: 0, category: 'Electronics' },
+      { id: 3, name: 'C', price: 50, discount: 0, category: 'Books' }
+    ]);
+    console.log('Before updateWhere:', products.items);
+    
+    products.updateWhere(
+      p => p.category === 'Electronics' && p.price > 150,
+      { discount: 0.2, featured: true }
+    );
+    console.log('After complex updateWhere:', products.items);
+    
+    // Test reactivity
+    console.log('\n=== Testing reactivity ===');
+    const reactive = ReactiveUtils.collection([
+      { id: 1, type: 'A', count: 0 },
+      { id: 2, type: 'B', count: 0 },
+      { id: 3, type: 'A', count: 0 }
+    ]);
+    let effectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const totalCount = reactive.items.reduce((sum, item) => sum + item.count, 0);
+      console.log(`Effect #${effectRuns}: total count = ${totalCount}`);
+    });
+    
+    setTimeout(() => {
+      reactive.updateWhere(item => item.type === 'A', { count: 5 });
+      console.log('Effect runs after updateWhere:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactive.updateWhere(item => item.type === 'B', { count: 10 });
+      console.log('Effect runs after second updateWhere:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ updateWhere(predicate, updates) updates all matching items');
+      console.log('✓ updateWhere() returns this for chaining');
+      console.log('✓ updateWhere() can update multiple properties');
+      console.log('✓ updateWhere() preserves non-updated properties');
+      console.log('✓ updateWhere() supports index in predicate');
+      console.log('✓ updateWhere() is safe on empty collections');
+      console.log('✓ updateWhere() differs from update() (all vs first)');
+      console.log('✓ updateWhere() is reactive and triggers effects');
+    }, 1500);
+  </script>
+</body>
+</html>

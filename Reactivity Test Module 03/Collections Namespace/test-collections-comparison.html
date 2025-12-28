@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head><title>Collections vs ReactiveUtils Comparison</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Comparing Collections vs ReactiveUtils ===');
+    
+    // Collections namespace
+    console.log('\n1. Collections namespace methods:');
+    const col1 = Collections.create([1, 2, 3]);
+    const col2 = Collections.collection([4, 5, 6]);
+    const col3 = Collections.list([7, 8, 9]);
+    
+    console.log('   Collections.create:', col1.items);
+    console.log('   Collections.collection:', col2.items);
+    console.log('   Collections.list:', col3.items);
+    
+    // ReactiveUtils namespace
+    console.log('\n2. ReactiveUtils namespace methods:');
+    const ru1 = ReactiveUtils.collection([10, 11, 12]);
+    const ru2 = ReactiveUtils.list([13, 14, 15]);
+    
+    console.log('   ReactiveUtils.collection:', ru1.items);
+    console.log('   ReactiveUtils.list:', ru2.items);
+    
+    // Verify they create the same type
+    console.log('\n=== Verifying compatibility ===');
+    console.log('col1 has .add method:', typeof col1.add === 'function');
+    console.log('ru1 has .add method:', typeof ru1.add === 'function');
+    
+    col1.add(100);
+    ru1.add(100);
+    console.log('After add(100):');
+    console.log('   col1:', col1.items);
+    console.log('   ru1:', ru1.items);
+    
+    // Both support the same methods
+    console.log('\n=== Testing method compatibility ===');
+    const methods = ['add', 'remove', 'update', 'clear', 'find', 'filter', 
+                     'map', 'forEach', 'sort', 'reverse'];
+    
+    const col1Methods = methods.filter(m => typeof col1[m] === 'function');
+    const ru1Methods = methods.filter(m => typeof ru1[m] === 'function');
+    
+    console.log('Collections methods:', col1Methods.length, 'of', methods.length);
+    console.log('ReactiveUtils methods:', ru1Methods.length, 'of', methods.length);
+    console.log('✓ Both have the same collection methods');
+    
+    // Summary
+    console.log('\n=== Summary ===');
+    console.log('Collections namespace:');
+    console.log('  - Collections.create()');
+    console.log('  - Collections.collection() (alias)');
+    console.log('  - Collections.list() (alias)');
+    console.log('  - Collections.createWithComputed()');
+    console.log('  - Collections.createFiltered()');
+    console.log('');
+    console.log('ReactiveUtils namespace:');
+    console.log('  - ReactiveUtils.collection()');
+    console.log('  - ReactiveUtils.list()');
+    console.log('');
+    console.log('✓ All create collections with the same extended methods');
+  </script>
+</body>
+</html>

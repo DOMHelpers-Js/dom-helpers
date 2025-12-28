@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Collections.collection()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing Collections.collection() ===');
+    console.log('Note: This is an alias for Collections.create()');
+    
+    // Test that collection() works
+    const collection = Collections.collection([1, 2, 3]);
+    console.log('Collection created:', collection.items);
+    console.log('length:', collection.length);
+    
+    // Verify it's the same as create()
+    console.log('\n=== Verifying it works like create() ===');
+    
+    collection.add(4);
+    console.log('After add(4):', collection.items);
+    
+    collection.remove(2);
+    console.log('After remove(2):', collection.items);
+    
+    // Test all collection methods
+    console.log('\n=== Testing collection methods ===');
+    console.log('first:', collection.first);
+    console.log('last:', collection.last);
+    console.log('at(1):', collection.at(1));
+    console.log('includes(3):', collection.includes(3));
+    
+    collection.push(5);
+    console.log('After push(5):', collection.items);
+    
+    collection.reverse();
+    console.log('After reverse():', collection.items);
+    
+    collection.sort((a, b) => a - b);
+    console.log('After sort():', collection.items);
+    
+    // Test with objects
+    console.log('\n=== Testing with objects ===');
+    const users = Collections.collection([
+      { id: 1, name: 'Alice', age: 30 },
+      { id: 2, name: 'Bob', age: 25 },
+      { id: 3, name: 'Charlie', age: 35 }
+    ]);
+
+    console.log('Users:', users.items);
+    
+    users.update(u => u.id === 2, { age: 26 });
+    console.log('After updating Bob age:', users.items);
+    
+    const found = users.find(u => u.name === 'Alice');
+    console.log('Found Alice:', found);
+    
+    const names = users.map(u => u.name);
+    console.log('All names:', names);
+    
+    // Verify Collections.collection === Collections.create
+    console.log('\n=== Verifying alias ===');
+    console.log('Collections.collection === Collections.create:', 
+      Collections.collection === Collections.create);
+    console.log('✓ Both create the same type of collection');
+  </script>
+</body>
+</html>

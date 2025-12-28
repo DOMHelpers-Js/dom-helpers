@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.reset()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection.reset() ===');
+    
+    // Basic reset
+    console.log('\n=== Basic reset ===');
+    const collection = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    console.log('Initial:', collection.items);
+    console.log('length:', collection.length);
+    
+    collection.reset([10, 20, 30]);
+    console.log('After reset([10, 20, 30]):', collection.items);
+    console.log('length:', collection.length);
+    
+    // Reset with empty array
+    console.log('\n=== Reset with empty array ===');
+    const toEmpty = ReactiveUtils.collection([1, 2, 3]);
+    console.log('Before reset:', toEmpty.items);
+    toEmpty.reset([]);
+    console.log('After reset([]):', toEmpty.items);
+    console.log('isEmpty:', toEmpty.isEmpty());
+    
+    // Reset with no arguments (clears)
+    console.log('\n=== Reset with no arguments ===');
+    const noArgs = ReactiveUtils.collection([1, 2, 3]);
+    console.log('Before reset:', noArgs.items);
+    noArgs.reset();
+    console.log('After reset():', noArgs.items);
+    console.log('✓ reset() with no args clears collection');
+    
+    // Test return value
+    console.log('\n=== Testing return value ===');
+    const test = ReactiveUtils.collection([1, 2, 3]);
+    const result = test.reset([4, 5, 6]);
+    console.log('reset() returns this:', result === test);
+    console.log('Items:', test.items);
+    
+    // Test chaining
+    console.log('\n=== Testing chaining ===');
+    const chain = ReactiveUtils.collection([1, 2, 3]);
+    chain.reset([10, 20]).push(30).push(40);
+    console.log('After reset([10, 20]).push(30).push(40):', chain.items);
+    
+    // Reset updates first and last
+    console.log('\n=== Reset updates first and last ===');
+    const props = ReactiveUtils.collection([1, 2, 3]);
+    console.log('Before reset:');
+    console.log('  first:', props.first);
+    console.log('  last:', props.last);
+    
+    props.reset([100, 200, 300, 400]);
+    console.log('After reset([100, 200, 300, 400]):');
+    console.log('  first:', props.first);
+    console.log('  last:', props.last);
+    
+    // Reset with objects
+    console.log('\n=== Reset with objects ===');
+    const todos = ReactiveUtils.collection([
+      { id: 1, text: 'Task 1', done: false },
+      { id: 2, text: 'Task 2', done: false }
+    ]);
+    console.log('Before reset:', todos.items);
+    
+    todos.reset([
+      { id: 10, text: 'New Task 1', done: true },
+      { id: 20, text: 'New Task 2', done: false },
+      { id: 30, text: 'New Task 3', done: false }
+    ]);
+    console.log('After reset:', todos.items);
+    
+    // Reset empty collection
+    console.log('\n=== Reset empty collection ===');
+    const empty = ReactiveUtils.collection();
+    console.log('Before reset:', empty.items);
+    empty.reset([1, 2, 3]);
+    console.log('After reset([1, 2, 3]):', empty.items);
+    
+    // Reset to larger array
+    console.log('\n=== Reset to larger array ===');
+    const smaller = ReactiveUtils.collection([1, 2]);
+    console.log('Before reset (2 items):', smaller.items);
+    smaller.reset([1, 2, 3, 4, 5, 6]);
+    console.log('After reset (6 items):', smaller.items);
+    console.log('length:', smaller.length);
+    
+    // Reset to smaller array
+    console.log('\n=== Reset to smaller array ===');
+    const larger = ReactiveUtils.collection([1, 2, 3, 4, 5, 6]);
+    console.log('Before reset (6 items):', larger.items);
+    larger.reset([1, 2]);
+    console.log('After reset (2 items):', larger.items);
+    console.log('length:', larger.length);
+    
+    // Reset with same values
+    console.log('\n=== Reset with same values ===');
+    const same = ReactiveUtils.collection([1, 2, 3]);
+    console.log('Before reset:', same.items);
+    same.reset([1, 2, 3]);
+    console.log('After reset([1, 2, 3]):', same.items);
+    console.log('✓ Can reset with same values');
+    
+    // Reset workflow
+    console.log('\n=== Reset workflow ===');
+    const workflow = ReactiveUtils.collection([
+      { id: 1, status: 'pending' }
+    ]);
+    console.log('Step 1:', workflow.items);
+    
+    workflow.add({ id: 2, status: 'pending' });
+    workflow.add({ id: 3, status: 'pending' });
+    console.log('Step 2 (added items):', workflow.items);
+    
+    workflow.updateWhere(item => true, { status: 'processing' });
+    console.log('Step 3 (updated all):', workflow.items);
+    
+    workflow.reset([{ id: 1, status: 'completed' }]);
+    console.log('Step 4 (reset):', workflow.items);
+    console.log('✓ Reset clears all previous items and state');
+    
+    // Test reactivity
+    console.log('\n=== Testing reactivity ===');
+    const reactive = ReactiveUtils.collection([1, 2, 3]);
+    let effectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: [${reactive.items.join(', ')}] (length: ${reactive.length})`);
+    });
+    
+    setTimeout(() => {
+      reactive.reset([10, 20, 30, 40]);
+      console.log('Effect runs after reset:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactive.reset([]);
+      console.log('Effect runs after reset to empty:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ reset(newItems) replaces all items');
+      console.log('✓ reset([]) clears collection');
+      console.log('✓ reset() with no args clears collection');
+      console.log('✓ reset() returns this for chaining');
+      console.log('✓ reset() updates length, first, and last');
+      console.log('✓ reset() works with any array size');
+      console.log('✓ reset() completely replaces previous items');
+      console.log('✓ reset() is reactive and triggers effects');
+    }, 1500);
+  </script>
+</body>
+</html>

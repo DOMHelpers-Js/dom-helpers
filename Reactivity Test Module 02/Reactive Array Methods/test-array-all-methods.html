@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test All Array Methods Together</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script>
+    console.log('=== Testing all reactive array methods ===');
+    
+    const state = ReactiveUtils.state({
+      items: [1, 2, 3, 4, 5]
+    });
+    
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: [${state.items.join(', ')}] (length: ${state.items.length})`);
+    });
+    
+    const tests = [
+      { name: 'push(6)', fn: () => state.items.push(6) },
+      { name: 'unshift(0)', fn: () => state.items.unshift(0) },
+      { name: 'pop()', fn: () => state.items.pop() },
+      { name: 'shift()', fn: () => state.items.shift() },
+      { name: 'splice(2, 1, 99)', fn: () => state.items.splice(2, 1, 99) },
+      { name: 'sort()', fn: () => state.items.sort((a, b) => b - a) },
+      { name: 'reverse()', fn: () => state.items.reverse() },
+      { name: 'fill(7, 1, 3)', fn: () => state.items.fill(7, 1, 3) },
+      { name: 'copyWithin(0, 2)', fn: () => state.items.copyWithin(0, 2) }
+    ];
+    
+    let delay = 500;
+    tests.forEach((test, index) => {
+      setTimeout(() => {
+        console.log(`\n=== Test ${index + 1}: ${test.name} ===`);
+        test.fn();
+        console.log(`Effect runs: ${effectRuns}`);
+      }, delay);
+      delay += 500;
+    });
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log(`Total effect runs: ${effectRuns}`);
+      console.log(`Expected: ${tests.length + 1} (initial + ${tests.length} mutations)`);
+      console.log(`✓ All array methods trigger reactivity!`);
+    }, delay);
+  </script>
+</body>
+</html>

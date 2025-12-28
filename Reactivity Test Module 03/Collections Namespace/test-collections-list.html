@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Collections.list()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing Collections.list() ===');
+    console.log('Note: This is an alias for Collections.create()');
+    
+    // Test that list() works
+    const list = Collections.list(['apple', 'banana', 'cherry']);
+    console.log('List created:', list.items);
+    console.log('length:', list.length);
+    
+    // Verify it's the same as create()
+    console.log('\n=== Verifying it works like create() ===');
+    
+    list.add('date');
+    console.log('After add("date"):', list.items);
+    
+    list.remove('banana');
+    console.log('After remove("banana"):', list.items);
+    
+    // Test all list methods
+    console.log('\n=== Testing list methods ===');
+    console.log('first:', list.first);
+    console.log('last:', list.last);
+    console.log('isEmpty:', list.isEmpty());
+    
+    list.push('elderberry');
+    console.log('After push("elderberry"):', list.items);
+    
+    list.sort();
+    console.log('After sort():', list.items);
+    
+    const filtered = list.filter(fruit => fruit.startsWith('a'));
+    console.log('Fruits starting with "a":', filtered);
+    
+    // Test with numbers
+    console.log('\n=== Testing with numbers ===');
+    const numbers = Collections.list([5, 2, 8, 1, 9]);
+    console.log('Numbers:', numbers.items);
+    
+    numbers.sort((a, b) => a - b);
+    console.log('After sort:', numbers.items);
+    
+    const doubled = numbers.map(n => n * 2);
+    console.log('Doubled:', doubled);
+    
+    const evens = numbers.filter(n => n % 2 === 0);
+    console.log('Even numbers:', evens);
+    
+    // Test forEach
+    console.log('\n=== Testing forEach ===');
+    console.log('All numbers:');
+    numbers.forEach((num, index) => {
+      console.log(`  [${index}] ${num}`);
+    });
+    
+    // Verify Collections.list === Collections.create
+    console.log('\n=== Verifying alias ===');
+    console.log('Collections.list === Collections.create:', 
+      Collections.list === Collections.create);
+    console.log('Collections.list === Collections.collection:', 
+      Collections.list === Collections.collection);
+    console.log('✓ All three are the same function');
+  </script>
+</body>
+</html>

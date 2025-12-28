@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Array sort()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script>
+    console.log('=== Testing reactive array sort() ===');
+    
+    const state = ReactiveUtils.state({
+      numbers: [5, 2, 8, 1, 9, 3],
+      words: ['banana', 'apple', 'cherry', 'date']
+    });
+    
+    console.log('Initial numbers:', state.numbers);
+    console.log('Initial words:', state.words);
+    
+    let numberRuns = 0;
+    ReactiveUtils.effect(() => {
+      numberRuns++;
+      console.log(`Numbers effect #${numberRuns}: [${state.numbers.join(', ')}]`);
+    });
+    
+    // Test default sort
+    setTimeout(() => {
+      console.log('\n=== sort() - default (lexicographic) ===');
+      state.numbers.sort();
+      console.log('numbers:', state.numbers);
+      console.log('Effect runs:', numberRuns);
+      console.log('⚠️  Note: Default sort is lexicographic!');
+    }, 500);
+    
+    // Test numeric sort
+    setTimeout(() => {
+      console.log('\n=== sort((a, b) => a - b) - numeric ascending ===');
+      state.numbers.sort((a, b) => a - b);
+      console.log('numbers:', state.numbers);
+      console.log('Effect runs:', numberRuns);
+      console.log('✓ Sorted numerically ascending');
+    }, 1000);
+    
+    // Test descending sort
+    setTimeout(() => {
+      console.log('\n=== sort((a, b) => b - a) - numeric descending ===');
+      state.numbers.sort((a, b) => b - a);
+      console.log('numbers:', state.numbers);
+      console.log('Effect runs:', numberRuns);
+      console.log('✓ Sorted numerically descending');
+    }, 1500);
+    
+    // Test string sort
+    setTimeout(() => {
+      console.log('\n=== Sorting strings ===');
+      let wordRuns = 0;
+      ReactiveUtils.effect(() => {
+        wordRuns++;
+        console.log(`Words effect #${wordRuns}: [${state.words.join(', ')}]`);
+      });
+      
+      setTimeout(() => {
+        state.words.sort();
+        console.log('Effect runs:', wordRuns);
+        console.log('✓ Words sorted alphabetically');
+      }, 500);
+    }, 2000);
+  </script>
+</body>
+</html>

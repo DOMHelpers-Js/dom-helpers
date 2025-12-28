@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.includes()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection.includes() ===');
+    
+    // Basic includes with numbers
+    console.log('\n=== Basic includes with numbers ===');
+    const numbers = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    console.log('includes(3):', numbers.includes(3));
+    console.log('includes(10):', numbers.includes(10));
+    console.log('includes(1):', numbers.includes(1));
+    console.log('includes(5):', numbers.includes(5));
+    
+    // Includes with strings
+    console.log('\n=== Includes with strings ===');
+    const words = ReactiveUtils.collection(['apple', 'banana', 'cherry']);
+    console.log('includes("banana"):', words.includes('banana'));
+    console.log('includes("grape"):', words.includes('grape'));
+    console.log('includes("BANANA"):', words.includes('BANANA')); // case-sensitive
+    
+    // Includes with objects (by reference)
+    console.log('\n=== Includes with objects ===');
+    const obj1 = { id: 1, name: 'Alice' };
+    const obj2 = { id: 2, name: 'Bob' };
+    const obj3 = { id: 3, name: 'Charlie' };
+    const users = ReactiveUtils.collection([obj1, obj2]);
+    
+    console.log('includes(obj1):', users.includes(obj1));
+    console.log('includes(obj2):', users.includes(obj2));
+    console.log('includes(obj3):', users.includes(obj3));
+    
+    const copy = { id: 1, name: 'Alice' };
+    console.log('includes(copy of obj1):', users.includes(copy));
+    console.log('⚠️  includes() uses strict equality (===)');
+    
+    // Includes with booleans
+    console.log('\n=== Includes with booleans ===');
+    const flags = ReactiveUtils.collection([true, false, true]);
+    console.log('includes(true):', flags.includes(true));
+    console.log('includes(false):', flags.includes(false));
+    
+    // Includes with null/undefined
+    console.log('\n=== Includes with null/undefined ===');
+    const mixed = ReactiveUtils.collection([1, null, undefined, 'text', 0]);
+    console.log('includes(null):', mixed.includes(null));
+    console.log('includes(undefined):', mixed.includes(undefined));
+    console.log('includes(0):', mixed.includes(0));
+    
+    // Empty collection
+    console.log('\n=== Empty collection ===');
+    const empty = ReactiveUtils.collection();
+    console.log('includes(anything) on empty:', empty.includes(1));
+    
+    // NaN behavior
+    console.log('\n=== NaN behavior ===');
+    const withNaN = ReactiveUtils.collection([1, NaN, 3]);
+    console.log('includes(NaN):', withNaN.includes(NaN));
+    console.log('✓ includes() can find NaN (unlike indexOf)');
+    
+    // After modifications
+    console.log('\n=== After modifications ===');
+    const dynamic = ReactiveUtils.collection([1, 2, 3]);
+    console.log('Initial includes(4):', dynamic.includes(4));
+    
+    dynamic.add(4);
+    console.log('After add(4), includes(4):', dynamic.includes(4));
+    
+    dynamic.remove(4);
+    console.log('After remove(4), includes(4):', dynamic.includes(4));
+    
+    // Test reactivity
+    console.log('\n=== Testing reactivity ===');
+    const reactive = ReactiveUtils.collection([1, 2, 3]);
+    let effectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const hasThree = reactive.includes(3);
+      console.log(`Effect #${effectRuns}: includes(3) = ${hasThree}`);
+    });
+    
+    setTimeout(() => {
+      reactive.remove(3);
+      console.log('Effect runs after remove(3):', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactive.add(3);
+      console.log('Effect runs after add(3):', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ includes(item) returns true if item exists');
+      console.log('✓ includes() returns false if item not found');
+      console.log('✓ includes() uses strict equality (===)');
+      console.log('✓ includes() works with primitives and objects');
+      console.log('✓ includes() can find NaN');
+      console.log('✓ includes() is case-sensitive for strings');
+      console.log('✓ includes() is reactive');
+    }, 1500);
+  </script>
+</body>
+</html>

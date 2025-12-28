@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.items</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection.items ===');
+    
+    const collection = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    
+    // Read items
+    console.log('\n=== Reading items ===');
+    console.log('collection.items:', collection.items);
+    console.log('Type:', Array.isArray(collection.items) ? 'Array' : typeof collection.items);
+    console.log('Is reactive array:', !!collection.items.__patched);
+    
+    // Write items (replace entire array)
+    console.log('\n=== Writing items (replace) ===');
+    collection.items = [10, 20, 30];
+    console.log('After collection.items = [10, 20, 30]:', collection.items);
+    
+    // Direct array mutation
+    console.log('\n=== Direct array mutation ===');
+    collection.items.push(40);
+    console.log('After push(40):', collection.items);
+    
+    collection.items[0] = 100;
+    console.log('After items[0] = 100:', collection.items);
+    
+    collection.items.splice(1, 1, 200);
+    console.log('After splice(1, 1, 200):', collection.items);
+    
+    // Test reactivity
+    console.log('\n=== Testing reactivity ===');
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect #${effectRuns}: items = [${collection.items.join(', ')}]`);
+    });
+    
+    setTimeout(() => {
+      console.log('\n=== Modifying items ===');
+      collection.items.push(50);
+      console.log('Effect runs after push:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      console.log('\n=== Replacing items array ===');
+      collection.items = [1, 2, 3];
+      console.log('Effect runs after replace:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Using collection methods ===');
+      collection.add(4);
+      console.log('After collection.add(4):', collection.items);
+      console.log('Effect runs:', effectRuns);
+    }, 1500);
+    
+    // Test with objects
+    setTimeout(() => {
+      console.log('\n=== Testing with objects ===');
+      const todos = ReactiveUtils.collection([
+        { id: 1, text: 'Task 1', done: false },
+        { id: 2, text: 'Task 2', done: false }
+      ]);
+      
+      console.log('Initial items:', todos.items);
+      
+      // Modify object in items
+      todos.items[0].done = true;
+      console.log('After todos.items[0].done = true:', todos.items);
+      
+      // Add new item directly
+      todos.items.push({ id: 3, text: 'Task 3', done: false });
+      console.log('After push:', todos.items);
+      
+      console.log('✓ Items property is fully read/write');
+    }, 2000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.map()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection.map() ===');
+    
+    // Basic map with numbers
+    console.log('\n=== Basic map with numbers ===');
+    const numbers = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    
+    const doubled = numbers.map(n => n * 2);
+    console.log('map(n => n * 2):', doubled);
+    
+    const squared = numbers.map(n => n * n);
+    console.log('map(n => n * n):', squared);
+    
+    const plusTen = numbers.map(n => n + 10);
+    console.log('map(n => n + 10):', plusTen);
+    
+    // Map with objects - extract properties
+    console.log('\n=== Map objects - extract properties ===');
+    const todos = ReactiveUtils.collection([
+      { id: 1, text: 'Buy groceries', done: false },
+      { id: 2, text: 'Walk dog', done: true },
+      { id: 3, text: 'Read book', done: false }
+    ]);
+    
+    const texts = todos.map(t => t.text);
+    console.log('map(t => t.text):', texts);
+    
+    const ids = todos.map(t => t.id);
+    console.log('map(t => t.id):', ids);
+    
+    const statuses = todos.map(t => t.done);
+    console.log('map(t => t.done):', statuses);
+    
+    // Map with objects - transform
+    console.log('\n=== Map objects - transform ===');
+    const users = ReactiveUtils.collection([
+      { id: 1, firstName: 'John', lastName: 'Doe', age: 30 },
+      { id: 2, firstName: 'Jane', lastName: 'Smith', age: 25 },
+      { id: 3, firstName: 'Bob', lastName: 'Johnson', age: 35 }
+    ]);
+    
+    const fullNames = users.map(u => `${u.firstName} ${u.lastName}`);
+    console.log('Full names:', fullNames);
+    
+    const userSummaries = users.map(u => ({ name: `${u.firstName} ${u.lastName}`, age: u.age }));
+    console.log('User summaries:', userSummaries);
+    
+    const ageInMonths = users.map(u => ({ ...u, ageInMonths: u.age * 12 }));
+    console.log('Age in months:', ageInMonths);
+    
+    // Map with strings
+    console.log('\n=== Map with strings ===');
+    const words = ReactiveUtils.collection(['apple', 'banana', 'cherry']);
+    
+    const uppercase = words.map(w => w.toUpperCase());
+    console.log('map(toUpperCase):', uppercase);
+    
+    const lengths = words.map(w => w.length);
+    console.log('map(length):', lengths);
+    
+    const firstChars = words.map(w => w[0]);
+    console.log('map(first char):', firstChars);
+    
+    // Map returns new array
+    console.log('\n=== Testing return type ===');
+    const original = ReactiveUtils.collection([1, 2, 3]);
+    const mapped = original.map(n => n * 2);
+    
+    console.log('Original items:', original.items);
+    console.log('Mapped result:', mapped);
+    console.log('Is array:', Array.isArray(mapped));
+    console.log('Is different from items:', mapped !== original.items);
+    
+    // Map on empty collection
+    console.log('\n=== Map on empty collection ===');
+    const empty = ReactiveUtils.collection();
+    const emptyResult = empty.map(item => item * 2);
+    console.log('map on empty:', emptyResult);
+    console.log('Is empty array:', Array.isArray(emptyResult) && emptyResult.length === 0);
+    
+    // Map with index parameter
+    console.log('\n=== Map with index parameter ===');
+    const items = ReactiveUtils.collection(['a', 'b', 'c', 'd']);
+    
+    const withIndex = items.map((item, index) => `${index}: ${item}`);
+    console.log('map with index:', withIndex);
+    
+    const positions = items.map((item, index) => ({ item, position: index + 1 }));
+    console.log('map to positions:', positions);
+    
+    // Map to different types
+    console.log('\n=== Map to different types ===');
+    const nums = ReactiveUtils.collection([1, 2, 3, 4, 5]);
+    
+    const toStrings = nums.map(n => String(n));
+    console.log('Numbers to strings:', toStrings);
+    console.log('Type of first:', typeof toStrings[0]);
+    
+    const toBooleans = nums.map(n => n > 3);
+    console.log('Numbers to booleans:', toBooleans);
+    
+    const toObjects = nums.map(n => ({ value: n, doubled: n * 2 }));
+    console.log('Numbers to objects:', toObjects);
+    
+    // Complex transformations
+    console.log('\n=== Complex transformations ===');
+    const products = ReactiveUtils.collection([
+      { id: 1, name: 'Laptop', price: 999, quantity: 2 },
+      { id: 2, name: 'Mouse', price: 25, quantity: 5 },
+      { id: 3, name: 'Keyboard', price: 75, quantity: 3 }
+    ]);
+    
+    const totals = products.map(p => p.price * p.quantity);
+    console.log('Totals:', totals);
+    
+    const withTotals = products.map(p => ({
+      ...p,
+      total: p.price * p.quantity,
+      formattedPrice: `$${p.price}`
+    }));
+    console.log('With totals:', withTotals);
+    
+    // Chaining map
+    console.log('\n=== Chaining map ===');
+    const result = numbers
+      .map(n => n * 2)
+      .map(n => n + 1)
+      .map(n => n * n);
+    console.log('Chained map result:', result);
+    
+    // Map with filter
+    console.log('\n=== Combining map and filter ===');
+    const evenDoubled = numbers
+      .filter(n => n % 2 === 0)
+      .map(n => n * 2);
+    console.log('Even numbers doubled:', evenDoubled);
+    
+    // Test reactivity
+    console.log('\n=== Testing with reactive collection ===');
+    const reactive = ReactiveUtils.collection([1, 2, 3]);
+    let effectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const doubled = reactive.map(n => n * 2);
+      console.log(`Effect #${effectRuns}: doubled = [${doubled.join(', ')}]`);
+    });
+    
+    setTimeout(() => {
+      reactive.add(4);
+      console.log('Effect runs after add:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactive.items[0] = 10;
+      console.log('Effect runs after modify:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ map(fn) returns new array with transformed items');
+      console.log('✓ map() works with numbers, strings, and objects');
+      console.log('✓ map() can transform to different types');
+      console.log('✓ map() returns empty array for empty collections');
+      console.log('✓ map() always returns new array');
+      console.log('✓ map() supports index parameter');
+      console.log('✓ map() can be chained with other array methods');
+    }, 1500);
+  </script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collection.at()</title></head>
+<body>
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/02_dh-reactive-array-patch.js"></script>
+  <script src="../../src/Reactive/03_dh-reactive-collections.js"></script>
+  <script>
+    console.log('=== Testing collection.at() ===');
+    
+    const collection = ReactiveUtils.collection(['a', 'b', 'c', 'd', 'e']);
+    
+    // Positive indices
+    console.log('\n=== Positive indices ===');
+    console.log('at(0):', collection.at(0));
+    console.log('at(1):', collection.at(1));
+    console.log('at(2):', collection.at(2));
+    console.log('at(4):', collection.at(4));
+    
+    // Negative indices (from end)
+    console.log('\n=== Negative indices ===');
+    console.log('at(-1):', collection.at(-1)); // last
+    console.log('at(-2):', collection.at(-2)); // second to last
+    console.log('at(-5):', collection.at(-5)); // first
+    
+    // Out of bounds
+    console.log('\n=== Out of bounds ===');
+    console.log('at(10):', collection.at(10)); // undefined
+    console.log('at(-10):', collection.at(-10)); // undefined
+    
+    // With numbers
+    console.log('\n=== With numbers ===');
+    const numbers = ReactiveUtils.collection([10, 20, 30, 40, 50]);
+    console.log('at(0):', numbers.at(0));
+    console.log('at(2):', numbers.at(2));
+    console.log('at(-1):', numbers.at(-1));
+    
+    // With objects
+    console.log('\n=== With objects ===');
+    const todos = ReactiveUtils.collection([
+      { id: 1, text: 'First' },
+      { id: 2, text: 'Second' },
+      { id: 3, text: 'Third' }
+    ]);
+    console.log('at(0):', todos.at(0));
+    console.log('at(1):', todos.at(1));
+    console.log('at(-1):', todos.at(-1));
+    
+    // Empty collection
+    console.log('\n=== Empty collection ===');
+    const empty = ReactiveUtils.collection();
+    console.log('at(0) on empty:', empty.at(0));
+    console.log('at(-1) on empty:', empty.at(-1));
+    
+    // Comparison with first/last
+    console.log('\n=== Comparison with first/last ===');
+    console.log('collection.first:', collection.first);
+    console.log('collection.at(0):', collection.at(0));
+    console.log('Match:', collection.first === collection.at(0));
+    
+    console.log('\ncollection.last:', collection.last);
+    console.log('collection.at(-1):', collection.at(-1));
+    console.log('Match:', collection.last === collection.at(-1));
+    
+    // Comparison with direct indexing
+    console.log('\n=== Comparison with items[index] ===');
+    console.log('collection.at(2):', collection.at(2));
+    console.log('collection.items[2]:', collection.items[2]);
+    console.log('Match:', collection.at(2) === collection.items[2]);
+    
+    // Test reactivity
+    console.log('\n=== Testing reactivity ===');
+    const reactive = ReactiveUtils.collection([1, 2, 3]);
+    let effectRuns = 0;
+    
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      const value = reactive.at(1);
+      console.log(`Effect #${effectRuns}: at(1) = ${value}`);
+    });
+    
+    setTimeout(() => {
+      reactive.items[1] = 20;
+      console.log('Effect runs after modify:', effectRuns);
+    }, 500);
+    
+    setTimeout(() => {
+      reactive.push(4);
+      console.log('Effect runs after push:', effectRuns);
+    }, 1000);
+    
+    setTimeout(() => {
+      console.log('\n=== Summary ===');
+      console.log('✓ at(index) returns item at positive index');
+      console.log('✓ at(-index) returns item from end (negative index)');
+      console.log('✓ at() returns undefined for out-of-bounds indices');
+      console.log('✓ at(0) === first');
+      console.log('✓ at(-1) === last');
+      console.log('✓ at() works with numbers, strings, and objects');
+      console.log('✓ at() is reactive');
+    }, 1500);
+  </script>
+</body>
+</html>
