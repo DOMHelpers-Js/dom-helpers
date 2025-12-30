@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveUtils.cleanup</title></head>
+<body>
+    
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/05_dh-reactive-cleanup.js"></script>
+
+  <script>
+    // ReactiveUtils.cleanup is a reference to ReactiveCleanup
+    console.log('ReactiveUtils.cleanup exists?', typeof ReactiveUtils.cleanup); // object
+    console.log('Same as ReactiveCleanup?', ReactiveUtils.cleanup === ReactiveCleanup); // true
+    
+    // Can access all methods through ReactiveUtils.cleanup
+    console.log('Has collector?', typeof ReactiveUtils.cleanup.collector); // function
+    console.log('Has scope?', typeof ReactiveUtils.cleanup.scope); // function
+    console.log('Has patchState?', typeof ReactiveUtils.cleanup.patchState); // function
+    console.log('Has isActive?', typeof ReactiveUtils.cleanup.isActive); // function
+    console.log('Has getStats?', typeof ReactiveUtils.cleanup.getStats); // function
+    console.log('Has debug?', typeof ReactiveUtils.cleanup.debug); // function
+    console.log('Has test?', typeof ReactiveUtils.cleanup.test); // function
+    
+    // Use it the same way
+    const state = ReactiveUtils.state({ count: 0 });
+    let runs = 0;
+    
+    const cleanup = ReactiveUtils.effect(() => {
+      runs++;
+      const _ = state.count;
+    });
+    
+    console.log('\nInitial runs:', runs); // 1
+    
+    // Check if active using ReactiveUtils.cleanup
+    console.log('Is active?', ReactiveUtils.cleanup.isActive(cleanup)); // true
+    
+    cleanup();
+    console.log('After cleanup, is active?', ReactiveUtils.cleanup.isActive(cleanup)); // false
+  </script>
+</body>
+</html>

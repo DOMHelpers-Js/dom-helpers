@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collector.size</title></head>
+<body>
+    
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/05_dh-reactive-cleanup.js"></script>
+
+  <script>
+    // collector.size is a getter property that returns the number of cleanup functions
+    const collector = ReactiveCleanup.collector();
+    
+    console.log('Initial size:', collector.size); // 0
+    
+    collector.add(() => {});
+    console.log('After 1 add:', collector.size); // 1
+    
+    collector.add(() => {});
+    console.log('After 2 adds:', collector.size); // 2
+    
+    collector.add(() => {});
+    console.log('After 3 adds:', collector.size); // 3
+    
+    // Size decreases to 0 after cleanup
+    collector.cleanup();
+    console.log('After cleanup:', collector.size); // 0
+    
+    // Cannot add after disposed
+    collector.add(() => {});
+    console.log('After trying to add to disposed collector:', collector.size); // Still 0
+    
+    // Multiple collectors track independently
+    const collector2 = ReactiveCleanup.collector();
+    const collector3 = ReactiveCleanup.collector();
+    
+    collector2.add(() => {});
+    collector2.add(() => {});
+    
+    collector3.add(() => {});
+    
+    console.log('\nCollector 2 size:', collector2.size); // 2
+    console.log('Collector 3 size:', collector3.size); // 1
+    console.log('Independent tracking?', collector2.size !== collector3.size); // true
+  </script>
+</body>
+</html>

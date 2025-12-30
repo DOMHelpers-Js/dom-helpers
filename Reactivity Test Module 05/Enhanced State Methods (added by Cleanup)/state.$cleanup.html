@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test state.$cleanup()</title></head>
+<body>
+    
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/05_dh-reactive-cleanup.js"></script>
+
+  <script>
+    // state.$cleanup() removes all effects, watchers, and computed properties
+    const state = ReactiveUtils.state({
+      count: 0,
+      name: 'Test'
+    });
+    
+    // Add computed property
+    state.$computed('doubled', function() {
+      return this.count * 2;
+    });
+    
+    console.log('Initial doubled:', state.doubled); // 0
+    
+    // Add effect
+    let effectRuns = 0;
+    ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect run #${effectRuns}: count=${state.count}`);
+    });
+    
+    // Add watcher
+    let watchRuns = 0;
+    state.$watch('name', (newVal, oldVal) => {
+      watchRuns++;
+      console.log(`Watch run #${watchRuns}: ${oldVal} -> ${newVal}`);
+    });
+    
+    // Trigger updates
+    state.count = 5;
+    console.log('After count=5, doubled:', state.doubled); // 10
+    console.log('Effect runs:', effectRuns); // 2
+    
+    state.name = 'Changed';
+    console.log('Watch runs:', watchRuns); // 1
+    
+    // Clean up everything
+    console.log('\nCalling state.$cleanup()...');
+    state.$cleanup();
+    
+    // Try to trigger after cleanup
+    state.count = 10;
+    state.name = 'Again';
+    
+    console.log('\nAfter cleanup:');
+    console.log('Effect runs (should be unchanged):', effectRuns); // Still 2
+    console.log('Watch runs (should be unchanged):', watchRuns); // Still 1
+    console.log('Computed still works?', state.doubled === 20); // true (computed properties remain)
+  </script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveUtils.safeWatch()</title></head>
+<body>
+    
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/05_dh-reactive-cleanup.js"></script>
+  <script src="../../src/Reactive/06_dh-reactive-enhancements.js"></script>
+
+  <script>
+    // safeWatch() wraps watchers with error boundaries
+    const state = ReactiveUtils.state({ count: 0, name: 'Test' });
+    
+    let safeWatchRuns = 0;
+    let normalWatchRuns = 0;
+    
+    // Safe watch with error
+    const safeCleanup = ReactiveUtils.safeWatch(state, 'count', (newVal, oldVal) => {
+      safeWatchRuns++;
+      console.log(`Safe watch run #${safeWatchRuns}: ${oldVal} -> ${newVal}`);
+      
+      if (newVal === 5) {
+        throw new Error('Intentional error at count=5');
+      }
+    }, {
+      errorBoundary: {
+        onError: (error, context) => {
+          console.log('Error caught in watch:', error.message);
+          console.log('Context:', context);
+        }
+      }
+    });
+    
+    // Normal watch for comparison
+    const normalCleanup = state.$watch('name', (newVal, oldVal) => {
+      normalWatchRuns++;
+      console.log(`Normal watch run #${normalWatchRuns}: ${oldVal} -> ${newVal}`);
+    });
+    
+    // Trigger safe watch
+    state.count = 3;
+    console.log('After count=3, safe watch runs:', safeWatchRuns); // 1
+    
+    // Trigger error
+    state.count = 5;
+    console.log('After count=5 (error), safe watch runs:', safeWatchRuns); // 2
+    
+    // Continue working after error
+    state.count = 10;
+    console.log('After count=10 (recovery), safe watch runs:', safeWatchRuns); // 3
+    console.log('Safe watch continues after error!');
+    
+    // Trigger normal watch
+    state.name = 'Changed';
+    console.log('Normal watch runs:', normalWatchRuns); // 1
+    
+    // Cleanup
+    safeCleanup();
+    normalCleanup();
+  </script>
+</body>
+</html>

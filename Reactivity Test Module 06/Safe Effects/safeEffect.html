@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveUtils.safeEffect()</title></head>
+<body>
+    
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/05_dh-reactive-cleanup.js"></script>
+  <script src="../../src/Reactive/06_dh-reactive-enhancements.js"></script>
+
+  <script>
+    // safeEffect() wraps effects with error boundaries
+    const state = ReactiveUtils.state({ count: 0 });
+    
+    let safeRuns = 0;
+    let normalRuns = 0;
+    
+    // Safe effect with error
+    const safeCleanup = ReactiveUtils.safeEffect(() => {
+      safeRuns++;
+      console.log(`Safe effect run #${safeRuns}: count=${state.count}`);
+      
+      if (state.count === 5) {
+        throw new Error('Intentional error at count=5');
+      }
+    }, {
+      errorBoundary: {
+        onError: (error, context) => {
+          console.log('Error caught:', error.message);
+          console.log('Error context:', context);
+        }
+      }
+    });
+    
+    // Normal effect for comparison
+    const normalCleanup = ReactiveUtils.effect(() => {
+      normalRuns++;
+      console.log(`Normal effect run #${normalRuns}: count=${state.count}`);
+    });
+    
+    console.log('Initial runs - safe:', safeRuns, 'normal:', normalRuns); // 1, 1
+    
+    // Trigger error
+    state.count = 5;
+    console.log('After error - safe:', safeRuns, 'normal:', normalRuns); // 2, 2
+    
+    // Continue working after error
+    state.count = 10;
+    console.log('After recovery - safe:', safeRuns, 'normal:', normalRuns); // 3, 3
+    console.log('Safe effect continues after error!');
+    
+    // Cleanup
+    safeCleanup();
+    normalCleanup();
+  </script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveCleanup.getStats()</title></head>
+<body>
+    
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/05_dh-reactive-cleanup.js"></script>
+
+  <script>
+    // Get initial stats
+    const stats1 = ReactiveCleanup.getStats();
+    console.log('Initial stats:', stats1);
+    console.log('Message:', stats1.message); // "Cleanup system active"
+    console.log('Note:', stats1.note); // WeakMaps prevent direct counting...
+    
+    // Create some state and effects
+    const state = ReactiveUtils.state({ count: 0 });
+    
+    let effectRuns = 0;
+    const cleanup = ReactiveUtils.effect(() => {
+      effectRuns++;
+      const _ = state.count;
+    });
+    
+    // Get stats after creating effects
+    const stats2 = ReactiveCleanup.getStats();
+    console.log('\nAfter creating effects:', stats2);
+    
+    // Note: Due to WeakMaps, we can't get exact counts
+    // But the system is working if we get a response
+    console.log('Stats available?', typeof stats2 === 'object'); // true
+    console.log('Has message?', typeof stats2.message === 'string'); // true
+    
+    // Cleanup
+    cleanup();
+    
+    // Get stats after cleanup
+    const stats3 = ReactiveCleanup.getStats();
+    console.log('\nAfter cleanup:', stats3);
+    console.log('System still active?', stats3.message === 'Cleanup system active'); // true
+  </script>
+</body>
+</html>

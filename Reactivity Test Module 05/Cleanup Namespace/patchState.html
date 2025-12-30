@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveCleanup.patchState()</title></head>
+<body>
+    
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/05_dh-reactive-cleanup.js"></script>
+
+  <script>
+    // Create state WITHOUT cleanup system (old way)
+    const oldState = ReactiveUtils.state({ count: 0 });
+    
+    console.log('Has $cleanup before patch?', typeof oldState.$cleanup); // undefined
+    
+    // Manually patch it to use cleanup system
+    ReactiveCleanup.patchState(oldState);
+    
+    console.log('Has $cleanup after patch?', typeof oldState.$cleanup); // function
+    
+    // Now we can use cleanup features
+    let effectRuns = 0;
+    const cleanup = ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect run #${effectRuns}: count=${oldState.count}`);
+    });
+    
+    oldState.count = 5;
+    console.log('After count=5, runs:', effectRuns); // 2
+    
+    // Use the patched $cleanup method
+    oldState.$cleanup();
+    console.log('Called $cleanup() on patched state');
+    
+    oldState.count = 10;
+    console.log('After count=10 (cleaned), runs:', effectRuns); // Still 2
+  </script>
+</body>
+</html>

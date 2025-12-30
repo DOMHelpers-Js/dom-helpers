@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveCleanup.isActive()</title></head>
+<body>
+    
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/05_dh-reactive-cleanup.js"></script>
+
+  <script>
+    const state = ReactiveUtils.state({ count: 0 });
+    
+    // Create effect
+    let effectRuns = 0;
+    const cleanup = ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect run #${effectRuns}: count=${state.count}`);
+    });
+    
+    // Check if active before cleanup
+    console.log('Is effect active?', ReactiveCleanup.isActive(cleanup)); // true
+    
+    // Trigger effect
+    state.count = 5;
+    console.log('After count=5, runs:', effectRuns); // 2
+    console.log('Is effect still active?', ReactiveCleanup.isActive(cleanup)); // true
+    
+    // Dispose effect
+    cleanup();
+    console.log('After cleanup()');
+    
+    // Check if active after cleanup
+    console.log('Is effect active after cleanup?', ReactiveCleanup.isActive(cleanup)); // false
+    
+    // Try to trigger disposed effect
+    state.count = 10;
+    console.log('After count=10 (disposed), runs:', effectRuns); // Still 2
+    console.log('Confirmed inactive:', !ReactiveCleanup.isActive(cleanup)); // true
+  </script>
+</body>
+</html>

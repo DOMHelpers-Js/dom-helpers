@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveUtils.asyncEffect()</title></head>
+<body>
+    
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/05_dh-reactive-cleanup.js"></script>
+  <script src="../../src/Reactive/06_dh-reactive-enhancements.js"></script>
+
+  <script>
+    // asyncEffect() supports async operations with AbortSignal
+    const state = ReactiveUtils.state({ url: 'https://api.example.com/data' });
+    
+    let fetchCount = 0;
+    
+    const cleanup = ReactiveUtils.asyncEffect(async (signal) => {
+      fetchCount++;
+      const currentFetch = fetchCount;
+      
+      console.log(`Async effect #${currentFetch} started for: ${state.url}`);
+      
+      // Simulate async operation
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Check if aborted
+      if (signal.aborted) {
+        console.log(`Async effect #${currentFetch} was aborted`);
+        return;
+      }
+      
+      console.log(`Async effect #${currentFetch} completed for: ${state.url}`);
+      
+      // Return cleanup function
+      return () => {
+        console.log(`Cleanup for async effect #${currentFetch}`);
+      };
+    }, {
+      onError: (error) => {
+        console.log('Async error:', error.message);
+      }
+    });
+    
+    console.log('Initial fetch started');
+    
+    // Change URL quickly - should abort previous
+    setTimeout(() => {
+      state.url = 'https://api.example.com/other';
+      console.log('URL changed - previous fetch should abort');
+    }, 50);
+    
+    // Wait to see results
+    setTimeout(() => {
+      console.log('\nTotal fetches started:', fetchCount); // 2
+      
+      // Cleanup
+      cleanup();
+      console.log('Called cleanup()');
+    }, 300);
+  </script>
+</body>
+</html>

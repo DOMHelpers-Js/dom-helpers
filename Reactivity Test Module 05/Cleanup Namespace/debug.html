@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveCleanup.debug()</title></head>
+<body>
+    
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/05_dh-reactive-cleanup.js"></script>
+
+  <script>
+    console.log('=== Testing ReactiveCleanup.debug() ===\n');
+    
+    // Enable debug mode
+    ReactiveCleanup.debug(true);
+    console.log('Debug mode enabled\n');
+    
+    // Create state and effects with debug enabled
+    const state = ReactiveUtils.state({ count: 0 });
+    
+    let effectRuns = 0;
+    const cleanup = ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect run #${effectRuns}: count=${state.count}`);
+    });
+    
+    state.count = 5;
+    console.log('After count=5, runs:', effectRuns); // 2
+    
+    // Cleanup with debug enabled
+    cleanup();
+    console.log('Called cleanup()\n');
+    
+    state.count = 10;
+    console.log('After count=10 (disposed), runs:', effectRuns); // Still 2
+    
+    // Disable debug mode
+    console.log('\n=== Disabling debug mode ===\n');
+    ReactiveCleanup.debug(false);
+    console.log('Debug mode disabled');
+    
+    // Test without debug
+    const state2 = ReactiveUtils.state({ value: 0 });
+    const cleanup2 = ReactiveUtils.effect(() => {
+      console.log('Silent effect:', state2.value);
+    });
+    
+    cleanup2();
+    console.log('Cleanup without debug output');
+  </script>
+</body>
+</html>

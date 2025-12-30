@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+
+  <body>
+    <h3 id="output">Iteration Utilities Test</h3>
+
+    <script src="iteration-utilities.js"></script>
+    <script>
+      
+      // Example 1: Simple logging
+      const user = { name: "John", age: 30, city: "New York" };
+      forEachEntry( user,(key, value, index) => {
+          return `<div>${key}: ${value}</div>`;
+          console.log(`${key} : ${value}`);
+        },
+        "#output"
+      );
+
+      // Example 2: Build HTML list
+        const product = { price: 99, stock: 50, rating: 4.5 };
+        forEachEntry(product, (key, value) => {
+          document.body.innerHTML += `<li>${key}: ${value}</li>`;
+          console.log(`${key} : ${value}`);
+        });
+
+      // Example 3: Transform to array of strings
+      const settings = { theme: "dark", lang: "en", notifications: true };
+      const labels = mapEntries(settings, (key, value) => `${key}: ${value}`);
+      // Result: ['theme: dark', 'lang: en', 'notifications: true']
+      console.log(labels);
+
+      // Example 4: Create array of objects
+      const scores = { math: 95, science: 88, english: 92 };
+      const subjects = mapEntries(scores, (key, value) => ({
+        subject: key,
+        score: value,
+      }));
+      // Result: [{subject: 'math', score: 95}, {subject: 'science', score: 88}, ...]
+      console.log(subjects);
+
+      // Example 5: Filter and transform
+      const inventory = { apples: 10, bananas: 0, oranges: 5 };
+      const inStock = mapEntries(inventory, (key, value) => {
+        return value > 0 ? `${key} (${value})` : null;
+      }).filter((item) => item !== null);
+      // Result: ['apples (10)', 'oranges (5)']
+      console.log(inStock);
+    </script>
+  </body>
+</html>

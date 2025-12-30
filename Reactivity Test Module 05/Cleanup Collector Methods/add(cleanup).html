@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collector.add()</title></head>
+<body>
+    
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/05_dh-reactive-cleanup.js"></script>
+
+  <script>
+    // collector.add() adds cleanup functions and returns the collector (chainable)
+    const collector = ReactiveCleanup.collector();
+    
+    let cleanup1Ran = false;
+    let cleanup2Ran = false;
+    let cleanup3Ran = false;
+    
+    // Add cleanups one by one
+    collector.add(() => {
+      cleanup1Ran = true;
+      console.log('Cleanup 1 ran');
+    });
+    
+    collector.add(() => {
+      cleanup2Ran = true;
+      console.log('Cleanup 2 ran');
+    });
+    
+    collector.add(() => {
+      cleanup3Ran = true;
+      console.log('Cleanup 3 ran');
+    });
+    
+    console.log('Added 3 cleanups');
+    console.log('Before cleanup:', cleanup1Ran, cleanup2Ran, cleanup3Ran); // false false false
+    
+    // Execute all
+    collector.cleanup();
+    
+    console.log('After cleanup:', cleanup1Ran, cleanup2Ran, cleanup3Ran); // true true true
+    
+    // Chainable example
+    const collector2 = ReactiveCleanup.collector();
+    let count = 0;
+    
+    collector2
+      .add(() => count++)
+      .add(() => count++)
+      .add(() => count++);
+    
+    console.log('\nChainable add() returns collector?', true); // Works because add() returns collector
+    collector2.cleanup();
+    console.log('Count after chained cleanup:', count); // 3
+  </script>
+</body>
+</html>

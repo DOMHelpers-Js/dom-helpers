@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveCleanup.test()</title></head>
+<body>
+    
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/05_dh-reactive-cleanup.js"></script>
+
+  <script>
+    console.log('=== Running ReactiveCleanup.test() ===\n');
+    
+    // This method runs an internal test that:
+    // 1. Creates 100 effects
+    // 2. Disposes them all immediately
+    // 3. Updates state
+    // 4. Verifies disposed effects don't run
+    
+    ReactiveCleanup.test();
+    
+    // Wait for async test results
+    setTimeout(() => {
+      console.log('\n=== Manual verification ===\n');
+      
+      // Do our own quick test
+      const state = ReactiveUtils.state({ value: 0 });
+      let runs = 0;
+      
+      const cleanup = ReactiveUtils.effect(() => {
+        runs++;
+        const _ = state.value;
+      });
+      
+      console.log('Created effect, runs:', runs); // 1
+      
+      cleanup();
+      console.log('Called cleanup()');
+      
+      state.value = 100;
+      setTimeout(() => {
+        console.log('After state change, runs:', runs); // Still 1
+        console.log('Manual test:', runs === 1 ? '✅ PASSED' : '❌ FAILED');
+      }, 50);
+    }, 100);
+  </script>
+</body>
+</html>

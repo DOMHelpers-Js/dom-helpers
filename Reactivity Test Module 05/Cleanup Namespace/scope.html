@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveCleanup.scope()</title></head>
+<body>
+    
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/05_dh-reactive-cleanup.js"></script>
+
+  <script>
+    // Basic scope usage
+    const state = ReactiveUtils.state({ count: 0 });
+    let effectRuns = 0;
+    
+    // Create scope that auto-collects cleanups
+    const cleanup = ReactiveCleanup.scope((collect) => {
+      // Add effect
+      collect(
+        ReactiveUtils.effect(() => {
+          effectRuns++;
+          console.log(`Effect run #${effectRuns}: count=${state.count}`);
+        })
+      );
+      
+      // Add watcher
+      collect(
+        state.$watch('count', (newVal, oldVal) => {
+          console.log(`Watch: ${oldVal} -> ${newVal}`);
+        })
+      );
+    });
+    
+    console.log('Initial runs:', effectRuns); // 1
+    
+    // Trigger changes
+    state.count = 5;
+    console.log('After count=5, runs:', effectRuns); // 2
+    
+    state.count = 10;
+    console.log('After count=10, runs:', effectRuns); // 3
+    
+    // Cleanup everything
+    cleanup();
+    console.log('After cleanup');
+    
+    // Try to trigger after cleanup
+    state.count = 20;
+    console.log('After count=20 (cleaned), runs:', effectRuns); // Still 3
+  </script>
+</body>
+</html>

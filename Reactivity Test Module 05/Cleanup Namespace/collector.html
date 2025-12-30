@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test ReactiveCleanup.collector()</title></head>
+<body>
+    
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/05_dh-reactive-cleanup.js"></script>
+
+  <script>
+    // Basic collector usage
+    const collector = ReactiveCleanup.collector();
+    
+    const state = ReactiveUtils.state({ count: 0 });
+    let effectRuns = 0;
+    
+    // Add effect cleanup to collector
+    const effectCleanup = ReactiveUtils.effect(() => {
+      effectRuns++;
+      console.log(`Effect run #${effectRuns}: count=${state.count}`);
+    });
+    
+    collector.add(effectCleanup);
+    console.log('Collector size:', collector.size); // 1
+    
+    // Trigger effect
+    state.count = 5;
+    console.log('After count=5, runs:', effectRuns); // 2
+    
+    // Cleanup
+    collector.cleanup();
+    console.log('After cleanup, disposed:', collector.disposed); // true
+    console.log('After cleanup, size:', collector.size); // 0
+    
+    // Try to trigger after cleanup
+    state.count = 10;
+    console.log('After count=10 (cleaned), runs:', effectRuns); // Still 2
+  </script>
+</body>
+</html>

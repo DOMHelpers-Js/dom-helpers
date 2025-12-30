@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h3 id="product-info">Product Information</h3>
+
+    <script src="src/Reactive/01_dh-reactive.js"></script>
+    <script src="iteration-utilities.js"></script>
+
+    <script>
+      const state = ReactiveUtils.state({
+        product: { name: "Laptop", price: 999, stock: 5 },
+      });
+
+      ReactiveUtils.effect(() => {
+        forEachEntry( state.product, (key, value) => {
+            return `<div><strong>${key}:</strong> ${value}</div>`;
+          },
+          "#product-info"
+        );
+      });
+
+      state.product.price = 899;
+    </script>
+  </body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collector.disposed</title></head>
+<body>
+    
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/05_dh-reactive-cleanup.js"></script>
+
+  <script>
+    // collector.disposed is a getter property that checks if the collector has been disposed
+    const collector = ReactiveCleanup.collector();
+    
+    console.log('Initially disposed?', collector.disposed); // false
+    
+    collector.add(() => {});
+    console.log('After adding cleanup, disposed?', collector.disposed); // false
+    
+    collector.add(() => {});
+    collector.add(() => {});
+    console.log('After multiple adds, disposed?', collector.disposed); // false
+    
+    // Becomes true after cleanup
+    collector.cleanup();
+    console.log('After cleanup(), disposed?', collector.disposed); // true
+    
+    // Stays true after multiple cleanup calls
+    collector.cleanup();
+    collector.cleanup();
+    console.log('After multiple cleanup calls, disposed?', collector.disposed); // true
+    
+    // Cannot add to disposed collector
+    let cleanupRan = false;
+    collector.add(() => {
+      cleanupRan = true;
+    });
+    
+    collector.cleanup();
+    console.log('Cleanup ran after adding to disposed collector?', cleanupRan); // false
+    console.log('Still disposed?', collector.disposed); // true
+    
+    // Empty collector can be disposed
+    const emptyCollector = ReactiveCleanup.collector();
+    console.log('\nEmpty collector disposed?', emptyCollector.disposed); // false
+    emptyCollector.cleanup();
+    console.log('Empty collector after cleanup, disposed?', emptyCollector.disposed); // true
+  </script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test collector.cleanup()</title></head>
+<body>
+    
+  <script src="../../src/Reactive/01_dh-reactive.js"></script>
+  <script src="../../src/Reactive/05_dh-reactive-cleanup.js"></script>
+
+  <script>
+    // collector.cleanup() executes all cleanup functions
+    const collector = ReactiveCleanup.collector();
+    
+    const order = [];
+    
+    collector.add(() => order.push('first'));
+    collector.add(() => order.push('second'));
+    collector.add(() => order.push('third'));
+    
+    console.log('Before cleanup, order:', order); // []
+    
+    // Execute all cleanups
+    collector.cleanup();
+    
+    console.log('After cleanup, order:', order); // ['first', 'second', 'third']
+    console.log('Runs in order added?', JSON.stringify(order) === '["first","second","third"]'); // true
+    
+    // cleanup() is idempotent - calling again does nothing
+    collector.cleanup();
+    collector.cleanup();
+    
+    console.log('After multiple cleanup calls, order:', order); // Still ['first', 'second', 'third']
+    console.log('Idempotent (only runs once)?', order.length === 3); // true
+    
+    // Real example with reactive effect
+    const state = ReactiveUtils.state({ count: 0 });
+    const collector2 = ReactiveCleanup.collector();
+    let runs = 0;
+    
+    collector2.add(
+      ReactiveUtils.effect(() => {
+        runs++;
+        const _ = state.count;
+      })
+    );
+    
+    state.count = 5;
+    console.log('\nBefore cleanup, effect runs:', runs); // 2
+    
+    collector2.cleanup();
+    state.count = 10;
+    console.log('After cleanup, effect runs:', runs); // Still 2
+  </script>
+</body>
+</html>
