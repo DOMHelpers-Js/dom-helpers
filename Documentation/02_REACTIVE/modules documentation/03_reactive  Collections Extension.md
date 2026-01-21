@@ -322,17 +322,53 @@ const last = items.pop();
 console.log(last);  // 3
 console.log(items.length);  // 2
 ```
+### 20 `collection.shift()`
 
-### 20. **collection.shift()**
-Removes and returns first item.
+**Removes and returns the first item in the collection, then updates the collection size.**
 
-```javascript
+`shift()` works similarly to JavaScript’s native `Array.prototype.shift()`, but it operates on a **Collections instance**.  
+It removes the **first element** from the collection and returns it.
+
+After calling `shift()`:
+
+- The first item is **removed** from the collection
+- All remaining items shift one position forward
+- The collection’s `length` is updated automatically
+
+---
+
+### Example
+
+```js
 const items = Collections.create([1, 2, 3]);
 
 const first = items.shift();
-console.log(first);  // 1
+
+console.log(first);         // 1
 console.log(items.length);  // 2
-```
+````
+
+---
+
+### Step-by-step explanation
+
+1. A collection is created with the values `[1, 2, 3]`
+2. `shift()` removes the first value (`1`)
+3. That value is returned and stored in `first`
+4. The collection now contains `[2, 3]`
+5. The length is reduced from `3` to `2`
+
+---
+
+### When to use `shift()`
+
+Use `shift()` when you want to:
+
+* Process items **in order** (queue-style behavior)
+* Remove and immediately use the first element
+* Keep your code clean without manual index manipulation
+
+---
 
 ### 21. **collection.unshift(...items)**
 Adds items to beginning.
