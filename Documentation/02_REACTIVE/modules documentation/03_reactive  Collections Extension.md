@@ -335,8 +335,6 @@ After calling `shift()`:
 - All remaining items shift one position forward
 - The collection’s `length` is updated automatically
 
----
-
 ### Example
 
 ```js
@@ -347,9 +345,6 @@ const first = items.shift();
 console.log(first);         // 1
 console.log(items.length);  // 2
 ````
-
----
-
 ### Step-by-step explanation
 
 1. A collection is created with the values `[1, 2, 3]`
@@ -357,9 +352,7 @@ console.log(items.length);  // 2
 3. That value is returned and stored in `first`
 4. The collection now contains `[2, 3]`
 5. The length is reduced from `3` to `2`
-
----
-
+   
 ### When to use `shift()`
 
 Use `shift()` when you want to:
@@ -367,8 +360,6 @@ Use `shift()` when you want to:
 * Process items **in order** (queue-style behavior)
 * Remove and immediately use the first element
 * Keep your code clean without manual index manipulation
-
----
 
 ### 21. **collection.unshift(...items)**
 Adds items to beginning.
