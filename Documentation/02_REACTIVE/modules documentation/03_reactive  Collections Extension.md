@@ -361,17 +361,7 @@ Use `shift()` when you want to:
 * Remove and immediately use the first element
 * Keep your code clean without manual index manipulation
 
-### 21. **collection.unshift(...items)**
-Adds items to beginning.
-
-```javascript
-const items = Collections.create([3, 4, 5]);
-
-items.unshift(1, 2);
-console.log(items.items);  // [1, 2, 3, 4, 5]
-```
-
-## `collection.unshift(...items)`
+### 21 `collection.unshift(...items)`
 
 **Adds one or more items to the beginning of the collection.**
 
