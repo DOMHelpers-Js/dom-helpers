@@ -371,6 +371,47 @@ items.unshift(1, 2);
 console.log(items.items);  // [1, 2, 3, 4, 5]
 ```
 
+## `collection.unshift(...items)`
+
+**Adds one or more items to the beginning of the collection.**
+
+`unshift()` inserts new items at the **start** of a collection.  
+All existing items are pushed forward to make room for the new ones.
+
+This method updates the collection immediately and preserves the order of the inserted items.
+
+After calling `unshift()`:
+
+- The new items appear at the **beginning** of the collection
+- Existing items shift to the right
+- The collection’s length increases automatically
+
+### Example
+
+```js
+const items = Collections.create([3, 4, 5]);
+
+items.unshift(1, 2);
+
+console.log(items.items); // [1, 2, 3, 4, 5]
+````
+
+### Step-by-step explanation
+
+1. A collection is created with the values `[3, 4, 5]`
+2. `unshift(1, 2)` adds `1` and `2` to the beginning
+3. Existing items (`3, 4, 5`) are shifted forward
+4. The final collection becomes `[1, 2, 3, 4, 5]`
+
+### When to use `unshift()`
+
+Use `unshift()` when you want to:
+
+* Add items to the **front** of a collection
+* Maintain a specific order of elements
+* Implement stack or queue-like behavior
+* Avoid manual index shifting
+
 ### 22. **collection.splice(start, deleteCount, ...items)**
 Adds/removes items at index.
 
