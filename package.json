@@ -1,0 +1,59 @@
+{
+  "name": "dom-helpers-js",
+  "version": "2.3.1",
+  "description": "High-performance vanilla JavaScript DOM utilities with intelligent caching, reactive state management, and conditional rendering",
+  "main": "dist/dom-helpers.cjs.js",
+  "module": "dist/dom-helpers.esm.js",
+  "browser": "dist/dom-helpers.umd.js",
+  "unpkg": "dist/dom-helpers.min.js",
+  "jsdelivr": "dist/dom-helpers.min.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "build:dev": "rollup -c --environment BUILD:development",
+    "build:prod": "rollup -c --environment BUILD:production",
+    "watch": "rollup -c -w",
+    "prepublishOnly": "npm run build:prod",
+    "test": "echo \"No tests specified yet\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DOMHelpers-Js/dom-helpers.git"
+  },
+  "keywords": [
+    "dom",
+    "dom-helpers",
+    "dom-manipulation",
+    "vanilla-js",
+    "javascript",
+    "reactive",
+    "reactive-state",
+    "ui",
+    "browser",
+    "frontend",
+    "elements",
+    "collections",
+    "selector",
+    "query",
+    "performance",
+    "caching",
+    "lightweight"
+  ],
+  "author": "DOMHelpers-Js",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DOMHelpers-Js/dom-helpers/issues"
+  },
+  "homepage": "https://github.com/DOMHelpers-Js/dom-helpers#readme",
+  "devDependencies": {
+    "@rollup/plugin-terser": "^0.4.4",
+    "rollup": "^4.57.1",
+    "rollup-plugin-filesize": "^10.0.0"
+  }
+}

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test: Core + Reactive</title>
+  <style>
+    body { font-family: Arial; padding: 20px; max-width: 800px; margin: 0 auto; }
+    button { padding: 10px 20px; font-size: 16px; cursor: pointer; margin: 10px 0; }
+    .status { padding: 10px; margin: 10px 0; border-radius: 4px; background: #e8f5e9; border: 1px solid #4caf50; }
+  </style>
+</head>
+<body>
+  <h1 id="mytitle">Testing Core + Reactive</h1>
+  <h2 id="counter">Count: 0</h2>
+  <button id="increment">Increment</button>
+  <button id="decrement">Decrement</button>
+  <div id="status" class="status">Loading...</div>
+
+  <!-- Load Core First -->
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.3.1/dist/dom-helpers.core.min.js"></script>
+  
+  <!-- Then Load Reactive -->
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.3.1/dist/dom-helpers.reactive.min.js"></script>
+  
+  <script>
+    // Check if modules loaded
+    if (typeof Elements === 'undefined') {
+      document.getElementById('status').innerHTML = '❌ Core module failed to load!';
+      document.getElementById('status').style.background = '#ffebee';
+    } else if (typeof ReactiveUtils === 'undefined') {
+      document.getElementById('status').innerHTML = '❌ Reactive module failed to load!';
+      document.getElementById('status').style.background = '#ffebee';
+    } else {
+      // Both loaded successfully!
+      document.getElementById('status').innerHTML = '✅ Core + Reactive modules loaded!';
+      
+      // Test Core functionality
+      Elements.mytitle.update({
+        style: { color: 'blue' }
+      });
+      
+      // Test Reactive functionality
+      const state = ReactiveUtils.state({ count: 0 });
+      
+      // Bind state to DOM
+      state.$watch('count', (newVal) => {
+        Elements.counter.textContent = `Count: ${newVal}`;
+      });
+      
+      // Button events
+      Elements.increment.addEventListener('click', () => {
+        state.count++;
+      });
+      
+      Elements.decrement.addEventListener('click', () => {
+        state.count--;
+      });
+      
+      console.log('✅ Test passed! Available:', {
+        Elements,
+        Collections,
+        Selector,
+        ReactiveUtils,
+        ReactiveState
+      });
+    }
+  </script>
+</body>
+</html>

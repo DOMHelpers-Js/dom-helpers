@@ -1,0 +1,30 @@
+# Source files (keep in npm package for debugging)
+# src/
+
+# Development files
+rollup.config.js
+.gitignore
+.npmignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+test/
+*.test.js
+*.spec.js
+
+# Documentation (keep README and LICENSE)
+PUBLISHING.md
+PUBLISH-NOW.md
+FIX-2FA.md
+QUICK-START.md
+MODULAR-USAGE.md
+
+# Misc
+.DS_Store
+Thumbs.db
+.env
