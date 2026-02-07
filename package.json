@@ -1,6 +1,6 @@
 {
   "name": "dom-helpers-js",
-  "version": "2.3.2",
+  "version": "2.3.3",
   "description": "High-performance vanilla JavaScript DOM utilities with intelligent caching, reactive state management, and conditional rendering",
   "main": "dist/dom-helpers.cjs.js",
   "module": "dist/dom-helpers.esm.js",
