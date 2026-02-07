@@ -19,21 +19,19 @@ Your library is now split into **5 standalone modules** that users can mix and m
 ### 3️⃣ Enhancers (~8 KB)
 **⚠️ Requires Core to be loaded first!**
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.3.1/dist/dom-helpers.core.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.3.1/dist/dom-helpers.enhancers.min.js"></script>
 ```
 
 ### 4️⃣ Conditions (~8 KB)
 **⚠️ Requires Core to be loaded first!**
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.3.1/dist/dom-helpers.core.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.3.1/dist/dom-helpers.conditions.min.js"></script>
 ```
 
 ### 5️⃣ Reactive (~11 KB)
-**⚠️ Requires Core to be loaded first!**
+**⚠️ 1. This module works independently and does not require the Core.**
+**⚠️ 2. When used together with Core, Enhancers, and Conditions, it gains access to extended capabilities and advanced features.**
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.3.1/dist/dom-helpers.core.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.3.1/dist/dom-helpers.reactive.min.js"></script>
 ```
 
@@ -74,10 +72,12 @@ Everything! (same as full bundle)
 
 ## ⚠️ Critical Rules
 
-1. **Core is Foundation** - Enhancers, Conditions, and Reactive all depend on Core
+1. **Core is Foundation** - Enhancers, Conditions depend on Core module
 2. **Load Order Matters** - Always load Core before other modules
 3. **Full Bundle Alternative** - If you need everything, just use the full bundle
 4. **No Duplication** - Don't load both full bundle and individual modules
+5. **Reactive module** - Can be used independently or combined with other modules in the following order:  
+`core → enhancers → conditions → reactive`
 
 ---
 
@@ -86,13 +86,13 @@ Everything! (same as full bundle)
 ### ❌ Wrong: Loading Reactive without Core
 ```html
 <!-- This will fail! -->
-<script src=".../dom-helpers.reactive.min.js"></script>
+<script src=".../dom-helpers.enhancers.min.js"></script>
 ```
 
 ### ✅ Correct: Load Core First
 ```html
 <script src=".../dom-helpers.core.min.js"></script>
-<script src=".../dom-helpers.reactive.min.js"></script>
+<script src=".../dom-helpers.enhancers.min.js"></script>
 ```
 
 ### ❌ Wrong: Mixing Full Bundle with Modules
@@ -108,9 +108,28 @@ Everything! (same as full bundle)
 <script src=".../dom-helpers.min.js"></script>
 
 <!-- OR this -->
-<script src=".../dom-helpers.core.min.js"></script>
+<script src=".../dom-helpers.core.min.js"></script> 
+<script src=".../dom-helpers.enhancers.min.js"></script>
+<script src=".../dom-helpers.conditions.min.js"></script>
 <script src=".../dom-helpers.reactive.min.js"></script>
 ```
+
+
+### ❌ Wrong: Loading order is not correct
+```html
+<!-- This will not work! -->
+<script src=".../dom-helpers.core.min.js"></script> 
+<script src=".../dom-helpers.reactive.min.js"></script>
+<script src=".../dom-helpers.conditions.min.js"></script>
+<script src=".../dom-helpers.enhancers.min.js"></script>
+```
+
+### ✅ Loading Rules
+Modules must be loaded in the following order:
+1. **core**
+2. **enhancers**
+3. **conditions**
+4. **reactive**
 
 ---
 
@@ -126,33 +145,4 @@ Everything! (same as full bundle)
 
 ---
 
-## 🎯 Decision Tree
-
-**Do you need reactive state management?**
-- Yes → Load Core + Reactive
-- No → Continue...
-
-**Do you need bulk update methods?**
-- Yes → Load Core + Enhancers
-- No → Continue...
-
-**Do you need conditional rendering?**
-- Yes → Load Core + Conditions
-- No → Load Core only
-
-**Need everything?**
-- Just use Full Bundle (dom-helpers.min.js)
-
----
-
-## 🧪 Test Files
-
-We've created test files to verify module combinations:
-- `test-core-reactive.html` - Tests Core + Reactive
-- `test-core-enhancers.html` - Tests Core + Enhancers
-- `test-npm-cdn.html` - Tests full bundle
-- `test-local.html` - Tests local build
-
----
-
-**Remember: Core first, then add what you need!** 🚀
+**Load core first, then add what you need!** 🚀
