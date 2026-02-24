@@ -1,6 +1,6 @@
 /**
  * DOM Helpers JS - Main Entry Point
- * @version 2.3.1
+ * @version 2.4.0
  * @license MIT
  */
 
@@ -34,6 +34,7 @@ import './04_reactive/06_dh-reactive-enhancements.js';
 import './04_reactive/07_dh-reactive-storage.js';
 import './04_reactive/08_dh-reactive-namespace-methods.js';
 import './04_reactive/09_dh-reactiveUtils-shortcut.js';
+import './05_storage/01_dh-storage-standalone.js';
 
 // Export global APIs (these are set by the modules on window/global)
 export const DOMHelpers = typeof window !== 'undefined' ? window.DOMHelpers : {};
@@ -43,6 +44,7 @@ export const Selector = typeof window !== 'undefined' ? window.Selector : {};
 export const createElement = typeof window !== 'undefined' ? window.createElement : {};
 export const ReactiveState = typeof window !== 'undefined' ? window.ReactiveState : {};
 export const ReactiveUtils = typeof window !== 'undefined' ? window.ReactiveUtils : {};
+export const StorageUtils = typeof window !== 'undefined' ? window.StorageUtils : {};
 
 // Default export
 export default typeof window !== 'undefined' ? window.DOMHelpers : {};

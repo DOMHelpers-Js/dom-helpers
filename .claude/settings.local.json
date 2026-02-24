@@ -3,7 +3,12 @@
     "allow": [
       "Bash(npm whoami:*)",
       "Bash(npm config get:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(ls:*)",
+      "Bash(cd:*)",
+      "Bash(npm run build:prod:*)",
+      "Bash(npm run build:dev:*)",
+      "Bash(npm pack:*)"
     ]
   }
 }

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Form Auto-Save Example</title>
+</head>
+<body>
+  <form id="contactForm">
+    <input type="text" id="name" placeholder="Name">
+    <input type="email" id="email" placeholder="Email">
+    <textarea id="message" placeholder="Message"></textarea>
+    <button type="submit">Submit</button>
+    <button type="button" id="clearBtn">Clear Draft</button>
+  </form>
+  
+  <div id="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.min.js"></script>
+<script>
+    // ========================================================================
+    // FORM AUTO-SAVE WITH VISUAL FEEDBACK
+    // ========================================================================
+    
+    const form = Elements.contactForm;
+    const status = Elements.status;
+    
+    // Create auto-save manager
+    const formAutoSave = StorageUtils.createAutoSave('contactFormDraft', {
+      debounce: 500,           // Save 500ms after user stops typing
+      namespace: 'myApp',
+      
+      onSave: (data) => {
+        // Show save indicator
+        status.textContent = '✓ Draft saved';
+        status.style.color = 'green';
+        setTimeout(() => {
+          status.textContent = '';
+        }, 2000);
+      },
+      
+      onLoad: (data) => {
+        console.log('Draft restored:', data);
+      }
+    });
+    
+    // Load saved draft on page load
+    const savedDraft = formAutoSave.load({
+      name: '',
+      email: '',
+      message: ''
+    });
+    
+    // Restore form values
+    Elements.name.value = savedDraft.name;
+    Elements.email.value = savedDraft.email;
+    Elements.message.value = savedDraft.message;
+    
+    // Show restoration message if draft exists
+    if (savedDraft.name || savedDraft.email || savedDraft.message) {
+      status.textContent = 'Draft restored';
+      status.style.color = 'blue';
+      setTimeout(() => {
+        status.textContent = '';
+      }, 3000);
+    }
+    
+    // Auto-save on every input change
+    function saveFormData() {
+      const formData = {
+        name: Elements.name.value,
+        email: Elements.email.value,
+        message: Elements.message.value
+      };
+      
+      // Show saving indicator
+      status.textContent = 'Saving draft...';
+      status.style.color = 'orange';
+      
+      // Save (debounced)
+      formAutoSave.save(formData);
+    }
+    
+    // Attach event listeners
+    Elements.name.addEventListener('input', saveFormData);
+    Elements.email.addEventListener('input', saveFormData);
+    Elements.message.addEventListener('input', saveFormData);
+    
+    // Clear draft button
+    Elements.clearBtn.addEventListener('click', () => {
+      // Clear form
+      Elements.name.value = '';
+      Elements.email.value = '';
+      Elements.message.value = '';
+      
+      // Clear storage
+      formAutoSave.clear();
+      
+      status.textContent = 'Draft cleared';
+      status.style.color = 'red';
+      setTimeout(() => {
+        status.textContent = '';
+      }, 2000);
+    });
+    
+    // Clear draft after successful submission
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      // Submit form data...
+      console.log('Form submitted');
+      
+      // Clear the saved draft
+      formAutoSave.clear();
+      
+      // Clear form
+      form.reset();
+      
+      status.textContent = '✓ Form submitted!';
+      status.style.color = 'green';
+    });
+  </script>
+</body>
+</html>

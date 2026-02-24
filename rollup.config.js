@@ -5,7 +5,7 @@ const isDev = process.env.BUILD === 'development';
 const isProd = process.env.BUILD === 'production';
 
 const banner = `/**
- * DOM Helpers JS v2.3.1
+ * DOM Helpers JS v2.4.1
  * High-performance vanilla JavaScript DOM utilities
  * @license MIT
  * @repository https://github.com/DOMHelpers-Js/dom-helpers
@@ -17,7 +17,12 @@ const terserConfig = {
     pure_getters: true,
     unsafe: true,
     unsafe_comps: true,
-    drop_console: false,
+    drop_console: false,        // handled selectively via pure_funcs below
+    pure_funcs: [
+      'console.log',
+      'console.debug',
+      'console.info'
+    ],
     drop_debugger: true,
     passes: 2
   },
@@ -60,6 +65,12 @@ const modules = [
     name: 'DOMHelpers',
     outputName: 'dom-helpers.reactive',
     description: 'Reactive only (requires core)'
+  },
+  {
+    input: 'src/storage-only.js',
+    name: 'StorageUtils',
+    outputName: 'dom-helpers.storage',
+    description: 'Storage utilities (standalone)'
   }
 ];
 

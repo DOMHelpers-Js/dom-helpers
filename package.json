@@ -1,6 +1,6 @@
 {
   "name": "dom-helpers-js",
-  "version": "2.3.3",
+  "version": "2.4.1",
   "description": "High-performance vanilla JavaScript DOM utilities with intelligent caching, reactive state management, and conditional rendering",
   "main": "dist/dom-helpers.cjs.js",
   "module": "dist/dom-helpers.esm.js",
@@ -8,6 +8,44 @@
   "unpkg": "dist/dom-helpers.min.js",
   "jsdelivr": "dist/dom-helpers.min.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/dom-helpers.esm.js",
+      "require": "./dist/dom-helpers.cjs.js",
+      "browser": "./dist/dom-helpers.umd.js",
+      "default": "./dist/dom-helpers.cjs.js"
+    },
+    "./storage": {
+      "import": "./dist/dom-helpers.storage.esm.js",
+      "require": "./dist/dom-helpers.storage.cjs.js",
+      "browser": "./dist/dom-helpers.storage.umd.js",
+      "default": "./dist/dom-helpers.storage.cjs.js"
+    },
+    "./core": {
+      "import": "./dist/dom-helpers.core.esm.js",
+      "require": "./dist/dom-helpers.core.cjs.js",
+      "browser": "./dist/dom-helpers.core.umd.js",
+      "default": "./dist/dom-helpers.core.cjs.js"
+    },
+    "./reactive": {
+      "import": "./dist/dom-helpers.reactive.esm.js",
+      "require": "./dist/dom-helpers.reactive.cjs.js",
+      "browser": "./dist/dom-helpers.reactive.umd.js",
+      "default": "./dist/dom-helpers.reactive.cjs.js"
+    },
+    "./conditions": {
+      "import": "./dist/dom-helpers.conditions.esm.js",
+      "require": "./dist/dom-helpers.conditions.cjs.js",
+      "browser": "./dist/dom-helpers.conditions.umd.js",
+      "default": "./dist/dom-helpers.conditions.cjs.js"
+    },
+    "./enhancers": {
+      "import": "./dist/dom-helpers.enhancers.esm.js",
+      "require": "./dist/dom-helpers.enhancers.cjs.js",
+      "browser": "./dist/dom-helpers.enhancers.umd.js",
+      "default": "./dist/dom-helpers.enhancers.cjs.js"
+    }
+  },
   "files": [
     "dist",
     "src",
@@ -43,7 +81,11 @@
     "query",
     "performance",
     "caching",
-    "lightweight"
+    "lightweight",
+    "storage",
+    "localstorage",
+    "sessionstorage",
+    "auto-save"
   ],
   "author": "DOMHelpers-Js",
   "license": "MIT",
