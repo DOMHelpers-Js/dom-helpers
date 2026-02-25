@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Selector .on() Demo</title>
+  <style>
+    body { font-family: system-ui, sans-serif; padding: 24px; }
+
+    .box {
+      display: inline-block;
+      padding: 12px 24px;
+      margin: 8px;
+      background: #6366f1;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    #status {
+      margin-top: 16px;
+      font-size: 15px;
+      color: #374151;
+    }
+  </style>
+</head>
+<body>
+
+  <button class="box" id="btn1">Box 1</button>
+  <button class="box" id="btn2">Box 2</button>
+  <button class="box" id="btn3">Box 3</button>
+
+  <p id="status">Click any box...</p>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.min.js"></script>
+  <script>
+
+    // Selector.queryAll — targets ALL elements matching the CSS selector
+    Selector.queryAll('.box').on('click', function (e) {
+      Elements.status.textContent = 'Clicked: ' + e.target.id;
+    });
+
+    Selector.queryAll('.box').on('mouseover', function (e) {
+      e.target.style.background = '#22c55e';
+    });
+
+    Selector.queryAll('.box').on('mouseout', function (e) {
+      e.target.style.background = '#6366f1';
+    });
+
+  </script>
+</body>
+</html>

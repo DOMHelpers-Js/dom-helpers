@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DOM Helpers JS — Complete Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+      padding: 24px;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body.dark {
+      background: #1a1a2e;
+      color: #eaeaea;
+    }
+
+    #app {
+      max-width: 560px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      transition: background 0.3s;
+    }
+
+    body.dark .card {
+      background: #16213e;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+    }
+
+    h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    h2 { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #555; }
+    body.dark h2 { color: #aaa; }
+
+    /* Counter */
+    #counterDisplay {
+      font-size: 48px;
+      font-weight: 800;
+      text-align: center;
+      margin: 12px 0;
+      transition: color 0.2s;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    button {
+      padding: 10px 22px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    button:active { transform: scale(0.97); }
+
+    #incrementBtn { background: #22c55e; color: #fff; }
+    #decrementBtn { background: #ef4444; color: #fff; }
+    #resetBtn     { background: #e5e7eb; color: #333; }
+
+    body.dark #resetBtn { background: #374151; color: #eee; }
+
+    /* Profile */
+    #nameInput {
+      width: 100%;
+      padding: 10px 14px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s, background 0.3s, color 0.3s;
+      background: #fff;
+    }
+
+    body.dark #nameInput {
+      background: #0f3460;
+      border-color: #374151;
+      color: #eaeaea;
+    }
+
+    #nameInput:focus { border-color: #6366f1; }
+
+    #greeting {
+      margin-top: 12px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    #charCount {
+      margin-top: 4px;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    /* Theme */
+    #themeBtn {
+      width: 100%;
+      padding: 12px;
+      font-size: 15px;
+      background: #1a1a2e;
+      color: #eaeaea;
+      border-radius: 8px;
+    }
+
+    body.dark #themeBtn {
+      background: #eaeaea;
+      color: #1a1a2e;
+    }
+
+    #themeLabel {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 13px;
+      color: #9ca3af;
+    }
+
+    /* Status bar */
+    #statusBar {
+      text-align: center;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      background: #f9fafb;
+      color: #6b7280;
+      transition: color 0.2s, background 0.2s;
+    }
+
+    body.dark #statusBar {
+      background: #111827;
+      color: #6b7280;
+    }
+
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 99px;
+      background: #ede9fe;
+      color: #7c3aed;
+      font-weight: 600;
+    }
+
+    body.dark .badge {
+      background: #2e1065;
+      color: #c4b5fd;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="app">
+
+    <!-- Header -->
+    <div class="card">
+      <div class="header-row">
+        <h1>DOM Helpers JS</h1>
+        <span class="badge">v2.4.1</span>
+      </div>
+      <h2>Elements + ReactiveUtils + StorageUtils</h2>
+    </div>
+
+    <!-- Counter -->
+    <div class="card">
+      <h2>Reactive Counter (persisted)</h2>
+      <div id="counterDisplay">0</div>
+      <div class="btn-row">
+        <button id="decrementBtn">− 1</button>
+        <button id="resetBtn">Reset</button>
+        <button id="incrementBtn">+ 1</button>
+      </div>
+    </div>
+
+    <!-- Profile -->
+    <div class="card">
+      <h2>Live Greeting (persisted)</h2>
+      <input id="nameInput" type="text" placeholder="Enter your name…" />
+      <p id="greeting">Hello, stranger!</p>
+      <p id="charCount">0 characters</p>
+    </div>
+
+    <!-- Theme -->
+    <div class="card">
+      <h2>Theme Toggle (persisted)</h2>
+      <button id="themeBtn">🌙 Switch to Dark</button>
+      <p id="themeLabel">Current theme: light</p>
+    </div>
+
+    <!-- Status -->
+    <div id="statusBar">Ready</div>
+
+  </div>
+
+  <!--
+    Using the unminified UMD bundle — the minified build strips
+    StorageUtils.createAutoSave via terser dead-code elimination.
+    The UMD bundle has all APIs fully intact.
+  -->
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.umd.js"></script>
+
+  <script>
+    // =========================================================================
+    // STATE — restored from localStorage on load, defaults used on first visit
+    // =========================================================================
+
+    const state = ReactiveUtils.state({
+      count : StorageUtils.load('count',  0,       { namespace: 'demo' }),
+      name  : StorageUtils.load('name',   '',      { namespace: 'demo' }),
+      theme : StorageUtils.load('theme',  'light', { namespace: 'demo' }),
+    });
+
+    // =========================================================================
+    // AUTO-SAVE — debounced write to localStorage on every state change
+    // =========================================================================
+
+    const store = StorageUtils.createAutoSave('appState', {
+      namespace: 'demo',
+      debounce: 300,
+      onSave: () => {
+        Elements.statusBar.update({
+          textContent: '✓ Saved',
+          style: { color: 'green' }
+        });
+        setTimeout(() => {
+          Elements.statusBar.update({
+            textContent: 'Ready',
+            style: { color: '' }
+          });
+        }, 1500);
+      }
+    });
+
+    // =========================================================================
+    // EFFECTS — DOM updates fire automatically whenever state changes
+    // =========================================================================
+
+    // Counter: text + color based on positive / zero / negative
+    ReactiveUtils.effect(() => {
+      const c = state.count;
+      Elements.counterDisplay.update({
+        textContent: c,
+        style: {
+          color: c > 0 ? '#22c55e' : c < 0 ? '#ef4444' : '#111827'
+        }
+      });
+    });
+
+    // Greeting: updates as user types their name
+    ReactiveUtils.effect(() => {
+      const name = state.name.trim();
+      Elements.greeting.update({
+        textContent: name ? `Hello, ${name}!` : 'Hello, stranger!',
+        style: {
+          color     : name ? '#6366f1' : '#9ca3af',
+          fontStyle : name ? 'normal' : 'italic'
+        }
+      });
+      Elements.charCount.textContent = `${state.name.length} / 40 characters`;
+    });
+
+    // Theme: toggle dark class on body + update button + label text
+    ReactiveUtils.effect(() => {
+      const isDark = state.theme === 'dark';
+      if (isDark) {
+        document.body.classList.add('dark');
+      } else {
+        document.body.classList.remove('dark');
+      }
+      Elements.themeBtn.textContent  = isDark ? '☀ Switch to Light' : '🌙 Switch to Dark';
+      Elements.themeLabel.textContent = `Current theme: ${state.theme}`;
+    });
+
+    // Persist — runs whenever any state value is accessed (all three keys)
+    ReactiveUtils.effect(() => {
+      StorageUtils.save('count', state.count, { namespace: 'demo' });
+      StorageUtils.save('name',  state.name,  { namespace: 'demo' });
+      StorageUtils.save('theme', state.theme, { namespace: 'demo' });
+      store.save({ count: state.count, name: state.name, theme: state.theme });
+    });
+
+    // =========================================================================
+    // EVENTS — only mutate state; effects above handle all DOM + storage
+    // =========================================================================
+
+    Elements.incrementBtn.addEventListener('click', () => { state.count++; });
+    Elements.decrementBtn.addEventListener('click', () => { state.count--; });
+    Elements.resetBtn.addEventListener('click', () => {
+      state.count = 0;
+      StorageUtils.clear('count', { namespace: 'demo' });
+    });
+
+    Elements.nameInput.addEventListener('input', (e) => {
+      state.name = e.target.value.slice(0, 40);
+    });
+
+    Elements.themeBtn.addEventListener('click', () => {
+      state.theme = state.theme === 'light' ? 'dark' : 'light';
+    });
+
+    // =========================================================================
+    // RESTORE — set input value from persisted state on page load
+    // =========================================================================
+
+    Elements.nameInput.value = state.name;
+
+    // =========================================================================
+    // CROSS-TAB SYNC — if another tab changes storage, sync this tab too
+    // =========================================================================
+
+    StorageUtils.watch('count', (val) => { if (val !== null) state.count = val; }, { namespace: 'demo' });
+    StorageUtils.watch('theme', (val) => { if (val !== null) state.theme = val; }, { namespace: 'demo' });
+    StorageUtils.watch('name',  (val) => {
+      if (val !== null) {
+        state.name = val;
+        Elements.nameInput.value = val;
+      }
+    }, { namespace: 'demo' });
+
+  </script>
+</body>
+</html>
