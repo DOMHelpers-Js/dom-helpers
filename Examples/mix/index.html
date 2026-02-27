@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>DOM Helpers Playground</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    .highlight {
+      background-color: yellow;
+    }
+
+    .fancy {
+      border: 8px solid #333;
+      padding: 15px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>DOM Helpers Test App</h1>
+  <button id="myBtn">Click Me</button>
+  <p id="myText">This text will be updated...</p>
+  <div id="list"></div>
+
+<script src="../../src/Core/01_elements.js"></script>
+ 
+  <script>
+  
+   Elements.myBtn.update({
+      textContent: "Enhanced Button",
+      style: {
+        color: "white",
+        backgroundColor: "blue",
+        padding: "10px"
+      },
+      classList: {
+        add: ["fancy"],        // Array format works
+        toggle: ["highlight"]  // Change to array format
+      },
+      setAttribute: ["data-role", "button"],
+      addEventListener: ["click", function () {
+        Elements.myText.update({
+          textContent: "You clicked the button!",
+
+        });
+
+        const newItem = document.createElement("p");
+        newItem.textContent = "New item added!";
+        Elements.list.appendChild(newItem);
+      }]
+    });
+
+    Elements.myText.update({
+      style: { fontSize: "18px", color: "darkgreen" }
+    });
+
+
+  </script>
+</body>
+
+</html>

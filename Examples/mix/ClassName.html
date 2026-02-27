@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>Collections.ClassName test</title>
+  <style>
+    .card {
+      padding: 10px;
+      margin: 5px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+    }
+
+    .fancy {
+      border: 2px solid #333;
+      border-radius: 6px;
+    }
+
+    .highlight {
+      background: #ffeb3b;
+    }
+
+    .active {
+      transform: scale(1.05);
+      background: lightgreen;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">Card 1</div>
+  <div class="card">Card 2</div>
+  <div class="card">Card 3</div>
+  <p id="status">Click a card...</p>
+
+ <script src="../../src/Core/01_dh-core.js"></script>
+ <script src="../../src/Enhancers/bundled-enhancers/enhancers.js"></script>
+
+  <script>
+  
+  // Apply different updates to each card by index
+Selector.queryAll(".card").update({
+    // Index-based updates for specific cards
+    [0]: {
+      textContent: "I am card 1",
+      style: { color: "white", backgroundColor: "red", padding: "15px" }
+    },
+    [1]: {
+      textContent: "I am card 2", 
+      style: { color: "white", backgroundColor: "green", padding: "15px" }
+    },
+    [2]: {
+      textContent: "I am card 3",
+      style: { color: "white", backgroundColor: "purple", padding: "15px" }
+    },
+    
+    // Shared properties applied to ALL cards (no index)
+    style: { fontSize: "18px" },
+    classList: { add: ["fancy", "highlight"] },
+    onclick: function() {
+      this.classList.toggle("active");
+      Elements.status.update({
+        textContent: `${this.textContent} was clicked!`
+      });
+    }
+  });
+
+  </script>
+</body>
+
+</html>

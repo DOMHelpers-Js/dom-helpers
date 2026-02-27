@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    .item { 
+      padding: 15px; 
+      margin: 5px; 
+      border-radius: 8px;
+      transition: all 0.3s;
+    }
+  </style>
+</head>
+<body>
+  <div class="item">Header</div>
+  <div class="item">Item 1</div>
+  <div class="item">Item 2</div>
+  <div class="item">Footer</div>
+
+  <button onclick="setMode('normal')">Normal</button>
+  <button onclick="setMode('alert')">Alert</button>
+
+  <!-- Include standalone file -->
+
+ 
+ <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.min.js"></script>
+
+  <script>
+    function setMode(mode) {
+      Conditions.apply(
+        mode,
+        {
+          'normal': {
+            // Shared for all
+            style: { 
+              background: '#e8f5e9',
+              border: '2px solid #4caf50'
+            },
+            
+            // First item (header)
+            0: {
+              style: {
+                background: '#4caf50',
+                color: 'white',
+                fontSize: '24px',
+                fontWeight: 'bold'
+              },
+              textContent: '✅ System Normal'
+            },
+            
+            // Last item (footer)
+            '-1': {
+              style: {
+                background: '#c8e6c9',
+                fontStyle: 'italic'
+              },
+              textContent: 'All systems operational'
+            }
+          },
+          
+          'alert': {
+            // Shared
+            style: { 
+              background: '#fff3e0',
+              border: '3px solid #ff9800'
+            },
+            
+            // Header
+            0: {
+              style: {
+                background: '#ff9800',
+                color: 'white',
+                fontSize: '24px'
+              },
+              textContent: '⚠️ Alert Mode'
+            },
+            
+            // Middle items get pulse
+            1: {
+              style: {
+                animation: 'pulse 1s infinite'
+              }
+            },
+            2: {
+              style: {
+                animation: 'pulse 1s infinite'
+              }
+            },
+            
+            // Footer
+            '-1': {
+              style: {
+                background: '#ffcc80'
+              },
+              textContent: '⚡ Action required'
+            }
+          }
+        },
+        '.item'
+      );
+    }
+    
+    // Set initial
+    setMode('normal');
+  </script>
+</body>
+</html>

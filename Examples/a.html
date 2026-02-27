@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>DOM Helpers Example</title>
+    <style>
+      .hot {
+        color: red;
+        font-weight: bold;
+      }
+      .cool {
+        color: blue;
+        font-weight: normal;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 id="mytitle">Counter</h1>
+    <p id="countValue">0</p>
+    <button id="incBtn">+1</button>
+    <button id="resetBtn">Reset</button>
+
+<script src="../dist/dom-helpers.core.min.js"></script>
+<script src="../dist/dom-helpers.reactive.min.js"></script>
+   
+   <script>
+      // 1) Reactive state
+      const counter = ReactiveUtils.state({ value: 0 });
+
+      // 2) Reactive DOM binding (declarative update)
+       ReactiveUtils.effect(() => {
+        const isHot = counter.value >= 10;
+
+        Elements.countValue.update({
+          textContent: `Count: ${counter.value}`,
+          className: isHot ? "hot" : "cool"
+        });
+
+        Elements.mytitle.update({
+          textContent: isHot ? "Counter (HOT)" : "Counter"
+        });
+      });
+
+      // 3) Events (plain JS)
+      Elements.incBtn.addEventListener("click", () => {
+        counter.value++;
+      });
+
+      Elements.resetBtn.addEventListener("click", () => {
+        counter.value = 0;
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Header/Body/Footer Pattern</title>
+  <script src="../../src/Core/Modular/01_dh-core.js"></script>
+  <script src="../../src/Core/Modular/06_dh-global-collection.js"></script>
+</head>
+<body>
+  <div class="section">Section 1</div>
+  <div class="section">Section 2</div>
+  <div class="section">Section 3</div>
+
+  <script>
+// Example script demonstrating header/body/footer pattern using index selection
+
+    // First section - Header style
+    ClassName.section[0].update({
+      textContent: 'Header Section',
+      style: {
+        backgroundColor: '#2c3e50',
+        color: 'white',
+        padding: '30px',
+        fontSize: '24px',
+        fontWeight: 'bold',
+        textAlign: 'center',
+        borderBottom: '4px solid #3498db'
+      }
+    });
+
+    // Middle section - Body style
+    ClassName.section[1].update({
+      textContent: 'Body Section',
+      style: {
+        backgroundColor: '#ecf0f1',
+        color: '#2c3e50',
+        padding: '40px',
+        fontSize: '16px',
+        lineHeight: '1.6',
+        minHeight: '300px'
+      }
+    });
+
+    // Last section - Footer style
+    ClassName.section[-1].update({
+      textContent: 'Footer Section',
+      style: {
+        backgroundColor: '#34495e',
+        color: 'white',
+        padding: '20px',
+        fontSize: '14px',
+        textAlign: 'center',
+        borderTop: '4px solid #95a5a6'
+      }
+    });
+  </script>
+</body>
+</html>

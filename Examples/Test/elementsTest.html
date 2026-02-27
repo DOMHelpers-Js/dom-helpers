@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>DOM Helpers Demo — get, getRequired, waitFor</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f7f7f7;
+      padding: 20px;
+    }
+    .section {
+      border: 2px solid #ddd;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 20px;
+      background: white;
+    }
+    button {
+      padding: 8px 15px;
+      border-radius: 6px;
+      border: none;
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    #log {
+      margin-top: 10px;
+      background: #222;
+      color: #0f0;
+      padding: 10px;
+      font-family: monospace;
+      border-radius: 8px;
+      height: 150px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>DOM Helpers Library Test</h1>
+
+  <div class="section">
+    <h2>1️⃣ Elements.get(id, fallback)</h2>
+    <p id="existing">I already exist!</p>
+    <button id="getBtn">Test Elements.get()</button>
+  </div>
+
+  <div class="section">
+    <h2>2️⃣ Elements.getRequired(...ids)</h2>
+    <p id="required1">Required element 1</p>
+    <p id="required2">Required element 1</p>
+    <button id="requiredBtn">Test Elements.getRequired()</button>
+  </div>
+
+  <div class="section">
+    <h2>3️⃣ Elements.waitFor(...ids)</h2>
+    <button id="createBtn">Create #delayed after 2 seconds</button>
+  </div>
+
+  <div id="log"></div>
+
+  <!-- ✅ Load your real DOM Helpers library -->
+<script src="../../src/Core/01_dom-helpers.js"></script>
+  <script src="../../src/Core/02_dh-bulk-property-updaters.js"></script>
+  <script src="../../src/Core/03_dh-collection-shortcuts.js"></script>
+  <script src="../../src/Core/04_dh-global-query.js"></script>
+  <script src="../../src/Core/05_dh-indexed-collection-updates.js"></script>
+  <script src="../../src/Core/06_dh-index-selection.js"></script>
+  <script src="../../src/Core/07_dh-global-collection-indexed-updates.js"></script>
+  <script src="../../src/Core/08_dh-conditional-rendering.js"></script>
+  <script src="../../src/Core/09_dh-conditions-default.js"></script>
+  <script src="../../src/Core/10_dh-selector-update-patch.js"></script>
+  <script src="../../src/Core/11_dh-bulk-properties-updater-global-query.js"></script>
+
+  <script>
+    const logBox = document.getElementById('log');
+    const log = msg => logBox.innerHTML += msg + '<br>';
+
+    // 1️⃣ Elements.get()
+    const getBtn = Elements.get('getBtn');
+    getBtn.addEventListener('click', () => {
+      const existing = Elements.get('existing');
+      const notFound = Elements.get('missing', () => {
+        const span = document.createElement('span');
+        span.textContent = '(Fallback created dynamically)';
+        span.style.color = 'red';
+        document.body.appendChild(span);
+        return span;
+      });
+
+      log(`✅ existing.textContent = "${existing.textContent}"`);
+      log(`🧩 fallback element created -> ${notFound.textContent}`);
+    });
+
+    // 2️⃣ Elements.getRequired()
+    const requiredBtn = Elements.get('requiredBtn');
+    requiredBtn.addEventListener('click', () => {
+      try {
+        const { required1, required2 } = Elements.getRequired('required1', 'required2');
+        log(`✅ Got required elements: ${required1.id}, ${required2.id}`);
+      } catch (err) {
+        log(`❌ ${err.message}`);
+      }
+    });
+
+    // 3️⃣ Elements.waitFor()
+    const createBtn = Elements.get('createBtn');
+    createBtn.addEventListener('click', async () => {
+      log('🕒 Creating element #delayed in 2 seconds...');
+      setTimeout(() => {
+        const div = document.createElement('div');
+        div.id = 'delayed';
+        div.textContent = 'I was created dynamically!';
+        document.body.appendChild(div);
+      }, 2000);
+
+      const { delayed } = await Elements.waitFor('delayed');
+      log(`✅ Found dynamically created element: ${delayed.id}`);
+      delayed.style.color = 'green';
+    });
+  </script>
+</body>
+</html>

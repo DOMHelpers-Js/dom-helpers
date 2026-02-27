@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Selector.query / queryAll test</title>
+  <style>
+    .box { padding: 10px; margin: 5px; border: 1px solid #ccc; cursor: pointer; }
+    .highlight { background-color: yellow; }
+    .active { transform: scale(1.05); background-color: lightgreen; }
+  </style>
+</head>
+<body>
+  <h2>Selector Test</h2>
+
+  <div id="single" class="box">Single Box</div>
+  <div class="multi box">Box 1</div>
+  <div class="multi box">Box 2</div>
+  <div class="multi box">Box 3</div>
+  <p id="status">Click a box...</p>
+
+  <!-- Load local library -->
+
+ 
+
+  <script src="../../modular/core/elements.js"></script>
+  <script src="../../modular/core/collections.js"></script>
+  <script src="../../modular/core/selector.js"></script>
+  <script src="../../modular/enhancers/core-update-engine.js"></script>
+  <script src="../../modular/enhancers/query-enhancements.js"></script>
+  <script src="../../modular/enhancers/collection-shortcuts.js"></script>
+  <script src="../../modular/enhancers/array-based-updates.js"></script>
+  
+  
+  <script>
+    // Using Selector.query() — single element
+    Selector.query("#single").update({
+      textContent: "Single Box Updated",
+      style: { color: "white", backgroundColor: "blue" },
+      classList: { add: "highlight" },
+      onclick: function() {
+        this.classList.toggle("active");
+        Elements.status.update({ textContent: "Single box clicked!" });
+      }
+    });
+
+    // Using Selector.queryAll() — multiple elements
+    Selector.queryAll(".multi").update({
+      textContent: "Multi Box Updated",
+      style: { color: "white", backgroundColor: "purple" },
+      classList: { add: ["highlight"] },
+      onclick: function() {
+        this.classList.toggle("active");
+        Elements.status.update({ textContent: `${this.textContent} clicked!` });
+      }
+    });
+  </script>
+</body>
+</html>

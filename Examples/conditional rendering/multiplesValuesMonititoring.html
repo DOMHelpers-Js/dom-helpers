@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conditions - Multiple Data Monitor Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+
+    .controls {
+      background: #f5f5f5;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+
+    .control-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: inline-block;
+      width: 150px;
+      font-weight: bold;
+    }
+
+    input,
+    select {
+      padding: 8px;
+      font-size: 16px;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .status-display {
+      padding: 30px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      margin-bottom: 20px;
+    }
+
+    .user-info {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .info-card {
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .info-card h3 {
+      margin: 0 0 10px 0;
+      font-size: 14px;
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+
+    .info-card p {
+      margin: 0;
+      font-size: 24px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>🎯 Multiple Data Monitor Demo</h1>
+  <p>This demo monitors multiple data points (age, role, status) simultaneously and updates UI based on combined
+    conditions.</p>
+
+  <!-- Controls -->
+  <div class="controls">
+    <div class="control-group">
+      <label for="age">Age:</label>
+      <input type="number" id="age" value="25" min="0" max="100">
+    </div>
+
+    <div class="control-group">
+      <label for="role">Role:</label>
+      <select id="role">
+        <option value="guest">Guest</option>
+        <option value="user" selected>User</option>
+        <option value="admin">Admin</option>
+        <option value="moderator">Moderator</option>
+      </select>
+    </div>
+
+    <div class="control-group">
+      <label for="status">Account Status:</label>
+      <select id="status">
+        <option value="active" selected>Active</option>
+        <option value="inactive">Inactive</option>
+        <option value="suspended">Suspended</option>
+        <option value="pending">Pending</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Display Area -->
+  <div class="status-display" id="status-display">
+    Ready
+  </div>
+
+  <div class="user-info">
+    <div class="info-card" id="card-access">
+      <h3>Access Level</h3>
+      <p>-</p>
+    </div>
+    <div class="info-card" id="card-permissions">
+      <h3>Permissions</h3>
+      <p>-</p>
+    </div>
+    <div class="info-card" id="card-category">
+      <h3>Category</h3>
+      <p>-</p>
+    </div>
+  </div>
+
+  <!-- Load YOUR Libraries -->
+<script src="../../src/DOMHelpers/03_dh-reactive.js"></script>
+<script src="../../src/DOMHelpers/05_dh-conditions.js"></script>
+
+  <!-- Demo Application -->
+  <script>
+    // Create reactive state (using YOUR reactive library)
+    const state = ReactiveUtils.state({
+      age: 25,
+      role: 'user',
+      status: 'active'
+    });
+
+    console.log('Initial state:', state);
+
+    // ========================================================================
+    // TECHNIQUE 1: Combined String Key
+    // Monitor all 3 values by combining them into a single condition string
+    // ========================================================================
+
+    Conditions.whenState(
+      () => {
+        // Combine multiple values into one key
+        const ageCategory = state.age >= 18 ? 'adult' : 'minor';
+        const key = `${state.role}-${state.status}-${ageCategory}`;
+        console.log('Combined key:', key);
+        return key;
+      },
+      {
+        // Exact matches for all combinations
+        'admin-active-adult': {
+          style: {
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white'
+          },
+          textContent: '🔐 Full Admin Access'
+        },
+
+        'admin-active-minor': {
+          style: {
+            background: '#ff6b6b',
+            color: 'white'
+          },
+          textContent: '⚠️ Admin access requires 18+'
+        },
+
+        'admin-suspended-adult': {
+          style: {
+            background: '#2c3e50',
+            color: 'white'
+          },
+          textContent: '🚫 Admin Account Suspended'
+        },
+
+        'admin-suspended-minor': {
+          style: {
+            background: '#2c3e50',
+            color: 'white'
+          },
+          textContent: '🚫 Account Suspended'
+        },
+
+        'user-active-adult': {
+          style: {
+            background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+            color: 'white'
+          },
+          textContent: '✓ Standard Access'
+        },
+
+        'user-active-minor': {
+          style: {
+            background: '#9b59b6',
+            color: 'white'
+          },
+          textContent: '🎓 Junior User'
+        },
+
+        'user-suspended-adult': {
+          style: {
+            background: '#2c3e50',
+            color: 'white'
+          },
+          textContent: '🚫 Account Suspended'
+        },
+
+        'user-suspended-minor': {
+          style: {
+            background: '#2c3e50',
+            color: 'white'
+          },
+          textContent: '🚫 Account Suspended'
+        },
+
+        'user-pending-adult': {
+          style: {
+            background: '#f39c12',
+            color: 'white'
+          },
+          textContent: '⏳ Awaiting Verification'
+        },
+
+        'user-pending-minor': {
+          style: {
+            background: '#f39c12',
+            color: 'white'
+          },
+          textContent: '⏳ Awaiting Verification'
+        },
+
+        'guest-active-adult': {
+          style: {
+            background: '#95a5a6',
+            color: 'white'
+          },
+          textContent: '👤 Guest Mode'
+        },
+
+        'guest-active-minor': {
+          style: {
+            background: '#95a5a6',
+            color: 'white'
+          },
+          textContent: '👤 Guest Mode (Junior)'
+        },
+
+        'moderator-active-adult': {
+          style: {
+            background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+            color: 'white'
+          },
+          textContent: '🛡️ Moderator Access'
+        },
+
+        'moderator-active-minor': {
+          style: {
+            background: '#ff6b6b',
+            color: 'white'
+          },
+          textContent: '⚠️ Moderator requires 18+'
+        },
+
+        'moderator-suspended-adult': {
+          style: {
+            background: '#2c3e50',
+            color: 'white'
+          },
+          textContent: '🚫 Moderator Suspended'
+        },
+
+        // Default fallback
+        'default': {
+          style: {
+            background: '#ecf0f1',
+            color: '#2c3e50'
+          },
+          textContent: '❓ Unknown Status'
+        }
+      },
+      '#status-display'
+    );
+
+    // ========================================================================
+    // TECHNIQUE 2: Multiple Separate Conditions
+    // Each monitors different aspects independently
+    // ========================================================================
+
+    // Monitor 1: Access Level (role + status)
+    Conditions.whenState(
+      () => `${state.role}-${state.status}`,
+      {
+        'admin-active': {
+          style: { background: '#667eea', color: 'white' },
+          innerHTML: '<h3>Access Level</h3><p>Full</p>'
+        },
+        'admin-suspended': {
+          style: { background: '#2c3e50', color: 'white' },
+          innerHTML: '<h3>Access Level</h3><p>Blocked</p>'
+        },
+        'admin-pending': {
+          style: { background: '#f39c12', color: 'white' },
+          innerHTML: '<h3>Access Level</h3><p>Pending</p>'
+        },
+        'admin-inactive': {
+          style: { background: '#7f8c8d', color: 'white' },
+          innerHTML: '<h3>Access Level</h3><p>Inactive</p>'
+        },
+
+        'moderator-active': {
+          style: { background: '#4facfe', color: 'white' },
+          innerHTML: '<h3>Access Level</h3><p>High</p>'
+        },
+        'moderator-suspended': {
+          style: { background: '#2c3e50', color: 'white' },
+          innerHTML: '<h3>Access Level</h3><p>Blocked</p>'
+        },
+
+        'user-active': {
+          style: { background: '#f093fb', color: 'white' },
+          innerHTML: '<h3>Access Level</h3><p>Standard</p>'
+        },
+        'user-suspended': {
+          style: { background: '#2c3e50', color: 'white' },
+          innerHTML: '<h3>Access Level</h3><p>Blocked</p>'
+        },
+        'user-pending': {
+          style: { background: '#f39c12', color: 'white' },
+          innerHTML: '<h3>Access Level</h3><p>Pending</p>'
+        },
+        'user-inactive': {
+          style: { background: '#7f8c8d', color: 'white' },
+          innerHTML: '<h3>Access Level</h3><p>Inactive</p>'
+        },
+
+        'guest-active': {
+          style: { background: '#95a5a6', color: 'white' },
+          innerHTML: '<h3>Access Level</h3><p>Guest</p>'
+        },
+        'guest-suspended': {
+          style: { background: '#2c3e50', color: 'white' },
+          innerHTML: '<h3>Access Level</h3><p>Blocked</p>'
+        },
+        'guest-inactive': {
+          style: { background: '#7f8c8d', color: 'white' },
+          innerHTML: '<h3>Access Level</h3><p>Guest</p>'
+        },
+
+        'default': {
+          style: { background: '#ecf0f1', color: '#2c3e50' },
+          innerHTML: '<h3>Access Level</h3><p>Unknown</p>'
+        }
+      },
+      '#card-access'
+    );
+
+    // Monitor 2: Permissions (role + age)
+    Conditions.whenState(
+      () => {
+        const ageCategory = state.age >= 18 ? 'adult' : 'minor';
+        return `${state.role}-${ageCategory}`;
+      },
+      {
+        'admin-adult': {
+          style: { background: '#27ae60', color: 'white' },
+          innerHTML: '<h3>Permissions</h3><p>All</p>'
+        },
+        'admin-minor': {
+          style: { background: '#e74c3c', color: 'white' },
+          innerHTML: '<h3>Permissions</h3><p>Age Restricted</p>'
+        },
+
+        'moderator-adult': {
+          style: { background: '#27ae60', color: 'white' },
+          innerHTML: '<h3>Permissions</h3><p>Moderate</p>'
+        },
+        'moderator-minor': {
+          style: { background: '#e74c3c', color: 'white' },
+          innerHTML: '<h3>Permissions</h3><p>Age Restricted</p>'
+        },
+
+        'user-adult': {
+          style: { background: '#3498db', color: 'white' },
+          innerHTML: '<h3>Permissions</h3><p>Standard</p>'
+        },
+        'user-minor': {
+          style: { background: '#f39c12', color: 'white' },
+          innerHTML: '<h3>Permissions</h3><p>Limited</p>'
+        },
+
+        'guest-adult': {
+          style: { background: '#95a5a6', color: 'white' },
+          innerHTML: '<h3>Permissions</h3><p>Read Only</p>'
+        },
+        'guest-minor': {
+          style: { background: '#95a5a6', color: 'white' },
+          innerHTML: '<h3>Permissions</h3><p>Read Only</p>'
+        },
+
+        'default': {
+          style: { background: '#ecf0f1', color: '#2c3e50' },
+          innerHTML: '<h3>Permissions</h3><p>None</p>'
+        }
+      },
+      '#card-permissions'
+    );
+
+    // Monitor 3: User Category (complex computed value from all 3)
+    Conditions.whenState(
+      () => {
+        const isAdult = state.age >= 18;
+        const isActive = state.status === 'active';
+        const isPremium = state.role === 'admin' || state.role === 'moderator';
+
+        // Create category based on all conditions
+        if (state.status === 'suspended') return 'suspended';
+        if (state.status === 'pending') return 'pending-verification';
+        if (!isActive) return 'inactive-user';
+        if (isPremium && isAdult) return 'premium-member';
+        if (isPremium && !isAdult) return 'premium-restricted';
+        if (isAdult) return 'standard-member';
+        return 'junior-member';
+      },
+      {
+        'premium-member': {
+          style: {
+            background: 'linear-gradient(135deg, #ffd89b 0%, #19547b 100%)',
+            color: 'white'
+          },
+          innerHTML: '<h3>Category</h3><p>⭐ Premium</p>'
+        },
+        'premium-restricted': {
+          style: { background: '#e74c3c', color: 'white' },
+          innerHTML: '<h3>Category</h3><p>🔒 Restricted</p>'
+        },
+        'standard-member': {
+          style: { background: '#3498db', color: 'white' },
+          innerHTML: '<h3>Category</h3><p>✓ Standard</p>'
+        },
+        'junior-member': {
+          style: { background: '#9b59b6', color: 'white' },
+          innerHTML: '<h3>Category</h3><p>🎓 Junior</p>'
+        },
+        'suspended': {
+          style: { background: '#2c3e50', color: 'white' },
+          innerHTML: '<h3>Category</h3><p>🚫 Suspended</p>'
+        },
+        'pending-verification': {
+          style: { background: '#f39c12', color: 'white' },
+          innerHTML: '<h3>Category</h3><p>⏳ Pending</p>'
+        },
+        'inactive-user': {
+          style: { background: '#7f8c8d', color: 'white' },
+          innerHTML: '<h3>Category</h3><p>💤 Inactive</p>'
+        },
+        'default': {
+          style: { background: '#ecf0f1', color: '#2c3e50' },
+          innerHTML: '<h3>Category</h3><p>-</p>'
+        }
+      },
+      '#card-category'
+    );
+
+    // ========================================================================
+    // Wire up controls to reactive state
+    // ========================================================================
+
+    document.getElementById('age').addEventListener('input', (e) => {
+      state.age = parseInt(e.target.value) || 0;
+      console.log('Age changed to:', state.age);
+    });
+
+    document.getElementById('role').addEventListener('change', (e) => {
+      state.role = e.target.value;
+      console.log('Role changed to:', state.role);
+    });
+
+    document.getElementById('status').addEventListener('change', (e) => {
+      state.status = e.target.value;
+      console.log('Status changed to:', state.status);
+    });
+
+    console.log('✅ Demo ready! Change the controls to see reactive updates.');
+    console.log('📊 4 separate conditions monitoring:', {
+      main: 'role + status + age',
+      card1: 'role + status',
+      card2: 'role + age',
+      card3: 'complex logic from all 3'
+    });
+  </script>
+
+</body>
+
+</html>

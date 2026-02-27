@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Global Query with Index Selection</title>
+</head>
+<body>
+  <div class="container">
+    <button class="btn">Button 1</button>
+    <button class="btn">Button 2</button>
+    <button class="btn">Button 3</button>
+    <button class="btn">Button 4</button>
+  </div>
+
+  <!-- LOAD ORDER IS CRITICAL! -->
+  
+  <!-- 1. Load main DOM helpers FIRST -->
+ <script src="../../src/Core/01_dom-helpers.js"></script>
+  <script src="../../src/Core/02_dh-bulk-property-updaters.js"></script>
+  <script src="../../src/Core/03_dh-collection-shortcuts.js"></script>
+  <script src="../../src/Core/04_dh-global-query.js"></script>
+  <script src="../../src/Core/05_dh-indexed-collection-updates.js"></script>
+  <script src="../../src/Core/06_dh-index-selection.js"></script>
+  <script src="../../src/Core/07_dh-global-collection-indexed-updates.js"></script>
+  <script src="../../src/Core/08_dh-conditional-rendering.js"></script>
+  <script src="../../src/Core/09_dh-conditions-default.js"></script>
+  <script src="../../src/Core/10_dh-selector-update-patch.js"></script>
+  <script src="../../src/Core/11_dh-bulk-properties-updater-global-query.js"></script>
+
+  <!-- 3. Now use them -->
+  <script>
+    // ✅ Now this works with index selection!
+    const buttons = querySelectorAll('.btn'); // or queryAll('.btn')
+
+    // Index selection with .update()
+    buttons[0].update({
+      textContent: 'First Button',
+      style: {
+        backgroundColor: 'red',
+        color: 'white',
+        padding: '10px 20px',
+        border: 'none',
+        borderRadius: '5px'
+      }
+    });
+
+    buttons[1].update({
+      textContent: 'Second Button',
+      style: {
+        backgroundColor: 'blue',
+        color: 'white',
+        padding: '10px 20px'
+      }
+    });
+
+    buttons[2].update({
+      textContent: 'Third Button',
+      style: {
+        backgroundColor: 'green',
+        color: 'white',
+        padding: '10px 20px'
+      }
+    });
+
+    // Using .at() with negative index
+    buttons.at(-1).update({
+      textContent: 'Last Button',
+      style: {
+        backgroundColor: 'purple',
+        color: 'white',
+        padding: '10px 20px'
+      }
+    });
+
+    // Using .first() and .last()
+    buttons.first().update({
+      style: { fontWeight: 'bold' }
+    });
+
+    buttons.last().update({
+      style: { fontStyle: 'italic' }
+    });
+
+    // Verify it works
+    console.log('Button 0:', buttons[0]);
+    console.log('Has update:', typeof buttons[0].update === 'function');
+  </script>
+</body>
+</html>

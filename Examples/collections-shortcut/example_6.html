@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dot Notation with Index</title>
+<script src="../../src/Core/01_dom-helpers.js"></script>
+  <script src="../../src/Core/02_dh-bulk-property-updaters.js"></script>
+  <script src="../../src/Core/03_dh-collection-shortcuts.js"></script>
+  <script src="../../src/Core/04_dh-global-query.js"></script>
+  <script src="../../src/Core/05_dh-indexed-collection-updates.js"></script>
+  <script src="../../src/Core/06_dh-index-selection.js"></script>
+  <script src="../../src/Core/07_dh-global-collection-indexed-updates.js"></script>
+  <script src="../../src/Core/08_dh-conditional-rendering.js"></script>
+  <script src="../../src/Core/09_dh-conditions-default.js"></script>
+  <script src="../../src/Core/10_dh-selector-update-patch.js"></script>
+  <script src="../../src/Core/11_dh-bulk-properties-updater-global-query.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="item-box">Container 1 - Item 1</div>
+    <div class="item-box">Container 1 - Item 2</div>
+    <div class="item-box">Container 1 - Item 3</div>
+  </div>
+  
+  <div class="container">
+    <div class="item-box">Container 2 - Item 1</div>
+    <div class="item-box">Container 2 - Item 2</div>
+  </div>
+
+  <script>
+// Example script demonstrating dot notation with index selection
+
+    // Access items within containers using dot notation + index
+    // First item in any container
+    ClassName['item-box'][0].update({
+      style: {
+        backgroundColor: 'gold',
+        color: 'black',
+        padding: '15px',
+        fontWeight: 'bold',
+        border: '2px solid #FFD700'
+      }
+    });
+
+    // Second item in any container
+    ClassName['item-box'][1].update({
+      style: {
+        backgroundColor: 'silver',
+        color: 'black',
+        padding: '15px',
+        border: '2px solid #C0C0C0'
+      }
+    });
+
+    // Last item in any container
+    ClassName['item-box'][-1].update({
+      style: {
+        backgroundColor: '#CD7F32',
+        color: 'white',
+        padding: '15px',
+        border: '2px solid #8B4513'
+      }
+    });
+  </script>
+</body>
+</html>

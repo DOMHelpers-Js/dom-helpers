@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulk Update Feature Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            color: #555;
+            margin-top: 30px;
+        }
+
+        .demo-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-warning {
+            background-color: #ffc107;
+            color: #333;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .result {
+            padding: 15px;
+            margin-top: 15px;
+            background: #e9ecef;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        .card {
+            padding: 15px;
+            margin: 10px 0;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 5px;
+            border-radius: 2px;
+        }
+
+        input {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🚀 Bulk Update Feature Test</h1>
+        <p class="info message">
+            This page demonstrates the new bulk update feature that allows updating multiple elements in a single call
+            using Elements.update(), Collections.update(), and Selector.update().
+        </p>
+    </div>
+
+    <!-- Elements.update() Demo -->
+    <div class="container">
+        <h2>1. Elements.update() - Update Multiple Elements by ID</h2>
+        <div class="demo-section">
+            <h1 id="title">Original Title</h1>
+            <p id="description">This is the original description text.</p>
+            <button id="actionBtn" class="btn-primary">Original Button</button>
+
+            <hr style="margin: 20px 0;">
+
+            <button onclick="testElementsUpdate()">Test Elements.update()</button>
+            <button onclick="resetElements()">Reset</button>
+
+            <div id="elementsResult" class="result"></div>
+        </div>
+    </div>
+
+    <!-- Collections.update() Demo -->
+    <div class="container">
+        <h2>2. Collections.update() - Update Multiple Collections</h2>
+        <div class="demo-section">
+            <div class="card">Card 1</div>
+            <div class="card">Card 2</div>
+            <div class="card">Card 3</div>
+
+            <p class="message">Message 1</p>
+            <p class="message">Message 2</p>
+
+            <hr style="margin: 20px 0;">
+
+            <button onclick="testCollectionsUpdate()">Test Collections.update()</button>
+            <button onclick="resetCollections()">Reset</button>
+
+            <div id="collectionsResult" class="result"></div>
+        </div>
+    </div>
+
+    <!-- Selector.update() Demo -->
+    <div class="container">
+        <h2>3. Selector.update() - Update Multiple Selectors</h2>
+        <div class="demo-section">
+            <input type="text" id="username" placeholder="Username">
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Password">
+
+            <div class="btn-group">
+                <button class="btn-primary">Button 1</button>
+                <button class="btn-primary">Button 2</button>
+                <button class="btn-primary">Button 3</button>
+            </div>
+
+            <hr style="margin: 20px 0;">
+
+            <button onclick="testSelectorUpdate()">Test Selector.update()</button>
+            <button onclick="resetSelector()">Reset</button>
+
+            <div id="selectorResult" class="result"></div>
+        </div>
+    </div>
+
+    <!-- Complex Update Demo -->
+    <div class="container">
+        <h2>4. Complex Updates with Event Listeners</h2>
+        <div class="demo-section">
+            <button id="btn1" class="btn-warning">Button 1</button>
+            <button id="btn2" class="btn-warning">Button 2</button>
+            <button id="btn3" class="btn-warning">Button 3</button>
+
+            <p id="clickStatus" style="margin-top: 15px;">Click a button above...</p>
+
+            <hr style="margin: 20px 0;">
+
+            <button onclick="testComplexUpdate()">Apply Complex Updates</button>
+            <button onclick="resetComplex()">Reset</button>
+
+            <div id="complexResult" class="result"></div>
+        </div>
+    </div>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.min.js"></script>
+
+ 
+    <script>
+        // Store original values for reset
+        const originalValues = {
+            title: 'Original Title',
+            description: 'This is the original description text.',
+            actionBtn: 'Original Button'
+        };
+
+        // Test 1: Elements.update()
+        function testElementsUpdate() {
+            const results = Elements.update({
+                title: {
+                    textContent: '✨ Title Updated via Bulk Update!',
+                    style: {
+                        color: '#007bff',
+                        fontSize: '28px',
+                        textShadow: '2px 2px 4px rgba(0,0,0,0.1)'
+                    }
+                },
+                description: {
+                    textContent: 'The paragraph text, color, and font size have been changed using Elements.update()!',
+                    style: {
+                        color: '#d63384',
+                        fontSize: '18px',
+                        fontWeight: 'bold'
+                    }
+                },
+                actionBtn: {
+                    textContent: '🎉 Button Updated!',
+                    style: {
+                        backgroundColor: '#28a745',
+                        fontSize: '16px',
+                        padding: '12px 24px'
+                    },
+                    classList: {
+                        add: ['btn-success'],
+                        remove: ['btn-primary']
+                    }
+                }
+            });
+
+            document.getElementById('elementsResult').textContent =
+                'Update Results:\n' + JSON.stringify(results, null, 2);
+        }
+
+        function resetElements() {
+            Elements.update({
+                title: {
+                    textContent: originalValues.title,
+                    style: {
+                        color: '',
+                        fontSize: '',
+                        textShadow: ''
+                    }
+                },
+                description: {
+                    textContent: originalValues.description,
+                    style: {
+                        color: '',
+                        fontSize: '',
+                        fontWeight: ''
+                    }
+                },
+                actionBtn: {
+                    textContent: originalValues.actionBtn,
+                    style: {
+                        backgroundColor: '',
+                        fontSize: '',
+                        padding: ''
+                    },
+                    classList: {
+                        add: ['btn-primary'],
+                        remove: ['btn-success']
+                    }
+                }
+            });
+
+            document.getElementById('elementsResult').textContent = 'Reset complete!';
+        }
+
+        // Test 2: Collections.update()
+        function testCollectionsUpdate() {
+            const results = Collections.update({
+                'class:card': {
+                    style: {
+                        backgroundColor: '#e3f2fd',
+                        borderLeft: '4px solid #2196F3',
+                        transform: 'translateX(10px)',
+                        transition: 'all 0.3s ease'
+                    }
+                },
+                'class:message': {
+                    style: {
+                        backgroundColor: '#fff3e0',
+                        color: '#e65100',
+                        fontWeight: 'bold',
+                        padding: '15px',
+                        borderRadius: '8px'
+                    }
+                }
+            });
+
+            document.getElementById('collectionsResult').textContent =
+                'Update Results:\n' + JSON.stringify(results, null, 2);
+        }
+
+        function resetCollections() {
+            Collections.update({
+                'class:card': {
+                    style: {
+                        backgroundColor: 'white',
+                        borderLeft: '1px solid #dee2e6',
+                        transform: 'translateX(0)',
+                        transition: ''
+                    }
+                },
+                'class:message': {
+                    style: {
+                        backgroundColor: '#d1ecf1',
+                        color: '#0c5460',
+                        fontWeight: 'normal',
+                        padding: '10px',
+                        borderRadius: '4px'
+                    }
+                }
+            });
+
+            document.getElementById('collectionsResult').textContent = 'Reset complete!';
+        }
+
+        // Test 3: Selector.update()
+        function testSelectorUpdate() {
+            const results = Selector.update({
+                'input[type="text"]': {
+                    style: {
+                        borderColor: '#28a745',
+                        borderWidth: '2px',
+                        backgroundColor: '#f0fff4'
+                    },
+                    placeholder: 'Updated username placeholder'
+                },
+                'input[type="email"]': {
+                    style: {
+                        borderColor: '#17a2b8',
+                        borderWidth: '2px',
+                        backgroundColor: '#e7f7f9'
+                    },
+                    placeholder: 'Updated email placeholder'
+                },
+                '.btn-group .btn-primary': {
+                    style: {
+                        backgroundColor: '#6f42c1',
+                        transform: 'scale(1.05)',
+                        transition: 'all 0.3s ease'
+                    }
+                }
+            });
+
+            document.getElementById('selectorResult').textContent =
+                'Update Results:\n' + JSON.stringify(results, null, 2);
+        }
+
+        function resetSelector() {
+            Selector.update({
+                'input[type="text"]': {
+                    style: {
+                        borderColor: '#ced4da',
+                        borderWidth: '1px',
+                        backgroundColor: 'white'
+                    },
+                    placeholder: 'Username'
+                },
+                'input[type="email"]': {
+                    style: {
+                        borderColor: '#ced4da',
+                        borderWidth: '1px',
+                        backgroundColor: 'white'
+                    },
+                    placeholder: 'Email'
+                },
+                '.btn-group .btn-primary': {
+                    style: {
+                        backgroundColor: '#007bff',
+                        transform: 'scale(1)',
+                        transition: ''
+                    }
+                }
+            });
+
+            document.getElementById('selectorResult').textContent = 'Reset complete!';
+        }
+
+        // Test 4: Complex updates with event listeners
+        function testComplexUpdate() {
+            const results = Elements.update({
+                btn1: {
+                    textContent: '🎨 Click Me!',
+                    style: {
+                        backgroundColor: '#e83e8c',
+                        color: 'white'
+                    },
+                    addEventListener: ['click', function () {
+                        document.getElementById('clickStatus').textContent =
+                            '✅ Button 1 clicked at ' + new Date().toLocaleTimeString();
+                        this.style.backgroundColor = '#c2185b';
+                    }]
+                },
+                btn2: {
+                    textContent: '🚀 Click Me Too!',
+                    style: {
+                        backgroundColor: '#9c27b0',
+                        color: 'white'
+                    },
+                    addEventListener: ['click', function () {
+                        document.getElementById('clickStatus').textContent =
+                            '✅ Button 2 clicked at ' + new Date().toLocaleTimeString();
+                        this.style.backgroundColor = '#7b1fa2';
+                    }]
+                },
+                btn3: {
+                    textContent: '⚡ And Me!',
+                    style: {
+                        backgroundColor: '#3f51b5',
+                        color: 'white'
+                    },
+                    addEventListener: ['click', function () {
+                        document.getElementById('clickStatus').textContent =
+                            '✅ Button 3 clicked at ' + new Date().toLocaleTimeString();
+                        this.style.backgroundColor = '#303f9f';
+                    }]
+                }
+            });
+
+            document.getElementById('complexResult').textContent =
+                'Event listeners attached!\nUpdate Results:\n' + JSON.stringify(results, null, 2);
+        }
+
+        function resetComplex() {
+            // Reset without event listeners (they remain attached)
+            Elements.update({
+                btn1: {
+                    textContent: 'Button 1',
+                    style: {
+                        backgroundColor: '#ffc107',
+                        color: '#333'
+                    }
+                },
+                btn2: {
+                    textContent: 'Button 2',
+                    style: {
+                        backgroundColor: '#ffc107',
+                        color: '#333'
+                    }
+                },
+                btn3: {
+                    textContent: 'Button 3',
+                    style: {
+                        backgroundColor: '#ffc107',
+                        color: '#333'
+                    }
+                }
+            });
+
+            document.getElementById('clickStatus').textContent = 'Click a button above...';
+            document.getElementById('complexResult').textContent = 'Reset complete! Event listeners remain active.';
+        }
+
+        // Show initial message
+        console.log('✨ Bulk Update Test Page Loaded!');
+        console.log('Available methods:');
+        console.log('- Elements.update({ id1: {...}, id2: {...} })');
+        console.log('- Collections.update({ "class:name": {...}, "tag:div": {...} })');
+        console.log('- Selector.update({ ".selector": {...}, "#id": {...} })');
+    </script>
+
+
+
+</body>
+
+</html>

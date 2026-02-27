@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <button id="btn">Click me</button>
+    <p>Button clicked <span id="clicks">0</span> times.</p>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
+    <script>
+        const clickCount = ref(0);
+
+        effect(() => {
+            document.getElementById('clicks').textContent = clickCount.value;
+        });
+
+        document.getElementById('btn').onclick = () => {
+            clickCount.value++; // DOM updates automatically
+        };
+    </script>
+</body>
+
+</html>

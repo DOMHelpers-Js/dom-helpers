@@ -1,11 +1,11 @@
 /**
  * 05_dh-reactive-cleanup
- * 
+ *
  * Production-Ready Cleanup System for DOM Helpers Reactive State
  * Fixes memory leaks and provides proper lifecycle management
  * Load this AFTER 01_dh-reactive.js
  * @license MIT
- * @version 1.0.1
+ * @version 1.0.2
  */
 
 (function(global) {
@@ -14,231 +14,148 @@
   // ============================================================================
   // STEP 1: Verify Dependencies
   // ============================================================================
-  
+
   if (!global.ReactiveUtils) {
     console.error('[Cleanup] ReactiveUtils not found. Load 01_dh-reactive.js first.');
     return;
   }
 
   // ============================================================================
-  // STEP 2: Global Effect Registry
+  // STEP 2: Capture Original Functions (before ANY override)
   // ============================================================================
-  
-  const effectRegistry = new WeakMap(); // effect -> { states: Set, disposed: boolean }
-  const stateRegistry = new WeakMap(); // state -> { effects: Map<key, Set<effect>> }
 
   /**
-   * Register an effect with its state dependencies
+   * IMPORTANT: We capture originalEffect HERE, before replacing it in Step 5.
+   * Module 01's `effect()` manages a closure-scoped `currentEffect` variable
+   * that the reactive Proxy's `get` trap reads to track dependencies. This
+   * closure variable is PRIVATE to module 01's IIFE — it is NOT accessible via
+   * `global.ReactiveUtils.__currentEffect` or any external property. Any code
+   * that tries to replicate or override that tracking externally will silently
+   * break all dependency tracking, causing effects to run once but never
+   * re-trigger on state changes.
+   *
+   * The safe pattern is: ALWAYS delegate to originalEffect for tracking, and
+   * only wrap it to add extra behaviour (disposal guards, registry, etc.).
    */
-  function registerEffect(effectFn, state, key) {
-    // Initialize effect registry entry
-    if (!effectRegistry.has(effectFn)) {
-      effectRegistry.set(effectFn, {
-        states: new Map(),
-        disposed: false
-      });
-    }
-    
-    const effectData = effectRegistry.get(effectFn);
-    
-    // Track which keys this effect depends on for this state
-    if (!effectData.states.has(state)) {
-      effectData.states.set(state, new Set());
-    }
-    effectData.states.get(state).add(key);
-    
-    // Initialize state registry entry
-    if (!stateRegistry.has(state)) {
-      stateRegistry.set(state, {
-        effects: new Map()
-      });
-    }
-    
-    const stateData = stateRegistry.get(state);
-    
-    // Add effect to this state's key
-    if (!stateData.effects.has(key)) {
-      stateData.effects.set(key, new Set());
-    }
-    stateData.effects.get(key).add(effectFn);
-  }
-
-  /**
-   * Unregister an effect from all its dependencies
-   */
-  function unregisterEffect(effectFn) {
-    const effectData = effectRegistry.get(effectFn);
-    if (!effectData) return;
-    
-    // Mark as disposed
-    effectData.disposed = true;
-    
-    // Remove this effect from all states it was tracking
-    effectData.states.forEach((keys, state) => {
-      const stateData = stateRegistry.get(state);
-      if (!stateData) return;
-      
-      keys.forEach(key => {
-        const effectSet = stateData.effects.get(key);
-        if (effectSet) {
-          effectSet.delete(effectFn);
-          
-          // Clean up empty sets
-          if (effectSet.size === 0) {
-            stateData.effects.delete(key);
-          }
-        }
-      });
-    });
-    
-    // Clear effect's state tracking
-    effectData.states.clear();
-  }
-
-  /**
-   * Check if an effect is disposed
-   */
-  function isEffectDisposed(effectFn) {
-    const effectData = effectRegistry.get(effectFn);
-    return effectData ? effectData.disposed : false;
-  }
-
-  // ============================================================================
-  // STEP 3: Enhanced Effect Function with Cleanup
-  // ============================================================================
-  
   const originalEffect = global.ReactiveUtils.effect;
-  
+  const originalCreateReactive = global.ReactiveUtils.state;
+
+  // ============================================================================
+  // STEP 3: Enhanced Effect with Disposal Guard
+  // ============================================================================
+
   /**
-   * Enhanced effect with proper cleanup
+   * Enhanced effect with proper cleanup / disposal support.
+   *
+   * FIXED: Previously this function tried to manage dependency tracking by
+   * writing to `global.ReactiveUtils.__currentEffect`. That property is never
+   * read by module 01's reactive Proxy — the Proxy reads the *closure-scoped*
+   * `currentEffect` variable inside module 01's IIFE, which is inaccessible
+   * from outside. The result was that every effect created after module 05
+   * loaded would execute its function once but NEVER re-run on state changes
+   * (because no dependencies were ever registered).
+   *
+   * The fix is simple: delegate to `originalEffect` for all dependency-tracking
+   * work. We only add a disposal guard on top of it.
    */
   function enhancedEffect(fn) {
     let isDisposed = false;
-    const trackedStates = new Map();
-    
-    const execute = () => {
+
+    // Wrap fn so that a disposed effect silently skips future re-runs.
+    // This is the only thing we need to add on top of the original effect.
+    const guardedFn = () => {
       if (isDisposed) return;
-      
-      // Clear previous tracking
-      trackedStates.forEach((keys, state) => {
-        keys.forEach(key => {
-          const stateData = stateRegistry.get(state);
-          if (stateData && stateData.effects.has(key)) {
-            stateData.effects.get(key).delete(execute);
-          }
-        });
-      });
-      trackedStates.clear();
-      
-      // Run the effect with tracking
-      const prevEffect = global.ReactiveUtils.__currentEffect;
-      global.ReactiveUtils.__currentEffect = {
-        fn: execute,
-        isComputed: false,
-        onDep: (state, key) => {
-          if (!trackedStates.has(state)) {
-            trackedStates.set(state, new Set());
-          }
-          trackedStates.get(state).add(key);
-          registerEffect(execute, state, key);
-        }
-      };
-      
-      try {
-        fn();
-      } catch (error) {
-        console.error('[Cleanup] Effect error:', error);
-      } finally {
-        global.ReactiveUtils.__currentEffect = prevEffect;
-      }
+      fn();
     };
-    
-    // Create disposal function
-    const dispose = () => {
+
+    // Delegate to the original effect (captured from module 01).
+    // This is the ONLY function that correctly sets module 01's private
+    // closure variable `currentEffect`, which the reactive Proxy reads.
+    const originalDisposeFn = originalEffect(guardedFn);
+
+    // Return a disposal function.
+    return function dispose() {
       if (isDisposed) return;
       isDisposed = true;
-      unregisterEffect(execute);
-      trackedStates.clear();
+      if (typeof originalDisposeFn === 'function') {
+        originalDisposeFn();
+      }
     };
-    
-    // Run initially
-    execute();
-    
-    return dispose;
   }
 
   // ============================================================================
   // STEP 4: Patch Reactive Proxy Creation
   // ============================================================================
-  
-  const originalCreateReactive = global.ReactiveUtils.state;
-  
+
   /**
-   * Enhanced reactive state creation with cleanup support
+   * Enhanced reactive state creation — adds $cleanup and enhanced $computed
+   * with cleanup tracking, without disturbing any existing behaviour.
    */
   function enhancedCreateReactive(target) {
     const state = originalCreateReactive(target);
-    
-    // Patch the state to use cleanup registry
     patchStateTracking(state);
-    
     return state;
   }
-  
+
   /**
-   * Patch a reactive state to use the cleanup registry
-   * FIXED: Uses Object.defineProperty to properly override methods
+   * Patch a reactive state to add the cleanup API.
+   *
+   * Rules:
+   *  - NEVER replace a working method with a broken one.
+   *  - $watch:    Delegate to the original; just intercept the returned
+   *               dispose so we can collect it for $cleanup.
+   *  - $computed: Delegate to the original; just track a per-key cleanup
+   *               so redundant computed definitions can be torn down.
+   *  - $cleanup:  New method — disposes all tracked watches/computeds.
    */
   function patchStateTracking(state) {
     // Prevent double-patching
-    if (state.__cleanupPatched) {
-      return;
-    }
-    
-    // Mark as patched
+    if (state.__cleanupPatched) return;
+
     Object.defineProperty(state, '__cleanupPatched', {
       value: true,
       writable: false,
       enumerable: false,
       configurable: false
     });
-    
-    // Store original methods
+
+    // Collect dispose functions returned by $watch calls on this state.
+    const watchDisposes = [];
+
+    // ========================================================================
+    // Enhance $watch — delegate to original, collect the dispose fn
+    //
+    // FIXED: The previous version re-implemented $watch using enhancedEffect
+    // with `oldValue` declared *inside* the effect closure, which meant it
+    // was reset to `undefined` on every re-run. That caused the callback to
+    // fire on every single state read, not just when the value actually
+    // changed. More critically, it called the broken enhancedEffect which
+    // prevented dependency tracking entirely.
+    //
+    // The correct approach: call the original $watch (which uses module 01's
+    // closure-level effect and correctly scopes oldValue outside the effect),
+    // and just capture the returned dispose function for later cleanup.
+    // ========================================================================
     const originalWatch = state.$watch;
-    const originalComputed = state.$computed;
-    
-    // ========================================================================
-    // FIXED: Enhanced $watch with proper property override
-    // ========================================================================
     if (originalWatch) {
       Object.defineProperty(state, '$watch', {
         value: function(keyOrFn, callback) {
-          const cleanup = enhancedEffect(() => {
-            let oldValue;
-            if (typeof keyOrFn === 'function') {
-              const newValue = keyOrFn.call(this);
-              if (newValue !== oldValue) {
-                callback(newValue, oldValue);
-                oldValue = newValue;
-              }
-            } else {
-              const newValue = this[keyOrFn];
-              if (newValue !== oldValue) {
-                callback(newValue, oldValue);
-                oldValue = newValue;
-              }
-            }
-          });
-          
-          return cleanup;
+          // originalWatch uses module 01's internal effect correctly.
+          const dispose = originalWatch.call(this, keyOrFn, callback);
+          if (typeof dispose === 'function') {
+            watchDisposes.push(dispose);
+          }
+          return dispose;
         },
         writable: true,
         enumerable: false,
         configurable: true
       });
     }
-    
-    // Track computed properties for cleanup
+
+    // ========================================================================
+    // Enhance $computed — delegate to original, track per-key cleanup
+    // ========================================================================
     if (!state.__computedCleanups) {
       Object.defineProperty(state, '__computedCleanups', {
         value: new Map(),
@@ -247,30 +164,26 @@
         configurable: false
       });
     }
-    
-    // ========================================================================
-    // FIXED: Enhanced $computed with proper property override
-    // ========================================================================
+
+    const originalComputed = state.$computed;
     if (originalComputed) {
       Object.defineProperty(state, '$computed', {
         value: function(key, fn) {
-          // Remove old computed if it exists
+          // Remove old computed cleanup if it exists
           if (state.__computedCleanups.has(key)) {
-            const cleanup = state.__computedCleanups.get(key);
-            cleanup();
+            const prevCleanup = state.__computedCleanups.get(key);
+            prevCleanup();
             state.__computedCleanups.delete(key);
           }
-          
-          // Create new computed
+
+          // Delegate to original $computed — it handles all the real work
           originalComputed.call(this, key, fn);
-          
-          // Store cleanup
-          const cleanup = () => {
-            delete this[key];
-          };
-          
-          state.__computedCleanups.set(key, cleanup);
-          
+
+          // Store a cleanup that removes the computed property
+          state.__computedCleanups.set(key, () => {
+            try { delete this[key]; } catch (e) {}
+          });
+
           return this;
         },
         writable: true,
@@ -278,29 +191,25 @@
         configurable: true
       });
     }
-    
+
     // ========================================================================
-    // Add $cleanup method to state
+    // Add $cleanup — disposes all watches and computed properties on this state
     // ========================================================================
     if (!state.$cleanup) {
       Object.defineProperty(state, '$cleanup', {
         value: function() {
+          // Dispose all tracked $watch effects
+          watchDisposes.forEach(dispose => {
+            try { dispose(); } catch (e) {}
+          });
+          watchDisposes.length = 0;
+
           // Clean up all computed properties
           if (this.__computedCleanups) {
-            this.__computedCleanups.forEach(cleanup => cleanup());
-            this.__computedCleanups.clear();
-          }
-          
-          // Remove all effects tracking this state
-          const stateData = stateRegistry.get(this);
-          if (stateData) {
-            stateData.effects.forEach((effectSet) => {
-              effectSet.forEach(effect => {
-                unregisterEffect(effect);
-              });
-              effectSet.clear();
+            this.__computedCleanups.forEach(cleanup => {
+              try { cleanup(); } catch (e) {}
             });
-            stateData.effects.clear();
+            this.__computedCleanups.clear();
           }
         },
         writable: true,
@@ -311,17 +220,22 @@
   }
 
   // ============================================================================
-  // STEP 5: Patch Existing Library Functions
+  // STEP 5: Install Overrides
+  //
+  // NOTE: We do NOT set `global.ReactiveUtils.__currentEffect = null`.
+  //
+  // FIXED: The previous version set that property and then tried to use it
+  // inside enhancedEffect for tracking. Module 01's Proxy NEVER reads
+  // `global.ReactiveUtils.__currentEffect` — it reads the private closure
+  // variable `currentEffect` declared with `let` inside module 01's IIFE.
+  // Setting an external property with the same name does absolutely nothing
+  // for dependency tracking. Removing it eliminates the false assumption.
   // ============================================================================
-  
-  // Override the state creation function
-  global.ReactiveUtils.state = enhancedCreateReactive;
+
   global.ReactiveUtils.effect = enhancedEffect;
-  
-  // Expose __currentEffect for tracking
-  global.ReactiveUtils.__currentEffect = null;
-  
-  // Patch createState if it exists
+  global.ReactiveUtils.state  = enhancedCreateReactive;
+
+  // Patch createState if it exists (added by module 01 as createStateWithBindings)
   if (global.ReactiveUtils.createState) {
     const originalCreateState = global.ReactiveUtils.createState;
     global.ReactiveUtils.createState = function(initialState, bindingDefs) {
@@ -334,22 +248,18 @@
   // ============================================================================
   // STEP 6: Enhanced Component with Automatic Cleanup
   // ============================================================================
-  
+
   if (global.ReactiveUtils.component) {
     const originalComponent = global.ReactiveUtils.component;
-    
+
     global.ReactiveUtils.component = function(config) {
       const component = originalComponent(config);
       const originalDestroy = component.$destroy;
-      
-      // Enhanced destroy
+
       if (originalDestroy) {
         Object.defineProperty(component, '$destroy', {
           value: function() {
-            // Call original destroy
             originalDestroy.call(this);
-            
-            // Clean up the state itself
             if (this.$cleanup) {
               this.$cleanup();
             }
@@ -359,7 +269,7 @@
           configurable: true
         });
       }
-      
+
       return component;
     };
   }
@@ -367,49 +277,39 @@
   // ============================================================================
   // STEP 7: Enhanced Reactive Builder with Cleanup
   // ============================================================================
-  
+
   if (global.ReactiveUtils.reactive) {
     const originalReactive = global.ReactiveUtils.reactive;
-    
+
     global.ReactiveUtils.reactive = function(initialState) {
       const builder = originalReactive(initialState);
       const originalBuild = builder.build;
-      
-      // Enhanced build
+
       builder.build = function() {
         const state = originalBuild.call(this);
-        
-        // Replace destroy with enhanced version
+
         const originalStateDestroy = state.destroy;
-        
         Object.defineProperty(state, 'destroy', {
           value: function() {
-            if (originalStateDestroy) {
-              originalStateDestroy.call(this);
-            }
-            if (this.$cleanup) {
-              this.$cleanup();
-            }
+            if (originalStateDestroy) originalStateDestroy.call(this);
+            if (this.$cleanup) this.$cleanup();
           },
           writable: true,
           enumerable: false,
           configurable: true
         });
-        
+
         return state;
       };
-      
-      // Enhanced builder destroy
+
       const originalBuilderDestroy = builder.destroy;
       builder.destroy = function() {
-        if (originalBuilderDestroy) {
-          originalBuilderDestroy.call(this);
-        }
+        if (originalBuilderDestroy) originalBuilderDestroy.call(this);
         if (this.state && this.state.$cleanup) {
           this.state.$cleanup();
         }
       };
-      
+
       return builder;
     };
   }
@@ -417,10 +317,10 @@
   // ============================================================================
   // STEP 8: Cleanup Utilities
   // ============================================================================
-  
+
   const CleanupAPI = {
     /**
-     * Get statistics about tracked effects and states
+     * Get a status message about the cleanup system.
      */
     getStats() {
       return {
@@ -428,141 +328,128 @@
         note: 'WeakMaps prevent direct counting, but cleanup is working properly'
       };
     },
-    
+
     /**
-     * Create a cleanup collector for managing multiple cleanups
+     * Create a cleanup collector for managing multiple dispose functions.
+     * @returns {{ add(fn): this, cleanup(): void, size: number, disposed: boolean }}
      */
     collector() {
       const cleanups = [];
       let isDisposed = false;
-      
+
       return {
         add(cleanup) {
           if (isDisposed) {
             console.warn('[Cleanup] Cannot add to disposed collector');
             return this;
           }
-          
           if (typeof cleanup === 'function') {
             cleanups.push(cleanup);
           }
           return this;
         },
-        
+
         cleanup() {
           if (isDisposed) return;
-          
           isDisposed = true;
           cleanups.forEach(cleanup => {
-            try {
-              cleanup();
-            } catch (error) {
+            try { cleanup(); } catch (error) {
               console.error('[Cleanup] Collector error:', error);
             }
           });
           cleanups.length = 0;
         },
-        
-        get size() {
-          return cleanups.length;
-        },
-        
-        get disposed() {
-          return isDisposed;
-        }
+
+        get size()     { return cleanups.length; },
+        get disposed() { return isDisposed; }
       };
     },
-    
+
     /**
-     * Create a cleanup scope
+     * Create a cleanup scope.
+     * @param {Function} fn - Receives a `collect` function; call collect(disposeFn)
+     *                        for each effect/watch you want auto-cleaned.
+     * @returns {Function} A function that disposes everything collected.
      */
     scope(fn) {
       const collector = this.collector();
-      
       fn((cleanup) => collector.add(cleanup));
-      
       return () => collector.cleanup();
     },
-    
+
     /**
-     * Patch an existing state to use the cleanup system
+     * Patch an existing state to use the cleanup system.
+     * Useful for states created before this module was loaded.
+     * @param {Object} state - A reactive state object
+     * @returns {Object} The same state, now patched
      */
     patchState(state) {
       patchStateTracking(state);
       return state;
-    },
-    
-    /**
-     * Check if an effect is still active
-     */
-    isActive(effectFn) {
-      return !isEffectDisposed(effectFn);
     }
   };
 
   // ============================================================================
   // STEP 9: Export API
   // ============================================================================
-  
+
   global.ReactiveCleanup = CleanupAPI;
-  
-  // Also add to ReactiveUtils
+
   if (global.ReactiveUtils) {
-    global.ReactiveUtils.cleanup = CleanupAPI;
-    global.ReactiveUtils.collector = CleanupAPI.collector;
-    global.ReactiveUtils.scope = CleanupAPI.scope;
+    global.ReactiveUtils.cleanup  = CleanupAPI;
+    global.ReactiveUtils.collector = CleanupAPI.collector.bind(CleanupAPI);
+    global.ReactiveUtils.scope     = CleanupAPI.scope.bind(CleanupAPI);
   }
 
   // ============================================================================
   // STEP 10: Diagnostic Tools
   // ============================================================================
-  
-  let debugMode = false;
-  
+
   CleanupAPI.debug = function(enable = true) {
-    debugMode = enable;
-    
     if (enable) {
       console.log('[Cleanup] Debug mode enabled');
       console.log('[Cleanup] Use ReactiveCleanup.getStats() for statistics');
     }
-    
     return this;
   };
-  
+
+  /**
+   * Quick smoke-test: creates 100 effects, disposes them, then verifies that
+   * a subsequent state mutation does NOT re-invoke any of them.
+   */
   CleanupAPI.test = function() {
     console.log('[Cleanup] Running cleanup test...');
-    
+
     const state = global.ReactiveUtils.state({ count: 0 });
     let runCount = 0;
-    
-    // Create and dispose 100 effects
+
+    // Create and immediately dispose 100 effects
     for (let i = 0; i < 100; i++) {
-      const cleanup = global.effect(() => {
+      // Use ReactiveUtils.effect (now enhancedEffect) so disposal works
+      const dispose = global.ReactiveUtils.effect(() => {
         const _ = state.count;
         runCount++;
       });
-      cleanup();
+      dispose();
     }
-    
+
     const initialRuns = runCount;
     runCount = 0;
-    
-    // Update state - should NOT trigger disposed effects
+
+    // Update state — disposed effects must NOT re-run
     state.count++;
-    
-    // Small delay for batched updates
+
     setTimeout(() => {
       if (runCount === 0) {
-        console.log('✅ Cleanup test PASSED - disposed effects not called');
-        console.log(`   Initial runs: ${initialRuns}, Update runs: ${runCount}`);
+        console.log('✅ Cleanup test PASSED — disposed effects were not called');
+        console.log(`   Initial runs: ${initialRuns}, Post-dispose runs: ${runCount}`);
       } else {
-        console.error('❌ Cleanup test FAILED - disposed effects still running!');
-        console.error(`   Initial runs: ${initialRuns}, Update runs: ${runCount}`);
+        console.error('❌ Cleanup test FAILED — disposed effects still running!');
+        console.error(`   Initial runs: ${initialRuns}, Post-dispose runs: ${runCount}`);
       }
     }, 10);
   };
 
-  console.log('[Cleanup System] v1.0.1 loaded successfully');
+  console.log('[Cleanup System] v1.0.2 loaded successfully');
 
 })(typeof window !== 'undefined' ? window : global);

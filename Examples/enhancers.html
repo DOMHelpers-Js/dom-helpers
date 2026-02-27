@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>DOM Helpers v2.0</title>
+</head>
+<body>
+  <div id="header">Header</div>
+  <button class="btn">Button 1</button>
+  <button class="btn">Button 2</button>
+  <button class="btn">Button 3</button>
+
+  <!-- Core -->
+  <script src="core/dh-core.js"></script>
+  
+  <!-- Enhancers -->
+  <script src="enhancers/utilities.js"></script>
+  <script src="enhancers/collection-enhancements.js"></script>
+  <script src="enhancers/array-distribution.js"></script>
+  <script src="enhancers/shortcuts.js"></script>
+
+  <script>
+    // Using shortcuts
+    Id('header').update({ 
+      textContent: 'Welcome!',
+      style: { color: 'blue' }
+    });
+
+    // Using index selection
+    ClassName.btn[0].style.backgroundColor = 'red';
+    ClassName.btn[-1].style.backgroundColor = 'green';
+
+    // Using bulk property updater
+    ClassName.btn.textContent(['First', 'Second', 'Third']);
+
+    // Using indexed updates
+    ClassName.btn.update({
+      [0]: { style: { fontSize: '12px' } },
+      [1]: { style: { fontSize: '14px' } },
+      [2]: { style: { fontSize: '16px' } }
+    });
+
+    // Using array distribution
+    querySelectorAll('.btn').update({
+      dataset: { index: [0, 1, 2] },
+      style: {
+        padding: ['5px', '10px', '15px'],
+        margin: ['2px', '4px', '6px']
+      }
+    });
+  </script>
+</body>
+</html>

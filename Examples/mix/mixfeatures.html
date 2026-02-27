@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>DOM Helpers Playground</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .box { padding: 10px; margin: 5px; border: 1px solid #ccc; cursor: pointer; }
+    .highlight { background: yellow; }
+    .active { background: lightgreen; transform: scale(1.05); }
+    .dynamic { background: purple; color: white; margin-top: 5px; padding: 5px; border-radius: 3px; }
+    .btn { padding: 8px 12px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; }
+    .btn-blue { background: blue; color: white; }
+    .btn-red { background: crimson; color: white; }
+  </style>
+</head>
+<body>
+  <h1>DOM Helpers Playground</h1>
+  <p id="status">Ready...</p>
+
+  <button id="btnSingle" class="btn btn-blue">Update Single Box</button>
+  <button id="btnMulti" class="btn btn-red">Update All Boxes</button>
+  <button id="btnInsert" class="btn btn-blue">Insert HTML</button>
+  <button id="btnCreate" class="btn btn-red">Create Element</button>
+
+  <div id="single" class="box">Single Box</div>
+  <div class="multi box">Multi Box 1</div>
+  <div class="multi box">Multi Box 2</div>
+  <div class="multi box">Multi Box 3</div>
+
+  <div id="container"></div>
+
+  <!-- Load your local library -->
+ <script src="../../src/Core/01_dom-helpers.js"></script>
+  <script src="../../src/Core/02_dh-bulk-property-updaters.js"></script>
+  <script src="../../src/Core/03_dh-collection-shortcuts.js"></script>
+  <script src="../../src/Core/04_dh-global-query.js"></script>
+  <script src="../../src/Core/05_dh-indexed-collection-updates.js"></script>
+  <script src="../../src/Core/06_dh-index-selection.js"></script>
+  <script src="../../src/Core/07_dh-global-collection-indexed-updates.js"></script>
+  <script src="../../src/Core/08_dh-conditional-rendering.js"></script>
+  <script src="../../src/Core/09_dh-conditions-default.js"></script>
+  <script src="../../src/Core/10_dh-selector-update-patch.js"></script>
+  <script src="../../src/Core/11_dh-bulk-properties-updater-global-query.js"></script>
+   <script>
+    // --- Single element test (Elements + Selector.query) ---
+    Elements.btnSingle.onclick = () => {
+      Selector.query("#single").update({
+        textContent: "Single Box Updated!",
+        style: { backgroundColor: "blue", color: "white" },
+        classList: { toggle: "highlight" },
+      });
+      Elements.status.update({ textContent: "Updated single box ✅" });
+    };
+
+    // --- Multi element test (Collections + Selector.queryAll) ---
+    Elements.btnMulti.onclick = () => {
+      Selector.queryAll(".multi").update({
+        textContent: "Multi Box Updated!",
+        style: { backgroundColor: "purple", color: "white" },
+        classList: { toggle: "active" },
+        onclick: function () {
+          this.classList.toggle("highlight");
+          Elements.status.update({ textContent: this.textContent + " clicked!" });
+        }
+      });
+      Elements.status.update({ textContent: "Updated all multi boxes ✅" });
+    };
+
+    // --- insertAdjacentHTML test ---
+    Elements.btnInsert.onclick = () => {
+      Elements.container.update({
+        insertAdjacentHTML: ["beforeend", `<p class="dynamic">Inserted via insertAdjacentHTML</p>`]
+      });
+      Elements.status.update({ textContent: "Inserted HTML ✅" });
+    };
+
+    // --- createElement + enhance + addEventListener test ---
+    Elements.btnCreate.onclick = () => {
+      const p = document.createElement("p");
+      EnhancedUpdateUtility.enhanceElementWithUpdate(p);
+
+      p.update({
+        classList: { add: ["dynamic"] },
+        textContent: "Created with createElement + update()",
+        addEventListener: ["click", () => {
+          p.classList.toggle("active");
+          Elements.status.update({ textContent: "Dynamic paragraph clicked ✅" });
+        }]
+      });
+
+      Elements.container.appendChild(p);
+      Elements.status.update({ textContent: "Created new element ✅" });
+    };
+  </script>
+</body>
+</html>

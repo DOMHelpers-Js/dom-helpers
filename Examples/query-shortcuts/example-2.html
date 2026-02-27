@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>querySelectorAll Index Selection Example</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>querySelectorAll Index Selection Demo</h1>
+  
+  <div class="container">
+    <button class="btn">Button 1</button>
+    <button class="btn">Button 2</button>
+    <button class="btn">Button 3</button>
+    <button class="btn">Button 4</button>
+  </div>
+
+  <div class="container">
+    <div class="card">Card 1</div>
+    <div class="card">Card 2</div>
+    <div class="card">Card 3</div>
+  </div>
+
+  <script src="../../src/Core/01_dom-helpers.js"></script>
+  <script src="../../src/Core/02_dh-bulk-property-updaters.js"></script>
+  <script src="../../src/Core/03_dh-collection-shortcuts.js"></script>
+  <script src="../../src/Core/04_dh-global-query.js"></script>
+  <script src="../../src/Core/05_dh-indexed-collection-updates.js"></script>
+  <script src="../../src/Core/06_dh-index-selection.js"></script>
+  <script src="../../src/Core/07_dh-global-collection-indexed-updates.js"></script>
+  <script src="../../src/Core/08_dh-conditional-rendering.js"></script>
+  <script src="../../src/Core/09_dh-conditions-default.js"></script>
+  <script src="../../src/Core/10_dh-selector-update-patch.js"></script>
+  <script src="../../src/Core/11_dh-bulk-properties-updater-global-query.js"></script>
+
+  <script>
+    // Example 1: Update buttons by index
+    const buttons = querySelectorAll('.btn'); // or use queryAll('.btn')
+
+    buttons[0].update({
+      textContent: 'First Button',
+      style: {
+        backgroundColor: 'red',
+        color: 'white',
+        padding: '10px 20px',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer'
+      }
+    });
+
+    buttons[1].update({
+      textContent: 'Second Button',
+      style: {
+        backgroundColor: 'blue',
+        color: 'white',
+        padding: '10px 20px',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer'
+      }
+    });
+
+    buttons[2].update({
+      textContent: 'Third Button',
+      style: {
+        backgroundColor: 'green',
+        color: 'white',
+        padding: '10px 20px',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer'
+      }
+    });
+
+    // Example 2: Update last button using negative index
+    buttons.at(-1).update({
+      textContent: 'Last Button',
+      style: {
+        backgroundColor: 'purple',
+        color: 'white',
+        padding: '10px 20px',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer'
+      }
+    });
+
+    // Example 3: Update cards by index
+    const cards = queryAll('.card');
+
+    cards[0].update({
+      textContent: 'First Card',
+      style: {
+        backgroundColor: '#ffcccc',
+        padding: '20px',
+        borderRadius: '8px',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+      }
+    });
+
+    cards[1].update({
+      textContent: 'Second Card',
+      style: {
+        backgroundColor: '#ccffcc',
+        padding: '20px',
+        borderRadius: '8px',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+      }
+    });
+
+    cards[2].update({
+      textContent: 'Third Card',
+      style: {
+        backgroundColor: '#ccccff',
+        padding: '20px',
+        borderRadius: '8px',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+      }
+    });
+
+    // Example 4: Using helper methods
+    cards.first().update({
+      style: { fontWeight: 'bold' }
+    });
+
+    cards.last().update({
+      style: { fontStyle: 'italic' }
+    });
+
+    // Example 5: Add click events to specific buttons
+    buttons[0].update({
+      addEventListener: ['click', () => alert('First button clicked!')]
+    });
+
+    buttons[1].update({
+      addEventListener: ['click', () => alert('Second button clicked!')]
+    });
+
+    // Example 6: Using .item() method
+    buttons.item(2).update({
+      classList: { add: 'special-button' }
+    });
+
+    // Example 7: Chaining multiple updates
+    buttons[3].update({
+      textContent: 'Updated via index',
+      dataset: { index: '3', updated: 'true' },
+      setAttribute: { 'data-custom': 'value' }
+    });
+
+    // Example 8: Conditional updates based on index
+    buttons.forEach((btn, index) => {
+      if (index % 2 === 0) {
+        btn.update({
+          style: { border: '2px solid black' }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

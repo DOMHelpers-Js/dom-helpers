@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    .box { padding: 20px; margin: 20px; border: 2px solid #ddd; }
+    .red { background: red; color: white; }
+    .green { background: green; color: white; }
+    .gray { background: gray; color: white; }
+  </style>
+</head>
+<body>
+  <div id="test" class="box">Test Box</div>
+
+   
+<script src="../../src/DOMHelpers/05_dh-conditions.js"></script>
+
+
+  <script>
+    console.log('=== DEBUGGING DEFAULT CONDITION ===');
+    
+    // Test 1: Check if matcher is registered
+    console.log('Available matchers:', Conditions.getMatchers());
+    
+    // Test 2: Simple apply test
+    console.log('\n--- Test with known value ---');
+    Conditions.apply('red', {
+      'red': { textContent: 'RED MATCHED', classList: { add: 'red' } },
+      'green': { textContent: 'GREEN MATCHED', classList: { add: 'green' } },
+      'default': { textContent: 'DEFAULT MATCHED', classList: { add: 'gray' } }
+    }, '#test');
+    
+    setTimeout(() => {
+      console.log('\n--- Test with unknown value (should use default) ---');
+      Conditions.apply('unknown', {
+        'red': { textContent: 'RED MATCHED', classList: { add: 'red', remove: ['green', 'gray'] } },
+        'green': { textContent: 'GREEN MATCHED', classList: { add: 'green', remove: ['red', 'gray'] } },
+        'default': { textContent: 'DEFAULT MATCHED', classList: { add: 'gray', remove: ['red', 'green'] } }
+      }, '#test');
+    }, 2000);
+  </script>
+</body>
+</html>

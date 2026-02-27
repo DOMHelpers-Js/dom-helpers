@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Indexed Updates with Array Support</title>
+  <style>
+    .card {
+      border: 1px solid #ddd;
+      padding: 20px;
+      margin: 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">Card 1</div>
+  <div class="card">Card 2</div>
+  <div class="card">Card 3</div>
+
+   <script src="../../src/Core/01_dh-core.js"></script>
+ <script src="../../src/Enhancers/bundled-enhancers/enhancers.js"></script>
+  
+  <script>
+    console.log('Testing array-based updates...');
+    
+    // Use Selector.queryAll (from 01_dh-core.js)
+    const cards = ClassName.card;
+    console.log('Found cards:', cards.length);
+    
+    // Test 1: Array syntax
+    cards.update({
+      textContent: ['First Card', 'Second Card', 'Third Card'],
+      style: {
+        backgroundColor: ['#ffebee', '#e8f5e9', '#e3f2fd'],
+        color: ['#c62828', '#2e7d32', '#1565c0'],
+        padding: '30px',
+        fontWeight: 'bold'
+      }
+    });
+    
+    console.log('Array updates applied!');
+    
+    // Test 2: Direct property method (after 2 seconds)
+    setTimeout(() => {
+      cards.textContent({
+        0: 'Updated First',
+        1: 'Updated Second',
+        2: 'Updated Third'
+      });
+      console.log('Direct property updates applied!');
+    }, 2000);
+    
+    // Test 3: Index object syntax (after 4 seconds)
+    setTimeout(() => {
+      cards.update({
+        [0]: { 
+          textContent: 'Override First',
+          style: { backgroundColor: '#fff3e0', color: '#e65100' }
+        },
+        [2]: {
+          textContent: 'Override Third',
+          style: { backgroundColor: '#f3e5f5', color: '#4a148c' }
+        }
+      });
+      console.log('Index object updates applied!');
+    }, 4000);
+  </script>
+</body>
+</html>
+
+
+
+
+
+

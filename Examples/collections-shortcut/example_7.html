@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Shortcuts Indexed Updates - Simple Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .demo-box {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .demo-box h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            margin: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 5px solid #ccc;
+            transition: all 0.3s ease;
+        }
+
+        .item {
+            padding: 15px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn {
+            padding: 12px 25px;
+            margin: 5px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+
+        .control-btn:hover {
+            background: #5568d3;
+            transform: scale(1.05);
+        }
+
+        .controls {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+        }
+
+        /* Special classes for demos */
+        .gold { background: gold !important; color: #333 !important; }
+        .silver { background: silver !important; color: #333 !important; }
+        .bronze { background: #CD7F32 !important; color: white !important; }
+        .featured { border: 3px solid gold !important; background: #fffdf7 !important; }
+        .highlight { background: #fff3cd !important; animation: pulse 0.5s; }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        code {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            display: block;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Global Shortcuts Indexed Updates Demo</h1>
+
+        <!-- Demo 1: Button Ranking -->
+        <div class="demo-box">
+            <h2>Demo 1: Button Ranking 🏆</h2>
+            
+            <div>
+                <button class="btn ranking-btn">Button 1</button>
+                <button class="btn ranking-btn">Button 2</button>
+                <button class="btn ranking-btn">Button 3</button>
+                <button class="btn ranking-btn">Button 4</button>
+                <button class="btn ranking-btn">Button 5</button>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn" onclick="applyRanking()">Apply Rankings</button>
+                <button class="control-btn" onclick="resetRanking()">Reset</button>
+            </div>
+
+            <code>
+ClassName['ranking-btn'].update({
+  [0]: { textContent: '🥇 First', classList: { add: 'gold' } },
+  [1]: { textContent: '🥈 Second', classList: { add: 'silver' } },
+  [2]: { textContent: '🥉 Third', classList: { add: 'bronze' } }
+});
+            </code>
+        </div>
+
+        <!-- Demo 2: Cards -->
+        <div class="demo-box">
+            <h2>Demo 2: Card Styling 🎨</h2>
+            
+            <div class="card style-card">Card 1 - Normal</div>
+            <div class="card style-card">Card 2 - Normal</div>
+            <div class="card style-card">Card 3 - Normal</div>
+            <div class="card style-card">Card 4 - Normal</div>
+
+            <div class="controls">
+                <button class="control-btn" onclick="styleCards()">Style Cards</button>
+                <button class="control-btn" onclick="highlightFirst()">Highlight First</button>
+                <button class="control-btn" onclick="highlightLast()">Highlight Last</button>
+                <button class="control-btn" onclick="resetCards()">Reset</button>
+            </div>
+
+            <code>
+ClassName['style-card'].update({
+  [0]: { style: { borderLeft: '5px solid red' } },
+  [-1]: { style: { borderLeft: '5px solid blue' } }
+});
+            </code>
+        </div>
+
+        <!-- Demo 3: List Items -->
+        <div class="demo-box">
+            <h2>Demo 3: List Items 📝</h2>
+            
+            <div class="item list-item">Item 1</div>
+            <div class="item list-item">Item 2</div>
+            <div class="item list-item">Item 3</div>
+            <div class="item list-item">Item 4</div>
+            <div class="item list-item">Item 5</div>
+
+            <div class="controls">
+                <button class="control-btn" onclick="numberItems()">Number Items</button>
+                <button class="control-btn" onclick="colorItems()">Color Items</button>
+                <button class="control-btn" onclick="updateEdges()">Update Edges Only</button>
+                <button class="control-btn" onclick="resetItems()">Reset</button>
+            </div>
+
+            <code>
+ClassName['list-item'].update({
+  [0]: { textContent: '1️⃣ First' },
+  [1]: { textContent: '2️⃣ Second' },
+  [-1]: { textContent: '🔚 Last' }
+});
+            </code>
+        </div>
+
+        <!-- Demo 4: All Elements Update -->
+        <div class="demo-box">
+            <h2>Demo 4: Update All Elements 🌟</h2>
+            
+            <div class="item all-item">Item A</div>
+            <div class="item all-item">Item B</div>
+            <div class="item all-item">Item C</div>
+
+            <div class="controls">
+                <button class="control-btn" onclick="updateAllItems()">Update All</button>
+                <button class="control-btn" onclick="updateSpecificItems()">Update Specific</button>
+                <button class="control-btn" onclick="resetAllItems()">Reset</button>
+            </div>
+
+            <code>
+// Update all elements (no indices)
+ClassName['all-item'].update({
+  style: { background: 'lightblue' }
+});
+
+// Update specific elements (with indices)
+ClassName['all-item'].update({
+  [0]: { style: { background: 'red' } },
+  [2]: { style: { background: 'green' } }
+});
+            </code>
+        </div>
+    </div>
+
+    <!-- Load your libraries here -->
+   <script src="../../src/Core/01_dom-helpers.js"></script>
+  <script src="../../src/Core/02_dh-bulk-property-updaters.js"></script>
+  <script src="../../src/Core/03_dh-collection-shortcuts.js"></script>
+  <script src="../../src/Core/04_dh-global-query.js"></script>
+  <script src="../../src/Core/05_dh-indexed-collection-updates.js"></script>
+  <script src="../../src/Core/06_dh-index-selection.js"></script>
+  <script src="../../src/Core/07_dh-global-collection-indexed-updates.js"></script>
+  <script src="../../src/Core/08_dh-conditional-rendering.js"></script>
+  <script src="../../src/Core/09_dh-conditions-default.js"></script>
+  <script src="../../src/Core/10_dh-selector-update-patch.js"></script>
+  <script src="../../src/Core/11_dh-bulk-properties-updater-global-query.js"></script>
+
+    <!-- Demo Functions -->
+    <script>
+        // ==========================================
+        // DEMO 1: Button Ranking
+        // ==========================================
+        function applyRanking() {
+            ClassName['ranking-btn'].update({
+                [0]: { 
+                    textContent: '🥇 First Place', 
+                    classList: { add: 'gold' } 
+                },
+                [1]: { 
+                    textContent: '🥈 Second Place', 
+                    classList: { add: 'silver' } 
+                },
+                [2]: { 
+                    textContent: '🥉 Third Place', 
+                    classList: { add: 'bronze' } 
+                },
+                [3]: { 
+                    textContent: '4th Place',
+                    style: { opacity: '0.7' }
+                },
+                [-1]: { 
+                    textContent: 'Last Place',
+                    disabled: true,
+                    style: { opacity: '0.5' }
+                }
+            });
+        }
+
+        function resetRanking() {
+            const buttons = ClassName['ranking-btn'];
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].textContent = `Button ${i + 1}`;
+                buttons[i].className = 'btn ranking-btn';
+                buttons[i].disabled = false;
+                buttons[i].style.opacity = '1';
+            }
+        }
+
+        // ==========================================
+        // DEMO 2: Card Styling
+        // ==========================================
+        function styleCards() {
+            ClassName['style-card'].update({
+                [0]: { 
+                    textContent: 'First Card - Red Border',
+                    style: { 
+                        borderLeft: '5px solid red',
+                        background: '#ffe0e0'
+                    } 
+                },
+                [1]: { 
+                    textContent: 'Second Card - Green Border',
+                    style: { 
+                        borderLeft: '5px solid green',
+                        background: '#e0ffe0'
+                    } 
+                },
+                [2]: { 
+                    textContent: 'Third Card - Blue Border',
+                    style: { 
+                        borderLeft: '5px solid blue',
+                        background: '#e0e0ff'
+                    } 
+                },
+                [-1]: { 
+                    textContent: 'Last Card - Purple Border',
+                    style: { 
+                        borderLeft: '5px solid purple',
+                        background: '#f0e0ff'
+                    } 
+                }
+            });
+        }
+
+        function highlightFirst() {
+            ClassName['style-card'].update({
+                [0]: { 
+                    classList: { add: 'featured' },
+                    textContent: '⭐ Featured Card'
+                }
+            });
+        }
+
+        function highlightLast() {
+            ClassName['style-card'].update({
+                [-1]: { 
+                    classList: { add: 'highlight' },
+                    textContent: '💡 Last Card Highlighted'
+                }
+            });
+        }
+
+        function resetCards() {
+            const cards = ClassName['style-card'];
+            for (let i = 0; i < cards.length; i++) {
+                cards[i].textContent = `Card ${i + 1} - Normal`;
+                cards[i].className = 'card style-card';
+                cards[i].style.cssText = '';
+            }
+        }
+
+        // ==========================================
+        // DEMO 3: List Items
+        // ==========================================
+        function numberItems() {
+            ClassName['list-item'].update({
+                [0]: { textContent: '1️⃣ First Item' },
+                [1]: { textContent: '2️⃣ Second Item' },
+                [2]: { textContent: '3️⃣ Third Item' },
+                [3]: { textContent: '4️⃣ Fourth Item' },
+                [-1]: { textContent: '🔚 Last Item' }
+            });
+        }
+
+        function colorItems() {
+            ClassName['list-item'].update({
+                [0]: { 
+                    style: { 
+                        background: '#ffcccc',
+                        borderColor: 'red'
+                    } 
+                },
+                [1]: { 
+                    style: { 
+                        background: '#ccffcc',
+                        borderColor: 'green'
+                    } 
+                },
+                [2]: { 
+                    style: { 
+                        background: '#ccccff',
+                        borderColor: 'blue'
+                    } 
+                },
+                [3]: { 
+                    style: { 
+                        background: '#ffffcc',
+                        borderColor: 'orange'
+                    } 
+                },
+                [-1]: { 
+                    style: { 
+                        background: '#ffccff',
+                        borderColor: 'purple'
+                    } 
+                }
+            });
+        }
+
+        function updateEdges() {
+            ClassName['list-item'].update({
+                [0]: { 
+                    textContent: '🎯 First Item',
+                    style: { 
+                        fontSize: '18px',
+                        fontWeight: 'bold'
+                    }
+                },
+                [-1]: { 
+                    textContent: '🎯 Last Item',
+                    style: { 
+                        fontSize: '18px',
+                        fontWeight: 'bold'
+                    }
+                }
+            });
+        }
+
+        function resetItems() {
+            const items = ClassName['list-item'];
+            for (let i = 0; i < items.length; i++) {
+                items[i].textContent = `Item ${i + 1}`;
+                items[i].style.cssText = '';
+            }
+        }
+
+        // ==========================================
+        // DEMO 4: All vs Specific Updates
+        // ==========================================
+        function updateAllItems() {
+            // No numeric indices = update all elements
+            ClassName['all-item'].update({
+                style: { 
+                    background: 'lightblue',
+                    borderColor: 'blue',
+                    padding: '20px'
+                },
+                textContent: '🌟 Updated Item'
+            });
+        }
+
+        function updateSpecificItems() {
+            // With numeric indices = update specific elements
+            ClassName['all-item'].update({
+                [0]: { 
+                    style: { background: '#ffcccc', borderColor: 'red' },
+                    textContent: '🔴 First Specific'
+                },
+                [2]: { 
+                    style: { background: '#ccffcc', borderColor: 'green' },
+                    textContent: '🟢 Last Specific'
+                }
+            });
+        }
+
+        function resetAllItems() {
+            const items = ClassName['all-item'];
+            const labels = ['A', 'B', 'C'];
+            for (let i = 0; i < items.length; i++) {
+                items[i].textContent = `Item ${labels[i]}`;
+                items[i].style.cssText = '';
+            }
+        }
+
+        // Log initial load
+        console.log('✅ Demo page loaded successfully!');
+        console.log('📚 Try the examples above to see indexed updates in action');
+    </script>
+</body>
+</html>

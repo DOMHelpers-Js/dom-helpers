@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Array Distribution Test - FIXED</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .card {
+            width: 200px;
+            height: 100px;
+            border: 2px solid #ccc;
+            margin: 10px;
+            padding: 10px;
+            box-sizing: border-box;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            background: #007bff;
+            color: white;
+            border-radius: 5px;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        .debug {
+            margin: 20px 0;
+            padding: 15px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        
+        .debug h3 {
+            margin-top: 0;
+        }
+        
+        .success { color: #22c55e; }
+        .error { color: #ef4444; }
+        .warning { color: #f59e0b; }
+    </style>
+</head>
+<body>
+    <h1>🎨 Array Distribution Test</h1>
+    
+    <div class="debug" id="debug">
+        <h3>Debug Information:</h3>
+        <div id="debug-output">Loading scripts...</div>
+    </div>
+    
+    <div>
+        <button onclick="testArrayDistribution()">Test 1: Array Distribution</button>
+        <button onclick="testMixed()">Test 2: Mixed Values</button>
+        <button onclick="testReset()">Reset</button>
+        <button onclick="runDiagnostics()">Run Diagnostics</button>
+    </div>
+    
+    <h2>Cards:</h2>
+    <div class="card-container">
+        <div class="card">?</div>
+        <div class="card">?</div>
+        <div class="card">?</div>
+    </div>
+    
+    <!-- Core DOM Helpers -->
+    <script src="../../src/Core/01_dh-core.js"></script>
+    
+    <!-- Conditions Core -->
+    <script src="../../src/Conditions/modular-conditions/01_dh-conditional-rendering.js"></script>
+    
+    <!-- Optional: Other Conditions extensions -->
+    <script src="../../src/Conditions/modular-conditions/02_dh-conditions-default.js"></script>
+    <script src="../../src/Conditions/modular-conditions/03_dh-conditions-collection-extension.js"></script>
+    <script src="../../src/Conditions/modular-conditions/04_dh-conditions-apply-index-support.js"></script>
+    
+    <!-- Array Distribution (REQUIRED) -->
+    <script src="../../src/Enhancers/modular-enhancers/10_dh-array-based-updates.js"></script>
+    
+    <!-- Array + Conditions Integration (FIXED VERSION) -->
+    <script src="../../src/Conditions/modular-conditions/07_dh-conditions-array-support.js"></script>
+    
+    <script>
+        // Debug output helper
+        function log(message, type = 'info') {
+            const output = document.getElementById('debug-output');
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                success: 'success',
+                error: 'error',
+                warning: 'warning',
+                info: ''
+            };
+            output.innerHTML += `<div class="${colors[type]}">[${timestamp}] ${message}</div>`;
+            console.log(`[${timestamp}] ${message}`);
+        }
+        
+        // Clear debug log
+        function clearLog() {
+            document.getElementById('debug-output').innerHTML = '';
+        }
+        
+        // Test 1: Basic array distribution
+        function testArrayDistribution() {
+            clearLog();
+            log('🧪 Testing array distribution...', 'info');
+            
+            try {
+                Conditions.apply('loaded', {
+                    'loaded': {
+                        textContent: ['First', 'Second', 'Third'],
+                        style: {
+                            color: ['red', 'blue', 'green'],
+                            fontSize: ['16px', '18px', '20px'],
+                            backgroundColor: ['#ffe0e0', '#e0e0ff', '#e0ffe0']
+                        }
+                    }
+                }, '.card');
+                
+                log('✅ Test completed successfully!', 'success');
+                log('Expected: Cards should show "First"(red), "Second"(blue), "Third"(green)', 'info');
+                
+                // Verify
+                setTimeout(() => verifyTest1(), 100);
+            } catch (error) {
+                log('❌ Error: ' + error.message, 'error');
+                console.error(error);
+            }
+        }
+        
+        // Test 2: Mixed array and non-array values
+        function testMixed() {
+            clearLog();
+            log('🧪 Testing mixed values...', 'info');
+            
+            try {
+                Conditions.apply('mixed', {
+                    'mixed': {
+                        textContent: ['A', 'B', 'C'],
+                        className: 'card',  // Same for all
+                        style: {
+                            color: ['purple', 'orange', 'teal'],
+                            border: '3px solid black',  // Same for all
+                            fontSize: '32px'  // Same for all
+                        }
+                    }
+                }, '.card');
+                
+                log('✅ Test completed successfully!', 'success');
+                log('Expected: Cards show A/B/C with different colors but same border', 'info');
+                
+                setTimeout(() => verifyTest2(), 100);
+            } catch (error) {
+                log('❌ Error: ' + error.message, 'error');
+                console.error(error);
+            }
+        }
+        
+        // Reset cards
+        function testReset() {
+            clearLog();
+            log('🔄 Resetting cards...', 'info');
+            
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.textContent = '?';
+                card.style.color = 'black';
+                card.style.fontSize = '24px';
+                card.style.backgroundColor = 'white';
+                card.style.border = '2px solid #ccc';
+            });
+            
+            log('✅ Cards reset', 'success');
+        }
+        
+        // Verify Test 1
+        function verifyTest1() {
+            const cards = document.querySelectorAll('.card');
+            const expected = [
+                { text: 'First', color: 'red' },
+                { text: 'Second', color: 'blue' },
+                { text: 'Third', color: 'green' }
+            ];
+            
+            let allCorrect = true;
+            cards.forEach((card, i) => {
+                const text = card.textContent.trim();
+                const color = card.style.color;
+                
+                if (text !== expected[i].text) {
+                    log(`⚠️  Card ${i}: Expected text "${expected[i].text}", got "${text}"`, 'warning');
+                    allCorrect = false;
+                }
+                if (color !== expected[i].color) {
+                    log(`⚠️  Card ${i}: Expected color "${expected[i].color}", got "${color}"`, 'warning');
+                    allCorrect = false;
+                }
+            });
+            
+            if (allCorrect) {
+                log('✅ Verification passed! All cards have correct values.', 'success');
+            } else {
+                log('❌ Verification failed! Check warnings above.', 'error');
+            }
+        }
+        
+        // Verify Test 2
+        function verifyTest2() {
+            const cards = document.querySelectorAll('.card');
+            const expected = ['A', 'B', 'C'];
+            
+            let allCorrect = true;
+            cards.forEach((card, i) => {
+                const text = card.textContent.trim();
+                const border = card.style.border;
+                
+                if (text !== expected[i]) {
+                    log(`⚠️  Card ${i}: Expected text "${expected[i]}", got "${text}"`, 'warning');
+                    allCorrect = false;
+                }
+                if (!border.includes('3px')) {
+                    log(`⚠️  Card ${i}: Border should be "3px solid black"`, 'warning');
+                    allCorrect = false;
+                }
+            });
+            
+            if (allCorrect) {
+                log('✅ Verification passed! Mixed values work correctly.', 'success');
+            } else {
+                log('❌ Verification failed! Check warnings above.', 'error');
+            }
+        }
+        
+        // Run diagnostics
+        function runDiagnostics() {
+            clearLog();
+            log('🔍 Running diagnostics...', 'info');
+            log('', 'info');
+            
+            // Check if modules loaded
+            log('Module Check:', 'info');
+            log(`  Conditions: ${typeof Conditions !== 'undefined' ? '✅' : '❌'}`, 
+                typeof Conditions !== 'undefined' ? 'success' : 'error');
+            log(`  ArrayBasedUpdates: ${typeof ArrayBasedUpdates !== 'undefined' ? '✅' : '❌'}`, 
+                typeof ArrayBasedUpdates !== 'undefined' ? 'success' : 'error');
+            log(`  Conditions.apply: ${typeof Conditions?.apply === 'function' ? '✅' : '❌'}`, 
+                typeof Conditions?.apply === 'function' ? 'success' : 'error');
+            log(`  Conditions.applyWithArrays: ${typeof Conditions?.applyWithArrays === 'function' ? '✅' : '❌'}`, 
+                typeof Conditions?.applyWithArrays === 'function' ? 'success' : 'error');
+            
+            log('', 'info');
+            
+            // Check elements
+            const cards = document.querySelectorAll('.card');
+            log(`Elements Found: ${cards.length} cards`, cards.length === 3 ? 'success' : 'warning');
+            
+            log('', 'info');
+            
+            // Check array support
+            const testConfig = { textContent: ['A', 'B', 'C'] };
+            const hasArrays = Conditions.hasArrayValues ? Conditions.hasArrayValues(testConfig) : 'Unknown';
+            log(`Array Detection: ${hasArrays}`, hasArrays === true ? 'success' : 'warning');
+            
+            log('', 'info');
+            
+            // Test apply function
+            log('Testing Conditions.apply()...', 'info');
+            try {
+                Conditions.apply('test', {
+                    'test': { dataset: { test: 'diagnostic' } }
+                }, '.card');
+                log('  Basic apply: ✅', 'success');
+            } catch (e) {
+                log(`  Basic apply: ❌ ${e.message}`, 'error');
+            }
+            
+            log('', 'info');
+            log('🏁 Diagnostics complete!', 'success');
+        }
+        
+        // Run diagnostics on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                runDiagnostics();
+                log('', 'info');
+                log('👆 Click "Test 1" or "Test 2" to see array distribution in action!', 'info');
+            }, 500);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Optimized Component Updates Test</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 40px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    h1 {
+      color: #667eea;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    .demo-section {
+      margin: 30px 0;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .demo-section h2 {
+      color: #667eea;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .demo-section p {
+      margin-bottom: 15px;
+      color: #555;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #5568d3;
+    }
+
+    .btn-success {
+      background: #4CAF50;
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #45a049;
+    }
+
+    .btn-warning {
+      background: #ff9800;
+      color: white;
+    }
+
+    .btn-warning:hover {
+      background: #e68900;
+    }
+
+    .btn-danger {
+      background: #f44336;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #da190b;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .stat-card {
+      padding: 15px;
+      background: white;
+      border-radius: 6px;
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: bold;
+      color: #667eea;
+      margin-top: 5px;
+    }
+
+    .log {
+      background: #2d3748;
+      color: #68d391;
+      padding: 15px;
+      border-radius: 6px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 15px;
+    }
+
+    .log div {
+      margin: 2px 0;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge-efficient {
+      background: #e8f5e9;
+      color: #4CAF50;
+    }
+
+    .badge-expensive {
+      background: #ffebee;
+      color: #f44336;
+    }
+
+    .badge-smart {
+      background: #e3f2fd;
+      color: #2196F3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚀 Optimized Component Updates</h1>
+    <p class="subtitle">Compare different update methods and their performance</p>
+
+    <!-- Demo Section 1: updateData() - Smart Update -->
+    <div class="demo-section">
+      <h2>
+        <span>1️⃣</span> updateData() - Smart Update 
+        <span class="badge badge-smart">NO RE-RENDER</span>
+      </h2>
+      <p>
+        Updates component data without triggering a full re-render. 
+        Perfect for updating state that doesn't immediately affect the DOM.
+      </p>
+      
+      <div class="controls">
+        <button class="btn btn-primary" onclick="testUpdateData()">
+          Update Data (Smart)
+        </button>
+        <button class="btn btn-success" onclick="checkComponentData()">
+          Check Data
+        </button>
+      </div>
+
+      <div id="updateDataDemo"></div>
+    </div>
+
+    <!-- Demo Section 2: component.update() - Granular DOM Update -->
+    <div class="demo-section">
+      <h2>
+        <span>2️⃣</span> component.update() - Granular Update 
+        <span class="badge badge-efficient">EFFICIENT</span>
+      </h2>
+      <p>
+        Updates specific DOM elements without re-rendering. 
+        This is the most efficient way to update the UI!
+      </p>
+      
+      <div class="controls">
+        <button class="btn btn-success" onclick="testComponentUpdate()">
+          Update UI (Efficient)
+        </button>
+        <button class="btn btn-primary" onclick="testMultipleUpdates()">
+          Multiple Updates
+        </button>
+      </div>
+
+      <div id="componentUpdateDemo"></div>
+    </div>
+
+    <!-- Demo Section 3: component.refresh() - Full Re-render -->
+    <div class="demo-section">
+      <h2>
+        <span>3️⃣</span> component.refresh() - Full Re-render 
+        <span class="badge badge-expensive">EXPENSIVE</span>
+      </h2>
+      <p>
+        Forces a complete rebuild of the component. 
+        Use only when structure needs to change.
+      </p>
+      
+      <div class="controls">
+        <button class="btn btn-warning" onclick="testRefresh()">
+          Full Refresh
+        </button>
+      </div>
+
+      <div id="refreshDemo"></div>
+    </div>
+
+    <!-- Demo Section 4: component.smartUpdate() - Combined Approach -->
+    <div class="demo-section">
+      <h2>
+        <span>4️⃣</span> component.smartUpdate() - Combined 
+        <span class="badge badge-smart">SMART</span>
+      </h2>
+      <p>
+        Updates data AND DOM in one call. Best of both worlds!
+      </p>
+      
+      <div class="controls">
+        <button class="btn btn-primary" onclick="testSmartUpdate()">
+          Smart Update
+        </button>
+      </div>
+
+      <div id="smartUpdateDemo"></div>
+    </div>
+
+    <!-- Performance Stats -->
+    <div class="demo-section">
+      <h2><span>📊</span> Performance Statistics</h2>
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-label">Update Data Calls</div>
+          <div class="stat-value" id="updateDataCount">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Component Updates</div>
+          <div class="stat-value" id="componentUpdateCount">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Full Refreshes</div>
+          <div class="stat-value" id="refreshCount">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Smart Updates</div>
+          <div class="stat-value" id="smartUpdateCount">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Console Log -->
+    <div class="demo-section">
+      <h2><span>📝</span> Activity Log</h2>
+      <div class="log" id="activityLog"></div>
+    </div>
+  </div>
+
+  <!-- Load Libraries -->
+  <script src="../../src/dom-helpers.js"></script>
+  <script src="../../src/dom-helpers-components.js"></script>
+
+  <script>
+    // Stats counters
+    let stats = {
+      updateData: 0,
+      componentUpdate: 0,
+      refresh: 0,
+      smartUpdate: 0
+    };
+
+    // Logger function
+    function log(message, type = 'info') {
+      const logEl = document.getElementById('activityLog');
+      const timestamp = new Date().toLocaleTimeString();
+      const color = type === 'success' ? '#68d391' : type === 'warning' ? '#ffd93d' : '#68d391';
+      logEl.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function updateStats() {
+      document.getElementById('updateDataCount').textContent = stats.updateData;
+      document.getElementById('componentUpdateCount').textContent = stats.componentUpdate;
+      document.getElementById('refreshCount').textContent = stats.refresh;
+      document.getElementById('smartUpdateCount').textContent = stats.smartUpdate;
+    }
+
+    // Register the test component
+    Components.register('TestCard', `
+      <div class="test-card">
+        <h3 id="cardTitle">Initial Title</h3>
+        <p id="cardDescription">Initial description</p>
+        <div id="cardStats">
+          <span id="counter">0</span> updates
+        </div>
+      </div>
+      
+      <style>
+        .test-card {
+          padding: 20px;
+          background: white;
+          border-radius: 8px;
+          border-left: 4px solid #667eea;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .test-card h3 {
+          color: #333;
+          margin-bottom: 10px;
+        }
+        
+        .test-card p {
+          color: #666;
+          margin-bottom: 10px;
+        }
+        
+        #cardStats {
+          color: #667eea;
+          font-weight: bold;
+        }
+      </style>
+      
+      <script>
+        let updateCount = 0;
+        
+        // Initialize
+        Elements.update({
+          "cardTitle.textContent": data.title || "Initial Title",
+          "cardDescription.textContent": data.description || "Initial description"
+        });
+        
+        // Listen for data changes
+        onUpdated(() => {
+          updateCount++;
+          Elements.counter.textContent = updateCount;
+        });
+      <\/script>
+    `);
+
+    // Render initial components
+    let comp1, comp2, comp3, comp4;
+
+    Components.render('TestCard', '#updateDataDemo', {
+      title: 'Update Data Demo',
+      description: 'Component for testing updateData()'
+    }).then(c => comp1 = c);
+
+    Components.render('TestCard', '#componentUpdateDemo', {
+      title: 'Component Update Demo',
+      description: 'Component for testing component.update()'
+    }).then(c => comp2 = c);
+
+    Components.render('TestCard', '#refreshDemo', {
+      title: 'Refresh Demo',
+      description: 'Component for testing component.refresh()'
+    }).then(c => comp3 = c);
+
+    Components.render('TestCard', '#smartUpdateDemo', {
+      title: 'Smart Update Demo',
+      description: 'Component for testing component.smartUpdate()'
+    }).then(c => comp4 = c);
+
+    // Test functions
+    async function testUpdateData() {
+      log('🔄 Calling updateData() - Updates data without re-render', 'info');
+      await comp1.updateData({
+        title: 'Data Updated at ' + new Date().toLocaleTimeString(),
+        description: 'Data changed but DOM not automatically updated'
+      });
+      stats.updateData++;
+      updateStats();
+      log('✅ Data updated successfully! (No DOM changes)', 'success');
+      log('💡 TIP: Data changed but you need to manually update DOM', 'warning');
+    }
+
+    function checkComponentData() {
+      log('🔍 Current component data:', 'info');
+      log(JSON.stringify(comp1.data, null, 2), 'success');
+    }
+
+    function testComponentUpdate() {
+      log('⚡ Calling component.update() - Direct DOM update', 'info');
+      comp2.update({
+        "cardTitle.textContent": "Updated at " + new Date().toLocaleTimeString(),
+        "cardDescription.textContent": "Efficiently updated without re-render!"
+      });
+      stats.componentUpdate++;
+      updateStats();
+      log('✅ DOM updated efficiently!', 'success');
+    }
+
+    function testMultipleUpdates() {
+      log('⚡ Multiple efficient updates in sequence', 'info');
+      let count = 0;
+      const interval = setInterval(() => {
+        count++;
+        comp2.update({
+          "cardTitle.textContent": `Rapid Update #${count}`,
+          "cardDescription.textContent": `Updated ${count} times without re-render`
+        });
+        
+        if (count >= 5) {
+          clearInterval(interval);
+          stats.componentUpdate += 5;
+          updateStats();
+          log('✅ 5 rapid updates completed efficiently!', 'success');
+        }
+      }, 200);
+    }
+
+    async function testRefresh() {
+      log('🔄 Calling component.refresh() - Full re-render', 'warning');
+      await comp3.updateData({
+        title: 'Refreshed at ' + new Date().toLocaleTimeString(),
+        description: 'Component completely rebuilt from scratch'
+      });
+      await comp3.refresh();
+      stats.refresh++;
+      updateStats();
+      log('⚠️  Component fully re-rendered (expensive operation)', 'warning');
+    }
+
+    async function testSmartUpdate() {
+      log('🧠 Calling component.smartUpdate() - Data + DOM', 'info');
+      await comp4.smartUpdate(
+        {
+          title: 'Smart Update at ' + new Date().toLocaleTimeString(),
+          description: 'Both data and DOM updated efficiently'
+        },
+        {
+          "cardTitle.textContent": "Smart Update at " + new Date().toLocaleTimeString(),
+          "cardDescription.textContent": "Data + DOM updated together!"
+        }
+      );
+      stats.smartUpdate++;
+      updateStats();
+      log('✅ Smart update complete - Best of both worlds!', 'success');
+    }
+
+    // Initial log
+    log('🚀 Component Library Loaded', 'success');
+    log('💡 Try each update method to see the difference!', 'info');
+  </script>
+</body>
+</html>

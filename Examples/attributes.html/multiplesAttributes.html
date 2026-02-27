@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test setAttribute with update()</title>
+  
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.min.js"></script>
+
+</head>
+<body>
+  <!-- Image element -->
+  <img id="myImg">
+
+  <button id="btn">Update Image</button>
+
+  <script>
+    // Test updating image attributes on button click
+    Elements.btn.update({
+      addEventListener: {
+        click: () => {
+          Elements.myImg.update({
+            setAttribute: {
+              src: "pic.png",
+              alt: "A picture",
+              title: "My Image",
+              "data-id": "123"
+            }
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

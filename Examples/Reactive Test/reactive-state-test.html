@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOM Helpers - Reactive stateTest</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: #333;
+      border-bottom: 2px solid #007bff;
+      padding-bottom: 10px;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    button:active {
+      transform: scale(0.98);
+    }
+    .output {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 10px 0;
+      border-left: 4px solid #007bff;
+    }
+    .reactive-text {
+      font-size: 18px;
+      font-weight: bold;
+      color: #007bff;
+    }
+    .user-card {
+      background: #e9ecef;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    .todo-list {
+      list-style: none;
+      padding: 0;
+    }
+    .todo-item {
+      background: #fff;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 4px;
+      border: 1px solid #dee2e6;
+    }
+    input {
+      padding: 8px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      margin: 5px;
+    }
+    .status {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .status.active {
+      background: #28a745;
+      color: white;
+    }
+    .status.inactive {
+      background: #6c757d;
+      color: white;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>🚀 DOM Helpers - Reactive stateSystem Test</h1>
+
+  <!-- Test 1: Basic Reactivity -->
+  <div class="container">
+    <h2>1. Basic Reactive Counter (Elements.bind)</h2>
+    <div class="output">
+      <div>Count: <span id="counter" class="reactive-text">0</span></div>
+      <div>Double: <span id="doubleCounter" class="reactive-text">0</span></div>
+    </div>
+    <button onclick="incrementCounter()">Increment</button>
+    <button onclick="decrementCounter()">Decrement</button>
+    <button onclick="resetCounter()">Reset</button>
+  </div>
+
+  <!-- Test 2: Nested Objects -->
+  <div class="container">
+    <h2>2. Nested Object Binding</h2>
+    <div class="output">
+      <div id="userInfo" class="user-card">
+        <div>Name: <strong id="userName">-</strong></div>
+        <div>Email: <span id="userEmail">-</span></div>
+        <div>Age: <span id="userAge">-</span></div>
+      </div>
+    </div>
+    <button onclick="changeUser()">Change User Info</button>
+    <button onclick="updateAge()">Increment Age</button>
+  </div>
+
+  <!-- Test 3: Array Reactivity -->
+  <div class="container">
+    <h2>3. Array Methods & Todo List</h2>
+    <div class="output">
+      <div>Todo Count: <strong id="todoCount">0</strong></div>
+      <div id="todoList" class="todo-list"></div>
+      <div>All Todos (comma separated): <span id="todoJoined">-</span></div>
+    </div>
+    <input type="text" id="newTodoInput" placeholder="Enter new todo">
+    <button onclick="addTodo()">Add Todo</button>
+    <button onclick="removeTodo()">Remove First</button>
+    <button onclick="clearTodos()">Clear All</button>
+  </div>
+
+  <!-- Test 4: Collections Binding (by class) -->
+  <div class="container">
+    <h2>4. Collections.bind (All elements with class)</h2>
+    <div class="output">
+      <div class="grid">
+        <div class="user-card">
+          <div>Counter 1: <span class="counter-display">0</span></div>
+        </div>
+        <div class="user-card">
+          <div>Counter 2: <span class="counter-display">0</span></div>
+        </div>
+        <div class="user-card">
+          <div>Counter 3: <span class="counter-display">0</span></div>
+        </div>
+      </div>
+    </div>
+    <p>All counter displays update simultaneously!</p>
+  </div>
+
+  <!-- Test 5: Selector Binding -->
+  <div class="container">
+    <h2>5. Selector.query.bind & Selector.queryAll.bind</h2>
+    <div class="output">
+      <div class="user-card">
+        <div class="status-indicator">Status: <span class="status">inactive</span></div>
+      </div>
+      <div class="user-card">
+        <div class="status-indicator">Status: <span class="status">inactive</span></div>
+      </div>
+    </div>
+    <button onclick="toggleStatus()">Toggle Status</button>
+  </div>
+
+  <!-- Test 6: Object Return Value -->
+  <div class="container">
+    <h2>6. Object Return Value (Multiple Props)</h2>
+    <div class="output">
+      <div id="dynamicElement" style="padding: 15px; border-radius: 4px;">
+        Dynamic element with reactive styles and content
+      </div>
+    </div>
+    <button onclick="changeTheme('blue')">Blue Theme</button>
+    <button onclick="changeTheme('green')">Green Theme</button>
+    <button onclick="changeTheme('red')">Red Theme</button>
+  </div>
+
+  <!-- Test 7: DOM Node Return -->
+  <div class="container">
+    <h2>7. DOM Node Return Value</h2>
+    <div class="output">
+      <div id="componentContainer"></div>
+    </div>
+    <button onclick="updateComponent()">Update Component</button>
+  </div>
+
+  <!-- Test 8: Performance Test -->
+  <div class="container">
+    <h2>8. Performance Test</h2>
+    <div class="output">
+      <div>Updates: <strong id="updateCount">0</strong></div>
+      <div>Value: <strong id="perfValue">0</strong></div>
+    </div>
+    <button onclick="runPerformanceTest()">Run 1000 Updates</button>
+  </div>
+
+  <!-- Load Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
+
+  <script>
+    // ===== REACTIVE state=====
+    
+    const state= ReactiveUtils.state({
+      // Basic counter
+      count: 0,
+      
+      // Nested object
+      user: {
+        name: "Alice",
+        email: "alice@example.com",
+        age: 25
+      },
+      
+      // Array
+      todos: ["Buy groceries", "Read book", "Exercise"],
+      
+      // Status
+      isActive: false,
+      
+      // Theme
+      theme: {
+        color: 'blue',
+        bgColor: '#e3f2fd',
+        text: 'Blue Theme Active'
+      },
+      
+      // Component counter
+      componentCount: 0,
+      
+      // Performance
+      perfValue: 0,
+      updateCount: 0
+    });
+
+    // ===== TEST 1: BASIC COUNTER =====
+    
+    Elements.bind({
+      counter: () => state.count,
+      doubleCounter: () => state.count * 2
+    });
+
+    function incrementCounter() {
+      state.count++;
+    }
+
+    function decrementCounter() {
+      state.count--;
+    }
+
+    function resetCounter() {
+      state.count = 0;
+    }
+
+    // ===== TEST 2: NESTED OBJECTS =====
+    
+    Elements.bind({
+      userName: () => state.user.name,
+      userEmail: () => state.user.email,
+      userAge: () => state.user.age
+    });
+
+    function changeUser() {
+      state.user.name = "Bob Smith";
+      state.user.email = "bob@example.com";
+    }
+
+    function updateAge() {
+      state.user.age++;
+    }
+
+    // ===== TEST 3: ARRAYS =====
+    
+    Elements.bind({
+      todoCount: () => state.todos.length,
+      todoJoined: () => state.todos.join(', '),
+      todoList: () => {
+        // Return DOM nodes
+        const ul = document.createElement('div');
+        state.todos.forEach((todo, index) => {
+          const li = document.createElement('div');
+          li.className = 'todo-item';
+          li.textContent = `${index + 1}. ${todo}`;
+          ul.appendChild(li);
+        });
+        return ul;
+      }
+    });
+
+    function addTodo() {
+      const input = document.getElementById('newTodoInput');
+      if (input.value.trim()) {
+        state.todos.push(input.value.trim());
+        input.value = '';
+      }
+    }
+
+    function removeTodo() {
+      state.todos.shift();
+    }
+
+    function clearTodos() {
+      state.todos.length = 0;
+    }
+
+    // ===== TEST 4: COLLECTIONS =====
+    
+    Collections.bind({
+      'counter-display': () => state.count
+    });
+
+    // ===== TEST 5: SELECTOR BINDING =====
+    
+    Selector.queryAll.bind({
+      '.status': () => ({
+        textContent: state.isActive ? 'active' : 'inactive',
+        className: state.isActive ? 'status active' : 'status inactive'
+      })
+    });
+
+    function toggleStatus() {
+      state.isActive = !state.isActive;
+    }
+
+    // ===== TEST 6: OBJECT RETURN =====
+    
+    Elements.bind({
+      dynamicElement: () => ({
+        textContent: state.theme.text,
+        style: {
+          backgroundColor: state.theme.bgColor,
+          color: state.theme.color === 'blue' ? '#0d47a1' : 
+                 state.theme.color === 'green' ? '#1b5e20' : '#b71c1c',
+          fontWeight: 'bold'
+        },
+        title: `Current theme: ${state.theme.color}`
+      })
+    });
+
+    function changeTheme(color) {
+      if (color === 'blue') {
+        state.theme.color = 'blue';
+        state.theme.bgColor = '#e3f2fd';
+        state.theme.text = 'Blue Theme Active';
+      } else if (color === 'green') {
+        state.theme.color = 'green';
+        state.theme.bgColor = '#e8f5e9';
+        state.theme.text = 'Green Theme Active';
+      } else if (color === 'red') {
+        state.theme.color = 'red';
+        state.theme.bgColor = '#ffebee';
+        state.theme.text = 'Red Theme Active';
+      }
+    }
+
+    // ===== TEST 7: DOM NODE RETURN =====
+    
+    Elements.bind({
+      componentContainer: () => {
+        const div = document.createElement('div');
+        div.className = 'user-card';
+        div.innerHTML = `
+          <h3>Dynamic Component</h3>
+          <p>Render count: <strong>${state.componentCount}</strong></p>
+          <p>Counter value: <strong>${state.count}</strong></p>
+        `;
+        return div;
+      }
+    });
+
+    function updateComponent() {
+      state.componentCount++;
+    }
+
+    // ===== TEST 8: PERFORMANCE =====
+    
+    Elements.bind({
+      perfValue: () => state.perfValue,
+      updateCount: () => state.updateCount
+    });
+
+    function runPerformanceTest() {
+      console.time('1000 reactive updates');
+      
+      for (let i = 0; i < 1000; i++) {
+        state.perfValue = i;
+        state.updateCount++;
+      }
+      
+      console.timeEnd('1000 reactive updates');
+      console.log('Performance test complete!');
+    }
+
+    // ===== INITIAL LOG =====
+    
+    console.log('✅ Reactive stateSystem Initialized');
+    console.log('stateobject:', state);
+    console.log('Try modifying statein console: state.count++');
+  </script>
+</body>
+</html>

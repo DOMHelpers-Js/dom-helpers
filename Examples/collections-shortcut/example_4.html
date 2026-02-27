@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Priority-Based Styling</title>
+  <script src="../../src/Core/Modular/01_dh-core.js"></script>
+  <script src="../../src/Core/Modular/06_dh-global-collection.js"></script>
+</head>
+<body>
+  <div class="task">Task 1</div>
+  <div class="task">Task 2</div>
+  <div class="task">Task 3</div>
+  <div class="task">Task 4</div>
+  <div class="task">Task 5</div>
+
+  <script>
+// Example script demonstrating priority-based styling using index selection
+
+    // First task - Critical priority (Red)
+    ClassName.task[0].update({
+      textContent: 'Critical Task',
+      style: {
+        backgroundColor: '#dc3545',
+        color: 'white',
+        padding: '20px',
+        margin: '10px',
+        fontWeight: 'bold',
+        fontSize: '18px',
+        borderRadius: '8px',
+        border: '3px solid #bd2130',
+        boxShadow: '0 4px 8px rgba(220,53,69,0.3)'
+      },
+      dataset: {
+        priority: 'critical',
+        level: '1'
+      }
+    });
+
+    // Second task - High priority (Orange)
+    ClassName.task[1].update({
+      textContent: 'High Priority Task',
+      style: {
+        backgroundColor: '#fd7e14',
+        color: 'white',
+        padding: '18px',
+        margin: '10px',
+        fontWeight: '600',
+        fontSize: '17px',
+        borderRadius: '8px',
+        border: '2px solid #dc6502',
+        boxShadow: '0 3px 6px rgba(253,126,20,0.3)'
+      },
+      dataset: {
+        priority: 'high',
+        level: '2'
+      }
+    });
+
+    // Third task - Medium priority (Yellow)
+    ClassName.task[2].update({
+      textContent: 'Medium Priority Task',
+      style: {
+        backgroundColor: '#ffc107',
+        color: '#333',
+        padding: '16px',
+        margin: '10px',
+        fontWeight: '500',
+        fontSize: '16px',
+        borderRadius: '8px',
+        border: '2px solid #e0a800',
+        boxShadow: '0 2px 4px rgba(255,193,7,0.3)'
+      },
+      dataset: {
+        priority: 'medium',
+        level: '3'
+      }
+    });
+
+    // Fourth task - Low priority (Blue)
+    ClassName.task[3].update({
+      textContent: 'Low Priority Task',
+      style: {
+        backgroundColor: '#17a2b8',
+        color: 'white',
+        padding: '14px',
+        margin: '10px',
+        fontSize: '15px',
+        borderRadius: '8px',
+        border: '1px solid #138496'
+      },
+      dataset: {
+        priority: 'low',
+        level: '4'
+      }
+    });
+
+    // Last task - Normal priority (Gray)
+    ClassName.task[-1].update({
+      textContent: 'Normal Task',
+      style: {
+        backgroundColor: '#6c757d',
+        color: 'white',
+        padding: '12px',
+        margin: '10px',
+        fontSize: '14px',
+        borderRadius: '8px',
+        opacity: '0.9'
+      },
+      dataset: {
+        priority: 'normal',
+        level: '5'
+      }
+    });
+  </script>
+</body>
+</html>

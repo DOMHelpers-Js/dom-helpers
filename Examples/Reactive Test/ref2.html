@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
+
+    <script>
+      const count = ref(1);
+const message = ref('Hello');
+
+console.log(count.value);   // 0
+console.log(message.value); // "Hello"
+
+// Use in expressions
+const doubled = count.value * 2;
+const greeting = message.value + ', World!';  
+
+console.log(doubled);  // 2
+console.log(greeting); // "Hello, World!"
+    </script>
+</body>
+</html>

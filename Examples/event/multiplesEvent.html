@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Normal Functions Inside .update()</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.min.js"></script>
+
+
+</head>
+
+<body>
+  <button id="btn">Click me</button>
+
+  <script>
+    // Attach multiple events using normal functions
+    Elements.btn.update({
+      addEventListener: {
+        click: function () {
+          // 'this' refers to the button element
+          this.update({
+            textContent: "Button clicked (normal function)!"
+          });
+          alert("Clicked with normal function!");
+        },
+
+        mouseover: function () {
+          this.update({
+            style: { backgroundColor: "lightblue" }
+          });
+          console.log("Hovered with normal function");
+        },
+
+        mouseout: function () {
+          this.update({
+            style: { backgroundColor: "" }
+          });
+        }
+      }
+    });
+
+
+  </script>
+</body>
+
+</html>

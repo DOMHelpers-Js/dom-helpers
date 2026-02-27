@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test Selector.queryAll Property Shortcuts</title>
+  <style>
+    .card { border: 1px solid #ddd; padding: 20px; margin: 10px; }
+  </style>
+</head>
+<body>
+  <div class="card">Card 1</div>
+  <div class="card">Card 2</div>
+  <div class="card">Card 3</div>
+  
+  
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.min.js"></script>
+
+  <script>
+    console.log('Testing ALL collection types...\n');
+    
+    // ✅ Test 1: Selector.queryAll (NOW WORKS!)
+    Selector.queryAll('.card').textContent({
+      0: 'Selector Card 1',
+      1: 'Selector Card 2',
+      2: 'Selector Card 3'
+    });
+    console.log('✅ Selector.queryAll(".card").textContent() works!');
+    
+    // ✅ Test 2: ClassName
+    setTimeout(() => {
+      ClassName.card.style({
+        0: { backgroundColor: '#ffebee', color: '#c62828' },
+        1: { backgroundColor: '#e8f5e9', color: '#2e7d32' },
+        2: { backgroundColor: '#e3f2fd', color: '#1565c0' }
+      });
+      console.log('✅ ClassName.card.style() works!');
+    }, 1000);
+    
+    // ✅ Test 3: querySelectorAll (from query-enhancements.js)
+    setTimeout(() => {
+      querySelectorAll('.card').dataset({
+        0: { id: '1', priority: 'high' },
+        1: { id: '2', priority: 'medium' },
+        2: { id: '3', priority: 'low' }
+      });
+      console.log('✅ querySelectorAll(".card").dataset() works!');
+    }, 2000);
+    
+    // ✅ Test 4: Collections.ClassName
+    setTimeout(() => {
+      Collections.ClassName.card.attrs({
+        0: { title: 'First Card' },
+        1: { title: 'Second Card' },
+        2: { title: 'Third Card' }
+      });
+      console.log('✅ Collections.ClassName.card.attrs() works!');
+    }, 3000);
+    
+    // ✅ Test 5: Array-based updates with Selector.queryAll
+    setTimeout(() => {
+      Selector.queryAll('.card').update({
+        textContent: ['Array 1', 'Array 2', 'Array 3'],
+        style: {
+          fontWeight: 'bold',
+          padding: ['25px', '30px', '35px']
+        }
+      });
+      console.log('✅ Selector.queryAll + array updates work!');
+    }, 4000);
+    
+    console.log('\n🎉 All collection types now support property shortcuts!');
+  </script>
+</body>
+</html>

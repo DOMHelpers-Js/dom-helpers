@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>createElement - Complete Demo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .header h1 {
+      color: #667eea;
+      margin-bottom: 10px;
+      font-size: 2.5em;
+    }
+
+    .header p {
+      color: #666;
+      font-size: 1.1em;
+    }
+
+    .demo-section {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 20px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .demo-section h2 {
+      color: #333;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 3px solid #667eea;
+      font-size: 1.8em;
+    }
+
+    .demo-section h3 {
+      color: #555;
+      margin: 20px 0 10px 0;
+      font-size: 1.3em;
+    }
+
+    .result-box {
+      background: #f8f9fa;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 15px 0;
+      min-height: 60px;
+    }
+
+    .code-block {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 10px 0;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+    }
+
+    .btn {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 600;
+      transition: all 0.3s;
+      margin: 5px;
+    }
+
+    .btn:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-success {
+      background: #48bb78;
+    }
+
+    .btn-success:hover {
+      background: #38a169;
+    }
+
+    .btn-danger {
+      background: #f56565;
+    }
+
+    .btn-danger:hover {
+      background: #e53e3e;
+    }
+
+    .btn-secondary {
+      background: #718096;
+    }
+
+    .btn-secondary:hover {
+      background: #4a5568;
+    }
+
+    .card {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: transform 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    }
+
+    .card h4 {
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .form-group {
+      margin: 15px 0;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #333;
+      font-weight: 600;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 1em;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 0.85em;
+      font-weight: 600;
+      margin: 2px;
+    }
+
+    .badge-primary { background: #667eea; color: white; }
+    .badge-success { background: #48bb78; color: white; }
+    .badge-warning { background: #ed8936; color: white; }
+    .badge-danger { background: #f56565; color: white; }
+
+    .status {
+      padding: 10px;
+      border-radius: 6px;
+      margin: 10px 0;
+      font-weight: 600;
+    }
+
+    .status-success {
+      background: #c6f6d5;
+      color: #22543d;
+      border-left: 4px solid #48bb78;
+    }
+
+    .status-error {
+      background: #fed7d7;
+      color: #742a2a;
+      border-left: 4px solid #f56565;
+    }
+
+    .status-info {
+      background: #bee3f8;
+      color: #2c5282;
+      border-left: 4px solid #4299e1;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .counter {
+      font-size: 3em;
+      font-weight: bold;
+      color: #667eea;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .navigation {
+      background: #2d3748;
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 10px 0;
+    }
+
+    .navigation a {
+      color: white;
+      text-decoration: none;
+      padding: 10px 15px;
+      margin: 0 5px;
+      border-radius: 4px;
+      transition: background 0.3s;
+      display: inline-block;
+    }
+
+    .navigation a:hover {
+      background: #4a5568;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎨 createElement Complete Demo</h1>
+      <p>Comprehensive showcase of all createElement features and capabilities</p>
+    </div>
+
+    <!-- Results will be dynamically inserted here -->
+    <div id="demo-container"></div>
+  </div>
+
+  <!-- Load your modules -->
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.min.js"></script>
+
+  <script>
+    // ========================================
+    // DEMO 1: Basic Element Creation
+    // ========================================
+    function demo1_basicCreation() {
+      const section = createElement('div', {
+        className: 'demo-section fade-in'
+      });
+
+      const title = createElement('h2', {
+        textContent: '1. Basic Element Creation'
+      });
+
+      const code = createElement('div', {
+        className: 'code-block',
+        innerHTML: `<pre>// Simple creation
+const div = createElement('div', {
+  textContent: 'Hello World!',
+  className: 'result-box',
+  style: { 
+    background: '#e8f4f8',
+    color: '#0066cc',
+    fontWeight: 'bold',
+    fontSize: '1.2em'
+  }
+});</pre>`
+      });
+
+      const result = createElement('div', {
+        textContent: 'Hello World!',
+        className: 'result-box',
+        style: {
+          background: '#e8f4f8',
+          color: '#0066cc',
+          fontWeight: 'bold',
+          fontSize: '1.2em',
+          textAlign: 'center'
+        }
+      });
+
+      section.appendChild(title);
+      section.appendChild(code);
+      section.appendChild(result);
+
+      return section;
+    }
+
+    // ========================================
+    // DEMO 2: Bulk Element Creation
+    // ========================================
+    function demo2_bulkCreation() {
+      const section = createElement('div', {
+        className: 'demo-section fade-in'
+      });
+
+      section.appendChild(createElement('h2', {
+        textContent: '2. Bulk Element Creation'
+      }));
+
+      section.appendChild(createElement('div', {
+        className: 'code-block',
+        innerHTML: `<pre>const elements = createElement.bulk({
+  H1: { textContent: 'Bulk Created Title', className: 'card' },
+  P: { textContent: 'This paragraph was created in bulk!' },
+  BUTTON_1: { textContent: 'Button 1', className: 'btn' },
+  BUTTON_2: { textContent: 'Button 2', className: 'btn btn-success' },
+  BUTTON_3: { textContent: 'Button 3', className: 'btn btn-danger' }
+});
+
+// Access via: elements.H1, elements.P, elements.BUTTON_1
+// Or use: elements.all (array of all elements)</pre>`
+      }));
+
+      const resultBox = createElement('div', {
+        className: 'result-box'
+      });
+
+      const elements = createElement.bulk({
+        H1: { 
+          textContent: 'Bulk Created Title', 
+          style: { color: '#667eea', marginBottom: '15px' }
+        },
+        P: { 
+          textContent: 'This paragraph was created in bulk! All elements created in a single call.',
+          style: { marginBottom: '15px' }
+        },
+        BUTTON_1: { 
+          textContent: '🎯 Button 1', 
+          className: 'btn'
+        },
+        BUTTON_2: { 
+          textContent: '✅ Button 2', 
+          className: 'btn btn-success'
+        },
+        BUTTON_3: { 
+          textContent: '❌ Button 3', 
+          className: 'btn btn-danger'
+        }
+      });
+
+      // Append all elements
+      elements.all.forEach(el => resultBox.appendChild(el));
+
+      section.appendChild(resultBox);
+      return section;
+    }
+
+    // ========================================
+    // DEMO 3: Complex Configuration
+    // ========================================
+    function demo3_complexConfig() {
+      const section = createElement('div', {
+        className: 'demo-section fade-in'
+      });
+
+      section.appendChild(createElement('h2', {
+        textContent: '3. Complex Configuration (classList, dataset, attributes, events)'
+      }));
+
+      section.appendChild(createElement('div', {
+        className: 'code-block',
+        innerHTML: `<pre>const button = createElement('button', {
+  textContent: 'Interactive Button',
+  classList: {
+    add: ['btn', 'btn-success'],
+    toggle: 'active'
+  },
+  dataset: {
+    id: '123',
+    action: 'submit',
+    userId: '456'
+  },
+  attributes: {
+    type: 'button',
+    'aria-label': 'Submit form'
+  },
+  style: {
+    padding: '15px 30px',
+    fontSize: '1.1em'
+  },
+  onclick: (e) => {
+    alert('Button clicked! Check console for data.');
+    console.log('Dataset:', e.target.dataset);
+  }
+});</pre>`
+      }));
+
+      const resultBox = createElement('div', {
+        className: 'result-box'
+      });
+
+      let clickCount = 0;
+      const button = createElement('button', {
+        textContent: '🎯 Click Me! (Interactive)',
+        classList: {
+          add: ['btn', 'btn-success']
+        },
+        dataset: {
+          id: '123',
+          action: 'submit',
+          userId: '456'
+        },
+        attributes: {
+          type: 'button',
+          'aria-label': 'Submit form'
+        },
+        style: {
+          padding: '15px 30px',
+          fontSize: '1.1em'
+        },
+        onclick: function(e) {
+          clickCount++;
+          this.textContent = `✅ Clicked ${clickCount} times!`;
+          console.log('Dataset:', e.target.dataset);
+          
+          const status = createElement('div', {
+            className: 'status status-success',
+            textContent: `✓ Click #${clickCount} - Dataset: id=${e.target.dataset.id}, userId=${e.target.dataset.userId}`,
+            style: { marginTop: '10px' }
+          });
+          
+          resultBox.appendChild(status);
+        }
+      });
+
+      resultBox.appendChild(button);
+      section.appendChild(resultBox);
+
+      return section;
+    }
+
+    // ========================================
+    // DEMO 4: Real-World Form
+    // ========================================
+    function demo4_realWorldForm() {
+      const section = createElement('div', {
+        className: 'demo-section fade-in'
+      });
+
+      section.appendChild(createElement('h2', {
+        textContent: '4. Real-World Example: Contact Form'
+      }));
+
+      const formElements = createElement.bulk({
+        FORM: {
+          className: 'result-box',
+          style: { background: 'white' }
+        },
+        DIV_NAME: { className: 'form-group' },
+        LABEL_NAME: { 
+          textContent: 'Full Name *',
+          attributes: { for: 'name' }
+        },
+        INPUT_NAME: {
+          attributes: {
+            type: 'text',
+            id: 'name',
+            name: 'name',
+            placeholder: 'John Doe',
+            required: true
+          }
+        },
+        DIV_EMAIL: { className: 'form-group' },
+        LABEL_EMAIL: { 
+          textContent: 'Email Address *',
+          attributes: { for: 'email' }
+        },
+        INPUT_EMAIL: {
+          attributes: {
+            type: 'email',
+            id: 'email',
+            name: 'email',
+            placeholder: 'john@example.com',
+            required: true
+          }
+        },
+        DIV_MESSAGE: { className: 'form-group' },
+        LABEL_MESSAGE: { 
+          textContent: 'Message *',
+          attributes: { for: 'message' }
+        },
+        TEXTAREA: {
+          attributes: {
+            id: 'message',
+            name: 'message',
+            rows: '5',
+            placeholder: 'Your message here...',
+            required: true
+          }
+        },
+        BUTTON_SUBMIT: {
+          textContent: '📧 Send Message',
+          className: 'btn btn-success',
+          attributes: { type: 'submit' }
+        }
+      });
+
+      // Assemble form structure
+      formElements.DIV_NAME.appendChild(formElements.LABEL_NAME);
+      formElements.DIV_NAME.appendChild(formElements.INPUT_NAME);
+
+      formElements.DIV_EMAIL.appendChild(formElements.LABEL_EMAIL);
+      formElements.DIV_EMAIL.appendChild(formElements.INPUT_EMAIL);
+
+      formElements.DIV_MESSAGE.appendChild(formElements.LABEL_MESSAGE);
+      formElements.DIV_MESSAGE.appendChild(formElements.TEXTAREA);
+
+      formElements.FORM.appendChild(formElements.DIV_NAME);
+      formElements.FORM.appendChild(formElements.DIV_EMAIL);
+      formElements.FORM.appendChild(formElements.DIV_MESSAGE);
+      formElements.FORM.appendChild(formElements.BUTTON_SUBMIT);
+
+      // Add form submit handler
+      formElements.FORM.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const formData = {
+          name: formElements.INPUT_NAME.value,
+          email: formElements.INPUT_EMAIL.value,
+          message: formElements.TEXTAREA.value
+        };
+
+        const success = createElement('div', {
+          className: 'status status-success',
+          innerHTML: `<strong>✓ Form Submitted!</strong><br>
+                      Name: ${formData.name}<br>
+                      Email: ${formData.email}<br>
+                      Message: ${formData.message}`,
+          style: { marginTop: '15px' }
+        });
+
+        formElements.FORM.appendChild(success);
+        formElements.FORM.reset();
+
+        setTimeout(() => success.remove(), 5000);
+      });
+
+      section.appendChild(formElements.FORM);
+
+      return section;
+    }
+
+    // ========================================
+    // DEMO 5: Dynamic Cards Grid
+    // ========================================
+    function demo5_dynamicCards() {
+      const section = createElement('div', {
+        className: 'demo-section fade-in'
+      });
+
+      section.appendChild(createElement('h2', {
+        textContent: '5. Dynamic Content: Product Cards'
+      }));
+
+      const products = [
+        { id: 1, name: 'Wireless Headphones', price: '$99', rating: 5, stock: 'In Stock' },
+        { id: 2, name: 'Smart Watch', price: '$299', rating: 4, stock: 'In Stock' },
+        { id: 3, name: 'Laptop Stand', price: '$49', rating: 5, stock: 'Limited' },
+        { id: 4, name: 'USB-C Hub', price: '$79', rating: 4, stock: 'In Stock' }
+      ];
+
+      const grid = createElement('div', {
+        className: 'grid result-box'
+      });
+
+      products.forEach(product => {
+        const card = createElement('div', {
+          className: 'card',
+          dataset: {
+            productId: product.id,
+            productName: product.name
+          }
+        });
+
+        const cardElements = createElement.bulk({
+          H4: { 
+            textContent: product.name,
+            style: { marginBottom: '10px' }
+          },
+          P_PRICE: { 
+            textContent: `Price: ${product.price}`,
+            style: { 
+              fontSize: '1.5em', 
+              fontWeight: 'bold', 
+              color: '#48bb78',
+              margin: '10px 0'
+            }
+          },
+          DIV_BADGES: { 
+            style: { margin: '10px 0' }
+          },
+          BUTTON: {
+            textContent: '🛒 Add to Cart',
+            className: 'btn',
+            style: { width: '100%', marginTop: '10px' },
+            onclick: function() {
+              const productName = this.closest('.card').dataset.productName;
+              alert(`Added "${productName}" to cart!`);
+              
+              this.textContent = '✓ Added!';
+              this.classList.add('btn-success');
+              
+              setTimeout(() => {
+                this.textContent = '🛒 Add to Cart';
+                this.classList.remove('btn-success');
+              }, 2000);
+            }
+          }
+        });
+
+        // Add rating badges
+        const ratingBadge = createElement('span', {
+          className: 'badge badge-warning',
+          textContent: `⭐ ${product.rating}/5`
+        });
+
+        const stockBadge = createElement('span', {
+          className: product.stock === 'In Stock' ? 'badge badge-success' : 'badge badge-danger',
+          textContent: product.stock
+        });
+
+        cardElements.DIV_BADGES.appendChild(ratingBadge);
+        cardElements.DIV_BADGES.appendChild(stockBadge);
+
+        // Assemble card
+        card.appendChild(cardElements.H4);
+        card.appendChild(cardElements.P_PRICE);
+        card.appendChild(cardElements.DIV_BADGES);
+        card.appendChild(cardElements.BUTTON);
+
+        grid.appendChild(card);
+      });
+
+      section.appendChild(grid);
+
+      return section;
+    }
+
+    // ========================================
+    // DEMO 6: Interactive Counter
+    // ========================================
+    function demo6_interactiveCounter() {
+      const section = createElement('div', {
+        className: 'demo-section fade-in'
+      });
+
+      section.appendChild(createElement('h2', {
+        textContent: '6. Interactive Component: Counter'
+      }));
+
+      const resultBox = createElement('div', {
+        className: 'result-box'
+      });
+
+      let count = 0;
+
+      const elements = createElement.bulk({
+        DISPLAY: {
+          className: 'counter',
+          textContent: '0'
+        },
+        BTN_MINUS: {
+          textContent: '➖ Decrease',
+          className: 'btn btn-danger'
+        },
+        BTN_RESET: {
+          textContent: '🔄 Reset',
+          className: 'btn btn-secondary'
+        },
+        BTN_PLUS: {
+          textContent: '➕ Increase',
+          className: 'btn btn-success'
+        },
+        DIV_BUTTONS: {
+          style: { textAlign: 'center' }
+        }
+      });
+
+      const updateDisplay = () => {
+        elements.DISPLAY.textContent = count;
+        elements.DISPLAY.style.color = count > 0 ? '#48bb78' : count < 0 ? '#f56565' : '#667eea';
+      };
+
+      elements.BTN_MINUS.onclick = () => {
+        count--;
+        updateDisplay();
+      };
+
+      elements.BTN_RESET.onclick = () => {
+        count = 0;
+        updateDisplay();
+      };
+
+      elements.BTN_PLUS.onclick = () => {
+        count++;
+        updateDisplay();
+      };
+
+      elements.DIV_BUTTONS.appendChild(elements.BTN_MINUS);
+      elements.DIV_BUTTONS.appendChild(elements.BTN_RESET);
+      elements.DIV_BUTTONS.appendChild(elements.BTN_PLUS);
+
+      resultBox.appendChild(elements.DISPLAY);
+      resultBox.appendChild(elements.DIV_BUTTONS);
+
+      section.appendChild(resultBox);
+
+      return section;
+    }
+
+    // ========================================
+    // DEMO 7: Navigation Menu
+    // ========================================
+    function demo7_navigationMenu() {
+      const section = createElement('div', {
+        className: 'demo-section fade-in'
+      });
+
+      section.appendChild(createElement('h2', {
+        textContent: '7. Navigation Component'
+      }));
+
+      const nav = createElement('nav', {
+        className: 'navigation result-box'
+      });
+
+      const links = ['Home', 'Products', 'About', 'Contact'];
+
+      links.forEach(linkText => {
+        const link = createElement('a', {
+          textContent: linkText,
+          attributes: {
+            href: '#',
+          },
+          onclick: function(e) {
+            e.preventDefault();
+            
+            // Remove active class from all links
+            nav.querySelectorAll('a').forEach(a => {
+              a.style.background = '';
+            });
+            
+            // Add active to clicked link
+            this.style.background = '#4a5568';
+            
+            // Show status
+            const status = createElement('div', {
+              className: 'status status-info',
+              textContent: `Navigated to: ${linkText}`,
+              style: { marginTop: '15px' }
+            });
+            
+            // Remove previous status if exists
+            const oldStatus = nav.querySelector('.status');
+            if (oldStatus) oldStatus.remove();
+            
+            nav.appendChild(status);
+          }
+        });
+
+        nav.appendChild(link);
+      });
+
+      section.appendChild(nav);
+
+      return section;
+    }
+
+    // ========================================
+    // DEMO 8: Enable/Disable Native Override
+    // ========================================
+    function demo8_enableDisable() {
+      const section = createElement('div', {
+        className: 'demo-section fade-in'
+      });
+
+      section.appendChild(createElement('h2', {
+        textContent: '8. Enable/Disable Native Override'
+      }));
+
+      section.appendChild(createElement('div', {
+        className: 'code-block',
+        innerHTML: `<pre>// Enable enhancement
+createElement.enable();
+
+// Now native document.createElement is enhanced
+const div = document.createElement('div');
+div.update({ textContent: 'Enhanced!' });
+
+// Disable enhancement
+createElement.disable();
+
+// Check status
+createElement.isEnabled(); // false</pre>`
+      }));
+
+      const resultBox = createElement('div', {
+        className: 'result-box'
+      });
+
+      const statusDiv = createElement('div', {
+        className: 'status status-info',
+        textContent: `Current Status: ${createElement.isEnabled() ? 'Enhanced (Enabled)' : 'Native (Disabled)'}`
+      });
+
+      const controls = createElement.bulk({
+        BTN_ENABLE: {
+          textContent: '✅ Enable Enhancement',
+          className: 'btn btn-success'
+        },
+        BTN_DISABLE: {
+          textContent: '❌ Disable Enhancement',
+          className: 'btn btn-danger'
+        },
+        BTN_TEST: {
+          textContent: '🧪 Test Native createElement',
+          className: 'btn'
+        }
+      });
+
+      controls.BTN_ENABLE.onclick = () => {
+        createElement.enable();
+        statusDiv.textContent = 'Status: Enhanced (Enabled) ✓';
+        statusDiv.className = 'status status-success';
+      };
+
+      controls.BTN_DISABLE.onclick = () => {
+        createElement.disable();
+        statusDiv.textContent = 'Status: Native (Disabled) ✓';
+        statusDiv.className = 'status status-error';
+      };
+
+      controls.BTN_TEST.onclick = () => {
+        const testDiv = document.createElement('div');
+        
+        if (typeof testDiv.update === 'function') {
+          testDiv.update({
+            textContent: '✅ Native createElement is ENHANCED!',
+            className: 'status status-success',
+            style: { marginTop: '15px' }
+          });
+        } else {
+          testDiv.textContent = '❌ Native createElement is NOT enhanced';
+          testDiv.className = 'status status-error';
+          testDiv.style.marginTop = '15px';
+        }
+        
+        resultBox.appendChild(testDiv);
+        
+        setTimeout(() => testDiv.remove(), 3000);
+      };
+
+      resultBox.appendChild(statusDiv);
+      controls.all.forEach(btn => resultBox.appendChild(btn));
+
+      section.appendChild(resultBox);
+
+      return section;
+    }
+
+    // ========================================
+    // DEMO 9: Helper Methods (.all, .toArray, .ordered, .appendTo)
+    // ========================================
+    function demo9_helperMethods() {
+      const section = createElement('div', {
+        className: 'demo-section fade-in'
+      });
+
+      section.appendChild(createElement('h2', {
+        textContent: '9. Bulk Helper Methods'
+      }));
+
+      section.appendChild(createElement('div', {
+        className: 'code-block',
+        innerHTML: `<pre>const elements = createElement.bulk({
+  HEADER: { textContent: 'Header' },
+  MAIN: { textContent: 'Main Content' },
+  FOOTER: { textContent: 'Footer' }
+});
+
+// Access all elements
+elements.all // [header, main, footer]
+
+// Get specific elements
+elements.toArray('HEADER', 'FOOTER') // [header, footer]
+
+// Get in specific order
+elements.ordered('FOOTER', 'MAIN', 'HEADER') // [footer, main, header]
+
+// Append to container
+elements.appendTo('#container')
+
+// Append specific elements in order
+elements.appendToOrdered('#container', 'HEADER', 'MAIN', 'FOOTER')</pre>`
+      }));
+
+      const resultBox = createElement('div', {
+        className: 'result-box'
+      });
+
+      const elements = createElement.bulk({
+        HEADER: { 
+          textContent: '📌 Header',
+          className: 'badge badge-primary',
+          style: { fontSize: '1.2em', display: 'block', marginBottom: '10px' }
+        },
+        MAIN: { 
+          textContent: '📄 Main Content',
+          className: 'badge badge-success',
+          style: { fontSize: '1.2em', display: 'block', marginBottom: '10px' }
+        },
+        FOOTER: { 
+          textContent: '📍 Footer',
+          className: 'badge badge-danger',
+          style: { fontSize: '1.2em', display: 'block', marginBottom: '10px' }
+        },
+        DIV_DEMO: {
+          style: { marginTop: '20px', padding: '15px', background: '#f0f0f0', borderRadius: '8px' }
+        }
+      });
+
+      const controls = createElement.bulk({
+        BTN_ALL: {
+          textContent: '.all (show all)',
+          className: 'btn'
+        },
+        BTN_ARRAY: {
+          textContent: '.toArray(HEADER, FOOTER)',
+          className: 'btn btn-success'
+        },
+        BTN_ORDERED: {
+          textContent: '.ordered(FOOTER, MAIN, HEADER)',
+          className: 'btn btn-danger'
+        },
+        BTN_APPEND: {
+          textContent: '.appendTo(container)',
+          className: 'btn btn-secondary'
+        }
+      });
+
+      controls.BTN_ALL.onclick = () => {
+        elements.DIV_DEMO.innerHTML = '';
+        elements.all.forEach(el => {
+          elements.DIV_DEMO.appendChild(el.cloneNode(true));
+        });
+      };
+
+      controls.BTN_ARRAY.onclick = () => {
+        elements.DIV_DEMO.innerHTML = '';
+        elements.toArray('HEADER', 'FOOTER').forEach(el => {
+          elements.DIV_DEMO.appendChild(el.cloneNode(true));
+        });
+      };
+
+      controls.BTN_ORDERED.onclick = () => {
+        elements.DIV_DEMO.innerHTML = '';
+        elements.ordered('FOOTER', 'MAIN', 'HEADER').forEach(el => {
+          elements.DIV_DEMO.appendChild(el.cloneNode(true));
+        });
+      };
+
+      controls.BTN_APPEND.onclick = () => {
+        elements.DIV_DEMO.innerHTML = '';
+        const temp = createElement('div');
+        elements.appendTo(temp);
+        elements.DIV_DEMO.appendChild(temp);
+      };
+
+      controls.all.forEach(btn => resultBox.appendChild(btn));
+      resultBox.appendChild(elements.DIV_DEMO);
+
+      section.appendChild(resultBox);
+
+      return section;
+    }
+
+    // ========================================
+    // DEMO 10: Chained Updates
+    // ========================================
+    function demo10_chainedUpdates() {
+      const section = createElement('div', {
+        className: 'demo-section fade-in'
+      });
+
+      section.appendChild(createElement('h2', {
+        textContent: '10. Chained Updates Pattern'
+      }));
+
+      section.appendChild(createElement('div', {
+        className: 'code-block',
+        innerHTML: `<pre>const box = createElement('div')
+  .update({ className: 'card' })
+  .update({ textContent: 'Initial Text' })
+  .update({ style: { background: '#e8f4f8' } })
+  .update({ style: { padding: '20px' } });
+
+// Each .update() returns the element for chaining</pre>`
+      }));
+
+      const resultBox = createElement('div', {
+        className: 'result-box'
+      });
+
+      const box = createElement('div')
+        .update({ className: 'card' })
+        .update({ textContent: '🎨 Created with chained updates!' })
+        .update({ style: { background: '#e8f4f8', color: '#0066cc' } })
+        .update({ style: { padding: '20px', textAlign: 'center', fontSize: '1.2em' } });
+
+      resultBox.appendChild(box);
+
+      const button = createElement('button', {
+        textContent: '🔄 Update Again',
+        className: 'btn',
+        style: { marginTop: '15px' }
+      });
+
+      let updateCount = 0;
+      button.onclick = () => {
+        updateCount++;
+        box.update({
+          textContent: `Updated ${updateCount} time${updateCount > 1 ? 's' : ''}!`,
+          style: {
+            background: `hsl(${updateCount * 30}, 70%, 85%)`,
+            transform: `scale(${1 + updateCount * 0.05})`
+          }
+        });
+      };
+
+      resultBox.appendChild(button);
+      section.appendChild(resultBox);
+
+      return section;
+    }
+
+    // ========================================
+    // RENDER ALL DEMOS
+    // ========================================
+    document.addEventListener('DOMContentLoaded', () => {
+      const container = document.getElementById('demo-container');
+
+      // Render all demos in sequence with slight delay for animation
+      const demos = [
+        demo1_basicCreation,
+        demo2_bulkCreation,
+        demo3_complexConfig,
+        demo4_realWorldForm,
+        demo5_dynamicCards,
+        demo6_interactiveCounter,
+        demo7_navigationMenu,
+        demo8_enableDisable,
+        demo9_helperMethods,
+        demo10_chainedUpdates
+      ];
+
+      demos.forEach((demo, index) => {
+        setTimeout(() => {
+          container.appendChild(demo());
+        }, index * 100); // Stagger the rendering
+      });
+
+      // Add summary section
+      setTimeout(() => {
+        const summary = createElement('div', {
+          className: 'demo-section fade-in',
+          style: {
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white'
+          }
+        });
+
+        summary.innerHTML = `
+          <h2 style="color: white; border-bottom-color: white;">✅ Demo Complete!</h2>
+          <p style="font-size: 1.2em; margin: 15px 0;">
+            You've seen all major features of createElement:
+          </p>
+          <ul style="list-style: none; padding: 0; font-size: 1.1em;">
+            <li>✓ Basic element creation with config objects</li>
+            <li>✓ Bulk creation with .bulk() and .update() alias</li>
+            <li>✓ Complex configurations (classList, dataset, attributes, events)</li>
+            <li>✓ Real-world examples (forms, cards, navigation)</li>
+            <li>✓ Interactive components with state</li>
+            <li>✓ Helper methods (.all, .toArray(), .ordered(), .appendTo())</li>
+            <li>✓ Enable/disable native override</li>
+            <li>✓ Chained updates pattern</li>
+          </ul>
+          <p style="font-size: 1.1em; margin-top: 20px;">
+            <strong>Total: 22+ ways to create elements!</strong>
+          </p>
+        `;
+
+        container.appendChild(summary);
+      }, demos.length * 100 + 200);
+
+      console.log('%c🎨 createElement Demo Loaded!', 'color: #667eea; font-size: 20px; font-weight: bold;');
+      console.log('All demos are interactive. Click buttons to test features!');
+    });
+  </script>
+</body>
+</html>

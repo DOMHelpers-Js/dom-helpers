@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conditions.js Default Branch Demo - Fixed</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: white;
+      margin-bottom: 30px;
+      font-size: 2.5rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .demo-card {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      transition: transform 0.3s ease;
+    }
+
+    .demo-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .demo-card h2 {
+      color: #667eea;
+      margin-bottom: 15px;
+      font-size: 1.3rem;
+      border-bottom: 2px solid #f0f0f0;
+      padding-bottom: 10px;
+    }
+
+    .controls {
+      margin-bottom: 20px;
+    }
+
+    .control-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #333;
+      font-size: 0.9rem;
+    }
+
+    select, input[type="range"], input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+    }
+
+    select:focus, input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    input[type="range"] {
+      padding: 0;
+      height: 40px;
+    }
+
+    .range-value {
+      text-align: center;
+      font-weight: 600;
+      color: #667eea;
+      font-size: 1.1rem;
+      margin-top: 5px;
+    }
+
+    .display {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: 600;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      border: 2px solid #e0e0e0;
+    }
+
+    /* Status Badge Styles */
+    .status-active {
+      background: #d4edda;
+      border-color: #28a745;
+      color: #155724;
+    }
+
+    .status-pending {
+      background: #fff3cd;
+      border-color: #ffc107;
+      color: #856404;
+    }
+
+    .status-error {
+      background: #f8d7da;
+      border-color: #dc3545;
+      color: #721c24;
+    }
+
+    .status-unknown {
+      background: #e2e3e5;
+      border-color: #6c757d;
+      color: #383d41;
+    }
+
+    /* Theme Styles */
+    .theme-dark {
+      background: #2c3e50;
+      color: #ecf0f1;
+      border-color: #34495e;
+    }
+
+    .theme-light {
+      background: #ffffff;
+      color: #2c3e50;
+      border-color: #bdc3c7;
+    }
+
+    .theme-auto {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-color: #667eea;
+    }
+
+    /* Role Badge Styles */
+    .role-admin {
+      background: #dc3545;
+      color: white;
+      border-color: #c82333;
+    }
+
+    .role-moderator {
+      background: #ffc107;
+      color: #212529;
+      border-color: #e0a800;
+    }
+
+    .role-user {
+      background: #17a2b8;
+      color: white;
+      border-color: #138496;
+    }
+
+    .role-guest {
+      background: #6c757d;
+      color: white;
+      border-color: #5a6268;
+    }
+
+    /* Temperature Styles */
+    .temp-freezing {
+      background: #cce5ff;
+      border-color: #004085;
+      color: #004085;
+    }
+
+    .temp-cold {
+      background: #d1ecf1;
+      border-color: #0c5460;
+      color: #0c5460;
+    }
+
+    .temp-comfortable {
+      background: #d4edda;
+      border-color: #155724;
+      color: #155724;
+    }
+
+    .temp-warm {
+      background: #fff3cd;
+      border-color: #856404;
+      color: #856404;
+    }
+
+    .temp-hot {
+      background: #f8d7da;
+      border-color: #721c24;
+      color: #721c24;
+    }
+
+    /* Button Group */
+    .button-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      flex: 1;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 6px;
+      background: #667eea;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.9rem;
+    }
+
+    button:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .info-box {
+      background: #e7f3ff;
+      border-left: 4px solid #2196F3;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      color: #0d47a1;
+    }
+
+    @media (max-width: 768px) {
+      .demo-grid {
+        grid-template-columns: 1fr;
+      }
+      h1 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎯 Conditions.js Default Branch Demo</h1>
+
+    <div class="demo-grid">
+      <!-- Demo 1: User Role with Default -->
+      <div class="demo-card">
+        <h2>1. User Role Badge</h2>
+        <div class="controls">
+          <div class="control-group">
+            <label>Select Role:</label>
+            <select id="roleSelector">
+              <option value="admin">Admin</option>
+              <option value="moderator">Moderator</option>
+              <option value="user">User</option>
+              <option value="guest" selected>Guest</option>
+              <option value="unknown">Unknown Role</option>
+              <option value="visitor">Visitor</option>
+            </select>
+          </div>
+        </div>
+        <div id="roleDisplay" class="display">Select a role</div>
+        <div class="info-box">
+          💡 Try selecting "Unknown Role" or "Visitor" - they will use the <strong>default</strong> configuration.
+        </div>
+      </div>
+
+      <!-- Demo 2: Status with Wildcard -->
+      <div class="demo-card">
+        <h2>2. Status Indicator</h2>
+        <div class="controls">
+          <div class="control-group">
+            <label>Select Status:</label>
+            <select id="statusSelector">
+              <option value="active">Active</option>
+              <option value="pending">Pending</option>
+              <option value="error">Error</option>
+              <option value="maintenance">Maintenance</option>
+              <option value="offline">Offline</option>
+            </select>
+          </div>
+        </div>
+        <div id="statusDisplay" class="display">Select a status</div>
+        <div class="info-box">
+          💡 "Maintenance" and "Offline" will use <strong>default</strong> styling.
+        </div>
+      </div>
+
+      <!-- Demo 3: Theme Switcher -->
+      <div class="demo-card">
+        <h2>3. Theme Switcher</h2>
+        <div class="controls">
+          <div class="button-group">
+            <button onclick="setTheme('dark')">🌙 Dark</button>
+            <button onclick="setTheme('light')">☀️ Light</button>
+            <button onclick="setTheme('auto')">🔄 Auto</button>
+            <button onclick="setTheme('custom')">🎨 Custom</button>
+          </div>
+        </div>
+        <div id="themeDisplay" class="display">Select a theme</div>
+        <div class="info-box">
+          💡 "Custom" theme will use the <strong>default</strong> styling.
+        </div>
+      </div>
+
+      <!-- Demo 4: Temperature Display -->
+      <div class="demo-card">
+        <h2>4. Temperature Monitor</h2>
+        <div class="controls">
+          <div class="control-group">
+            <label>Temperature: <span id="tempValue">20</span>°C</label>
+            <input type="range" id="tempSlider" min="-10" max="45" value="20" step="1">
+          </div>
+        </div>
+        <div id="tempDisplay" class="display">Adjust temperature</div>
+        <div class="info-box">
+          💡 Temperature ranges trigger different styles dynamically.
+        </div>
+      </div>
+
+      <!-- Demo 5: Grade Calculator -->
+      <div class="demo-card">
+        <h2>5. Grade Calculator</h2>
+        <div class="controls">
+          <div class="control-group">
+            <label>Score: <span id="scoreValue">0</span>/100</label>
+            <input type="range" id="scoreSlider" min="0" max="100" value="0" step="5">
+          </div>
+        </div>
+        <div id="gradeDisplay" class="display">Enter score</div>
+        <div class="info-box">
+          💡 Different score ranges show different grade displays.
+        </div>
+      </div>
+
+      <!-- Demo 6: API Response Handler -->
+      <div class="demo-card">
+        <h2>6. API Response Handler</h2>
+        <div class="controls">
+          <div class="button-group">
+            <button onclick="simulateAPI('success')">✅ Success</button>
+            <button onclick="simulateAPI('error')">❌ Error</button>
+            <button onclick="simulateAPI('timeout')">⏱️ Timeout</button>
+            <button onclick="simulateAPI('unknown')">❓ Unknown</button>
+          </div>
+        </div>
+        <div id="apiDisplay" class="display">Click a button to simulate</div>
+        <div class="info-box">
+          💡 "Timeout" and "Unknown" responses use <strong>default</strong> handling.
+        </div>
+      </div>
+    </div>
+  </div>
+  
+<script src="../../src/DOMHelpers/03_dh-reactive.js"></script>
+  <script src="../../src/DOMHelpers/05_dh-conditions.js"></script>
+   
+ <script>
+    // ============================================================================
+    // REACTIVE STATE - FIXED: Initialize with objects containing 'value' property
+    // ============================================================================
+    const userRole = ReactiveUtils.state({ value: 'guest' });
+    const status = ReactiveUtils.state({ value: 'active' });
+    const theme = ReactiveUtils.state({ value: 'light' });
+    const temperature = ReactiveUtils.state({ value: 20 });
+    const score = ReactiveUtils.state({ value: 0 });
+    const apiResponse = ReactiveUtils.state({ value: 'idle' });
+
+    // ============================================================================
+    // DEMO 1: USER ROLE WITH DEFAULT
+    // ============================================================================
+    Conditions.whenState(
+      () => userRole.value,
+      {
+        'admin': {
+          classList: { add: 'role-admin', remove: ['role-moderator', 'role-user', 'role-guest'] },
+          textContent: '👑 Administrator'
+        },
+        'moderator': {
+          classList: { add: 'role-moderator', remove: ['role-admin', 'role-user', 'role-guest'] },
+          textContent: '⚡ Moderator'
+        },
+        'user': {
+          classList: { add: 'role-user', remove: ['role-admin', 'role-moderator', 'role-guest'] },
+          textContent: '👤 User'
+        },
+        'guest': {
+          classList: { add: 'role-guest', remove: ['role-admin', 'role-moderator', 'role-user'] },
+          textContent: '🚶 Guest'
+        },
+        'default': {
+          classList: { add: 'role-guest', remove: ['role-admin', 'role-moderator', 'role-user'] },
+          textContent: '❓ Unknown Role'
+        }
+      },
+      '#roleDisplay'
+    );
+
+    // ============================================================================
+    // DEMO 2: STATUS WITH DEFAULT
+    // ============================================================================
+    Conditions.whenState(
+      () => status.value,
+      {
+        'active': {
+          classList: { add: 'status-active', remove: ['status-pending', 'status-error', 'status-unknown'] },
+          textContent: '✅ System Active'
+        },
+        'pending': {
+          classList: { add: 'status-pending', remove: ['status-active', 'status-error', 'status-unknown'] },
+          textContent: '⏳ Pending...'
+        },
+        'error': {
+          classList: { add: 'status-error', remove: ['status-active', 'status-pending', 'status-unknown'] },
+          textContent: '❌ Error Occurred'
+        },
+        'default': {
+          classList: { add: 'status-unknown', remove: ['status-active', 'status-pending', 'status-error'] },
+          textContent: '❓ Unknown Status'
+        }
+      },
+      '#statusDisplay'
+    );
+
+    // ============================================================================
+    // DEMO 3: THEME SWITCHER
+    // ============================================================================
+    Conditions.whenState(
+      () => theme.value,
+      {
+        'dark': {
+          classList: { add: 'theme-dark', remove: ['theme-light', 'theme-auto'] },
+          textContent: '🌙 Dark Theme Active'
+        },
+        'light': {
+          classList: { add: 'theme-light', remove: ['theme-dark', 'theme-auto'] },
+          textContent: '☀️ Light Theme Active'
+        },
+        'auto': {
+          classList: { add: 'theme-auto', remove: ['theme-dark', 'theme-light'] },
+          textContent: '🔄 Auto Theme Active'
+        },
+        'default': {
+          classList: { add: 'theme-light', remove: ['theme-dark', 'theme-auto'] },
+          textContent: '🎨 Custom Theme (Default)'
+        }
+      },
+      '#themeDisplay'
+    );
+
+    // ============================================================================
+    // DEMO 4: TEMPERATURE MONITOR - FIXED: Dynamic text content
+    // ============================================================================
+    Conditions.whenState(
+      () => temperature.value,
+      () => ({
+        '<=0': {
+          classList: { add: 'temp-freezing', remove: ['temp-cold', 'temp-comfortable', 'temp-warm', 'temp-hot'] },
+          textContent: `🥶 Freezing: ${temperature.value}°C`
+        },
+        '1-15': {
+          classList: { add: 'temp-cold', remove: ['temp-freezing', 'temp-comfortable', 'temp-warm', 'temp-hot'] },
+          textContent: `🧊 Cold: ${temperature.value}°C`
+        },
+        '16-24': {
+          classList: { add: 'temp-comfortable', remove: ['temp-freezing', 'temp-cold', 'temp-warm', 'temp-hot'] },
+          textContent: `😊 Comfortable: ${temperature.value}°C`
+        },
+        '25-32': {
+          classList: { add: 'temp-warm', remove: ['temp-freezing', 'temp-cold', 'temp-comfortable', 'temp-hot'] },
+          textContent: `☀️ Warm: ${temperature.value}°C`
+        },
+        '>32': {
+          classList: { add: 'temp-hot', remove: ['temp-freezing', 'temp-cold', 'temp-comfortable', 'temp-warm'] },
+          textContent: `🔥 Hot: ${temperature.value}°C`
+        },
+        'default': {
+          classList: { remove: ['temp-freezing', 'temp-cold', 'temp-comfortable', 'temp-warm', 'temp-hot'] },
+          textContent: `📊 Temperature: ${temperature.value}°C`
+        }
+      }),
+      '#tempDisplay'
+    );
+
+    // ============================================================================
+    // DEMO 5: GRADE CALCULATOR - FIXED: Dynamic text content
+    // ============================================================================
+    Conditions.whenState(
+      () => score.value,
+      () => ({
+        '>=90': {
+          style: { background: '#d4edda', borderColor: '#28a745', color: '#155724' },
+          textContent: `Grade: A (${score.value}%) - Excellent! 🌟`
+        },
+        '80-89': {
+          style: { background: '#d1ecf1', borderColor: '#17a2b8', color: '#0c5460' },
+          textContent: `Grade: B (${score.value}%) - Good! 👍`
+        },
+        '70-79': {
+          style: { background: '#fff3cd', borderColor: '#ffc107', color: '#856404' },
+          textContent: `Grade: C (${score.value}%) - Average 📝`
+        },
+        '60-69': {
+          style: { background: '#f8d7da', borderColor: '#dc3545', color: '#721c24' },
+          textContent: `Grade: D (${score.value}%) - Below Average ⚠️`
+        },
+        '<60': {
+          style: { background: '#f8d7da', borderColor: '#dc3545', color: '#721c24', fontWeight: 'bold' },
+          textContent: `Grade: F (${score.value}%) - Failed ❌`
+        },
+        'default': {
+          style: { background: '#e2e3e5', borderColor: '#6c757d', color: '#383d41' },
+          textContent: 'Enter a score to calculate grade'
+        }
+      }),
+      '#gradeDisplay'
+    );
+
+    // ============================================================================
+    // DEMO 6: API RESPONSE HANDLER
+    // ============================================================================
+    Conditions.whenState(
+      () => apiResponse.value,
+      {
+        'success': {
+          style: { background: '#d4edda', borderColor: '#28a745', color: '#155724' },
+          textContent: '✅ Request Successful!'
+        },
+        'error': {
+          style: { background: '#f8d7da', borderColor: '#dc3545', color: '#721c24' },
+          textContent: '❌ Request Failed!'
+        },
+        'loading': {
+          style: { background: '#d1ecf1', borderColor: '#17a2b8', color: '#0c5460' },
+          textContent: '⏳ Loading...'
+        },
+        'default': {
+          style: { background: '#fff3cd', borderColor: '#ffc107', color: '#856404' },
+          textContent: '⚠️ Unknown Response Type'
+        }
+      },
+      '#apiDisplay'
+    );
+
+    // ============================================================================
+    // EVENT HANDLERS
+    // ============================================================================
+
+    document.getElementById('roleSelector').addEventListener('change', (e) => {
+      userRole.value = e.target.value;
+    });
+
+    document.getElementById('statusSelector').addEventListener('change', (e) => {
+      status.value = e.target.value;
+    });
+
+    function setTheme(themeName) {
+      theme.value = themeName;
+    }
+    window.setTheme = setTheme;
+
+    const tempSlider = document.getElementById('tempSlider');
+    const tempValue = document.getElementById('tempValue');
+    tempSlider.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      tempValue.textContent = value;
+      temperature.value = value;
+    });
+
+    const scoreSlider = document.getElementById('scoreSlider');
+    const scoreValue = document.getElementById('scoreValue');
+    scoreSlider.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      scoreValue.textContent = value;
+      score.value = value;
+    });
+
+    function simulateAPI(response) {
+      apiResponse.value = 'loading';
+      setTimeout(() => {
+        apiResponse.value = response;
+      }, 500);
+    }
+    window.simulateAPI = simulateAPI;
+
+    console.log('✅ Demo loaded successfully!');
+  </script>
+</body>
+</html>

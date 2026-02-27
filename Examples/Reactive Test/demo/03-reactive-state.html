@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reactive State - Conditions.js Demo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header class="demo-header">
+      <h1>⚡ Reactive State</h1>
+      <a href="index.html" class="back-button">← Back to Demos</a>
+    </header>
+
+    <section>
+      <h2>Automatic UI Updates</h2>
+      <p>With reactive state, your UI automatically updates when data changes. No manual DOM manipulation required!</p>
+
+      <!-- Simple Counter -->
+      <div class="interactive-demo">
+        <h3>1. Simple Reactive Counter</h3>
+        <div class="demo-description">
+          The display updates automatically when the counter state changes.
+        </div>
+        
+        <div class="demo-controls">
+          <button class="primary" onclick="increment()">+ Increment</button>
+          <button class="secondary" onclick="decrement()">- Decrement</button>
+          <button class="secondary" onclick="reset()">Reset</button>
+        </div>
+        
+        <div id="counter-output" class="demo-output">Count: 0</div>
+        
+        <div class="code-display">
+<span class="keyword">const</span> state = ReactiveUtils.state({ count: <span class="string">0</span> });
+
+Conditions.whenState(
+  <span class="keyword">() =&gt;</span> state.count,
+  {
+    <span class="string">'0'</span>: { textContent: <span class="string">'Count: 0'</span>, style: { color: <span class="string">'gray'</span> } },
+    <span class="string">'>0'</span>: { textContent: <span class="keyword">`Count: ${state.count}`</span>, style: { color: <span class="string">'green'</span> } },
+    <span class="string">'<0'</span>: { textContent: <span class="keyword">`Count: ${state.count}`</span>, style: { color: <span class="string">'red'</span> } }
+  },
+  <span class="string">'#counter-output'</span>
+);
+
+<span class="comment">// Changes update automatically!</span>
+state.count++;
+        </div>
+      </div>
+
+      <!-- Status Indicator -->
+      <div class="interactive-demo">
+        <h3>2. Loading Status Indicator</h3>
+        <div class="demo-description">
+          Shows different states: loading, success, or error with automatic updates.
+        </div>
+        
+        <div class="demo-controls">
+          <button class="primary" onclick="simulateLoading()">Start Loading</button>
+          <button class="success" onclick="simulateSuccess()">Success</button>
+          <button class="error" onclick="simulateError()">Error</button>
+        </div>
+        
+        <div id="status-output" class="demo-output">Ready</div>
+        
+        <div class="code-display">
+<span class="keyword">const</span> state = ReactiveUtils.state({ status: <span class="string">'idle'</span> });
+
+Conditions.whenState(
+  <span class="keyword">() =&gt;</span> state.status,
+  {
+    <span class="string">'loading'</span>: { 
+      textContent: <span class="string">'⏳ Loading...'</span>,
+      style: { color: <span class="string">'#2196f3'</span>, background: <span class="string">'#e3f2fd'</span> }
+    },
+    <span class="string">'success'</span>: { 
+      textContent: <span class="string">'✓ Success!'</span>,
+      style: { color: <span class="string">'#4caf50'</span>, background: <span class="string">'#f1f8f4'</span> }
+    },
+    <span class="string">'error'</span>: { 
+      textContent: <span class="string">'✗ Error occurred'</span>,
+      style: { color: <span class="string">'#f44336'</span>, background: <span class="string">'#fef1f0'</span> }
+    }
+  },
+  <span class="string">'#status-output'</span>
+);
+        </div>
+      </div>
+
+      <!-- Form Validation -->
+      <div class="interactive-demo">
+        <h3>3. Reactive Form Validation</h3>
+        <div class="demo-description">
+          Real-time validation feedback as user types.
+        </div>
+        
+        <div class="demo-controls">
+          <input type="email" id="email-input" placeholder="Enter email..." 
+                 oninput="validateEmail(this.value)" style="width: 300px;">
+        </div>
+        
+        <div id="validation-output" class="demo-output">Enter an email to validate</div>
+        
+        <div class="code-display">
+<span class="keyword">const</span> state = ReactiveUtils.state({ email: <span class="string">''</span> });
+
+Conditions.whenState(
+  <span class="keyword">() =&gt;</span> state.email,
+  {
+    <span class="string">'empty'</span>: { textContent: <span class="string">'Enter an email to validate'</span> },
+    <span class="string">'/^[^@]+@[^@]+\\.[^@]+$/'</span>: { 
+      textContent: <span class="string">'✓ Valid email'</span>,
+      style: { color: <span class="string">'#4caf50'</span>, fontWeight: <span class="string">'bold'</span> }
+    },
+    <span class="string">'truthy'</span>: { 
+      textContent: <span class="string">'✗ Invalid email format'</span>,
+      style: { color: <span class="string">'#f44336'</span>, fontWeight: <span class="string">'bold'</span> }
+    }
+  },
+  <span class="string">'#validation-output'</span>
+);
+        </div>
+      </div>
+
+      <!-- Theme Switcher -->
+      <div class="interactive-demo">
+        <h3>4. Reactive Theme Switcher</h3>
+        <div class="demo-description">
+          Switch themes with automatic UI updates across multiple elements.
+        </div>
+        
+        <div class="demo-controls">
+          <button class="primary" onclick="switchTheme('light')">☀️ Light</button>
+          <button class="secondary" onclick="switchTheme('dark')">🌙 Dark</button>
+          <button class="secondary" onclick="switchTheme('auto')">🔄 Auto</button>
+        </div>
+        
+        <div id="theme-display" class="demo-output">Current theme: light</div>
+        
+        <div class="code-display">
+<span class="keyword">const</span> state = ReactiveUtils.state({ theme: <span class="string">'light'</span> });
+
+Conditions.whenState(
+  <span class="keyword">() =&gt;</span> state.theme,
+  {
+    <span class="string">'light'</span>: { 
+      textContent: <span class="string">'☀️ Light Theme'</span>,
+      style: { background: <span class="string">'#fff'</span>, color: <span class="string">'#333'</span> }
+    },
+    <span class="string">'dark'</span>: { 
+      textContent: <span class="string">'🌙 Dark Theme'</span>,
+      style: { background: <span class="string">'#1e1e1e'</span>, color: <span class="string">'#fff'</span> }
+    }
+  },
+  <span class="string">'#theme-display'</span>
+);
+
+<span class="comment">// Automatically updates all bound elements!</span>
+state.theme = <span class="string">'dark'</span>;
+        </div>
+      </div>
+
+      <!-- Shopping Cart -->
+      <div class="interactive-demo">
+        <h3>5. Reactive Shopping Cart</h3>
+        <div class="demo-description">
+          Add items and watch the cart update automatically with conditional styling.
+        </div>
+        
+        <div class="demo-controls">
+          <button class="primary" onclick="addItem()">+ Add Item</button>
+          <button class="secondary" onclick="removeItem()">- Remove Item</button>
+          <button class="secondary" onclick="clearCart()">Clear Cart</button>
+        </div>
+        
+        <div id="cart-output" class="demo-output">Cart is empty</div>
+        
+        <div class="code-display">
+<span class="keyword">const</span> cart = ReactiveUtils.state({ items: <span class="string">0</span> });
+
+Conditions.whenState(
+  <span class="keyword">() =&gt;</span> cart.items,
+  {
+    <span class="string">'0'</span>: { 
+      textContent: <span class="string">'Cart is empty'</span>,
+      style: { color: <span class="string">'gray'</span> }
+    },
+    <span class="string">'1-5'</span>: { 
+      textContent: <span class="keyword">`${cart.items} item(s) in cart`</span>,
+      style: { color: <span class="string">'blue'</span> }
+    },
+    <span class="string">'>5'</span>: { 
+      textContent: <span class="keyword">`🛒 ${cart.items} items - Ready to checkout!`</span>,
+      style: { color: <span class="string">'green'</span>, fontWeight: <span class="string">'bold'</span> }
+    }
+  },
+  <span class="string">'#cart-output'</span>
+);
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>
+        <a href="02-property-handlers.html">← Property Handlers</a> •
+        <a href="04-advanced-patterns.html">Advanced Patterns →</a>
+      </p>
+    </footer>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.min.js"></script>
+<script src = "04_reactive/01_dh-reactive.js"></script>
+  <script>
+    // Counter State
+    const counterState = ReactiveUtils.state({ count: 0 });
+    
+    // Use whenState with a function that recreates conditions each time
+    Conditions.whenState(
+      () => counterState.count,
+      () => ({
+        '0': { 
+          textContent: 'Count: 0', 
+          style: { color: 'gray', fontWeight: 'normal' } 
+        },
+        '>0': { 
+          textContent: `Count: ${counterState.count} (Positive)`, 
+          style: { color: '#4caf50', fontWeight: 'bold' } 
+        },
+        '<0': { 
+          textContent: `Count: ${counterState.count} (Negative)`, 
+          style: { color: '#f44336', fontWeight: 'bold' } 
+        }
+      }),
+      '#counter-output'
+    );
+    
+    function increment() { counterState.count++; }
+    function decrement() { counterState.count--; }
+    function reset() { counterState.count = 0; }
+
+    // Status State
+    const statusState = ReactiveUtils.state({ status: 'idle' });
+    
+    Conditions.whenState(
+      () => statusState.status,
+      {
+        'idle': { 
+          textContent: '⚪ Ready', 
+          style: { color: '#666', background: '#f5f5f5', border: '2px solid #ccc' } 
+        },
+        'loading': { 
+          textContent: '⏳ Loading...', 
+          style: { color: '#2196f3', background: '#e3f2fd', border: '2px solid #2196f3' } 
+        },
+        'success': { 
+          textContent: '✓ Success!', 
+          style: { color: '#4caf50', background: '#f1f8f4', border: '2px solid #4caf50' } 
+        },
+        'error': { 
+          textContent: '✗ Error occurred', 
+          style: { color: '#f44336', background: '#fef1f0', border: '2px solid #f44336' } 
+        }
+      },
+      '#status-output'
+    );
+    
+    function simulateLoading() {
+      statusState.status = 'loading';
+      setTimeout(() => statusState.status = 'idle', 2000);
+    }
+    function simulateSuccess() { statusState.status = 'success'; }
+    function simulateError() { statusState.status = 'error'; }
+
+    // Validation State
+    const validationState = ReactiveUtils.state({ email: '' });
+    
+    Conditions.whenState(
+      () => validationState.email,
+      {
+        'empty': { 
+          textContent: 'Enter an email to validate', 
+          style: { color: '#666', fontWeight: 'normal' } 
+        },
+        '/^[^@]+@[^@]+\\.[^@]+$/': { 
+          textContent: '✓ Valid email format', 
+          style: { color: '#4caf50', fontWeight: 'bold' } 
+        },
+        'truthy': { 
+          textContent: '✗ Invalid email format', 
+          style: { color: '#f44336', fontWeight: 'bold' } 
+        }
+      },
+      '#validation-output'
+    );
+    
+    function validateEmail(value) {
+      validationState.email = value;
+    }
+
+    // Theme State
+    const themeState = ReactiveUtils.state({ theme: 'light' });
+    
+    Conditions.whenState(
+      () => themeState.theme,
+      {
+        'light': { 
+          textContent: '☀️ Light Theme Active', 
+          style: { background: '#fff', color: '#333', border: '2px solid #e0e0e0' } 
+        },
+        'dark': { 
+          textContent: '🌙 Dark Theme Active', 
+          style: { background: '#1e1e1e', color: '#fff', border: '2px solid #333' } 
+        },
+        'auto': { 
+          textContent: '🔄 Auto Theme (System)', 
+          style: { background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: '#fff', border: '2px solid #667eea' } 
+        }
+      },
+      '#theme-display'
+    );
+    
+    function switchTheme(theme) {
+      themeState.theme = theme;
+    }
+
+    // Cart State
+    const cartState = ReactiveUtils.state({ items: 0 });
+    
+    const cartEl = document.getElementById('cart-output');
+    
+    // Use whenState with dynamic conditions
+    Conditions.whenState(
+      () => cartState.items,
+      () => ({
+        '0': { 
+          textContent: 'Cart is empty', 
+          style: { color: 'gray', fontWeight: 'normal' } 
+        },
+        '1-5': { 
+          textContent: `🛒 ${cartState.items} item(s) in cart`, 
+          style: { color: '#2196f3', fontWeight: 'bold' } 
+        },
+        '>5': { 
+          textContent: `🛒 ${cartState.items} items - Ready to checkout!`, 
+          style: { color: '#4caf50', fontWeight: 'bold', fontSize: '1.2em' } 
+        }
+      }),
+      cartEl
+    );
+    
+    function addItem() { cartState.items++; }
+    function removeItem() { if(cartState.items > 0) cartState.items--; }
+    function clearCart() { cartState.items = 0; }
+  </script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Individual Element Updates</title>
+ <script src="../../src/Core/Modular/01_dh-core.js"></script>
+ <script src="../../src/Core/Modular/06_dh-global-collection.js"></script>
+</head>
+<body>
+  <div class="card">Card 1</div>
+  <div class="card">Card 2</div>
+  <div class="card">Card 3</div>
+  <div class="card">Card 4</div>
+
+  <script>
+// Example script demonstrating individual element updates by index with Different Styles
+
+    // Update first card (index 0)
+    ClassName.card[0].update({
+      textContent: 'Premium Card',
+      style: {
+        backgroundColor: 'gold',
+        color: 'black',
+        padding: '30px',
+        fontSize: '24px',
+        fontWeight: 'bold',
+        border: '3px solid #FFD700',
+        borderRadius: '10px',
+        boxShadow: '0 4px 8px rgba(255,215,0,0.3)'
+      }
+    });
+
+    // Update second card (index 1)
+    ClassName.card[1].update({
+      textContent: 'Standard Card',
+      style: {
+        backgroundColor: 'silver',
+        color: 'black',
+        padding: '20px',
+        fontSize: '18px',
+        border: '2px solid #C0C0C0',
+        borderRadius: '8px',
+        boxShadow: '0 2px 4px rgba(192,192,192,0.3)'
+      }
+    });
+
+    // Update third card (index 2)
+    ClassName.card[2].update({
+      textContent: 'Basic Card',
+      style: {
+        backgroundColor: '#CD7F32',
+        color: 'white',
+        padding: '15px',
+        fontSize: '16px',
+        border: '1px solid #8B4513',
+        borderRadius: '6px'
+      }
+    });
+
+    // Update last card (negative index)
+    ClassName.card[-1].update({
+      textContent: 'Last Card',
+      style: {
+        backgroundColor: '#333',
+        color: 'white',
+        padding: '15px',
+        fontSize: '14px',
+        borderRadius: '4px',
+        opacity: '0.7'
+      }
+    });
+  </script>
+</body>
+</html>
