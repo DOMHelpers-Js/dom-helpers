@@ -113,9 +113,19 @@
   <h2>Automated test results</h2>
   <div class="results" id="results"></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
+  <script src="../../src/01_core/01_dh-core.js"></script>
   <script>
     const resultsEl = document.getElementById('results');
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML =
+        '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span>' +
+        '<strong>' + label + '</strong>' +
+        (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
 
     const THEMES = {
       ocean:  { background: '#0c4a6e', color: '#e0f2fe', borderRadius: '16px', fontSize: '15px', boxShadow: '0 8px 24px rgba(12,74,110,.4)' },

@@ -1857,8 +1857,10 @@
             const element = target[index];
 
             if (element) {
-              // Return enhanced element proxy
-              return this._createElementProxy(element);
+              // Enhance element in-place; return the same DOM reference — not a new
+              // Proxy wrapper — so that toArray()[i] === collection[i] and
+              // item(i) === collection[i] hold true (reference equality).
+              return enhanceElementWithUpdate(element);
             }
             return element;
           }
@@ -2022,25 +2024,27 @@
           return Array.from(htmlCollection).every(callback, thisArg);
         },
 
-        reduce(callback, initialValue) {
-          return Array.from(htmlCollection).reduce(callback, initialValue);
+        reduce(callback, ...rest) {
+          return Array.from(htmlCollection).reduce(callback, ...rest);
         },
 
         // Utility methods
         first() {
-          return htmlCollection.length > 0 ? htmlCollection[0] : null;
+          return htmlCollection.length > 0
+            ? enhanceElementWithUpdate(htmlCollection[0])
+            : null;
         },
 
         last() {
           return htmlCollection.length > 0
-            ? htmlCollection[htmlCollection.length - 1]
+            ? enhanceElementWithUpdate(htmlCollection[htmlCollection.length - 1])
             : null;
         },
 
         at(index) {
           if (index < 0) index = htmlCollection.length + index;
-          return index >= 0 && index < htmlCollection.length
-            ? htmlCollection[index]
+          return (index >= 0 && index < htmlCollection.length)
+            ? enhanceElementWithUpdate(htmlCollection[index])
             : null;
         },
 
@@ -3032,8 +3036,10 @@
             const element = target[index];
 
             if (element) {
-              // Return enhanced element proxy
-              return this._createElementProxy(element);
+              // Enhance element in-place; return the same DOM reference — not a new
+              // Proxy wrapper — so that toArray()[i] === collection[i] and
+              // item(i) === collection[i] hold true (reference equality).
+              return enhanceElementWithUpdate(element);
             }
             return element;
           }
@@ -3264,22 +3270,28 @@
           return Array.from(nodeList).every(callback, thisArg);
         },
 
-        reduce(callback, initialValue) {
-          return Array.from(nodeList).reduce(callback, initialValue);
+        reduce(callback, ...rest) {
+          return Array.from(nodeList).reduce(callback, ...rest);
         },
 
         // Utility methods
         first() {
-          return nodeList.length > 0 ? nodeList[0] : null;
+          return nodeList.length > 0
+            ? enhanceElementWithUpdate(nodeList[0])
+            : null;
         },
 
         last() {
-          return nodeList.length > 0 ? nodeList[nodeList.length - 1] : null;
+          return nodeList.length > 0
+            ? enhanceElementWithUpdate(nodeList[nodeList.length - 1])
+            : null;
         },
 
         at(index) {
           if (index < 0) index = nodeList.length + index;
-          return index >= 0 && index < nodeList.length ? nodeList[index] : null;
+          return (index >= 0 && index < nodeList.length)
+            ? enhanceElementWithUpdate(nodeList[index])
+            : null;
         },
 
         isEmpty() {
