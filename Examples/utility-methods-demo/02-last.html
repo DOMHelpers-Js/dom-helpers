@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: .last()</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+
+    .collection {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+    .card {
+      width: 130px;
+      padding: 18px 12px;
+      border-radius: 10px;
+      background: #fff;
+      border: 2px solid #dde1e7;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 600;
+      color: #444;
+      transition: border-color .25s, background .25s, transform .2s;
+    }
+    .card .index-badge {
+      display: block;
+      font-size: 11px;
+      font-weight: 400;
+      color: #999;
+      margin-bottom: 6px;
+    }
+
+    /* Highlight — last element */
+    .card.highlighted {
+      border-color: #ea580c;
+      background: #fff7ed;
+      color: #9a3412;
+      transform: translateY(-4px);
+      box-shadow: 0 6px 18px rgba(234,88,12,.2);
+    }
+    .card.highlighted .label-tag {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: #ea580c;
+      margin-top: 6px;
+    }
+    .label-tag { display: none; }
+
+    /* Dim non-selected cards */
+    .card.dimmed {
+      opacity: .45;
+    }
+
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #fff;
+      border-radius: 8px;
+      padding: 10px 14px;
+      border-left: 4px solid #ccc;
+      font-size: 14px;
+      color: #333;
+    }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 99px;
+      flex-shrink: 0;
+    }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase;
+         letter-spacing: .6px; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+
+  <h1>Demo — <code>.last()</code></h1>
+  <p class="subtitle">Returns the last element in a collection. Highlighted (orange) card = element returned by <code>.last()</code>. Dimmed cards are the rest.</p>
+
+  <!-- ── Test 1: Normal collection ── -->
+  <h2>Test 1 — Normal collection (3 items)</h2>
+  <div class="collection" id="collection-1">
+    <div class="card" id="item-1">
+      <span class="index-badge">[0]</span>Item 1
+      <span class="label-tag"></span>
+    </div>
+    <div class="card" id="item-2">
+      <span class="index-badge">[1]</span>Item 2
+      <span class="label-tag"></span>
+    </div>
+    <div class="card" id="item-3">
+      <span class="index-badge">[2]</span>Item 3
+      <span class="label-tag"></span>
+    </div>
+  </div>
+
+  <!-- ── Test 2: Single-element collection ── -->
+  <h2>Test 2 — Single element (first = last)</h2>
+  <div class="collection" id="collection-2">
+    <div class="card only-item" id="only-item">
+      <span class="index-badge">[0]</span>Only Item
+      <span class="label-tag"></span>
+    </div>
+  </div>
+
+  <!-- ── Test 3: Empty collection ── -->
+  <h2>Test 3 — Empty collection</h2>
+  <div class="collection" id="collection-3">
+    <!-- no .empty-class elements -->
+  </div>
+
+  <!-- ── Results ── -->
+  <h2>Results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
+  <script>
+    const resultsEl = document.getElementById('results');
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML =
+        '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span>' +
+        '<strong>' + label + '</strong>' +
+        (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    // ── Test 1: Normal collection ──────────────────────────────────────────
+    const items = Collections.ClassName('card');
+    const lastItem = items.last();
+
+    // Dim all, then highlight the last one
+    items.forEach(el => el.classList.add('dimmed'));
+    if (lastItem) {
+      lastItem.classList.remove('dimmed');
+      lastItem.classList.add('highlighted');
+      lastItem.querySelector('.label-tag').textContent = '← .last()';
+      lastItem.querySelector('.label-tag').style.display = 'block';
+    }
+
+    addResult(
+      lastItem !== null && lastItem.id === 'item-3',
+      '.last() on 3-item collection',
+      lastItem ? 'returned #' + lastItem.id : 'returned null'
+    );
+
+    // ── Test 2: first() === last() for single element ──────────────────────
+    const solos = Collections.ClassName('only-item');
+    const lastSolo = solos.last();
+    const firstSolo = solos.first();
+
+    if (lastSolo) {
+      lastSolo.classList.add('highlighted');
+      lastSolo.querySelector('.label-tag').textContent = '.first() = .last()';
+      lastSolo.querySelector('.label-tag').style.display = 'block';
+    }
+
+    addResult(
+      lastSolo !== null && lastSolo.id === 'only-item',
+      '.last() on single-element collection',
+      lastSolo ? 'returned #' + lastSolo.id : 'returned null'
+    );
+    addResult(
+      firstSolo && lastSolo && firstSolo === lastSolo,
+      '.first() === .last() for single element',
+      'same element reference ✓'
+    );
+
+    // ── Test 3: Empty collection ──────────────────────────────────────────
+    const empties = Collections.ClassName('empty-class');
+    const lastEmpty = empties.last();
+
+    const emptyMsg = document.createElement('div');
+    emptyMsg.style.cssText = 'padding:14px;background:#fff;border-radius:8px;font-size:14px;color:#888;border:2px dashed #dde1e7;';
+    emptyMsg.textContent = lastEmpty === null
+      ? '.last() returned null — collection is empty ✓'
+      : 'Unexpected: element found';
+    document.getElementById('collection-3').appendChild(emptyMsg);
+
+    addResult(
+      lastEmpty === null,
+      '.last() on empty collection',
+      'returned null as expected'
+    );
+
+    // ── Test 4: last() !== first() on multi-element ────────────────────────
+    const firstItem = items.first();
+    addResult(
+      firstItem && lastItem && firstItem.id !== lastItem.id,
+      '.first() ≠ .last() on multi-element collection',
+      'first=#' + firstItem?.id + ', last=#' + lastItem?.id
+    );
+  </script>
+</body>
+</html>

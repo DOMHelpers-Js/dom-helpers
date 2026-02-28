@@ -18,7 +18,7 @@
 Includes everything. Use this if you need all features.
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
 ```
 
 ---
@@ -28,7 +28,7 @@ Includes everything. Use this if you need all features.
 `Elements`, `Collections`, `Selector`, `createElement`. Foundation for all other modules.
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.core.min.js"></script>
 ```
 
 ---
@@ -39,7 +39,7 @@ Includes everything. Use this if you need all features.
 Fully standalone, no other modules required.
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.storage.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.storage.min.js"></script>
 ```
 
 ---
@@ -50,9 +50,9 @@ Bulk DOM updates, shortcuts, indexed operations. **Requires Core.**
 
 ```html
 <!-- Core first -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.core.min.js"></script>
 <!-- Then Enhancers -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.enhancers.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.enhancers.min.js"></script>
 ```
 
 ---
@@ -63,9 +63,9 @@ Conditional rendering, state-based DOM updates. **Requires Core.**
 
 ```html
 <!-- Core first -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.core.min.js"></script>
 <!-- Then Conditions -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.conditions.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.conditions.min.js"></script>
 ```
 
 ---
@@ -76,9 +76,9 @@ Reactive state, forms, watchers, computed properties. **Requires Core.**
 
 ```html
 <!-- Core first -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.core.min.js"></script>
 <!-- Then Reactive -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.reactive.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.reactive.min.js"></script>
 ```
 
 ---
@@ -88,46 +88,46 @@ Reactive state, forms, watchers, computed properties. **Requires Core.**
 ### Core + Storage (11 KB total)
 Lightweight DOM access with persistent storage.
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.storage.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.storage.min.js"></script>
 ```
 
 ### Core + Reactive (21.5 KB total)
 DOM access with reactive state management.
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.reactive.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.reactive.min.js"></script>
 ```
 
 ### Core + Enhancers (18.1 KB total)
 DOM access with bulk update helpers.
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.enhancers.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.enhancers.min.js"></script>
 ```
 
 ### Core + Conditions (16.9 KB total)
 DOM access with conditional rendering.
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.conditions.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.conditions.min.js"></script>
 ```
 
 ### Core + Reactive + Storage (23 KB total)
 Reactive state with persistent storage.
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.reactive.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.storage.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.reactive.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.storage.min.js"></script>
 ```
 
 ### Core + All Modules (same as Full Bundle ~35 KB)
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.enhancers.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.conditions.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.reactive.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.1/dist/dom-helpers.storage.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.enhancers.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.conditions.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.reactive.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.storage.min.js"></script>
 ```
 
 ---
@@ -138,22 +138,22 @@ Same files, available immediately after npm publish.
 
 ```html
 <!-- Full Bundle -->
-<script src="https://unpkg.com/dom-helpers-js@2.4.1/dist/dom-helpers.min.js"></script>
+<script src="https://unpkg.com/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
 
 <!-- Core -->
-<script src="https://unpkg.com/dom-helpers-js@2.4.1/dist/dom-helpers.core.min.js"></script>
+<script src="https://unpkg.com/dom-helpers-js@2.4.2/dist/dom-helpers.core.min.js"></script>
 
 <!-- Storage (standalone) -->
-<script src="https://unpkg.com/dom-helpers-js@2.4.1/dist/dom-helpers.storage.min.js"></script>
+<script src="https://unpkg.com/dom-helpers-js@2.4.2/dist/dom-helpers.storage.min.js"></script>
 
 <!-- Enhancers (after core) -->
-<script src="https://unpkg.com/dom-helpers-js@2.4.1/dist/dom-helpers.enhancers.min.js"></script>
+<script src="https://unpkg.com/dom-helpers-js@2.4.2/dist/dom-helpers.enhancers.min.js"></script>
 
 <!-- Conditions (after core) -->
-<script src="https://unpkg.com/dom-helpers-js@2.4.1/dist/dom-helpers.conditions.min.js"></script>
+<script src="https://unpkg.com/dom-helpers-js@2.4.2/dist/dom-helpers.conditions.min.js"></script>
 
 <!-- Reactive (after core) -->
-<script src="https://unpkg.com/dom-helpers-js@2.4.1/dist/dom-helpers.reactive.min.js"></script>
+<script src="https://unpkg.com/dom-helpers-js@2.4.2/dist/dom-helpers.reactive.min.js"></script>
 ```
 
 ---

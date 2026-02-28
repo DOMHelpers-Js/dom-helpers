@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: .on() and .off()</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase;
+         letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
+    p.desc { font-size: 13px; color: #666; margin-bottom: 12px; }
+
+    .controls {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: #fff; padding: 12px 16px; border-radius: 10px;
+      border: 1px solid #e2e8f0; margin-bottom: 14px;
+    }
+    .btn { padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: #fff; }
+    .btn-on  { background: #0891b2; }
+    .btn-on:hover  { background: #0e7490; }
+    .btn-off { background: #dc2626; }
+    .btn-off:hover { background: #b91c1c; }
+    .btn-reset { background: #6b7280; }
+    .btn-reset:hover { background: #4b5563; }
+
+    /* ── Cards ── */
+    .collection { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+    .click-card {
+      width: 130px; padding: 22px 12px; border-radius: 10px;
+      background: #fff; border: 2px solid #dde1e7;
+      text-align: center; font-size: 14px; font-weight: 600; color: #555;
+      cursor: pointer; user-select: none;
+      transition: all .2s ease;
+    }
+    .click-card:hover { border-color: #a5b4fc; }
+    .click-card .count-badge {
+      display: inline-block; margin-top: 8px;
+      background: #e0e7ff; color: #4f46e5;
+      font-size: 12px; font-weight: 700;
+      padding: 2px 10px; border-radius: 99px;
+    }
+    .click-card.listening {
+      border-color: #0891b2; background: #ecfeff;
+      box-shadow: 0 4px 14px rgba(8,145,178,.15);
+    }
+    .click-card.listening:hover {
+      background: #cffafe; transform: translateY(-3px);
+    }
+    .click-card.fired {
+      background: #fef9c3; border-color: #ca8a04;
+    }
+
+    /* ── Mouseover demo ── */
+    .hover-card {
+      width: 150px; padding: 20px 12px; border-radius: 10px;
+      background: #fff; border: 2px solid #dde1e7;
+      text-align: center; font-size: 14px; font-weight: 600; color: #555;
+      cursor: default; user-select: none;
+      transition: all .2s ease;
+    }
+    .hover-card.listening { border-color: #7c3aed; }
+    .hover-card .hover-log { margin-top: 8px; font-size: 11px; color: #aaa; font-family: monospace; }
+
+    /* ── Event log ── */
+    .event-log {
+      background: #1e1b4b; color: #a5b4fc; font-family: monospace;
+      font-size: 13px; padding: 14px 16px; border-radius: 10px;
+      max-height: 140px; overflow-y: auto; margin-bottom: 20px;
+      line-height: 1.7;
+    }
+    .event-log .log-entry { display: block; }
+    .event-log .log-entry.new { color: #6ee7b7; }
+    #log-placeholder { color: #4f4680; }
+
+    /* ── Status indicator ── */
+    .status-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .status-dot.on  { background: #0891b2; }
+    .status-dot.off { background: #d1d5db; }
+
+    /* Results */
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 8px; padding: 10px 14px; border-left: 4px solid #ccc; font-size: 14px; color: #333; }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+
+  <h1>Demo — <code>.on(event, handler)</code> / <code>.off(event, handler)</code></h1>
+  <p class="subtitle">
+    <code>.on()</code> adds an event listener to every element in the collection.
+    <code>.off()</code> removes it. Click the cards below to see the listener in action, then detach it.
+  </p>
+
+  <!-- ── Section 1: click listener ── -->
+  <h2>Section 1 — click listener on all cards</h2>
+  <p class="desc">Click any card while listening is ON. The card flashes and the log shows the event.</p>
+
+  <div class="controls">
+    <div class="status-row">
+      <div class="status-dot" id="status-dot"></div>
+      <span id="status-text" style="font-size:13px;font-weight:600;color:#888;">Listener: OFF</span>
+    </div>
+    <button class="btn btn-on"  onclick="attachClick()">Run .on('click', handler)</button>
+    <button class="btn btn-off" onclick="detachClick()">Run .off('click', handler)</button>
+    <button class="btn btn-reset" onclick="resetClickCards()">Reset counts</button>
+  </div>
+
+  <div class="collection">
+    <div class="click-card clickable" id="cc1">Card 1<span class="count-badge" id="cnt1">0</span></div>
+    <div class="click-card clickable" id="cc2">Card 2<span class="count-badge" id="cnt2">0</span></div>
+    <div class="click-card clickable" id="cc3">Card 3<span class="count-badge" id="cnt3">0</span></div>
+    <div class="click-card clickable" id="cc4">Card 4<span class="count-badge" id="cnt4">0</span></div>
+  </div>
+
+  <!-- ── Event log ── -->
+  <div class="event-log" id="event-log">
+    <span id="log-placeholder">Event log will appear here once listener is attached…</span>
+  </div>
+
+  <!-- ── Section 2: mouseover listener ── -->
+  <h2>Section 2 — mouseover listener</h2>
+  <p class="desc">Hover cards while the mouseover listener is ON. Each hover updates the card's counter.</p>
+
+  <div class="controls">
+    <button class="btn btn-on"  onclick="attachHover()">Run .on('mouseover', handler)</button>
+    <button class="btn btn-off" onclick="detachHover()">Run .off('mouseover', handler)</button>
+  </div>
+
+  <div class="collection">
+    <div class="hover-card hoverable" id="hc1">Card 1<div class="hover-log" id="hl1">hovers: 0</div></div>
+    <div class="hover-card hoverable" id="hc2">Card 2<div class="hover-log" id="hl2">hovers: 0</div></div>
+    <div class="hover-card hoverable" id="hc3">Card 3<div class="hover-log" id="hl3">hovers: 0</div></div>
+  </div>
+
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
+  <script>
+    const resultsEl  = document.getElementById('results');
+    const eventLog   = document.getElementById('event-log');
+    const logHolder  = document.getElementById('log-placeholder');
+    const statusDot  = document.getElementById('status-dot');
+    const statusText = document.getElementById('status-text');
+
+    const clickCounts = { cc1: 0, cc2: 0, cc3: 0, cc4: 0 };
+    const hoverCounts = { hc1: 0, hc2: 0, hc3: 0 };
+
+    // ── Click section ─────────────────────────────────────────────────────
+    function clickHandler(e) {
+      const id = e.currentTarget.id;
+      clickCounts[id]++;
+      document.getElementById('cnt' + id.slice(2)).textContent = clickCounts[id];
+
+      e.currentTarget.classList.add('fired');
+      setTimeout(() => e.currentTarget.classList.remove('fired'), 300);
+
+      // Log entry
+      logHolder.style.display = 'none';
+      const entry = document.createElement('span');
+      entry.className = 'log-entry new';
+      entry.textContent = '▶ click on #' + id + ' (total: ' + clickCounts[id] + ')';
+      eventLog.appendChild(entry);
+      setTimeout(() => entry.classList.remove('new'), 800);
+      eventLog.scrollTop = eventLog.scrollHeight;
+    }
+
+    function attachClick() {
+      Collections.ClassName('clickable').on('click', clickHandler);
+      Collections.ClassName('clickable').forEach(el => el.classList.add('listening'));
+      statusDot.className = 'status-dot on';
+      statusText.textContent = 'Listener: ON — click any card';
+      statusText.style.color = '#0891b2';
+    }
+
+    function detachClick() {
+      Collections.ClassName('clickable').off('click', clickHandler);
+      Collections.ClassName('clickable').forEach(el => el.classList.remove('listening'));
+      statusDot.className = 'status-dot off';
+      statusText.textContent = 'Listener: OFF';
+      statusText.style.color = '#888';
+
+      const entry = document.createElement('span');
+      entry.className = 'log-entry';
+      entry.textContent = '⛔ listener removed — clicks no longer tracked';
+      eventLog.appendChild(entry);
+      eventLog.scrollTop = eventLog.scrollHeight;
+    }
+
+    function resetClickCards() {
+      ['cc1','cc2','cc3','cc4'].forEach(id => {
+        clickCounts[id] = 0;
+        document.getElementById('cnt' + id.slice(2)).textContent = '0';
+      });
+    }
+
+    // ── Mouseover section ─────────────────────────────────────────────────
+    function hoverHandler(e) {
+      const id = e.currentTarget.id;
+      hoverCounts[id]++;
+      document.getElementById('hl' + id.slice(2)).textContent = 'hovers: ' + hoverCounts[id];
+      e.currentTarget.style.background = '#faf5ff';
+      e.currentTarget.style.borderColor = '#7c3aed';
+      setTimeout(() => {
+        e.currentTarget.style.background = '';
+        e.currentTarget.style.borderColor = e.currentTarget.classList.contains('listening') ? '#7c3aed' : '';
+      }, 250);
+    }
+
+    function attachHover() {
+      Collections.ClassName('hoverable').on('mouseover', hoverHandler);
+      Collections.ClassName('hoverable').forEach(el => el.classList.add('listening'));
+    }
+
+    function detachHover() {
+      Collections.ClassName('hoverable').off('mouseover', hoverHandler);
+      Collections.ClassName('hoverable').forEach(el => {
+        el.classList.remove('listening');
+        el.style.background = '';
+        el.style.borderColor = '';
+      });
+    }
+
+    // ── Automated tests ───────────────────────────────────────────────────
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML = '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span>' +
+        '<strong>' + label + '</strong>' +
+        (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    // Test 1: .on() attaches listener — verify by programmatic dispatch
+    let testFiredCount = 0;
+    const testHandler = () => testFiredCount++;
+
+    Collections.ClassName('clickable').on('click', testHandler);
+    document.getElementById('cc1').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    document.getElementById('cc2').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    addResult(testFiredCount === 2, '.on("click", handler) — handler fires on each element', 'dispatched 2 clicks, handler fired ' + testFiredCount + 'x');
+
+    // Test 2: .off() removes listener — further clicks do not fire
+    Collections.ClassName('clickable').off('click', testHandler);
+    const beforeOff = testFiredCount;
+    document.getElementById('cc1').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    document.getElementById('cc2').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    addResult(testFiredCount === beforeOff, '.off("click", handler) — handler no longer fires after removal', 'fired 0 additional times ✓');
+
+    // Test 3: .on() is chainable
+    const colOn = Collections.ClassName('clickable').on('click', testHandler);
+    addResult(colOn !== null && colOn !== undefined, '.on() returns collection (chainable)', '');
+    Collections.ClassName('clickable').off('click', testHandler);
+
+    // Test 4: .off() is chainable
+    const colOff = Collections.ClassName('clickable').off('click', testHandler);
+    addResult(colOff !== null && colOff !== undefined, '.off() returns collection (chainable)', '');
+
+    // Test 5: listener only attached once per .on() call (no stacking test)
+    let multiCount = 0;
+    const multiHandler = () => multiCount++;
+    Collections.ClassName('clickable').on('click', multiHandler);
+    document.getElementById('cc3').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    addResult(multiCount === 1, '.on() on element fires handler once per click', 'fired ' + multiCount + 'x for 1 click');
+    Collections.ClassName('clickable').off('click', multiHandler);
+  </script>
+</body>
+</html>

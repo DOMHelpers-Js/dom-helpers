@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: .first()</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+
+    /* ── Collection cards ── */
+    .collection {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+    .card {
+      width: 130px;
+      padding: 18px 12px;
+      border-radius: 10px;
+      background: #fff;
+      border: 2px solid #dde1e7;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 600;
+      color: #444;
+      transition: border-color .25s, background .25s, transform .2s;
+    }
+    .card .index-badge {
+      display: block;
+      font-size: 11px;
+      font-weight: 400;
+      color: #999;
+      margin-bottom: 6px;
+    }
+
+    /* Highlight state — applied by the demo */
+    .card.highlighted {
+      border-color: #4f46e5;
+      background: #eef2ff;
+      color: #3730a3;
+      transform: translateY(-4px);
+      box-shadow: 0 6px 18px rgba(79,70,229,.2);
+    }
+    .card.highlighted::after {
+      content: '← .first()';
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: #4f46e5;
+      margin-top: 6px;
+      letter-spacing: .3px;
+    }
+
+    /* ── Test results panel ── */
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #fff;
+      border-radius: 8px;
+      padding: 10px 14px;
+      border-left: 4px solid #ccc;
+      font-size: 14px;
+      color: #333;
+    }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 99px;
+      flex-shrink: 0;
+    }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase;
+         letter-spacing: .6px; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+
+  <h1>Demo — <code>.first()</code></h1>
+  <p class="subtitle">Returns the first element in a collection. Highlighted card = element returned by <code>.first()</code>.</p>
+
+  <!-- ── Test 1: Normal collection ── -->
+  <h2>Test 1 — Normal collection</h2>
+  <div class="collection" id="collection-1">
+    <div class="card" id="card-a"><span class="index-badge">[0]</span>Card A</div>
+    <div class="card" id="card-b"><span class="index-badge">[1]</span>Card B</div>
+    <div class="card" id="card-c"><span class="index-badge">[2]</span>Card C</div>
+  </div>
+
+  <!-- ── Test 2: Single-element collection ── -->
+  <h2>Test 2 — Single element</h2>
+  <div class="collection" id="collection-2">
+    <div class="card solo-card" id="solo-card"><span class="index-badge">[0]</span>Solo</div>
+  </div>
+
+  <!-- ── Test 3: Empty collection ── -->
+  <h2>Test 3 — Empty collection</h2>
+  <div class="collection" id="collection-3">
+    <!-- no .ghost elements -->
+  </div>
+
+  <!-- ── Results ── -->
+  <h2>Results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
+  <script>
+    const resultsEl = document.getElementById('results');
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML =
+        '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span>' +
+        '<strong>' + label + '</strong>' +
+        (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    // ── Test 1: Normal collection ──────────────────────────────────────────
+    const cards = Collections.ClassName('card');
+    const firstCard = cards.first();
+
+    if (firstCard) {
+      firstCard.classList.add('highlighted');
+      firstCard.update({ textContent: 'Card A ✓' });
+    }
+
+    addResult(
+      firstCard !== null && firstCard.id === 'card-a',
+      '.first() on 3-card collection',
+      firstCard ? 'returned #' + firstCard.id : 'returned null'
+    );
+
+    // ── Test 2: Single element ────────────────────────────────────────────
+    const solos = Collections.ClassName('solo-card');
+    const firstSolo = solos.first();
+
+    if (firstSolo) {
+      firstSolo.classList.add('highlighted');
+      firstSolo.style.setProperty('--label', '"← .first()"');
+    }
+
+    addResult(
+      firstSolo !== null && firstSolo.id === 'solo-card',
+      '.first() on single-element collection',
+      firstSolo ? 'returned #' + firstSolo.id : 'returned null'
+    );
+
+    // ── Test 3: Empty collection ──────────────────────────────────────────
+    const ghosts = Collections.ClassName('ghost');
+    const firstGhost = ghosts.first();
+
+    const emptyMsg = document.createElement('div');
+    emptyMsg.style.cssText = 'padding:14px;background:#fff;border-radius:8px;font-size:14px;color:#888;border:2px dashed #dde1e7;';
+    emptyMsg.textContent = firstGhost === null
+      ? '.first() returned null — collection is empty ✓'
+      : 'Unexpected element found';
+    document.getElementById('collection-3').appendChild(emptyMsg);
+
+    addResult(
+      firstGhost === null,
+      '.first() on empty collection',
+      'returned null as expected'
+    );
+
+    // ── Test 4: first() !== last() ────────────────────────────────────────
+    const lastCard = cards.last();
+    addResult(
+      firstCard && lastCard && firstCard.id !== lastCard.id,
+      '.first() ≠ .last() on multi-element collection',
+      firstCard?.id + ' vs ' + lastCard?.id
+    );
+  </script>
+</body>
+</html>

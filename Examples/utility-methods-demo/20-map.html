@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: .map()</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
+
+    .controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: #fff; padding: 12px 16px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 14px; }
+    .btn { padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: #fff; }
+    .btn-run { background: #ea580c; } .btn-run:hover { background: #c2410c; }
+    .btn-reset { background: #6b7280; } .btn-reset:hover { background: #4b5563; }
+
+    /* ── Before/After layout ── */
+    .transform-layout { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; }
+    .col-panel { flex: 1; min-width: 200px; }
+    .col-panel h3 { font-size: 12px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
+    .arrow { font-size: 28px; color: #ea580c; align-self: center; flex-shrink: 0; }
+
+    .card-list { display: flex; flex-direction: column; gap: 8px; }
+    .card {
+      padding: 12px 16px; border-radius: 10px; background: #fff; border: 2px solid #dde1e7;
+      font-size: 14px; font-weight: 600; color: #555; transition: all .3s;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .card .meta { font-size: 11px; color: #aaa; font-family: monospace; }
+    .card.mapped { border-color: #ea580c; background: #fff7ed; color: #9a3412; }
+    .result-card {
+      padding: 12px 16px; border-radius: 10px; background: #fff7ed; border: 2px solid #fed7aa;
+      font-size: 13px; color: #9a3412; font-family: monospace; margin-bottom: 6px;
+    }
+
+    /* ── Preset transforms ── */
+    .preset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin-bottom: 20px; }
+    .preset-btn {
+      padding: 12px 16px; border-radius: 10px; background: #fff; border: 1.5px solid #e2e8f0;
+      text-align: left; cursor: pointer; font-size: 13px; font-family: monospace;
+      transition: border-color .2s, background .2s;
+    }
+    .preset-btn:hover { border-color: #ea580c; background: #fff7ed; }
+    .preset-btn .preset-desc { font-size: 11px; color: #888; font-family: sans-serif; margin-top: 4px; }
+
+    .output-box {
+      background: #1e293b; color: #fdba74; font-family: monospace; font-size: 13px;
+      padding: 14px 16px; border-radius: 10px; margin-bottom: 20px; line-height: 1.8;
+    }
+
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 8px; padding: 10px 14px; border-left: 4px solid #ccc; font-size: 14px; color: #333; }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <h1>Demo — <code>.map(callback, thisArg?)</code></h1>
+  <p class="subtitle">Transforms each element into a new value, returning a plain Array. The source collection is never modified.</p>
+
+  <!-- ── Source collection ── -->
+  <h2>Source collection (prices)</h2>
+  <div class="card-list" id="source-list">
+    <div class="card mapcard" id="mc1" data-price="12" data-name="Apple">Apple<span class="meta">data-price="12"</span></div>
+    <div class="card mapcard" id="mc2" data-price="8"  data-name="Banana">Banana<span class="meta">data-price="8"</span></div>
+    <div class="card mapcard" id="mc3" data-price="30" data-name="Cherry">Cherry<span class="meta">data-price="30"</span></div>
+    <div class="card mapcard" id="mc4" data-price="5"  data-name="Dates">Dates<span class="meta">data-price="5"</span></div>
+  </div>
+
+  <!-- ── Preset transforms ── -->
+  <h2>Try a transform</h2>
+  <div class="preset-grid">
+    <button class="preset-btn" onclick="runMap('ids')">el => el.id<div class="preset-desc">Extract all IDs</div></button>
+    <button class="preset-btn" onclick="runMap('prices')">el => +el.dataset.price<div class="preset-desc">Extract prices as numbers</div></button>
+    <button class="preset-btn" onclick="runMap('names')">el => el.dataset.name<div class="preset-desc">Extract names</div></button>
+    <button class="preset-btn" onclick="runMap('doubled')">el => price * 2<div class="preset-desc">Double all prices</div></button>
+    <button class="preset-btn" onclick="runMap('labels')">el => `${name}: $${price}`<div class="preset-desc">Create label strings</div></button>
+    <button class="preset-btn" onclick="runMap('objects')">{name, price}<div class="preset-desc">Extract as objects</div></button>
+  </div>
+
+  <div class="transform-layout">
+    <div class="col-panel"><h3>Source (unchanged)</h3><div class="card-list" id="map-source"></div></div>
+    <div class="arrow">→</div>
+    <div class="col-panel"><h3>Mapped array result</h3><div id="map-result"><span style="color:#aaa;font-size:13px;">click a transform above</span></div></div>
+  </div>
+
+  <div class="output-box" id="output-box">// .map() result will appear here</div>
+
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
+  <script>
+    const resultsEl = document.getElementById('results');
+    const outBox = document.getElementById('output-box');
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML = '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span><strong>' + label + '</strong>' + (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    const col = Collections.ClassName('mapcard');
+
+    const transforms = {
+      ids:     el => el.id,
+      prices:  el => +el.dataset.price,
+      names:   el => el.dataset.name,
+      doubled: el => +el.dataset.price * 2,
+      labels:  el => el.dataset.name + ': $' + el.dataset.price,
+      objects: el => ({ name: el.dataset.name, price: +el.dataset.price }),
+    };
+
+    function runMap(key) {
+      const result = col.map(transforms[key]);
+
+      // Rebuild source panel (highlight all)
+      const srcPanel = document.getElementById('map-source');
+      srcPanel.innerHTML = '';
+      col.forEach(el => {
+        const d = document.createElement('div');
+        d.className = 'card mapped';
+        d.innerHTML = el.dataset.name + '<span class="meta">' + el.id + '</span>';
+        srcPanel.appendChild(d);
+      });
+
+      // Show result
+      const resPanel = document.getElementById('map-result');
+      resPanel.innerHTML = '';
+      result.forEach((val, i) => {
+        const d = document.createElement('div');
+        d.className = 'result-card';
+        d.textContent = '[' + i + '] ' + JSON.stringify(val);
+        resPanel.appendChild(d);
+      });
+
+      outBox.textContent = 'col.map(' + key + ') → ' + JSON.stringify(result);
+    }
+
+    // ── Automated tests ───────────────────────────────────────────────────
+    const ids = col.map(el => el.id);
+    addResult(Array.isArray(ids),                  '.map() returns an Array',             'isArray: ' + Array.isArray(ids));
+    addResult(ids.length === col.length,            '.map() output length === input length', ids.length + ' === ' + col.length);
+    addResult(ids[0] === 'mc1',                    '.map() first element correct',        'ids[0]: ' + ids[0]);
+    addResult(ids[ids.length-1] === 'mc4',         '.map() last element correct',         'ids[-1]: ' + ids[ids.length-1]);
+
+    // Source collection not mutated
+    addResult(col.length === 4,                    '.map() does not mutate source collection', 'length still 4');
+
+    // Numeric transform
+    const prices = col.map(el => +el.dataset.price);
+    addResult(typeof prices[0] === 'number',       '.map() can transform to non-element values', 'price[0]: ' + prices[0]);
+
+    // thisArg
+    const ctx = { prefix: 'item' };
+    const tagged = col.map(function(el) { return this.prefix + ':' + el.id; }, ctx);
+    addResult(tagged[0] === 'item:mc1',            '.map() respects thisArg', 'tagged[0]: ' + tagged[0]);
+
+    // Chaining (map returns Array so can chain with .filter)
+    const expensive = col.map(el => +el.dataset.price).filter(p => p > 10);
+    addResult(expensive.length === 2,              '.map() result can be chained with .filter()', 'prices > 10: ' + expensive.join(', '));
+  </script>
+</body>
+</html>

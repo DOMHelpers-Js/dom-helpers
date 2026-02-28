@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,18 +13,21 @@
       padding: 20px;
       background: #f5f5f5;
     }
+
     .container {
       background: white;
       padding: 20px;
       border-radius: 8px;
       margin-bottom: 20px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
+
     h2 {
       color: #333;
       border-bottom: 2px solid #007bff;
       padding-bottom: 10px;
     }
+
     button {
       background: #007bff;
       color: white;
@@ -33,12 +37,15 @@
       cursor: pointer;
       margin: 5px;
     }
+
     button:hover {
       background: #0056b3;
     }
+
     button:active {
       transform: scale(0.98);
     }
+
     .output {
       background: #f8f9fa;
       padding: 15px;
@@ -46,21 +53,25 @@
       margin: 10px 0;
       border-left: 4px solid #007bff;
     }
+
     .reactive-text {
       font-size: 18px;
       font-weight: bold;
       color: #007bff;
     }
+
     .user-card {
       background: #e9ecef;
       padding: 15px;
       border-radius: 4px;
       margin: 10px 0;
     }
+
     .todo-list {
       list-style: none;
       padding: 0;
     }
+
     .todo-item {
       background: #fff;
       padding: 10px;
@@ -68,12 +79,14 @@
       border-radius: 4px;
       border: 1px solid #dee2e6;
     }
+
     input {
       padding: 8px;
       border: 1px solid #ced4da;
       border-radius: 4px;
       margin: 5px;
     }
+
     .status {
       display: inline-block;
       padding: 4px 8px;
@@ -81,14 +94,17 @@
       font-size: 12px;
       font-weight: bold;
     }
+
     .status.active {
       background: #28a745;
       color: white;
     }
+
     .status.inactive {
       background: #6c757d;
       color: white;
     }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -97,6 +113,7 @@
     }
   </style>
 </head>
+
 <body>
   <h1>🚀 DOM Helpers - Reactive stateSystem Test</h1>
 
@@ -206,45 +223,45 @@
   </div>
 
   <!-- Load Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
 
   <script>
     // ===== REACTIVE state=====
-    
-    const state= ReactiveUtils.state({
+
+    const state = ReactiveUtils.state({
       // Basic counter
       count: 0,
-      
+
       // Nested object
       user: {
         name: "Alice",
         email: "alice@example.com",
         age: 25
       },
-      
+
       // Array
       todos: ["Buy groceries", "Read book", "Exercise"],
-      
+
       // Status
       isActive: false,
-      
+
       // Theme
       theme: {
         color: 'blue',
         bgColor: '#e3f2fd',
         text: 'Blue Theme Active'
       },
-      
+
       // Component counter
       componentCount: 0,
-      
+
       // Performance
       perfValue: 0,
       updateCount: 0
     });
 
     // ===== TEST 1: BASIC COUNTER =====
-    
+
     Elements.bind({
       counter: () => state.count,
       doubleCounter: () => state.count * 2
@@ -263,7 +280,7 @@
     }
 
     // ===== TEST 2: NESTED OBJECTS =====
-    
+
     Elements.bind({
       userName: () => state.user.name,
       userEmail: () => state.user.email,
@@ -280,22 +297,25 @@
     }
 
     // ===== TEST 3: ARRAYS =====
-    
+
     Elements.bind({
       todoCount: () => state.todos.length,
       todoJoined: () => state.todos.join(', '),
       todoList: () => {
         // Return DOM nodes
-        const ul = document.createElement('div');
+        const ul = createElement('div');
         state.todos.forEach((todo, index) => {
-          const li = document.createElement('div');
-          li.className = 'todo-item';
-          li.textContent = `${index + 1}. ${todo}`;
+          const li = createElement('div');
+          li.update({
+            className: 'todo-item',
+            textContent: `${index + 1}. ${todo}`
+          });
           ul.appendChild(li);
         });
         return ul;
       }
     });
+
 
     function addTodo() {
       const input = document.getElementById('newTodoInput');
@@ -314,13 +334,13 @@
     }
 
     // ===== TEST 4: COLLECTIONS =====
-    
+
     Collections.bind({
       'counter-display': () => state.count
     });
 
     // ===== TEST 5: SELECTOR BINDING =====
-    
+
     Selector.queryAll.bind({
       '.status': () => ({
         textContent: state.isActive ? 'active' : 'inactive',
@@ -333,14 +353,14 @@
     }
 
     // ===== TEST 6: OBJECT RETURN =====
-    
+
     Elements.bind({
       dynamicElement: () => ({
         textContent: state.theme.text,
         style: {
           backgroundColor: state.theme.bgColor,
-          color: state.theme.color === 'blue' ? '#0d47a1' : 
-                 state.theme.color === 'green' ? '#1b5e20' : '#b71c1c',
+          color: state.theme.color === 'blue' ? '#0d47a1' :
+            state.theme.color === 'green' ? '#1b5e20' : '#b71c1c',
           fontWeight: 'bold'
         },
         title: `Current theme: ${state.theme.color}`
@@ -364,7 +384,7 @@
     }
 
     // ===== TEST 7: DOM NODE RETURN =====
-    
+
     Elements.bind({
       componentContainer: () => {
         const div = document.createElement('div');
@@ -383,7 +403,7 @@
     }
 
     // ===== TEST 8: PERFORMANCE =====
-    
+
     Elements.bind({
       perfValue: () => state.perfValue,
       updateCount: () => state.updateCount
@@ -391,21 +411,22 @@
 
     function runPerformanceTest() {
       console.time('1000 reactive updates');
-      
+
       for (let i = 0; i < 1000; i++) {
         state.perfValue = i;
         state.updateCount++;
       }
-      
+
       console.timeEnd('1000 reactive updates');
       console.log('Performance test complete!');
     }
 
     // ===== INITIAL LOG =====
-    
+
     console.log('✅ Reactive stateSystem Initialized');
     console.log('stateobject:', state);
     console.log('Try modifying statein console: state.count++');
   </script>
 </body>
+
 </html>

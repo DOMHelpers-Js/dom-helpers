@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: .enabled()</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase;
+         letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
+    p.desc { font-size: 13px; color: #666; margin-bottom: 12px; line-height: 1.6; }
+
+    /* ── Controls ── */
+    .controls {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: #fff; padding: 12px 16px; border-radius: 10px;
+      border: 1px solid #e2e8f0; margin-bottom: 14px;
+    }
+    .btn { padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: #fff; }
+    .btn-run    { background: #16a34a; }
+    .btn-run:hover    { background: #15803d; }
+    .btn-reset  { background: #6b7280; }
+    .btn-reset:hover  { background: #4b5563; }
+
+    /* ── Form field grid ── */
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, 180px);
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+    .field-wrap {
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .field-wrap label {
+      font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .field-wrap label input[type=checkbox] { cursor: pointer; }
+
+    /* Inputs & buttons */
+    .form-el {
+      padding: 10px 12px; border-radius: 8px; font-size: 14px;
+      border: 2px solid #dde1e7; background: #fff; color: #374151;
+      transition: all .25s ease; font-family: inherit; width: 100%;
+    }
+    .form-el:not([disabled]) {
+      border-color: #dde1e7;
+    }
+    .form-el[disabled] {
+      background: #f3f4f6; color: #9ca3af; border-color: #e5e7eb;
+      cursor: not-allowed;
+    }
+    button.form-el { cursor: pointer; font-weight: 600; }
+    button.form-el:not([disabled]):hover { background: #f0fdf4; border-color: #86efac; }
+
+    /* ── Match highlight overlay ── */
+    .field-wrap.matched .form-el {
+      border-color: #16a34a !important;
+      box-shadow: 0 0 0 3px rgba(22,163,74,.15);
+      background: #f0fdf4 !important;
+      color: #15803d !important;
+    }
+    .field-wrap.matched .match-tag { display: block; }
+    .match-tag {
+      display: none; font-size: 10px; font-weight: 700;
+      color: #16a34a; font-family: monospace;
+    }
+    .field-wrap.not-matched { opacity: .35; }
+
+    /* ── Result bar ── */
+    .result-bar {
+      background: #f0fdf4; border: 1.5px solid #86efac;
+      border-radius: 8px; padding: 10px 14px;
+      font-size: 13px; color: #15803d; font-family: monospace;
+      margin-bottom: 20px;
+    }
+
+    /* Results */
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 8px; padding: 10px 14px; border-left: 4px solid #ccc; font-size: 14px; color: #333; }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+
+  <h1>Demo — <code>.enabled()</code></h1>
+  <p class="subtitle">
+    Filters the collection to elements that are <strong>not disabled</strong>
+    (neither <code>el.disabled</code> is true nor the <code>disabled</code> attribute is present).
+    Returns an array. Toggle each field's disabled state, then run the filter.
+  </p>
+
+  <h2>Interactive — toggle disabled state per field</h2>
+  <p class="desc">
+    Check the box next to a field to disable it. Click <strong>Run .enabled()</strong>
+    — green border = returned by the filter. Dimmed = filtered out.
+  </p>
+
+  <div class="controls">
+    <button class="btn btn-run"   onclick="runEnabled()">Run .enabled()</button>
+    <button class="btn btn-reset" onclick="resetFilter()">Clear highlights</button>
+    <button style="padding:7px 14px;border:1.5px solid #dde1e7;border-radius:6px;background:#fff;font-size:13px;cursor:pointer;" onclick="disableAll()">Disable all</button>
+    <button style="padding:7px 14px;border:1.5px solid #dde1e7;border-radius:6px;background:#fff;font-size:13px;cursor:pointer;" onclick="enableAll()">Enable all</button>
+  </div>
+
+  <div class="field-grid" id="field-grid">
+
+    <div class="field-wrap" id="fw1">
+      <label><input type="checkbox" onchange="toggleField('el1',this)"> Disable</label>
+      <input  class="form-el fld" type="text"     id="el1" value="Text input" />
+      <span class="match-tag">✓ enabled()</span>
+    </div>
+
+    <div class="field-wrap" id="fw2">
+      <label><input type="checkbox" onchange="toggleField('el2',this)"> Disable</label>
+      <input  class="form-el fld" type="number"   id="el2" value="42" />
+      <span class="match-tag">✓ enabled()</span>
+    </div>
+
+    <div class="field-wrap" id="fw3">
+      <label><input type="checkbox" onchange="toggleField('el3',this)"> Disable</label>
+      <select class="form-el fld" id="el3">
+        <option>Option A</option><option>Option B</option>
+      </select>
+      <span class="match-tag">✓ enabled()</span>
+    </div>
+
+    <div class="field-wrap" id="fw4">
+      <label><input type="checkbox" onchange="toggleField('el4',this)"> Disable</label>
+      <textarea class="form-el fld" id="el4" rows="2">Textarea</textarea>
+      <span class="match-tag">✓ enabled()</span>
+    </div>
+
+    <div class="field-wrap" id="fw5">
+      <label><input type="checkbox" onchange="toggleField('el5',this)" checked> Disable</label>
+      <button class="form-el fld" id="el5" disabled>Button (starts disabled)</button>
+      <span class="match-tag">✓ enabled()</span>
+    </div>
+
+    <div class="field-wrap" id="fw6">
+      <label><input type="checkbox" onchange="toggleField('el6',this)"> Disable</label>
+      <input  class="form-el fld" type="checkbox" id="el6" style="width:auto;height:20px;padding:0;border:none;" />
+      <span class="match-tag">✓ enabled()</span>
+    </div>
+
+  </div>
+
+  <div class="result-bar" id="result-bar" style="display:none;"></div>
+
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
+  <script>
+    const resultsEl = document.getElementById('results');
+    const resultBar = document.getElementById('result-bar');
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML = '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span>' +
+        '<strong>' + label + '</strong>' +
+        (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    function toggleField(id, cb) {
+      document.getElementById(id).disabled = cb.checked;
+    }
+
+    function disableAll() {
+      document.querySelectorAll('.fld').forEach(el => {
+        el.disabled = true;
+        const cb = el.closest('.field-wrap').querySelector('input[type=checkbox]');
+        if (cb) cb.checked = true;
+      });
+    }
+
+    function enableAll() {
+      document.querySelectorAll('.fld').forEach(el => {
+        el.disabled = false;
+        const cb = el.closest('.field-wrap').querySelector('input[type=checkbox]');
+        if (cb) cb.checked = false;
+      });
+    }
+
+    function runEnabled() {
+      resetFilter();
+      const all     = Collections.ClassName('fld');
+      const enabled = all.enabled();
+      const enabledEls = enabled.map ? enabled : Array.from(enabled);
+      const allIds = ['el1','el2','el3','el4','el5','el6'];
+
+      allIds.forEach((id, i) => {
+        const el   = document.getElementById(id);
+        const wrap = document.getElementById('fw' + (i + 1));
+        if (enabledEls.includes(el)) {
+          wrap.classList.add('matched');
+        } else {
+          wrap.classList.add('not-matched');
+        }
+      });
+
+      resultBar.style.display = 'block';
+      const ids = enabledEls.map(el => '#' + el.id);
+      resultBar.textContent = '.enabled() returned ' + enabledEls.length +
+        ' element(s): ' + (ids.length ? ids.join(', ') : 'none');
+    }
+
+    function resetFilter() {
+      ['fw1','fw2','fw3','fw4','fw5','fw6'].forEach(id => {
+        document.getElementById(id).classList.remove('matched','not-matched');
+      });
+      resultBar.style.display = 'none';
+    }
+
+    // ── Automated tests ───────────────────────────────────────────────────
+    const mk = (tag, id, disabled) => {
+      const el = document.createElement(tag);
+      el.className = 'tcard3'; el.id = id;
+      if (disabled) el.disabled = true;
+      Object.assign(el.style, { position: 'absolute', left: '-9999px' });
+      document.body.appendChild(el);
+      return el;
+    };
+
+    const ia = mk('input',    'ia', false);  // enabled
+    const ib = mk('input',    'ib', true);   // disabled via .disabled
+    const ic = mk('button',   'ic', false);  // enabled
+    const id = mk('button',   'id', true);   // disabled via .disabled
+    const ie = mk('select',   'ie', false);  // enabled
+    const iee= mk('textarea', 'if', true);  // disabled
+
+    const tAll     = Collections.ClassName('tcard3');
+    const tEnabled = tAll.enabled();
+
+    addResult(Array.isArray(tEnabled), '.enabled() returns an array', 'isArray: ' + Array.isArray(tEnabled));
+    addResult(tEnabled.includes(ia),   '.enabled() includes enabled input',    '#ia ✓');
+    addResult(!tEnabled.includes(ib),  '.enabled() excludes disabled input',   '#ib excluded ✓');
+    addResult(tEnabled.includes(ic),   '.enabled() includes enabled button',   '#ic ✓');
+    addResult(!tEnabled.includes(id),  '.enabled() excludes disabled button',  '#id excluded ✓');
+    addResult(tEnabled.includes(ie),   '.enabled() includes enabled select',   '#ie ✓');
+    addResult(!tEnabled.includes(iee), '.enabled() excludes disabled textarea','#if excluded ✓');
+    addResult(tEnabled.length === 3,   '.enabled() count correct', '3 enabled, 3 disabled → found 3');
+
+    // Empty
+    addResult(
+      Array.isArray(Collections.ClassName('nope').enabled()) &&
+      Collections.ClassName('nope').enabled().length === 0,
+      '.enabled() on empty collection → empty array', ''
+    );
+
+    [ia,ib,ic,id,ie,iee].forEach(el => document.body.removeChild(el));
+  </script>
+</body>
+</html>

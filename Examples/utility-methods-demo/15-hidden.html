@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: .hidden()</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase;
+         letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
+    p.desc { font-size: 13px; color: #666; margin-bottom: 12px; line-height: 1.6; }
+
+    .controls {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: #fff; padding: 12px 16px; border-radius: 10px;
+      border: 1px solid #e2e8f0; margin-bottom: 14px;
+    }
+    .btn { padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: #fff; }
+    .btn-run   { background: #7c3aed; }
+    .btn-run:hover   { background: #6d28d9; }
+    .btn-reset { background: #6b7280; }
+    .btn-reset:hover { background: #4b5563; }
+    .btn-hide  { background: #dc2626; }
+    .btn-hide:hover  { background: #b91c1c; }
+    .btn-show  { background: #16a34a; }
+    .btn-show:hover  { background: #15803d; }
+
+    /* ── Cards ── */
+    .collection { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; min-height: 90px; align-items: flex-start; }
+    .card {
+      width: 120px; padding: 18px 10px; border-radius: 10px;
+      background: #fff; border: 2px solid #dde1e7;
+      text-align: center; font-size: 13px; font-weight: 600; color: #555;
+      transition: border-color .3s, background .3s, box-shadow .3s;
+      position: relative;
+    }
+    .card .state-label {
+      display: block; margin-top: 6px; font-size: 10px;
+      font-family: monospace; color: #aaa; font-weight: 400;
+    }
+
+    /* ── Visibility ghost placeholder ── */
+    /* Cards hidden with display:none disappear; we use visibility:hidden
+       so the slot stays (easier to understand visually). For display:none
+       we add a ghost placeholder so the layout doesn't collapse. */
+    .ghost-slot {
+      width: 120px; padding: 18px 10px; border-radius: 10px;
+      border: 2px dashed #e5e7eb; text-align: center;
+      font-size: 11px; color: #d1d5db; font-weight: 400;
+    }
+
+    /* hidden states applied interactively */
+    .card.is-display-none    { display: none; }
+    .card.is-vis-hidden      { visibility: hidden; }
+    .card.is-opacity-zero    { opacity: 0; pointer-events: none; }
+
+    /* highlight — returned by .hidden() */
+    .card.matched {
+      border-color: #7c3aed !important;
+      background: #faf5ff !important;
+      color: #6b21a8 !important;
+      box-shadow: 0 5px 16px rgba(124,58,237,.2);
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+    .card.matched::after {
+      content: '✓ hidden()';
+      display: block; font-size: 10px; font-weight: 700;
+      color: #7c3aed; margin-top: 6px;
+    }
+    /* NOT returned — dim it */
+    .card.not-matched { opacity: .25; }
+
+    /* ── Result bar ── */
+    .result-bar {
+      background: #faf5ff; border: 1.5px solid #d8b4fe;
+      border-radius: 8px; padding: 10px 14px;
+      font-size: 13px; color: #6b21a8; font-family: monospace;
+      margin-bottom: 20px;
+    }
+
+    /* ── Note box ── */
+    .note {
+      font-size: 12px; color: #888; background: #fff;
+      padding: 8px 12px; border-radius: 6px;
+      border-left: 3px solid #fbbf24; margin-bottom: 14px;
+    }
+
+    /* Results */
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 8px; padding: 10px 14px; border-left: 4px solid #ccc; font-size: 14px; color: #333; }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+
+  <h1>Demo — <code>.hidden()</code></h1>
+  <p class="subtitle">
+    Opposite of <code>.visible()</code>. Returns elements hidden by
+    <code>display:none</code>, <code>visibility:hidden</code>, or <code>opacity:0</code>.
+    Matched elements get a purple border — they're the ones the filter found.
+  </p>
+
+  <div class="note">
+    ⚠️ Cards hidden with <code>display:none</code> vanish from the layout — a dashed ghost slot marks their position.
+    Cards hidden with <code>visibility:hidden</code> or <code>opacity:0</code> stay in place but are invisible.
+    The filter finds <em>all three</em>.
+  </div>
+
+  <h2>Interactive — hide cards then run filter</h2>
+  <p class="desc">Hide cards with different CSS techniques, then click <strong>Run .hidden()</strong>.</p>
+
+  <div class="controls">
+    <button class="btn btn-hide" onclick="hideDisplay()">Hide C2 (display:none)</button>
+    <button class="btn btn-hide" onclick="hideVisibility()">Hide C3 (visibility:hidden)</button>
+    <button class="btn btn-hide" onclick="hideOpacity()">Hide C4 (opacity:0)</button>
+    <button class="btn btn-show" onclick="showAll()">Show all</button>
+  </div>
+  <div class="controls">
+    <button class="btn btn-run"   onclick="runHidden()">Run .hidden()</button>
+    <button class="btn btn-reset" onclick="resetFilter()">Clear highlights</button>
+  </div>
+
+  <!-- Ghost slot for Card 2 when display:none -->
+  <div class="collection" id="card-collection">
+    <div class="card hcard" id="hc1">Card 1<span class="state-label" id="sl1">visible</span></div>
+    <div class="ghost-slot" id="ghost2" style="display:none;">Card 2 (hidden)</div>
+    <div class="card hcard" id="hc2">Card 2<span class="state-label" id="sl2">visible</span></div>
+    <div class="card hcard" id="hc3">Card 3<span class="state-label" id="sl3">visible</span></div>
+    <div class="card hcard" id="hc4">Card 4<span class="state-label" id="sl4">visible</span></div>
+    <div class="card hcard" id="hc5">Card 5<span class="state-label" id="sl5">visible</span></div>
+  </div>
+
+  <div class="result-bar" id="result-bar" style="display:none;"></div>
+
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
+  <script>
+    const resultsEl = document.getElementById('results');
+    const resultBar = document.getElementById('result-bar');
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML = '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span>' +
+        '<strong>' + label + '</strong>' +
+        (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    function hideDisplay() {
+      const el = document.getElementById('hc2');
+      el.style.display = 'none';
+      document.getElementById('sl2').textContent = 'display:none';
+      document.getElementById('ghost2').style.display = 'block';
+    }
+    function hideVisibility() {
+      const el = document.getElementById('hc3');
+      el.style.visibility = 'hidden';
+      document.getElementById('sl3').textContent = 'visibility:hidden';
+    }
+    function hideOpacity() {
+      const el = document.getElementById('hc4');
+      el.style.opacity = '0';
+      el.style.pointerEvents = 'none';
+      document.getElementById('sl4').textContent = 'opacity:0';
+    }
+    function showAll() {
+      ['hc2','hc3','hc4'].forEach(id => {
+        const el = document.getElementById(id);
+        el.style.display = '';
+        el.style.visibility = '';
+        el.style.opacity = '';
+        el.style.pointerEvents = '';
+      });
+      document.getElementById('ghost2').style.display = 'none';
+      ['sl2','sl3','sl4'].forEach(id => document.getElementById(id).textContent = 'visible');
+      resetFilter();
+    }
+
+    function runHidden() {
+      resetFilter();
+      const all = Collections.ClassName('hcard');
+      const hiddenCards = all.hidden();
+      const hiddenIds = hiddenCards.map(el => el.id);
+      const allIds = ['hc1','hc2','hc3','hc4','hc5'];
+
+      allIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (hiddenIds.includes(id)) {
+          el.classList.add('matched');
+        } else {
+          el.classList.add('not-matched');
+        }
+      });
+
+      resultBar.style.display = 'block';
+      resultBar.textContent =
+        '.hidden() returned ' + hiddenCards.length + ' element(s): ' +
+        (hiddenIds.length ? hiddenIds.join(', ') : 'none');
+    }
+
+    function resetFilter() {
+      Collections.ClassName('hcard').forEach(el => el.classList.remove('matched', 'not-matched'));
+      resultBar.style.display = 'none';
+    }
+
+    // ── Automated tests ───────────────────────────────────────────────────
+    // Offscreen test elements
+    const base = { position: 'absolute', left: '-9999px' };
+    const mk = (id, styles) => {
+      const el = document.createElement('div');
+      el.className = 'tcard2'; el.id = id;
+      Object.assign(el.style, { position: 'absolute', left: '-9999px', ...styles });
+      document.body.appendChild(el);
+      return el;
+    };
+
+    const ta = mk('ta', {});                              // visible
+    const tb = mk('tb', { display: 'none' });             // hidden (display)
+    const tc = mk('tc', { visibility: 'hidden' });        // hidden (visibility)
+    const td = mk('td', { opacity: '0' });                // hidden (opacity)
+
+    const tAll = Collections.ClassName('tcard2');
+    const tHidden = tAll.hidden();
+
+    addResult(Array.isArray(tHidden), '.hidden() returns an array', 'isArray: ' + Array.isArray(tHidden));
+    addResult(!tHidden.includes(ta),  '.hidden() does NOT include visible elements', '#ta excluded ✓');
+    addResult(tHidden.includes(tb),   '.hidden() includes display:none element', '#tb included ✓');
+    addResult(tHidden.includes(tc),   '.hidden() includes visibility:hidden element', '#tc included ✓');
+    addResult(tHidden.includes(td),   '.hidden() includes opacity:0 element', '#td included ✓');
+    addResult(tHidden.length === 3,   '.hidden() count is correct', 'found 3 hidden, 1 visible');
+
+    // Complement: visible() + hidden() should cover all elements
+    const tVisible = tAll.visible();
+    addResult(
+      tVisible.length + tHidden.length === tAll.length,
+      '.visible() + .hidden() covers all elements (no overlap)',
+      tVisible.length + ' visible + ' + tHidden.length + ' hidden = ' + tAll.length + ' total'
+    );
+
+    // Empty collection
+    const emptyH = Collections.ClassName('nonexistent').hidden();
+    addResult(Array.isArray(emptyH) && emptyH.length === 0, '.hidden() on empty collection → empty array', '');
+
+    [ta,tb,tc,td].forEach(el => document.body.removeChild(el));
+  </script>
+</body>
+</html>

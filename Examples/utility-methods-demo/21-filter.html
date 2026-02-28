@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: .filter()</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
+
+    .controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: #fff; padding: 12px 16px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 14px; }
+    .btn { padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: #fff; }
+    .btn-run { background: #16a34a; } .btn-run:hover { background: #15803d; }
+    .btn-reset { background: #6b7280; } .btn-reset:hover { background: #4b5563; }
+
+    /* ── Product grid ── */
+    .product-grid { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+    .product {
+      width: 140px; padding: 16px 12px; border-radius: 12px; background: #fff;
+      border: 2px solid #dde1e7; text-align: center; font-size: 13px; font-weight: 600;
+      color: #555; transition: all .3s; cursor: default;
+    }
+    .product .price { font-size: 16px; font-weight: 700; color: #1a1a2e; margin: 6px 0; }
+    .product .tags { font-size: 10px; color: #aaa; font-family: monospace; }
+    .product.matched {
+      border-color: #16a34a; background: #f0fdf4; color: #15803d;
+      box-shadow: 0 5px 16px rgba(22,163,74,.18); transform: translateY(-4px);
+    }
+    .product.matched .price { color: #15803d; }
+    .product.matched::after { content: '✓ match'; display: block; font-size: 10px; font-weight: 700; color: #16a34a; margin-top: 4px; }
+    .product.excluded { opacity: .25; }
+
+    /* ── Filter presets ── */
+    .filter-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; margin-bottom: 20px; }
+    .filter-btn {
+      padding: 10px 14px; border-radius: 8px; background: #fff; border: 1.5px solid #e2e8f0;
+      text-align: left; cursor: pointer; font-size: 12px; font-family: monospace;
+      transition: border-color .2s, background .2s;
+    }
+    .filter-btn:hover { border-color: #16a34a; background: #f0fdf4; }
+    .filter-btn .fd { font-size: 11px; color: #888; font-family: sans-serif; margin-top: 3px; }
+
+    .result-bar { background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #15803d; font-family: monospace; margin-bottom: 20px; }
+
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 8px; padding: 10px 14px; border-left: 4px solid #ccc; font-size: 14px; color: #333; }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <h1>Demo — <code>.filter(callback, thisArg?)</code></h1>
+  <p class="subtitle">Returns an Array of elements for which the callback returns <code>true</code>. Matched products get a green border — excluded ones dim.</p>
+
+  <h2>Product catalogue</h2>
+  <div class="product-grid" id="products">
+    <div class="product pcard" id="p1" data-price="12"  data-category="fruit"  data-instock="true">Apple    <div class="price">$12</div><div class="tags">fruit · in-stock</div></div>
+    <div class="product pcard" id="p2" data-price="8"   data-category="fruit"  data-instock="false">Banana  <div class="price">$8</div> <div class="tags">fruit · out-of-stock</div></div>
+    <div class="product pcard" id="p3" data-price="30"  data-category="veggie" data-instock="true">Carrot   <div class="price">$30</div><div class="tags">veggie · in-stock</div></div>
+    <div class="product pcard" id="p4" data-price="5"   data-category="fruit"  data-instock="true">Dates    <div class="price">$5</div> <div class="tags">fruit · in-stock</div></div>
+    <div class="product pcard" id="p5" data-price="50"  data-category="veggie" data-instock="false">Edamame <div class="price">$50</div><div class="tags">veggie · out-of-stock</div></div>
+    <div class="product pcard" id="p6" data-price="18"  data-category="veggie" data-instock="true">Fennel   <div class="price">$18</div><div class="tags">veggie · in-stock</div></div>
+  </div>
+
+  <h2>Apply a filter</h2>
+  <div class="filter-grid">
+    <button class="filter-btn" onclick="applyFilter('price>15')">price > 15<div class="fd">Expensive items</div></button>
+    <button class="filter-btn" onclick="applyFilter('instock')">data-instock="true"<div class="fd">In-stock only</div></button>
+    <button class="filter-btn" onclick="applyFilter('fruit')">category === "fruit"<div class="fd">Fruit only</div></button>
+    <button class="filter-btn" onclick="applyFilter('veggie')">category === "veggie"<div class="fd">Veggie only</div></button>
+    <button class="filter-btn" onclick="applyFilter('cheap-instock')">price ≤ 15 AND in-stock<div class="fd">Affordable & available</div></button>
+    <button class="filter-btn" onclick="applyFilter('none')">() => false<div class="fd">Nothing matches</div></button>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-reset" onclick="resetFilter()">Clear highlights</button>
+  </div>
+
+  <div class="result-bar" id="result-bar" style="display:none;"></div>
+
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
+  <script>
+    const resultsEl = document.getElementById('results');
+    const resultBar = document.getElementById('result-bar');
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML = '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span><strong>' + label + '</strong>' + (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    const col = Collections.ClassName('pcard');
+
+    const predicates = {
+      'price>15':     el => +el.dataset.price > 15,
+      'instock':      el => el.dataset.instock === 'true',
+      'fruit':        el => el.dataset.category === 'fruit',
+      'veggie':       el => el.dataset.category === 'veggie',
+      'cheap-instock':el => +el.dataset.price <= 15 && el.dataset.instock === 'true',
+      'none':         el => false,
+    };
+
+    function applyFilter(key) {
+      resetFilter();
+      const matched = col.filter(predicates[key]);
+      const matchedIds = matched.map(el => el.id);
+
+      col.forEach(el => {
+        if (matchedIds.includes(el.id)) el.classList.add('matched');
+        else el.classList.add('excluded');
+      });
+
+      resultBar.style.display = 'block';
+      resultBar.textContent = '.filter() returned ' + matched.length + ' element(s): ' +
+        (matchedIds.length ? matchedIds.join(', ') : 'none');
+    }
+
+    function resetFilter() {
+      col.forEach(el => el.classList.remove('matched','excluded'));
+      resultBar.style.display = 'none';
+    }
+
+    // ── Automated tests ───────────────────────────────────────────────────
+    const allTrue  = col.filter(() => true);
+    const allFalse = col.filter(() => false);
+    addResult(Array.isArray(allTrue),             '.filter() returns an Array',                  'isArray: true');
+    addResult(allTrue.length === 6,               '.filter(() => true) returns all elements',    '6/6');
+    addResult(allFalse.length === 0,              '.filter(() => false) returns empty array',    '0/6');
+    addResult(col.length === 6,                   '.filter() does not mutate source collection', 'length still 6');
+
+    const priceFilter = col.filter(el => +el.dataset.price > 15);
+    addResult(priceFilter.length === 3,           '.filter(price > 15) correct count',           priceFilter.map(e=>e.id).join(','));
+    addResult(priceFilter.every(el => +el.dataset.price > 15), 'all returned elements satisfy predicate', '');
+
+    // thisArg
+    const ctx = { min: 15 };
+    const withCtx = col.filter(function(el) { return +el.dataset.price > this.min; }, ctx);
+    addResult(withCtx.length === priceFilter.length, '.filter() respects thisArg', 'same result via thisArg.min');
+  </script>
+</body>
+</html>

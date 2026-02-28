@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: .removeClass()</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase;
+         letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
+
+    .controls {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: #fff; padding: 14px 16px; border-radius: 10px;
+      border: 1px solid #e2e8f0; margin-bottom: 16px;
+    }
+    .controls label { font-size: 14px; font-weight: 600; color: #444; }
+    .controls input[type=text] {
+      padding: 6px 10px; border: 1.5px solid #fecaca; border-radius: 6px;
+      font-size: 14px; outline: none; font-family: monospace; width: 160px;
+    }
+    .controls input:focus { border-color: #dc2626; }
+    .btn { padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: #fff; }
+    .btn-remove { background: #dc2626; }
+    .btn-remove:hover { background: #b91c1c; }
+    .btn-restore { background: #6b7280; }
+    .btn-restore:hover { background: #4b5563; }
+
+    /* ── Cards ── */
+    .collection { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+    .card {
+      width: 130px; padding: 20px 12px; border-radius: 10px;
+      background: #fff; border: 2px solid #dde1e7;
+      text-align: center; font-size: 14px; font-weight: 600; color: #555;
+      transition: all .3s ease;
+    }
+    .card .cls-list { margin-top: 8px; font-size: 10px; font-family: monospace; color: #aaa; font-weight: 400; }
+
+    /* Class that will be removed */
+    .card.highlighted {
+      background: #fef9c3; border-color: #ca8a04; color: #92400e;
+      box-shadow: 0 4px 12px rgba(202,138,4,.15);
+    }
+
+    /* After removal — plain state */
+    .card.plain {
+      background: #f9fafb; border-color: #d1d5db; color: #9ca3af;
+    }
+
+    /* Results */
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 8px; padding: 10px 14px; border-left: 4px solid #ccc; font-size: 14px; color: #333; }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+
+  <h1>Demo — <code>.removeClass(className)</code></h1>
+  <p class="subtitle">Removes a CSS class from <strong>every element</strong> in the collection. Cards start highlighted (yellow). Removing the class fades them to plain grey.</p>
+
+  <h2>Interactive</h2>
+  <div class="controls">
+    <label>Class to remove:</label>
+    <input type="text" id="class-input" value="highlighted" />
+    <button class="btn btn-remove"  onclick="runRemoveClass()">Run .removeClass()</button>
+    <button class="btn btn-restore" onclick="restoreCards()">Restore</button>
+  </div>
+
+  <div class="collection">
+    <div class="card item highlighted" id="r1">Card 1<div class="cls-list" id="cls-r1"></div></div>
+    <div class="card item highlighted" id="r2">Card 2<div class="cls-list" id="cls-r2"></div></div>
+    <div class="card item highlighted" id="r3">Card 3<div class="cls-list" id="cls-r3"></div></div>
+    <div class="card item highlighted" id="r4">Card 4<div class="cls-list" id="cls-r4"></div></div>
+  </div>
+
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
+  <script>
+    const resultsEl = document.getElementById('results');
+    const ids = ['r1','r2','r3','r4'];
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML = '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span>' +
+        '<strong>' + label + '</strong>' +
+        (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    function updateLabels() {
+      const cards = Collections.ClassName('item');
+      cards.forEach(el => {
+        document.getElementById('cls-' + el.id).textContent =
+          '.' + Array.from(el.classList).join(' .');
+      });
+    }
+
+    function runRemoveClass() {
+      const cls = document.getElementById('class-input').value.trim();
+      if (!cls) return;
+      Collections.ClassName('item').removeClass(cls);
+      updateLabels();
+    }
+
+    function restoreCards() {
+      Collections.ClassName('item').addClass('highlighted').removeClass('plain');
+      updateLabels();
+    }
+
+    updateLabels();
+
+    // ── Automated tests ───────────────────────────────────────────────────
+
+    // Test 1: removeClass removes from ALL elements
+    Collections.ClassName('item').addClass('to-remove');
+    Collections.ClassName('item').removeClass('to-remove');
+    const allRemoved = ids.every(id => !document.getElementById(id).classList.contains('to-remove'));
+    addResult(allRemoved, '.removeClass() removes class from all elements', allRemoved ? '4/4 class removed' : 'some still have class');
+
+    // Test 2: removeClass is safe on elements that don't have the class (no error)
+    let safeRemove = true;
+    try {
+      Collections.ClassName('item').removeClass('class-that-never-existed');
+    } catch(e) {
+      safeRemove = false;
+    }
+    addResult(safeRemove, '.removeClass() is safe when class is not present (no error)', '');
+
+    // Test 3: other classes are preserved
+    Collections.ClassName('item').addClass('keep-me');
+    Collections.ClassName('item').addClass('remove-me');
+    Collections.ClassName('item').removeClass('remove-me');
+    const othersKept = ids.every(id => document.getElementById(id).classList.contains('keep-me'));
+    addResult(othersKept, '.removeClass() does not affect other classes', 'keep-me class preserved');
+    Collections.ClassName('item').removeClass('keep-me');
+
+    // Test 4: chainable
+    const col = Collections.ClassName('item');
+    const returned = col.removeClass('nonexistent');
+    addResult(returned !== null && returned !== undefined, '.removeClass() returns the collection (chainable)', '');
+
+    updateLabels();
+  </script>
+</body>
+</html>

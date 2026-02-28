@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: .addClass()</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase;
+         letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
+
+    /* ── Controls ── */
+    .controls {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: #fff; padding: 14px 16px; border-radius: 10px;
+      border: 1px solid #e2e8f0; margin-bottom: 16px;
+    }
+    .controls label { font-size: 14px; font-weight: 600; color: #444; }
+    .controls input[type=text] {
+      padding: 6px 10px; border: 1.5px solid #bbf7d0; border-radius: 6px;
+      font-size: 14px; outline: none; font-family: monospace; width: 160px;
+    }
+    .controls input:focus { border-color: #16a34a; }
+    .btn {
+      padding: 7px 16px; border: none; border-radius: 6px;
+      font-size: 13px; font-weight: 600; cursor: pointer; color: #fff;
+    }
+    .btn-add    { background: #16a34a; }
+    .btn-add:hover    { background: #15803d; }
+    .btn-reset  { background: #6b7280; }
+    .btn-reset:hover  { background: #4b5563; }
+
+    /* ── Cards ── */
+    .collection { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+    .card {
+      width: 130px; padding: 20px 12px; border-radius: 10px;
+      background: #fff; border: 2px solid #dde1e7;
+      text-align: center; font-size: 14px; font-weight: 600; color: #555;
+      transition: all .3s ease;
+    }
+    .card .cls-list {
+      margin-top: 8px; font-size: 10px; font-family: monospace;
+      color: #aaa; font-weight: 400; word-break: break-all;
+    }
+
+    /* ── "active" class — the one we add ── */
+    .card.active {
+      background: #dcfce7; border-color: #16a34a; color: #15803d;
+      transform: translateY(-4px);
+      box-shadow: 0 6px 18px rgba(22,163,74,.2);
+    }
+
+    /* ── Results ── */
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row {
+      display: flex; align-items: center; gap: 10px; background: #fff;
+      border-radius: 8px; padding: 10px 14px; border-left: 4px solid #ccc;
+      font-size: 14px; color: #333;
+    }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+
+  <h1>Demo — <code>.addClass(className)</code></h1>
+  <p class="subtitle">Adds a CSS class to <strong>every element</strong> in the collection at once. Cards turn green when the class is applied.</p>
+
+  <!-- ── Interactive ── -->
+  <h2>Interactive</h2>
+  <div class="controls">
+    <label>Class name:</label>
+    <input type="text" id="class-input" value="active" />
+    <button class="btn btn-add"   onclick="runAddClass()">Run .addClass()</button>
+    <button class="btn btn-reset" onclick="resetCards()">Reset</button>
+  </div>
+
+  <div class="collection" id="card-collection">
+    <div class="card item" id="c1">Card 1<div class="cls-list" id="cls-c1">—</div></div>
+    <div class="card item" id="c2">Card 2<div class="cls-list" id="cls-c2">—</div></div>
+    <div class="card item" id="c3">Card 3<div class="cls-list" id="cls-c3">—</div></div>
+    <div class="card item" id="c4">Card 4<div class="cls-list" id="cls-c4">—</div></div>
+  </div>
+
+  <!-- ── Results ── -->
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
+  <script>
+    const resultsEl = document.getElementById('results');
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML = '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span>' +
+        '<strong>' + label + '</strong>' +
+        (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    function updateClassLabels() {
+      const cards = Collections.ClassName('item');
+      cards.forEach(el => {
+        document.getElementById('cls-' + el.id).textContent =
+          '.' + Array.from(el.classList).join(' .');
+      });
+    }
+
+    function runAddClass() {
+      const cls = document.getElementById('class-input').value.trim();
+      if (!cls) return;
+      Collections.ClassName('item').addClass(cls);
+      updateClassLabels();
+    }
+
+    function resetCards() {
+      const cards = Collections.ClassName('item');
+      cards.forEach(el => {
+        // Remove all classes except 'card' and 'item'
+        Array.from(el.classList).forEach(c => {
+          if (c !== 'card' && c !== 'item') el.classList.remove(c);
+        });
+      });
+      updateClassLabels();
+    }
+
+    updateClassLabels(); // init labels
+
+    // ── Automated tests ───────────────────────────────────────────────────
+    // Use a separate set of hidden elements so interactive state doesn't interfere
+    const testIds = ['c1','c2','c3','c4'];
+
+    // Test 1: addClass applies to ALL elements
+    Collections.ClassName('item').addClass('test-green');
+    const allHaveClass = testIds.every(id => document.getElementById(id).classList.contains('test-green'));
+    addResult(allHaveClass, '.addClass() applies to all elements in collection', allHaveClass ? '4/4 have class' : 'some missing');
+    Collections.ClassName('item').removeClass('test-green');
+
+    // Test 2: addClass is idempotent (no duplicates)
+    Collections.ClassName('item').addClass('dup-test');
+    Collections.ClassName('item').addClass('dup-test');
+    const noDuplicates = testIds.every(id => {
+      const classes = Array.from(document.getElementById(id).classList);
+      return classes.filter(c => c === 'dup-test').length === 1;
+    });
+    addResult(noDuplicates, '.addClass() is idempotent — no duplicate class entries', '');
+    Collections.ClassName('item').removeClass('dup-test');
+
+    // Test 3: addClass returns the collection (chainable)
+    const col = Collections.ClassName('item');
+    const returned = col.addClass('chain-test');
+    addResult(returned !== null && returned !== undefined, '.addClass() returns the collection (chainable)', '');
+    Collections.ClassName('item').removeClass('chain-test');
+
+    // Test 4: addClass doesn't affect other classes
+    Collections.ClassName('item').addClass('extra');
+    const stillHaveOriginal = testIds.every(id => document.getElementById(id).classList.contains('card'));
+    addResult(stillHaveOriginal, '.addClass() does not remove pre-existing classes', 'card class preserved on all');
+    Collections.ClassName('item').removeClass('extra');
+
+    updateClassLabels();
+  </script>
+</body>
+</html>

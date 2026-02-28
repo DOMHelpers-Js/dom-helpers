@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: .disabled()</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase;
+         letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
+    p.desc { font-size: 13px; color: #666; margin-bottom: 12px; line-height: 1.6; }
+
+    /* ── Controls ── */
+    .controls {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: #fff; padding: 12px 16px; border-radius: 10px;
+      border: 1px solid #e2e8f0; margin-bottom: 14px;
+    }
+    .btn { padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: #fff; }
+    .btn-run    { background: #dc2626; }
+    .btn-run:hover    { background: #b91c1c; }
+    .btn-reset  { background: #6b7280; }
+    .btn-reset:hover  { background: #4b5563; }
+
+    /* ── Field grid ── */
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, 180px);
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+    .field-wrap { display: flex; flex-direction: column; gap: 6px; }
+    .field-wrap label {
+      font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase;
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    .form-el {
+      padding: 10px 12px; border-radius: 8px; font-size: 14px;
+      border: 2px solid #dde1e7; background: #fff; color: #374151;
+      transition: all .25s ease; font-family: inherit; width: 100%;
+    }
+    .form-el[disabled] {
+      background: #f3f4f6; color: #9ca3af; border-color: #e5e7eb; cursor: not-allowed;
+    }
+    button.form-el { cursor: pointer; font-weight: 600; }
+
+    /* ── Match highlight ── */
+    .field-wrap.matched .form-el {
+      border-color: #dc2626 !important;
+      box-shadow: 0 0 0 3px rgba(220,38,38,.15) !important;
+      background: #fff5f5 !important;
+      color: #b91c1c !important;
+      opacity: 1 !important;
+    }
+    .field-wrap.matched .match-tag { display: block; }
+    .match-tag { display: none; font-size: 10px; font-weight: 700; color: #dc2626; font-family: monospace; }
+
+    /* Dim enabled elements when filter runs */
+    .field-wrap.not-matched { opacity: .3; }
+
+    /* ── Result bar ── */
+    .result-bar {
+      background: #fff5f5; border: 1.5px solid #fca5a5;
+      border-radius: 8px; padding: 10px 14px;
+      font-size: 13px; color: #b91c1c; font-family: monospace;
+      margin-bottom: 20px;
+    }
+
+    /* ── Use-case section ── */
+    .usecase-form {
+      background: #fff; border-radius: 12px; padding: 20px;
+      border: 1.5px solid #e2e8f0; margin-bottom: 20px;
+    }
+    .usecase-form h3 { font-size: 14px; color: #555; margin-bottom: 14px; }
+    .uc-fields { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .uc-fields input {
+      padding: 9px 12px; border: 1.5px solid #dde1e7; border-radius: 8px;
+      font-size: 14px; outline: none; flex: 1; min-width: 100px;
+    }
+    .uc-fields input[disabled] { background: #f3f4f6; color: #9ca3af; }
+    .uc-submit {
+      padding: 9px 20px; border: none; border-radius: 8px;
+      background: #4f46e5; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
+    }
+    .uc-submit[disabled] { background: #a5b4fc; cursor: not-allowed; }
+    .uc-msg { font-size: 13px; margin-top: 10px; color: #666; min-height: 20px; }
+
+    /* Results */
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 8px; padding: 10px 14px; border-left: 4px solid #ccc; font-size: 14px; color: #333; }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+
+  <h1>Demo — <code>.disabled()</code></h1>
+  <p class="subtitle">
+    Returns elements where <code>el.disabled === true</code> or the <code>disabled</code> attribute is present.
+    Red border = element returned by the filter. Toggle each field, then run the filter.
+  </p>
+
+  <!-- ── Interactive filter ── -->
+  <h2>Interactive — toggle & filter</h2>
+  <p class="desc">Check a box to disable a field. Then click <strong>Run .disabled()</strong> — red border marks which elements the filter found.</p>
+
+  <div class="controls">
+    <button class="btn btn-run"   onclick="runDisabled()">Run .disabled()</button>
+    <button class="btn btn-reset" onclick="resetFilter()">Clear highlights</button>
+    <button style="padding:7px 14px;border:1.5px solid #dde1e7;border-radius:6px;background:#fff;font-size:13px;cursor:pointer;" onclick="disableAll()">Disable all</button>
+    <button style="padding:7px 14px;border:1.5px solid #dde1e7;border-radius:6px;background:#fff;font-size:13px;cursor:pointer;" onclick="enableAll()">Enable all</button>
+  </div>
+
+  <div class="field-grid">
+
+    <div class="field-wrap" id="dfw1">
+      <label><input type="checkbox" onchange="toggleField('del1',this)"> Disable</label>
+      <input  class="form-el dfld" type="text"   id="del1" value="Text input" />
+      <span class="match-tag">✓ disabled()</span>
+    </div>
+
+    <div class="field-wrap" id="dfw2">
+      <label><input type="checkbox" onchange="toggleField('del2',this)" checked> Disable</label>
+      <input  class="form-el dfld" type="email"  id="del2" value="email@test.com" disabled />
+      <span class="match-tag">✓ disabled()</span>
+    </div>
+
+    <div class="field-wrap" id="dfw3">
+      <label><input type="checkbox" onchange="toggleField('del3',this)"> Disable</label>
+      <select class="form-el dfld" id="del3">
+        <option>Option A</option><option>Option B</option>
+      </select>
+      <span class="match-tag">✓ disabled()</span>
+    </div>
+
+    <div class="field-wrap" id="dfw4">
+      <label><input type="checkbox" onchange="toggleField('del4',this)" checked> Disable</label>
+      <button class="form-el dfld" id="del4" disabled>Submit (disabled)</button>
+      <span class="match-tag">✓ disabled()</span>
+    </div>
+
+    <div class="field-wrap" id="dfw5">
+      <label><input type="checkbox" onchange="toggleField('del5',this)"> Disable</label>
+      <textarea class="form-el dfld" id="del5" rows="2">Textarea</textarea>
+      <span class="match-tag">✓ disabled()</span>
+    </div>
+
+    <div class="field-wrap" id="dfw6">
+      <label><input type="checkbox" onchange="toggleField('del6',this)" checked> Disable</label>
+      <input  class="form-el dfld" type="number" id="del6" value="0" disabled />
+      <span class="match-tag">✓ disabled()</span>
+    </div>
+
+  </div>
+
+  <div class="result-bar" id="result-bar" style="display:none;"></div>
+
+  <!-- ── Real-world use case ── -->
+  <h2>Real-world use case — count & re-enable disabled fields</h2>
+  <p class="desc">
+    Uses <code>.disabled()</code> to detect blocked fields and <code>.enabled()</code>
+    to validate completeness before form submission.
+  </p>
+
+  <div class="usecase-form">
+    <h3>Checkout form — some fields locked until payment confirmed</h3>
+    <div class="uc-fields">
+      <input class="ucfld" type="text"  id="uc-name"    placeholder="Full name" />
+      <input class="ucfld" type="text"  id="uc-addr"    placeholder="Address" disabled />
+      <input class="ucfld" type="text"  id="uc-card"    placeholder="Card number" disabled />
+      <button class="uc-submit" id="uc-submit" disabled onclick="submitForm()">Place order</button>
+    </div>
+    <div class="uc-msg" id="uc-msg">Fill your name, then unlock fields.</div>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button style="padding:6px 14px;border:1.5px solid #dde1e7;border-radius:6px;background:#fff;font-size:12px;cursor:pointer;" onclick="unlockCheckout()">Unlock address + card</button>
+      <button style="padding:6px 14px;border:1.5px solid #dde1e7;border-radius:6px;background:#fff;font-size:12px;cursor:pointer;" onclick="checkFormStatus()">Check form status</button>
+    </div>
+  </div>
+
+  <!-- ── Automated tests ── -->
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
+  <script>
+    const resultsEl = document.getElementById('results');
+    const resultBar = document.getElementById('result-bar');
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML = '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span>' +
+        '<strong>' + label + '</strong>' +
+        (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    function toggleField(id, cb) {
+      document.getElementById(id).disabled = cb.checked;
+    }
+    function disableAll() {
+      document.querySelectorAll('.dfld').forEach(el => {
+        el.disabled = true;
+        const cb = el.closest('.field-wrap').querySelector('input[type=checkbox]');
+        if (cb) cb.checked = true;
+      });
+    }
+    function enableAll() {
+      document.querySelectorAll('.dfld').forEach(el => {
+        el.disabled = false;
+        const cb = el.closest('.field-wrap').querySelector('input[type=checkbox]');
+        if (cb) cb.checked = false;
+      });
+    }
+
+    function runDisabled() {
+      resetFilter();
+      const all      = Collections.ClassName('dfld');
+      const disabled = all.disabled();
+      const disabledEls = Array.isArray(disabled) ? disabled : Array.from(disabled);
+
+      ['del1','del2','del3','del4','del5','del6'].forEach((id, i) => {
+        const el   = document.getElementById(id);
+        const wrap = document.getElementById('dfw' + (i + 1));
+        if (disabledEls.includes(el)) {
+          wrap.classList.add('matched');
+        } else {
+          wrap.classList.add('not-matched');
+        }
+      });
+
+      resultBar.style.display = 'block';
+      const ids = disabledEls.map(el => '#' + el.id);
+      resultBar.textContent = '.disabled() returned ' + disabledEls.length +
+        ' element(s): ' + (ids.length ? ids.join(', ') : 'none');
+    }
+
+    function resetFilter() {
+      ['dfw1','dfw2','dfw3','dfw4','dfw5','dfw6'].forEach(id => {
+        document.getElementById(id).classList.remove('matched','not-matched');
+      });
+      resultBar.style.display = 'none';
+    }
+
+    // ── Real-world use case ───────────────────────────────────────────────
+    function unlockCheckout() {
+      const locked = Collections.ClassName('ucfld').disabled();
+      locked.forEach(el => el.disabled = false);
+      document.getElementById('uc-submit').disabled = false;
+      document.getElementById('uc-msg').textContent =
+        'Unlocked ' + locked.length + ' field(s). Fill in details and place order.';
+    }
+
+    function checkFormStatus() {
+      const all      = Collections.ClassName('ucfld');
+      const disabled = all.disabled();
+      const enabled  = all.enabled();
+      document.getElementById('uc-msg').textContent =
+        enabled.length + ' field(s) enabled, ' + disabled.length + ' field(s) still disabled.';
+    }
+
+    function submitForm() {
+      document.getElementById('uc-msg').textContent = '✓ Order placed! (demo)';
+    }
+
+    // ── Automated tests ───────────────────────────────────────────────────
+    const mk = (tag, id, disabled) => {
+      const el = document.createElement(tag);
+      el.className = 'tcard4'; el.id = id;
+      if (disabled) el.disabled = true;
+      Object.assign(el.style, { position: 'absolute', left: '-9999px' });
+      document.body.appendChild(el);
+      return el;
+    };
+
+    const ea = mk('input',    'ea', false);   // enabled
+    const eb = mk('input',    'eb', true);    // disabled
+    const ec = mk('button',   'ec', false);   // enabled
+    const ed = mk('button',   'ed', true);    // disabled
+    const ee = mk('select',   'ee', true);    // disabled
+    const ef = mk('textarea', 'ef', false);   // enabled
+
+    const tAll      = Collections.ClassName('tcard4');
+    const tDisabled = tAll.disabled();
+
+    addResult(Array.isArray(tDisabled), '.disabled() returns an array', 'isArray: ' + Array.isArray(tDisabled));
+    addResult(!tDisabled.includes(ea),  '.disabled() excludes enabled input',    '#ea excluded ✓');
+    addResult(tDisabled.includes(eb),   '.disabled() includes disabled input',   '#eb included ✓');
+    addResult(!tDisabled.includes(ec),  '.disabled() excludes enabled button',   '#ec excluded ✓');
+    addResult(tDisabled.includes(ed),   '.disabled() includes disabled button',  '#ed included ✓');
+    addResult(tDisabled.includes(ee),   '.disabled() includes disabled select',  '#ee included ✓');
+    addResult(!tDisabled.includes(ef),  '.disabled() excludes enabled textarea', '#ef excluded ✓');
+    addResult(tDisabled.length === 3,   '.disabled() count correct', '3 disabled, 3 enabled → found 3');
+
+    // Complement: enabled() + disabled() covers all
+    const tEnabled = tAll.enabled();
+    addResult(
+      tEnabled.length + tDisabled.length === tAll.length,
+      '.enabled() + .disabled() covers all elements (no overlap)',
+      tEnabled.length + ' enabled + ' + tDisabled.length + ' disabled = ' + tAll.length + ' total'
+    );
+
+    // Empty collection
+    addResult(
+      Array.isArray(Collections.ClassName('nope').disabled()) &&
+      Collections.ClassName('nope').disabled().length === 0,
+      '.disabled() on empty collection → empty array', ''
+    );
+
+    [ea,eb,ec,ed,ee,ef].forEach(el => document.body.removeChild(el));
+  </script>
+</body>
+</html>

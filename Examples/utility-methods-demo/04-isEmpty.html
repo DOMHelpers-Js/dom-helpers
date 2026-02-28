@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: .isEmpty()</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase;
+         letter-spacing: .6px; margin-bottom: 10px; }
+
+    /* ── Collection groups ── */
+    .group {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+    .collection {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .card {
+      width: 110px;
+      padding: 16px 10px;
+      border-radius: 10px;
+      background: #fff;
+      border: 2px solid #dde1e7;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: #555;
+    }
+
+    /* ── isEmpty indicator badge ── */
+    .is-empty-badge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 140px;
+      padding: 14px 18px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      border: 2px solid transparent;
+    }
+    .is-empty-badge .method-call {
+      font-size: 11px;
+      font-weight: 400;
+      opacity: .7;
+      margin-bottom: 5px;
+      font-family: monospace;
+    }
+    .is-empty-badge.true  { background: #fef9c3; border-color: #ca8a04; color: #854d0e; }
+    .is-empty-badge.false { background: #dcfce7; border-color: #16a34a; color: #15803d; }
+
+    /* ── Live DOM section ── */
+    .live-controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+    .live-controls button {
+      padding: 7px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-add    { background: #22c55e; color: #fff; }
+    .btn-add:hover    { background: #16a34a; }
+    .btn-remove { background: #ef4444; color: #fff; }
+    .btn-remove:hover { background: #dc2626; }
+    #live-status {
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 6px;
+      transition: background .2s, color .2s;
+    }
+    #live-count {
+      font-size: 13px;
+      color: #666;
+    }
+
+    /* ── Results panel ── */
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #fff;
+      border-radius: 8px;
+      padding: 10px 14px;
+      border-left: 4px solid #ccc;
+      font-size: 14px;
+      color: #333;
+    }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+
+  <h1>Demo — <code>.isEmpty()</code></h1>
+  <p class="subtitle">Returns <code>true</code> when the collection has no elements, <code>false</code> otherwise. The badge next to each group shows the live return value.</p>
+
+  <!-- ── Group 1: populated ── -->
+  <h2>Non-empty collection — .isEmpty() should be false</h2>
+  <div class="group">
+    <div class="collection" id="col-boxes">
+      <div class="card box">Box 1</div>
+      <div class="card box">Box 2</div>
+      <div class="card box">Box 3</div>
+    </div>
+    <div class="is-empty-badge" id="badge-boxes">
+      <span class="method-call">boxes.isEmpty()</span>
+      <span id="badge-boxes-value">…</span>
+    </div>
+  </div>
+
+  <!-- ── Group 2: empty ── -->
+  <h2>Empty collection — .isEmpty() should be true</h2>
+  <div class="group">
+    <div class="collection" id="col-empty">
+      <div style="padding:14px;background:#fff;border-radius:8px;font-size:13px;color:#aaa;border:2px dashed #dde1e7;">
+        No elements with class "phantom"
+      </div>
+    </div>
+    <div class="is-empty-badge" id="badge-empty">
+      <span class="method-call">phantoms.isEmpty()</span>
+      <span id="badge-empty-value">…</span>
+    </div>
+  </div>
+
+  <!-- ── Group 3: Live DOM — add/remove items ── -->
+  <h2>Live DOM test — add / remove elements and watch .isEmpty() update</h2>
+  <div class="live-controls">
+    <button class="btn-add"    onclick="addLive()">+ Add element</button>
+    <button class="btn-remove" onclick="removeLive()">− Remove element</button>
+    <div id="live-status">…</div>
+    <span id="live-count"></span>
+  </div>
+  <div class="collection" id="live-area">
+    <div class="card live-item">Live 1</div>
+    <div class="card live-item">Live 2</div>
+  </div>
+
+  <!-- ── Results ── -->
+  <h2 style="margin-top:28px;">Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
+  <script>
+    const resultsEl = document.getElementById('results');
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML =
+        '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span>' +
+        '<strong>' + label + '</strong>' +
+        (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    function setBadge(badgeEl, valueEl, boolValue) {
+      badgeEl.classList.remove('true', 'false');
+      badgeEl.classList.add(String(boolValue));
+      valueEl.textContent = String(boolValue);
+    }
+
+    // ── Group 1: non-empty ────────────────────────────────────────────────
+    const boxes    = Collections.ClassName('box');
+    const boxEmpty = boxes.isEmpty();
+    setBadge(
+      document.getElementById('badge-boxes'),
+      document.getElementById('badge-boxes-value'),
+      boxEmpty
+    );
+
+    // ── Group 2: empty ────────────────────────────────────────────────────
+    const phantoms    = Collections.ClassName('phantom');
+    const ghostEmpty  = phantoms.isEmpty();
+    setBadge(
+      document.getElementById('badge-empty'),
+      document.getElementById('badge-empty-value'),
+      ghostEmpty
+    );
+
+    // ── Automated results ─────────────────────────────────────────────────
+    addResult(boxEmpty === false,   '.isEmpty() on non-empty collection',  'returned ' + boxEmpty);
+    addResult(ghostEmpty === true,  '.isEmpty() on empty collection',      'returned ' + ghostEmpty);
+    addResult(typeof boxEmpty === 'boolean',   'return type is boolean (non-empty)', typeof boxEmpty);
+    addResult(typeof ghostEmpty === 'boolean', 'return type is boolean (empty)',     typeof ghostEmpty);
+    addResult(boxes.isEmpty() === (boxes.length === 0),    '.isEmpty() consistent with length===0 (non-empty)', '✓');
+    addResult(phantoms.isEmpty() === (phantoms.length === 0), '.isEmpty() consistent with length===0 (empty)', '✓');
+
+    // ── Live DOM section ──────────────────────────────────────────────────
+    const liveCollection = Collections.ClassName('live-item');
+    let liveCounter = 3;
+
+    function updateLiveStatus() {
+      const empty  = liveCollection.isEmpty();
+      const count  = liveCollection.length;
+      const status = document.getElementById('live-status');
+      const countEl = document.getElementById('live-count');
+
+      status.textContent = 'isEmpty() → ' + empty;
+      status.style.background = empty ? '#fef9c3' : '#dcfce7';
+      status.style.color      = empty ? '#854d0e' : '#15803d';
+      countEl.textContent     = 'length: ' + count;
+    }
+
+    function addLive() {
+      const el = document.createElement('div');
+      el.className = 'card live-item';
+      el.textContent = 'Live ' + liveCounter++;
+      document.getElementById('live-area').appendChild(el);
+      updateLiveStatus();
+    }
+
+    function removeLive() {
+      const area = document.getElementById('live-area');
+      const last = area.querySelector('.live-item:last-child');
+      if (last) area.removeChild(last);
+      updateLiveStatus();
+    }
+
+    updateLiveStatus();
+  </script>
+</body>
+</html>

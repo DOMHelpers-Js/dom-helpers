@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: .forEach()</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
+
+    .controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: #fff; padding: 12px 16px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 14px; }
+    .btn { padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: #fff; }
+    .btn-run { background: #7c3aed; } .btn-run:hover { background: #6d28d9; }
+    .btn-reset { background: #6b7280; } .btn-reset:hover { background: #4b5563; }
+
+    /* ── Step-through animation ── */
+    .collection { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+    .card {
+      width: 120px; padding: 18px 10px; border-radius: 10px;
+      background: #fff; border: 2px solid #dde1e7;
+      text-align: center; font-size: 13px; font-weight: 600; color: #555;
+      transition: all .3s; position: relative;
+    }
+    .card .sub { display: block; font-size: 10px; color: #aaa; font-weight: 400; margin-top: 4px; }
+    .card .iteration-badge {
+      position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+      background: #7c3aed; color: #fff; font-size: 10px; font-weight: 700;
+      padding: 2px 8px; border-radius: 99px; opacity: 0; transition: opacity .2s;
+      white-space: nowrap;
+    }
+    .card.visiting {
+      border-color: #7c3aed; background: #faf5ff; color: #6b21a8;
+      transform: translateY(-6px); box-shadow: 0 8px 20px rgba(124,58,237,.2);
+    }
+    .card.visiting .iteration-badge { opacity: 1; }
+    .card.visited { border-color: #c4b5fd; background: #faf5ff; color: #7c3aed; }
+
+    /* ── Log panel ── */
+    .log {
+      background: #1e1b4b; color: #c4b5fd; font-family: monospace; font-size: 13px;
+      padding: 16px; border-radius: 10px; margin-bottom: 20px; line-height: 1.9;
+      max-height: 160px; overflow-y: auto;
+    }
+    .log .entry { display: block; }
+    .log .active-entry { color: #a5f3fc; }
+
+    /* ── Use-case: number badges ── */
+    .use-collection { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+    .use-card {
+      width: 130px; padding: 16px 10px; border-radius: 10px;
+      background: #fff; border: 2px solid #dde1e7;
+      text-align: center; font-size: 13px; font-weight: 600; color: #555;
+      transition: all .3s;
+    }
+    .use-card .num-badge {
+      display: inline-block; margin-top: 6px;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: #e9d5ff; color: #7c3aed;
+      font-size: 13px; font-weight: 700; line-height: 28px;
+    }
+
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 8px; padding: 10px 14px; border-left: 4px solid #ccc; font-size: 14px; color: #333; }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <h1>Demo — <code>.forEach(callback, thisArg?)</code></h1>
+  <p class="subtitle">Iterates every element in the collection. The step-through animation visits each card one by one — exactly matching the callback execution order.</p>
+
+  <!-- ── Step-through ── -->
+  <h2>Step-through iteration</h2>
+  <div class="controls">
+    <button class="btn btn-run"   onclick="runForEach()">Run .forEach() (animated)</button>
+    <button class="btn btn-reset" onclick="resetCards()">Reset</button>
+  </div>
+
+  <div class="collection" id="card-col">
+    <div class="card fecard" id="fe1"><span class="iteration-badge">index 0</span>Card 1<span class="sub">id: fe1</span></div>
+    <div class="card fecard" id="fe2"><span class="iteration-badge">index 1</span>Card 2<span class="sub">id: fe2</span></div>
+    <div class="card fecard" id="fe3"><span class="iteration-badge">index 2</span>Card 3<span class="sub">id: fe3</span></div>
+    <div class="card fecard" id="fe4"><span class="iteration-badge">index 3</span>Card 4<span class="sub">id: fe4</span></div>
+  </div>
+
+  <div class="log" id="log"><span style="color:#4c1d95;">// log will appear here…</span></div>
+
+  <!-- ── Real use case: stamp each card with its index number ── -->
+  <h2>Use case — stamp each card with its index number</h2>
+  <div class="controls">
+    <button class="btn btn-run" onclick="stampNumbers()">Run .forEach() to stamp numbers</button>
+    <button class="btn btn-reset" onclick="clearStamps()">Clear stamps</button>
+  </div>
+  <div class="use-collection" id="use-col">
+    <div class="use-card usecard" id="uc1">Apple<span class="num-badge" id="nb1"> </span></div>
+    <div class="use-card usecard" id="uc2">Banana<span class="num-badge" id="nb2"> </span></div>
+    <div class="use-card usecard" id="uc3">Cherry<span class="num-badge" id="nb3"> </span></div>
+    <div class="use-card usecard" id="uc4">Durian<span class="num-badge" id="nb4"> </span></div>
+    <div class="use-card usecard" id="uc5">Elderberry<span class="num-badge" id="nb5"> </span></div>
+  </div>
+
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
+  <script>
+    const logEl = document.getElementById('log');
+    const resultsEl = document.getElementById('results');
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML = '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span><strong>' + label + '</strong>' + (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    function runForEach() {
+      resetCards();
+      logEl.innerHTML = '';
+      const col = Collections.ClassName('fecard');
+      const ids = ['fe1','fe2','fe3','fe4'];
+      let i = 0;
+
+      // Animate one card at a time
+      function step() {
+        if (i > 0) {
+          document.getElementById(ids[i-1]).classList.remove('visiting');
+          document.getElementById(ids[i-1]).classList.add('visited');
+        }
+        if (i >= ids.length) return;
+
+        const el = document.getElementById(ids[i]);
+        el.classList.add('visiting');
+
+        const entry = document.createElement('span');
+        entry.className = 'entry active-entry';
+        entry.textContent = 'callback(el, ' + i + ') → #' + ids[i] + ' visited';
+        logEl.appendChild(entry);
+        logEl.scrollTop = logEl.scrollHeight;
+        i++;
+        setTimeout(step, 500);
+      }
+      step();
+    }
+
+    function resetCards() {
+      Collections.ClassName('fecard').forEach(el => el.classList.remove('visiting','visited'));
+      logEl.innerHTML = '<span style="color:#4c1d95;">// log will appear here…</span>';
+    }
+
+    function stampNumbers() {
+      Collections.ClassName('usecard').forEach((el, index) => {
+        el.querySelector('.num-badge').textContent = index + 1;
+        el.querySelector('.num-badge').style.background = '#a855f7';
+        el.querySelector('.num-badge').style.color = '#fff';
+      });
+    }
+    function clearStamps() {
+      Collections.ClassName('usecard').forEach((el, index) => {
+        el.querySelector('.num-badge').textContent = ' ';
+        el.querySelector('.num-badge').style.background = '';
+        el.querySelector('.num-badge').style.color = '';
+      });
+    }
+
+    // ── Automated tests ───────────────────────────────────────────────────
+    const col = Collections.ClassName('fecard');
+    const visitedOrder = [];
+    col.forEach((el, i) => visitedOrder.push({ id: el.id, index: i }));
+
+    addResult(visitedOrder.length === 4, '.forEach() visits all 4 elements', 'visited: ' + visitedOrder.length);
+    addResult(visitedOrder[0].id === 'fe1' && visitedOrder[0].index === 0, 'callback receives (element, index) — first', 'id=fe1, index=0');
+    addResult(visitedOrder[3].id === 'fe4' && visitedOrder[3].index === 3, 'callback receives (element, index) — last',  'id=fe4, index=3');
+    addResult(visitedOrder.map(v=>v.id).join(',') === 'fe1,fe2,fe3,fe4', 'iteration order matches DOM order', visitedOrder.map(v=>v.id).join(','));
+
+    const ret = col.forEach(() => {});
+    addResult(ret === undefined, '.forEach() returns undefined (no chaining)', 'returned: ' + ret);
+
+    // thisArg test
+    const ctx = { prefix: 'item' };
+    const tagged = [];
+    col.forEach(function(el) { tagged.push(this.prefix + '-' + el.id); }, ctx);
+    addResult(tagged[0] === 'item-fe1', '.forEach() passes thisArg correctly', 'tagged[0]: ' + tagged[0]);
+  </script>
+</body>
+</html>

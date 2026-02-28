@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: .setAttribute()</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase;
+         letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
+
+    .controls {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: #fff; padding: 14px 16px; border-radius: 10px;
+      border: 1px solid #e2e8f0; margin-bottom: 16px;
+    }
+    .controls label { font-size: 14px; font-weight: 600; color: #444; white-space: nowrap; }
+    .controls input[type=text] {
+      padding: 6px 10px; border: 1.5px solid #c7d2fe; border-radius: 6px;
+      font-size: 14px; outline: none; font-family: monospace; width: 160px;
+    }
+    .controls input:focus { border-color: #4f46e5; }
+    .btn { padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: #fff; }
+    .btn-set { background: #4f46e5; }
+    .btn-set:hover { background: #4338ca; }
+    .btn-reset { background: #6b7280; }
+    .btn-reset:hover { background: #4b5563; }
+
+    /* ── Section 1: data-* attr cards ── */
+    .collection { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+    .card {
+      width: 150px; padding: 18px 12px; border-radius: 10px;
+      background: #fff; border: 2px solid #dde1e7;
+      text-align: center; font-size: 14px; font-weight: 600; color: #555;
+      transition: border-color .3s, background .3s;
+    }
+    .card .attr-display {
+      margin-top: 8px; font-size: 10px; font-family: monospace;
+      color: #a5b4fc; background: #eef2ff; padding: 3px 6px;
+      border-radius: 4px; word-break: break-all;
+    }
+
+    /* ── Section 2: disabled buttons ── */
+    .btn-demo {
+      padding: 12px 20px; border-radius: 8px; font-size: 14px; font-weight: 600;
+      cursor: pointer; border: 2px solid #4f46e5; background: #eef2ff; color: #4f46e5;
+      transition: all .3s;
+    }
+    .btn-demo[disabled] {
+      background: #f3f4f6; border-color: #d1d5db; color: #9ca3af; cursor: not-allowed;
+    }
+
+    /* ── Section 3: title tooltip ── */
+    .tooltip-card {
+      width: 160px; padding: 16px 12px; border-radius: 10px;
+      background: #fff; border: 2px solid #dde1e7;
+      text-align: center; font-size: 14px; font-weight: 600; color: #555;
+      cursor: default; transition: border-color .3s;
+    }
+    .tooltip-card .tip-display { margin-top: 6px; font-size: 11px; color: #a5b4fc; font-family: monospace; }
+
+    /* Results */
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 8px; padding: 10px 14px; border-left: 4px solid #ccc; font-size: 14px; color: #333; }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+
+  <h1>Demo — <code>.setAttribute(attr, value)</code></h1>
+  <p class="subtitle">Sets an HTML attribute on every element in the collection. The attribute display below each card updates live.</p>
+
+  <!-- ── Section 1: data-* ── -->
+  <h2>Section 1 — set data-status attribute on all cards</h2>
+  <div class="controls">
+    <label>data-status value:</label>
+    <input type="text" id="data-input" value="active" />
+    <button class="btn btn-set"   onclick="runSetDataAttr()">Run .setAttribute('data-status', …)</button>
+    <button class="btn btn-reset" onclick="resetDataAttr()">Reset</button>
+  </div>
+  <div class="collection" id="data-cards">
+    <div class="card attr-card" id="a1">Card 1<div class="attr-display" id="da1">data-status: —</div></div>
+    <div class="card attr-card" id="a2">Card 2<div class="attr-display" id="da2">data-status: —</div></div>
+    <div class="card attr-card" id="a3">Card 3<div class="attr-display" id="da3">data-status: —</div></div>
+  </div>
+
+  <!-- ── Section 2: disabled ── -->
+  <h2>Section 2 — set disabled attribute on buttons</h2>
+  <div class="controls">
+    <button class="btn btn-set"   onclick="runDisable()">Run .setAttribute('disabled', '')</button>
+    <button class="btn btn-reset" onclick="runEnable()">Run removeAttribute (re-enable)</button>
+  </div>
+  <div style="display:flex;gap:12px;margin-bottom:20px;">
+    <button class="btn-demo demobutton" id="db1">Button 1</button>
+    <button class="btn-demo demobutton" id="db2">Button 2</button>
+    <button class="btn-demo demobutton" id="db3">Button 3</button>
+  </div>
+
+  <!-- ── Section 3: title (tooltip) ── -->
+  <h2>Section 3 — set title attribute (tooltip on hover)</h2>
+  <div class="controls">
+    <label>title value:</label>
+    <input type="text" id="title-input" value="I am a tooltip!" />
+    <button class="btn btn-set" onclick="runSetTitle()">Run .setAttribute('title', …)</button>
+  </div>
+  <div style="display:flex;gap:12px;margin-bottom:20px;">
+    <div class="tooltip-card tip-card" id="tp1">Hover me<div class="tip-display" id="tpd1">title: —</div></div>
+    <div class="tooltip-card tip-card" id="tp2">Hover me<div class="tip-display" id="tpd2">title: —</div></div>
+    <div class="tooltip-card tip-card" id="tp3">Hover me<div class="tip-display" id="tpd3">title: —</div></div>
+  </div>
+
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
+  <script>
+    const resultsEl = document.getElementById('results');
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML = '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span>' +
+        '<strong>' + label + '</strong>' +
+        (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    function updateDataLabels() {
+      ['a1','a2','a3'].forEach(id => {
+        const val = document.getElementById(id).getAttribute('data-status');
+        document.getElementById('da' + id.slice(1)).textContent = 'data-status: ' + (val || '—');
+      });
+    }
+
+    function updateTitleLabels() {
+      ['tp1','tp2','tp3'].forEach((id, i) => {
+        const val = document.getElementById(id).getAttribute('title');
+        document.getElementById('tpd' + (i + 1)).textContent = 'title: ' + (val || '—');
+      });
+    }
+
+    function runSetDataAttr() {
+      const val = document.getElementById('data-input').value;
+      Collections.ClassName('attr-card').setAttribute('data-status', val);
+      updateDataLabels();
+    }
+
+    function resetDataAttr() {
+      ['a1','a2','a3'].forEach(id => document.getElementById(id).removeAttribute('data-status'));
+      updateDataLabels();
+    }
+
+    function runDisable() {
+      Collections.ClassName('demobutton').setAttribute('disabled', '');
+    }
+
+    function runEnable() {
+      Collections.ClassName('demobutton').forEach(el => el.removeAttribute('disabled'));
+    }
+
+    function runSetTitle() {
+      const val = document.getElementById('title-input').value;
+      Collections.ClassName('tip-card').setAttribute('title', val);
+      updateTitleLabels();
+    }
+
+    // ── Automated tests ───────────────────────────────────────────────────
+
+    // Test 1: setAttribute sets on all elements
+    Collections.ClassName('attr-card').setAttribute('data-status', 'test-val');
+    const allSet = ['a1','a2','a3'].every(id => document.getElementById(id).getAttribute('data-status') === 'test-val');
+    addResult(allSet, '.setAttribute("data-status", "test-val") — all 3 cards updated', allSet ? '3/3' : 'some missing');
+    ['a1','a2','a3'].forEach(id => document.getElementById(id).removeAttribute('data-status'));
+
+    // Test 2: overwrites existing attribute value
+    const el = document.getElementById('a1');
+    el.setAttribute('data-status', 'old');
+    Collections.ClassName('attr-card').setAttribute('data-status', 'new');
+    addResult(el.getAttribute('data-status') === 'new', '.setAttribute() overwrites existing attribute', 'old → new');
+    ['a1','a2','a3'].forEach(id => document.getElementById(id).removeAttribute('data-status'));
+
+    // Test 3: disabled attribute disables all buttons
+    Collections.ClassName('demobutton').setAttribute('disabled', '');
+    const allDisabled = ['db1','db2','db3'].every(id => document.getElementById(id).hasAttribute('disabled'));
+    addResult(allDisabled, '.setAttribute("disabled", "") — all buttons disabled', allDisabled ? '3/3' : 'some not disabled');
+    Collections.ClassName('demobutton').forEach(el => el.removeAttribute('disabled'));
+
+    // Test 4: chainable
+    const returned = Collections.ClassName('attr-card').setAttribute('data-test', 'chain');
+    addResult(returned !== null && returned !== undefined, '.setAttribute() returns collection (chainable)', '');
+    ['a1','a2','a3'].forEach(id => document.getElementById(id).removeAttribute('data-test'));
+
+    updateDataLabels();
+    updateTitleLabels();
+  </script>
+</body>
+</html>

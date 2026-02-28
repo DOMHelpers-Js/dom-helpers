@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: .toggleClass()</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase;
+         letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
+
+    .controls {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: #fff; padding: 14px 16px; border-radius: 10px;
+      border: 1px solid #e2e8f0; margin-bottom: 16px;
+    }
+    .controls label { font-size: 14px; font-weight: 600; color: #444; }
+    .btn { padding: 7px 18px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; color: #fff; }
+    .btn-toggle { background: #7c3aed; }
+    .btn-toggle:hover { background: #6d28d9; }
+    #toggle-counter { font-size: 13px; color: #7c3aed; font-weight: 600; }
+
+    /* ── Cards ── */
+    .collection { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+    .card {
+      width: 130px; padding: 20px 12px; border-radius: 10px;
+      background: #fff; border: 2px solid #dde1e7;
+      text-align: center; font-size: 14px; font-weight: 600; color: #555;
+      transition: all .3s ease;
+      cursor: default; user-select: none;
+    }
+    .card .state-label {
+      margin-top: 8px; font-size: 11px; font-family: monospace;
+      color: #aaa; font-weight: 400;
+    }
+
+    /* ON state */
+    .card.active {
+      background: #ede9fe; border-color: #7c3aed; color: #5b21b6;
+      transform: translateY(-4px);
+      box-shadow: 0 6px 18px rgba(124,58,237,.2);
+    }
+    .card.active .state-label { color: #7c3aed; }
+
+    /* ── Mixed state display ── */
+    .mixed-card.active  { background: #ede9fe; border-color: #7c3aed; color: #5b21b6; }
+    .mixed-card:not(.active) { background: #fff3f3; border-color: #fca5a5; color: #b91c1c; }
+
+    /* Results */
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 8px; padding: 10px 14px; border-left: 4px solid #ccc; font-size: 14px; color: #333; }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+
+  <h1>Demo — <code>.toggleClass(className)</code></h1>
+  <p class="subtitle">Toggles a CSS class on every element — adds it if absent, removes it if present. Click the button repeatedly to watch all cards flip together.</p>
+
+  <h2>Test 1 — All cards start without class (all toggle ON together)</h2>
+  <div class="controls">
+    <button class="btn btn-toggle" onclick="doToggle()">Toggle .active on all</button>
+    <span id="toggle-counter">clicked: 0</span>
+  </div>
+  <div class="collection" id="toggle-group">
+    <div class="card tog" id="t1">Card 1<div class="state-label" id="st1">OFF</div></div>
+    <div class="card tog" id="t2">Card 2<div class="state-label" id="st2">OFF</div></div>
+    <div class="card tog" id="t3">Card 3<div class="state-label" id="st3">OFF</div></div>
+    <div class="card tog" id="t4">Card 4<div class="state-label" id="st4">OFF</div></div>
+  </div>
+
+  <h2>Test 2 — Mixed initial state (some ON, some OFF)</h2>
+  <p style="font-size:13px;color:#888;margin-bottom:12px;">Cards 1 & 3 start with <code>.active</code>. After one toggle, all should flip.</p>
+  <div class="collection" id="mixed-group">
+    <div class="card mixed-card" id="m1">Card 1<div class="state-label">active</div></div>
+    <div class="card mixed-card active" id="m2">Card 2<div class="state-label">active</div></div>
+    <div class="card mixed-card" id="m3">Card 3<div class="state-label">active</div></div>
+    <div class="card mixed-card active" id="m4">Card 4<div class="state-label">active</div></div>
+  </div>
+  <div class="controls" style="margin-top:0;">
+    <button class="btn btn-toggle" onclick="doMixedToggle()">Toggle .active on mixed group</button>
+  </div>
+
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
+  <script>
+    const resultsEl = document.getElementById('results');
+    let clickCount = 0;
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML = '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span>' +
+        '<strong>' + label + '</strong>' +
+        (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    function updateStateLabels() {
+      ['t1','t2','t3','t4'].forEach(id => {
+        const el = document.getElementById(id);
+        document.getElementById('st' + id.slice(1)).textContent =
+          el.classList.contains('active') ? 'ON' : 'OFF';
+      });
+    }
+
+    function doToggle() {
+      Collections.ClassName('tog').toggleClass('active');
+      clickCount++;
+      document.getElementById('toggle-counter').textContent = 'clicked: ' + clickCount;
+      updateStateLabels();
+    }
+
+    function doMixedToggle() {
+      Collections.ClassName('mixed-card').toggleClass('active');
+      // update labels
+      document.querySelectorAll('.mixed-card').forEach(el => {
+        el.querySelector('.state-label').textContent =
+          el.classList.contains('active') ? 'active' : '(removed)';
+      });
+    }
+
+    // ── Automated tests ───────────────────────────────────────────────────
+    const ids = ['t1','t2','t3','t4'];
+
+    // Test 1: toggleClass adds class when absent
+    Collections.ClassName('tog').toggleClass('test-toggle');
+    const allAdded = ids.every(id => document.getElementById(id).classList.contains('test-toggle'));
+    addResult(allAdded, '.toggleClass() adds class to all when absent', allAdded ? '4/4 received class' : 'some missing');
+
+    // Test 2: toggleClass removes class when present
+    Collections.ClassName('tog').toggleClass('test-toggle');
+    const allRemoved = ids.every(id => !document.getElementById(id).classList.contains('test-toggle'));
+    addResult(allRemoved, '.toggleClass() removes class from all when present', allRemoved ? '4/4 class removed' : 'some still have class');
+
+    // Test 3: two toggles = back to original
+    Collections.ClassName('tog').toggleClass('round-trip');
+    Collections.ClassName('tog').toggleClass('round-trip');
+    const backToOriginal = ids.every(id => !document.getElementById(id).classList.contains('round-trip'));
+    addResult(backToOriginal, 'two .toggleClass() calls = original state (round-trip)', '');
+
+    // Test 4: returns collection (chainable)
+    const col = Collections.ClassName('tog');
+    const returned = col.toggleClass('chain-cls');
+    addResult(returned !== null && returned !== undefined, '.toggleClass() returns collection (chainable)', '');
+    col.toggleClass('chain-cls'); // restore
+
+    // Test 5: mixed state — each element independent
+    // m2 and m4 have .active, m1 and m3 don't
+    const mixedBefore = {
+      m1: document.getElementById('m1').classList.contains('active'), // false
+      m2: document.getElementById('m2').classList.contains('active'), // true
+    };
+    Collections.ClassName('mixed-card').toggleClass('active');
+    const m1After = document.getElementById('m1').classList.contains('active');
+    const m2After = document.getElementById('m2').classList.contains('active');
+    addResult(!mixedBefore.m1 && m1After, '.toggleClass() adds to elements that lacked the class', 'm1: false → true');
+    addResult(mixedBefore.m2 && !m2After,  '.toggleClass() removes from elements that had the class', 'm2: true → false');
+    // restore
+    Collections.ClassName('mixed-card').toggleClass('active');
+
+    updateStateLabels();
+  </script>
+</body>
+</html>

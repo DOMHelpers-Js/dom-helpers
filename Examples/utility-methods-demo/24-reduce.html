@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: .reduce()</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
+
+    /* ── Cart items ── */
+    .cart { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+    .cart-item {
+      display: flex; align-items: center; gap: 14px; background: #fff;
+      border-radius: 10px; padding: 12px 16px; border: 2px solid #dde1e7;
+      transition: border-color .25s;
+    }
+    .cart-item .name { flex: 1; font-size: 14px; font-weight: 600; color: #374151; }
+    .cart-item .qty-ctrl { display: flex; align-items: center; gap: 6px; }
+    .cart-item .qty-ctrl button {
+      width: 28px; height: 28px; border: 1.5px solid #dde1e7; border-radius: 6px;
+      background: #f9fafb; font-size: 16px; cursor: pointer; font-weight: 700; line-height: 1;
+      transition: background .15s;
+    }
+    .cart-item .qty-ctrl button:hover { background: #e0e7ff; }
+    .cart-item .qty { width: 28px; text-align: center; font-weight: 700; font-size: 14px; }
+    .cart-item .unit-price { font-size: 13px; color: #888; font-family: monospace; }
+    .cart-item .line-total { font-size: 14px; font-weight: 700; color: #4f46e5; min-width: 60px; text-align: right; font-family: monospace; }
+
+    /* ── Summary box ── */
+    .summary {
+      background: #fff; border-radius: 12px; padding: 18px 20px;
+      border: 2px solid #c7d2fe; margin-bottom: 24px;
+    }
+    .summary-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 6px 0; border-bottom: 1px solid #f3f4f6;
+      font-size: 14px; color: #555;
+    }
+    .summary-row:last-child { border: none; }
+    .summary-row .label { font-family: monospace; font-size: 12px; color: #818cf8; }
+    .summary-row .val { font-weight: 700; font-size: 16px; color: #1a1a2e; font-family: monospace; }
+    .summary-row.total-row { font-size: 16px; font-weight: 700; }
+    .summary-row.total-row .val { font-size: 22px; color: #4f46e5; }
+
+    /* ── Preset examples ── */
+    .example-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; margin-bottom: 20px; }
+    .example-card {
+      background: #fff; border-radius: 10px; padding: 14px 16px;
+      border: 1.5px solid #e2e8f0; font-size: 13px;
+    }
+    .example-card code { display: block; font-size: 11px; background: #f1f5f9; padding: 6px 8px; border-radius: 6px; margin-bottom: 8px; white-space: pre; line-height: 1.6; }
+    .example-card .ex-result { font-weight: 700; color: #4f46e5; font-family: monospace; font-size: 14px; }
+
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 8px; padding: 10px 14px; border-left: 4px solid #ccc; font-size: 14px; color: #333; }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <h1>Demo — <code>.reduce(callback, initialValue)</code></h1>
+  <p class="subtitle">Accumulates a single value from all elements. Classic use-case: a live shopping cart — total price recalculates via <code>.reduce()</code> every time a quantity changes.</p>
+
+  <!-- ── Shopping cart ── -->
+  <h2>Live shopping cart — total calculated with .reduce()</h2>
+  <div class="cart" id="cart">
+    <div class="cart-item rcard" id="r1" data-price="12">
+      <span class="name">Apple</span>
+      <div class="qty-ctrl"><button onclick="changeQty('r1',-1)">−</button><span class="qty" id="qty-r1">2</span><button onclick="changeQty('r1',1)">+</button></div>
+      <span class="unit-price">$12 each</span>
+      <span class="line-total" id="lt-r1">$24</span>
+    </div>
+    <div class="cart-item rcard" id="r2" data-price="8">
+      <span class="name">Banana</span>
+      <div class="qty-ctrl"><button onclick="changeQty('r2',-1)">−</button><span class="qty" id="qty-r2">3</span><button onclick="changeQty('r2',1)">+</button></div>
+      <span class="unit-price">$8 each</span>
+      <span class="line-total" id="lt-r2">$24</span>
+    </div>
+    <div class="cart-item rcard" id="r3" data-price="30">
+      <span class="name">Cherry</span>
+      <div class="qty-ctrl"><button onclick="changeQty('r3',-1)">−</button><span class="qty" id="qty-r3">1</span><button onclick="changeQty('r3',1)">+</button></div>
+      <span class="unit-price">$30 each</span>
+      <span class="line-total" id="lt-r3">$30</span>
+    </div>
+    <div class="cart-item rcard" id="r4" data-price="5">
+      <span class="name">Dates</span>
+      <div class="qty-ctrl"><button onclick="changeQty('r4',-1)">−</button><span class="qty" id="qty-r4">4</span><button onclick="changeQty('r4',1)">+</button></div>
+      <span class="unit-price">$5 each</span>
+      <span class="line-total" id="lt-r4">$20</span>
+    </div>
+  </div>
+
+  <div class="summary" id="summary">
+    <div class="summary-row">
+      <span class="label">.reduce(sum of items)</span>
+      <span class="val" id="sum-items">—</span>
+    </div>
+    <div class="summary-row">
+      <span class="label">.reduce(total units)</span>
+      <span class="val" id="sum-qty">—</span>
+    </div>
+    <div class="summary-row">
+      <span class="label">.reduce(most expensive)</span>
+      <span class="val" id="max-price">—</span>
+    </div>
+    <div class="summary-row total-row">
+      <span>TOTAL</span>
+      <span class="val" id="grand-total">—</span>
+    </div>
+  </div>
+
+  <!-- ── Other use-cases ── -->
+  <h2>Other reduce patterns (static examples)</h2>
+  <div class="example-grid" id="example-grid"></div>
+
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
+  <script>
+    const resultsEl = document.getElementById('results');
+    const qtys = { r1: 2, r2: 3, r3: 1, r4: 4 };
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML = '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span><strong>' + label + '</strong>' + (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    function recalculate() {
+      const items = Collections.ClassName('rcard');
+
+      // Update line totals display
+      items.forEach(el => {
+        const qty   = qtys[el.id];
+        const price = +el.dataset.price;
+        document.getElementById('lt-' + el.id).textContent = '$' + (qty * price);
+      });
+
+      // ── .reduce() calls ──────────────────────────────────────────────
+      const total = items.reduce((acc, el) => {
+        return acc + qtys[el.id] * +el.dataset.price;
+      }, 0);
+
+      const totalQty = items.reduce((acc, el) => acc + qtys[el.id], 0);
+
+      const maxItem = items.reduce((best, el) => {
+        return +el.dataset.price > +best.dataset.price ? el : best;
+      });
+
+      const itemCount = items.reduce((acc) => acc + 1, 0);
+
+      document.getElementById('grand-total').textContent  = '$' + total;
+      document.getElementById('sum-items').textContent    = itemCount + ' items';
+      document.getElementById('sum-qty').textContent      = totalQty + ' units';
+      document.getElementById('max-price').textContent    = maxItem.querySelector('.name').textContent + ' ($' + maxItem.dataset.price + ')';
+    }
+
+    function changeQty(id, delta) {
+      qtys[id] = Math.max(0, qtys[id] + delta);
+      document.getElementById('qty-' + id).textContent = qtys[id];
+      recalculate();
+    }
+
+    recalculate();
+
+    // ── Other patterns ────────────────────────────────────────────────────
+    function exampleCard(title, code, result) {
+      const d = document.createElement('div');
+      d.className = 'example-card';
+      d.innerHTML = '<strong style="font-size:12px;color:#555;">' + title + '</strong>' +
+        '<code>' + code + '</code>' +
+        '<div class="ex-result">' + result + '</div>';
+      document.getElementById('example-grid').appendChild(d);
+    }
+
+    const items = Collections.ClassName('rcard');
+    const ids   = items.reduce((acc, el) => [...acc, el.id], []);
+    exampleCard('Collect IDs', 'reduce((acc,el)=>[...acc,el.id],[])', JSON.stringify(ids));
+
+    const byId  = items.reduce((map, el) => { map[el.id] = +el.dataset.price; return map; }, {});
+    exampleCard('Build price map', 'reduce((map,el)=>..., {})', JSON.stringify(byId));
+
+    const maxP  = items.reduce((m, el) => Math.max(m, +el.dataset.price), 0);
+    exampleCard('Max price', 'reduce((m,el)=>Math.max(m,price), 0)', '$' + maxP);
+
+    const prices = items.reduce((acc, el) => [...acc, +el.dataset.price], []);
+    exampleCard('Price array', 'reduce((acc,el)=>[...acc,price],[])', JSON.stringify(prices));
+
+    // ── Automated tests ───────────────────────────────────────────────────
+    const sum = items.reduce((acc, el) => acc + +el.dataset.price, 0);
+    addResult(typeof sum === 'number',     '.reduce() returns correct type (number)',      'type: number');
+    addResult(sum === 55,                  '.reduce() sum of prices correct',              '12+8+30+5 = ' + sum);
+
+    const countResult = items.reduce((acc) => acc + 1, 0);
+    addResult(countResult === 4,           '.reduce() count with initialValue=0',           'counted: ' + countResult);
+
+    // No initialValue (uses first element as accumulator)
+    const maxEl = items.reduce((best, el) => +el.dataset.price > +best.dataset.price ? el : best);
+    addResult(maxEl && maxEl.id === 'r3',  '.reduce() without initialValue — finds max price element', '#' + maxEl?.id + ' ($30)');
+
+    const mapResult = items.reduce((acc, el) => { acc[el.id] = +el.dataset.price; return acc; }, {});
+    addResult(mapResult['r1'] === 12 && mapResult['r3'] === 30, '.reduce() can build an object accumulator', JSON.stringify(mapResult));
+
+    // Empty collection
+    const emptySum = Collections.ClassName('nope').reduce((acc) => acc + 1, 0);
+    addResult(emptySum === 0,              '.reduce() on empty collection returns initialValue', 'returned: ' + emptySum);
+  </script>
+</body>
+</html>

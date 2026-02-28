@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: .setProperty()</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase;
+         letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
+
+    .controls {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: #fff; padding: 14px 16px; border-radius: 10px;
+      border: 1px solid #e2e8f0; margin-bottom: 16px;
+    }
+    .controls label { font-size: 14px; font-weight: 600; color: #444; white-space: nowrap; }
+    .controls input[type=text] {
+      padding: 6px 10px; border: 1.5px solid #fed7aa; border-radius: 6px;
+      font-size: 14px; outline: none; font-family: monospace; width: 180px;
+    }
+    .controls input:focus { border-color: #ea580c; }
+    .btn { padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: #fff; }
+    .btn-set { background: #ea580c; }
+    .btn-set:hover { background: #c2410c; }
+    .btn-reset { background: #6b7280; }
+    .btn-reset:hover { background: #4b5563; }
+
+    /* ── Cards ── */
+    .collection { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+    .card {
+      width: 140px; padding: 20px 12px; border-radius: 10px;
+      background: #fff; border: 2px solid #dde1e7;
+      text-align: center; font-size: 14px; font-weight: 600; color: #555;
+      transition: all .3s ease;
+    }
+    .card .prop-val { margin-top: 8px; font-size: 11px; font-family: monospace; color: #aaa; }
+
+    /* Results */
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 8px; padding: 10px 14px; border-left: 4px solid #ccc; font-size: 14px; color: #333; }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+
+    /* Inputs used for value/placeholder tests */
+    .input-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+    .demo-input {
+      padding: 10px 14px; border: 2px solid #dde1e7; border-radius: 10px;
+      font-size: 14px; font-family: monospace; width: 180px; outline: none;
+      transition: border-color .3s;
+    }
+    .demo-input:focus { border-color: #ea580c; }
+  </style>
+</head>
+<body>
+
+  <h1>Demo — <code>.setProperty(prop, value)</code></h1>
+  <p class="subtitle">Sets a DOM property (e.g. <code>textContent</code>, <code>value</code>, <code>hidden</code>) on every element in the collection. Changes appear immediately on the page.</p>
+
+  <!-- ── Section 1: textContent ── -->
+  <h2>Section 1 — set textContent on all cards</h2>
+  <div class="controls">
+    <label>New text:</label>
+    <input type="text" id="text-input" value="Updated!" />
+    <button class="btn btn-set"   onclick="runSetText()">Run .setProperty('textContent', …)</button>
+    <button class="btn btn-reset" onclick="resetText()">Reset</button>
+  </div>
+  <div class="collection" id="text-cards">
+    <div class="card text-card" id="tc1">Card 1<div class="prop-val">textContent</div></div>
+    <div class="card text-card" id="tc2">Card 2<div class="prop-val">textContent</div></div>
+    <div class="card text-card" id="tc3">Card 3<div class="prop-val">textContent</div></div>
+  </div>
+
+  <!-- ── Section 2: value on inputs ── -->
+  <h2>Section 2 — set value on all inputs</h2>
+  <div class="controls">
+    <label>New value:</label>
+    <input type="text" id="value-input" value="Hello, World!" />
+    <button class="btn btn-set"   onclick="runSetValue()">Run .setProperty('value', …)</button>
+    <button class="btn btn-reset" onclick="resetInputs()">Reset</button>
+  </div>
+  <div class="input-row">
+    <input class="demo-input field" type="text" id="f1" value="Field 1" placeholder="Field 1" />
+    <input class="demo-input field" type="text" id="f2" value="Field 2" placeholder="Field 2" />
+    <input class="demo-input field" type="text" id="f3" value="Field 3" placeholder="Field 3" />
+  </div>
+
+  <!-- ── Section 3: hidden ── -->
+  <h2>Section 3 — set hidden property</h2>
+  <div class="controls">
+    <button class="btn btn-set"   onclick="runHide()">Run .setProperty('hidden', true)</button>
+    <button class="btn btn-reset" onclick="runShow()">Run .setProperty('hidden', false)</button>
+  </div>
+  <div class="collection" id="hide-cards">
+    <div class="card hide-card" id="h1">Card 1</div>
+    <div class="card hide-card" id="h2">Card 2</div>
+    <div class="card hide-card" id="h3">Card 3</div>
+  </div>
+
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
+  <script>
+    const resultsEl = document.getElementById('results');
+    const origTexts = { tc1: 'Card 1', tc2: 'Card 2', tc3: 'Card 3' };
+    const origValues = { f1: 'Field 1', f2: 'Field 2', f3: 'Field 3' };
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML = '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span>' +
+        '<strong>' + label + '</strong>' +
+        (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    function runSetText() {
+      const val = document.getElementById('text-input').value;
+      Collections.ClassName('text-card').setProperty('textContent', val);
+    }
+
+    function resetText() {
+      ['tc1','tc2','tc3'].forEach(id => {
+        document.getElementById(id).textContent = origTexts[id];
+      });
+    }
+
+    function runSetValue() {
+      const val = document.getElementById('value-input').value;
+      Collections.ClassName('field').setProperty('value', val);
+    }
+
+    function resetInputs() {
+      ['f1','f2','f3'].forEach(id => {
+        document.getElementById(id).value = origValues[id];
+      });
+    }
+
+    function runHide()  { Collections.ClassName('hide-card').setProperty('hidden', true);  }
+    function runShow()  { Collections.ClassName('hide-card').setProperty('hidden', false); }
+
+    // ── Automated tests ───────────────────────────────────────────────────
+
+    // Test 1: textContent set on all
+    Collections.ClassName('text-card').setProperty('textContent', 'SET!');
+    const allTextSet = ['tc1','tc2','tc3'].every(id => document.getElementById(id).textContent === 'SET!');
+    addResult(allTextSet, '.setProperty("textContent", "SET!") — updates all cards', allTextSet ? '3/3 updated' : 'some not updated');
+    resetText();
+
+    // Test 2: value set on all inputs
+    Collections.ClassName('field').setProperty('value', 'test-val');
+    const allValueSet = ['f1','f2','f3'].every(id => document.getElementById(id).value === 'test-val');
+    addResult(allValueSet, '.setProperty("value", "test-val") — updates all inputs', allValueSet ? '3/3 updated' : 'some not updated');
+    resetInputs();
+
+    // Test 3: hidden
+    Collections.ClassName('hide-card').setProperty('hidden', true);
+    const allHidden = ['h1','h2','h3'].every(id => document.getElementById(id).hidden === true);
+    addResult(allHidden, '.setProperty("hidden", true) — hides all elements', allHidden ? '3/3 hidden' : 'some not hidden');
+    Collections.ClassName('hide-card').setProperty('hidden', false);
+
+    // Test 4: chainable
+    const returned = Collections.ClassName('text-card').setProperty('textContent', 'chain');
+    addResult(returned !== null && returned !== undefined, '.setProperty() returns collection (chainable)', '');
+    resetText();
+  </script>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: .item(index)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase;
+         letter-spacing: .6px; margin-bottom: 10px; }
+
+    /* ── Controls ── */
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      background: #fff;
+      padding: 14px 16px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      flex-wrap: wrap;
+    }
+    .controls label { font-size: 14px; font-weight: 600; color: #444; }
+    .controls input[type=number] {
+      width: 80px;
+      padding: 6px 10px;
+      border: 1.5px solid #bfdbfe;
+      border-radius: 6px;
+      font-size: 14px;
+      text-align: center;
+      outline: none;
+    }
+    .controls input[type=number]:focus { border-color: #3b82f6; }
+    .controls button {
+      padding: 7px 18px;
+      background: #3b82f6;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .controls button:hover { background: #2563eb; }
+    #item-result-label { font-size: 13px; font-weight: 600; color: #3b82f6; }
+
+    .note {
+      font-size: 12px;
+      color: #888;
+      background: #fff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border-left: 3px solid #fbbf24;
+      margin-bottom: 16px;
+    }
+
+    /* ── Collection ── */
+    .collection {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+    .card {
+      width: 100px;
+      padding: 16px 10px;
+      border-radius: 10px;
+      background: #fff;
+      border: 2px solid #dde1e7;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: #555;
+      transition: border-color .2s, background .2s, transform .2s, opacity .2s;
+    }
+    .card .idx  { font-size: 11px; color: #aaa; font-weight: 400; display: block; margin-bottom: 4px; }
+    .card .tag  { font-size: 10px; font-weight: 700; color: #3b82f6; display: block; margin-top: 5px; opacity: 0; transition: opacity .2s; }
+    .card.highlighted {
+      border-color: #3b82f6;
+      background: #eff6ff;
+      color: #1d4ed8;
+      transform: translateY(-5px);
+      box-shadow: 0 6px 20px rgba(59,130,246,.2);
+    }
+    .card.highlighted .tag { opacity: 1; }
+    .card.dimmed { opacity: .35; }
+
+    /* ── Results ── */
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #fff;
+      border-radius: 8px;
+      padding: 10px 14px;
+      border-left: 4px solid #ccc;
+      font-size: 14px;
+      color: #333;
+    }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+
+  <h1>Demo — <code>.item(index)</code></h1>
+  <p class="subtitle">Standard <code>HTMLCollection.item()</code> interface — positive indexes only. Highlighted card = element returned.</p>
+
+  <div class="note">
+    ⚠️ <strong>.item()</strong> does <em>not</em> support negative indexes (unlike <code>.at()</code>).
+    Negative values return <code>null</code> per the HTML spec.
+  </div>
+
+  <!-- ── Interactive ── -->
+  <h2>Interactive — try an index</h2>
+  <div class="controls">
+    <label for="item-input">Index:</label>
+    <input type="number" id="item-input" value="0" min="0" />
+    <button onclick="runItem()">Run .item()</button>
+    <span id="item-result-label"></span>
+  </div>
+
+  <div class="collection" id="tiles-collection">
+    <div class="card tile" id="tile-0"><span class="idx">[0]</span>Tile 0<span class="tag"></span></div>
+    <div class="card tile" id="tile-1"><span class="idx">[1]</span>Tile 1<span class="tag"></span></div>
+    <div class="card tile" id="tile-2"><span class="idx">[2]</span>Tile 2<span class="tag"></span></div>
+    <div class="card tile" id="tile-3"><span class="idx">[3]</span>Tile 3<span class="tag"></span></div>
+  </div>
+
+  <!-- ── Automated tests ── -->
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
+  <script>
+    const resultsEl = document.getElementById('results');
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML =
+        '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span>' +
+        '<strong>' + label + '</strong>' +
+        (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    const tiles = Collections.ClassName('tile');
+
+    // ── Interactive handler ────────────────────────────────────────────────
+    function runItem() {
+      const idx = parseInt(document.getElementById('item-input').value);
+      const label = document.getElementById('item-result-label');
+
+      tiles.forEach(el => {
+        el.classList.remove('highlighted', 'dimmed');
+        el.querySelector('.tag').textContent = '';
+      });
+
+      const found = tiles.item(idx);
+
+      if (found) {
+        tiles.forEach(el => el.classList.add('dimmed'));
+        found.classList.remove('dimmed');
+        found.classList.add('highlighted');
+        found.querySelector('.tag').textContent = '.item(' + idx + ')';
+        label.textContent = '→ returned #' + found.id;
+        label.style.color = '#3b82f6';
+      } else {
+        label.textContent = '→ returned null (out of range or negative)';
+        label.style.color = '#dc2626';
+      }
+    }
+
+    runItem(); // show item(0) on load
+
+    // ── Automated tests ───────────────────────────────────────────────────
+    const tests = [
+      { index: 0, expectedId: 'tile-0', label: '.item(0) — first element'  },
+      { index: 1, expectedId: 'tile-1', label: '.item(1) — second element' },
+      { index: 3, expectedId: 'tile-3', label: '.item(3) — last element'   },
+      { index: 99, expectedId: null,    label: '.item(99) — out of range → null' },
+      { index: -1, expectedId: null,    label: '.item(-1) — negative not supported → null (use .at(-1) instead)' },
+    ];
+
+    tests.forEach(({ index, expectedId, label }) => {
+      const el = tiles.item(index);
+      const pass = expectedId === null ? (el === null || el === undefined) : (el !== null && el.id === expectedId);
+      addResult(pass, label, el ? 'returned #' + el.id : 'returned null');
+    });
+
+    // item(i) === tiles[i] for all valid indices
+    let bracketMatch = true;
+    for (let i = 0; i < tiles.length; i++) {
+      if (tiles.item(i) !== tiles[i]) { bracketMatch = false; break; }
+    }
+    addResult(bracketMatch, '.item(i) === [i] for all valid indices', 'consistent access ✓');
+
+    // item(0) === first()
+    addResult(tiles.item(0) === tiles.first(), '.item(0) === .first()', 'same element reference');
+
+    // Empty collection
+    const empty = Collections.ClassName('no-tiles');
+    addResult(empty.item(0) === null || empty.item(0) === undefined, '.item(0) on empty collection → null', '');
+  </script>
+</body>
+</html>

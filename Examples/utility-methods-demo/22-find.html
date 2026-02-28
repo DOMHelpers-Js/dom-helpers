@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: .find()</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
+    p.desc { font-size: 13px; color: #666; margin-bottom: 12px; }
+
+    .controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: #fff; padding: 12px 16px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 14px; }
+    .controls label { font-size: 13px; font-weight: 600; color: #444; }
+    .controls input[type=text], .controls input[type=number], .controls select {
+      padding: 6px 10px; border: 1.5px solid #fde68a; border-radius: 6px; font-size: 13px;
+      outline: none; font-family: monospace; width: 130px;
+    }
+    .controls input:focus, .controls select:focus { border-color: #d97706; }
+    .btn { padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: #fff; }
+    .btn-run { background: #d97706; } .btn-run:hover { background: #b45309; }
+    .btn-reset { background: #6b7280; } .btn-reset:hover { background: #4b5563; }
+
+    /* ── User cards ── */
+    .user-grid { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+    .user-card {
+      width: 150px; padding: 16px 12px; border-radius: 12px; background: #fff;
+      border: 2px solid #dde1e7; text-align: center; font-size: 13px; font-weight: 600;
+      color: #555; transition: all .3s;
+    }
+    .user-card .role  { font-size: 10px; color: #aaa; font-family: monospace; margin-top: 4px; }
+    .user-card .score { font-size: 12px; font-weight: 700; color: #d97706; margin-top: 4px; }
+
+    .user-card.found {
+      border-color: #d97706; background: #fffbeb; color: #92400e;
+      transform: translateY(-5px); box-shadow: 0 6px 18px rgba(217,119,6,.2);
+    }
+    .user-card.found::after { content: '← .find()'; display: block; font-size: 10px; font-weight: 700; color: #d97706; margin-top: 5px; }
+    .user-card.scanned { border-color: #c4b5fd; background: #faf5ff; } /* checked but not matched */
+    .user-card.skipped { opacity: .3; } /* never reached (find stops early) */
+
+    /* ── Find result ── */
+    .find-result {
+      background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 8px;
+      padding: 12px 16px; font-family: monospace; font-size: 13px; color: #92400e;
+      margin-bottom: 20px;
+    }
+
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 8px; padding: 10px 14px; border-left: 4px solid #ccc; font-size: 14px; color: #333; }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <h1>Demo — <code>.find(callback, thisArg?)</code></h1>
+  <p class="subtitle">Returns the <strong>first</strong> element for which the callback returns <code>true</code>, then stops. Returns <code>undefined</code> if nothing matches. Purple = scanned, amber = found, faded = never reached.</p>
+
+  <!-- ── User cards ── -->
+  <h2>Find a user by attribute</h2>
+  <p class="desc">Cards that get checked are scanned (purple tint). The first match stops the search — cards after it are never visited (faded).</p>
+
+  <div class="controls">
+    <label>Find by:</label>
+    <select id="find-by">
+      <option value="role">role</option>
+      <option value="score">score ≥</option>
+      <option value="id">id</option>
+    </select>
+    <input type="text" id="find-value" value="admin" placeholder="value" />
+    <button class="btn btn-run" onclick="runFind()">Run .find()</button>
+    <button class="btn btn-reset" onclick="resetCards()">Reset</button>
+  </div>
+
+  <div class="user-grid" id="user-grid">
+    <div class="user-card ucard" id="u1" data-role="viewer" data-score="40">Alice<div class="role">viewer</div><div class="score">score: 40</div></div>
+    <div class="user-card ucard" id="u2" data-role="editor" data-score="70">Bob<div class="role">editor</div><div class="score">score: 70</div></div>
+    <div class="user-card ucard" id="u3" data-role="admin"  data-score="90">Carol<div class="role">admin</div><div class="score">score: 90</div></div>
+    <div class="user-card ucard" id="u4" data-role="admin"  data-score="85">Dave<div class="role">admin</div><div class="score">score: 85</div></div>
+    <div class="user-card ucard" id="u5" data-role="viewer" data-score="55">Eve<div class="role">viewer</div><div class="score">score: 55</div></div>
+  </div>
+
+  <div class="find-result" id="find-result" style="display:none;"></div>
+
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
+  <script>
+    const resultsEl = document.getElementById('results');
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML = '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span><strong>' + label + '</strong>' + (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    const col = Collections.ClassName('ucard');
+
+    function runFind() {
+      resetCards();
+      const by  = document.getElementById('find-by').value;
+      const val = document.getElementById('find-value').value.trim();
+      const ids = ['u1','u2','u3','u4','u5'];
+
+      let foundIdx = -1;
+      let found;
+
+      if (by === 'role') {
+        found = col.find(el => el.dataset.role === val);
+      } else if (by === 'score') {
+        found = col.find(el => +el.dataset.score >= +val);
+      } else {
+        found = col.find(el => el.id === val);
+      }
+
+      // Mark scanned, found, skipped
+      let reachedFound = false;
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (found && el === found) {
+          el.classList.add('found');
+          foundIdx = ids.indexOf(id);
+          reachedFound = true;
+          return;
+        }
+        if (!reachedFound) el.classList.add('scanned');
+        else               el.classList.add('skipped');
+      });
+
+      const resultEl = document.getElementById('find-result');
+      resultEl.style.display = 'block';
+      if (found) {
+        resultEl.textContent = '.find() → #' + found.id + ' (role: ' + found.dataset.role + ', score: ' + found.dataset.score + ')  — stopped after index ' + foundIdx;
+      } else {
+        resultEl.textContent = '.find() → undefined  — no element matched "' + val + '"';
+        resultEl.style.background = '#fff5f5';
+        resultEl.style.borderColor = '#fca5a5';
+        resultEl.style.color = '#b91c1c';
+      }
+    }
+
+    function resetCards() {
+      col.forEach(el => el.classList.remove('found','scanned','skipped'));
+      const r = document.getElementById('find-result');
+      r.style.display = 'none';
+      r.style.background = '';
+      r.style.borderColor = '';
+      r.style.color = '';
+    }
+
+    // ── Automated tests ───────────────────────────────────────────────────
+
+    // Returns first match
+    const admin = col.find(el => el.dataset.role === 'admin');
+    addResult(admin !== undefined,          '.find() returns element when found',          'found: #' + (admin?.id));
+    addResult(admin && admin.id === 'u3',   '.find() returns FIRST match (not all)',       'u3 is first admin, u4 is second');
+
+    // Returns undefined on no match
+    const notFound = col.find(el => el.dataset.role === 'superuser');
+    addResult(notFound === undefined,       '.find() returns undefined when no match',     'returned: ' + notFound);
+
+    // Stops at first match (verify by counting calls)
+    let callCount = 0;
+    col.find(el => { callCount++; return el.id === 'u3'; }); // u3 is index 2
+    addResult(callCount === 3,              '.find() stops after first match (short-circuit)', 'callback called ' + callCount + ' times (expected 3)');
+
+    // Empty collection
+    addResult(Collections.ClassName('nope').find(() => true) === undefined, '.find() on empty collection → undefined', '');
+
+    // thisArg
+    const ctx = { target: 'editor' };
+    const withCtx = col.find(function(el) { return el.dataset.role === this.target; }, ctx);
+    addResult(withCtx && withCtx.id === 'u2', '.find() respects thisArg', 'found: #' + withCtx?.id);
+  </script>
+</body>
+</html>

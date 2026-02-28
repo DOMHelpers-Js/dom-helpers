@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: .setStyle()</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase;
+         letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
+
+    .controls {
+      display: flex; align-items: flex-start; gap: 14px; flex-wrap: wrap;
+      background: #fff; padding: 14px 16px; border-radius: 10px;
+      border: 1px solid #e2e8f0; margin-bottom: 16px;
+    }
+    .control-group { display: flex; flex-direction: column; gap: 4px; }
+    .control-group label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; }
+    .control-group input[type=text], .control-group select {
+      padding: 6px 10px; border: 1.5px solid #fde68a; border-radius: 6px;
+      font-size: 13px; outline: none; font-family: monospace; width: 140px;
+    }
+    .control-group input:focus, .control-group select:focus { border-color: #d97706; }
+    .btn { padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: #fff; align-self: flex-end; }
+    .btn-set { background: #d97706; }
+    .btn-set:hover { background: #b45309; }
+    .btn-reset { background: #6b7280; }
+    .btn-reset:hover { background: #4b5563; }
+
+    /* ── Cards ── */
+    .collection { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+    .card {
+      width: 130px; padding: 20px 12px; border-radius: 10px;
+      background: #fff; border: 2px solid #dde1e7;
+      text-align: center; font-size: 14px; font-weight: 600; color: #555;
+      transition: all .35s ease;
+    }
+    .card .style-display {
+      margin-top: 8px; font-size: 10px; font-family: monospace;
+      color: #92400e; word-break: break-all; line-height: 1.5;
+    }
+
+    /* Preset theme buttons */
+    .theme-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .theme-btn {
+      padding: 8px 16px; border: none; border-radius: 8px;
+      font-size: 13px; font-weight: 600; cursor: pointer; color: #fff;
+      transition: transform .15s;
+    }
+    .theme-btn:hover { transform: translateY(-2px); }
+    .theme-btn.ocean     { background: #0891b2; }
+    .theme-btn.sunset    { background: #dc2626; }
+    .theme-btn.forest    { background: #16a34a; }
+    .theme-btn.night     { background: #1e1b4b; }
+
+    /* Results */
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 8px; padding: 10px 14px; border-left: 4px solid #ccc; font-size: 14px; color: #333; }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+
+  <h1>Demo — <code>.setStyle(styles)</code></h1>
+  <p class="subtitle">Applies a style object to every element in the collection at once using <code>Object.assign(el.style, styles)</code>. Multiple properties in one call.</p>
+
+  <!-- ── Preset themes ── -->
+  <h2>Quick themes — apply a full style object to all cards</h2>
+  <div class="theme-btns">
+    <button class="theme-btn ocean"  onclick="applyTheme('ocean')">Ocean</button>
+    <button class="theme-btn sunset" onclick="applyTheme('sunset')">Sunset</button>
+    <button class="theme-btn forest" onclick="applyTheme('forest')">Forest</button>
+    <button class="theme-btn night"  onclick="applyTheme('night')">Night</button>
+    <button class="btn btn-reset"    onclick="resetCards()" style="align-self:center;">Reset</button>
+  </div>
+
+  <div class="collection" id="style-cards">
+    <div class="card styled-card" id="sc1">Card 1<div class="style-display" id="sd1">—</div></div>
+    <div class="card styled-card" id="sc2">Card 2<div class="style-display" id="sd2">—</div></div>
+    <div class="card styled-card" id="sc3">Card 3<div class="style-display" id="sd3">—</div></div>
+    <div class="card styled-card" id="sc4">Card 4<div class="style-display" id="sd4">—</div></div>
+  </div>
+
+  <!-- ── Custom ── -->
+  <h2>Custom — build your own style object</h2>
+  <div class="controls">
+    <div class="control-group">
+      <label>background</label>
+      <input type="text" id="bg-input" value="#fef3c7" />
+    </div>
+    <div class="control-group">
+      <label>color</label>
+      <input type="text" id="color-input" value="#92400e" />
+    </div>
+    <div class="control-group">
+      <label>borderRadius</label>
+      <input type="text" id="radius-input" value="20px" />
+    </div>
+    <div class="control-group">
+      <label>fontSize</label>
+      <input type="text" id="size-input" value="18px" />
+    </div>
+    <button class="btn btn-set" onclick="runCustom()">Apply .setStyle()</button>
+  </div>
+
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
+  <script>
+    const resultsEl = document.getElementById('results');
+
+    const THEMES = {
+      ocean:  { background: '#0c4a6e', color: '#e0f2fe', borderRadius: '16px', fontSize: '15px', boxShadow: '0 8px 24px rgba(12,74,110,.4)' },
+      sunset: { background: '#7f1d1d', color: '#fecaca', borderRadius: '4px',  fontSize: '15px', boxShadow: '0 8px 24px rgba(127,29,29,.4)' },
+      forest: { background: '#14532d', color: '#bbf7d0', borderRadius: '50%',  fontSize: '15px', boxShadow: '0 8px 24px rgba(20,83,45,.4)' },
+      night:  { background: '#1e1b4b', color: '#c7d2fe', borderRadius: '0px',  fontSize: '15px', boxShadow: '0 8px 24px rgba(30,27,75,.4)' },
+    };
+
+    function updateLabels() {
+      ['sc1','sc2','sc3','sc4'].forEach((id, i) => {
+        const el = document.getElementById(id);
+        document.getElementById('sd' + (i + 1)).textContent =
+          'bg: ' + (el.style.background || el.style.backgroundColor || '—') +
+          '\ncolor: ' + (el.style.color || '—');
+      });
+    }
+
+    function applyTheme(name) {
+      Collections.ClassName('styled-card').setStyle(THEMES[name]);
+      updateLabels();
+    }
+
+    function resetCards() {
+      Collections.ClassName('styled-card').setStyle({
+        background: '', color: '', borderRadius: '', fontSize: '', boxShadow: ''
+      });
+      updateLabels();
+    }
+
+    function runCustom() {
+      Collections.ClassName('styled-card').setStyle({
+        background:   document.getElementById('bg-input').value,
+        color:        document.getElementById('color-input').value,
+        borderRadius: document.getElementById('radius-input').value,
+        fontSize:     document.getElementById('size-input').value,
+      });
+      updateLabels();
+    }
+
+    // ── Automated tests ───────────────────────────────────────────────────
+
+    // Test 1: multiple style properties set at once
+    Collections.ClassName('styled-card').setStyle({ background: 'rgb(238,242,255)', color: 'rgb(55,48,163)' });
+    const allBg = ['sc1','sc2','sc3','sc4'].every(id => {
+      const bg = document.getElementById(id).style.background || document.getElementById(id).style.backgroundColor;
+      return bg !== '' && bg !== undefined;
+    });
+    addResult(allBg, '.setStyle() sets background on all elements', allBg ? '4/4 updated' : 'some not updated');
+
+    const allColor = ['sc1','sc2','sc3','sc4'].every(id => document.getElementById(id).style.color !== '');
+    addResult(allColor, '.setStyle() sets color on all elements', allColor ? '4/4 updated' : 'some not updated');
+
+    // Test 2: multiple properties in one call
+    Collections.ClassName('styled-card').setStyle({ fontSize: '20px', fontWeight: 'bold', letterSpacing: '1px' });
+    const sizeSet = document.getElementById('sc1').style.fontSize === '20px';
+    const weightSet = document.getElementById('sc1').style.fontWeight === 'bold';
+    addResult(sizeSet && weightSet, '.setStyle() applies multiple properties in one call', 'fontSize + fontWeight set');
+
+    // Test 3: chainable
+    const returned = Collections.ClassName('styled-card').setStyle({ opacity: '1' });
+    addResult(returned !== null && returned !== undefined, '.setStyle() returns collection (chainable)', '');
+
+    // Test 4: partial update preserves other styles
+    Collections.ClassName('styled-card').setStyle({ background: 'purple' });
+    Collections.ClassName('styled-card').setStyle({ color: 'white' });
+    const stillPurple = document.getElementById('sc1').style.background === 'purple';
+    addResult(stillPurple, '.setStyle() second call does not erase first call styles', 'background preserved ✓');
+
+    resetCards();
+    updateLabels();
+  </script>
+</body>
+</html>

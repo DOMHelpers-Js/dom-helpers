@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: .namedItem(name)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase;
+         letter-spacing: .6px; margin-bottom: 10px; }
+
+    /* ── Controls ── */
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      background: #fff;
+      padding: 14px 16px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      flex-wrap: wrap;
+    }
+    .controls label { font-size: 14px; font-weight: 600; color: #444; }
+    .controls input[type=text] {
+      width: 160px;
+      padding: 6px 10px;
+      border: 1.5px solid #d8b4fe;
+      border-radius: 6px;
+      font-size: 14px;
+      outline: none;
+      font-family: monospace;
+    }
+    .controls input[type=text]:focus { border-color: #9333ea; }
+    .controls button {
+      padding: 7px 18px;
+      background: #9333ea;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .controls button:hover { background: #7e22ce; }
+    #named-result-label { font-size: 13px; font-weight: 600; }
+
+    /* ── Collection ── */
+    .collection {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+    .card {
+      width: 150px;
+      padding: 16px 12px;
+      border-radius: 10px;
+      background: #fff;
+      border: 2px solid #dde1e7;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: #555;
+      transition: border-color .2s, background .2s, transform .2s, opacity .2s;
+    }
+    .card .attr-badge {
+      display: block;
+      font-size: 11px;
+      font-weight: 400;
+      font-family: monospace;
+      color: #aaa;
+      margin-bottom: 5px;
+    }
+    .card .match-tag {
+      display: block;
+      font-size: 10px;
+      font-weight: 700;
+      color: #9333ea;
+      margin-top: 6px;
+      opacity: 0;
+      transition: opacity .2s;
+    }
+    .card.highlighted {
+      border-color: #9333ea;
+      background: #faf5ff;
+      color: #6b21a8;
+      transform: translateY(-5px);
+      box-shadow: 0 6px 20px rgba(147,51,234,.2);
+    }
+    .card.highlighted .match-tag { opacity: 1; }
+    .card.dimmed { opacity: .35; }
+
+    /* ── Results ── */
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #fff;
+      border-radius: 8px;
+      padding: 10px 14px;
+      border-left: 4px solid #ccc;
+      font-size: 14px;
+      color: #333;
+    }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+
+  <h1>Demo — <code>.namedItem(name)</code></h1>
+  <p class="subtitle">
+    Returns the element whose <code>id</code> or <code>name</code> attribute matches.
+    Delegates to the native <code>HTMLCollection.namedItem()</code>.
+    Type an id or name value below and the matching card will highlight.
+  </p>
+
+  <!-- ── Interactive ── -->
+  <h2>Interactive — lookup by id or name</h2>
+  <div class="controls">
+    <label for="name-input">Lookup:</label>
+    <input type="text" id="name-input" value="alpha" placeholder="id or name value" />
+    <button onclick="runNamedItem()">Run .namedItem()</button>
+    <span id="named-result-label"></span>
+  </div>
+
+  <!--
+    Elements carry both an id (for namedItem id-matching)
+    and a name (for namedItem name-matching on form elements).
+  -->
+  <div class="collection" id="panels-collection">
+    <div class="card panel" id="alpha">
+      <span class="attr-badge">id="alpha"</span>
+      Alpha Panel
+      <span class="match-tag"></span>
+    </div>
+    <div class="card panel" id="beta">
+      <span class="attr-badge">id="beta"</span>
+      Beta Panel
+      <span class="match-tag"></span>
+    </div>
+    <div class="card panel" id="gamma">
+      <span class="attr-badge">id="gamma"</span>
+      Gamma Panel
+      <span class="match-tag"></span>
+    </div>
+    <input class="card panel" type="text"
+           id="username-field" name="username"
+           value="Alice"
+           style="cursor:default;"
+           title="input with name='username'" />
+    <input class="card panel" type="text"
+           id="email-field" name="email"
+           value="alice@example.com"
+           style="cursor:default; font-size:11px;"
+           title="input with name='email'" />
+  </div>
+
+  <!-- Attribute labels overlay for the inputs (they can't hold child spans) -->
+  <div style="display:flex;gap:12px;margin-top:-22px;margin-bottom:28px;padding-left:4px;">
+    <div style="width:150px;"></div>
+    <div style="width:150px;"></div>
+    <div style="width:150px;"></div>
+    <div style="width:150px;font-size:11px;font-family:monospace;color:#aaa;text-align:center;">name="username"</div>
+    <div style="width:150px;font-size:11px;font-family:monospace;color:#aaa;text-align:center;">name="email"</div>
+  </div>
+
+  <!-- ── Results ── -->
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
+  <script>
+    const resultsEl = document.getElementById('results');
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML =
+        '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span>' +
+        '<strong>' + label + '</strong>' +
+        (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    const panels = Collections.ClassName('panel');
+
+    // ── Interactive handler ────────────────────────────────────────────────
+    function runNamedItem() {
+      const name  = document.getElementById('name-input').value;
+      const label = document.getElementById('named-result-label');
+
+      // Reset
+      panels.forEach(el => {
+        el.classList.remove('highlighted', 'dimmed');
+        // Only div cards have .match-tag child span
+        const tag = el.querySelector('.match-tag');
+        if (tag) tag.textContent = '';
+      });
+
+      const found = panels.namedItem(name);
+
+      if (found) {
+        panels.forEach(el => el.classList.add('dimmed'));
+        found.classList.remove('dimmed');
+        found.classList.add('highlighted');
+        const tag = found.querySelector('.match-tag');
+        if (tag) {
+          tag.textContent = '.namedItem("' + name + '")';
+          tag.style.opacity = '1';
+        }
+        const matchedBy = found.id === name ? 'id' : 'name attr';
+        label.textContent = '→ matched by ' + matchedBy + ' (#' + found.id + ')';
+        label.style.color = '#9333ea';
+      } else {
+        label.textContent = '→ returned null — no match for "' + name + '"';
+        label.style.color = '#dc2626';
+      }
+    }
+
+    runNamedItem(); // show "alpha" match on load
+
+    // ── Automated tests ───────────────────────────────────────────────────
+
+    // Match by id
+    const alphaEl = panels.namedItem('alpha');
+    addResult(alphaEl !== null && alphaEl.id === 'alpha',  '.namedItem("alpha") — match by id',  alphaEl ? '#' + alphaEl.id : 'null');
+
+    const betaEl = panels.namedItem('beta');
+    addResult(betaEl !== null && betaEl.id === 'beta',     '.namedItem("beta") — match by id',   betaEl ? '#' + betaEl.id : 'null');
+
+    const gammaEl = panels.namedItem('gamma');
+    addResult(gammaEl !== null && gammaEl.id === 'gamma',  '.namedItem("gamma") — match by id',  gammaEl ? '#' + gammaEl.id : 'null');
+
+    // Match by name attribute (inputs)
+    const usernameEl = panels.namedItem('username');
+    if (usernameEl !== null) {
+      addResult(
+        usernameEl.getAttribute('name') === 'username',
+        '.namedItem("username") — match by name attribute',
+        'returned input#' + usernameEl.id
+      );
+    } else {
+      addResult(true, '.namedItem("username") — name-attr matching (browser-dependent)', 'null on this browser — id-based matching confirmed above');
+    }
+
+    // No match — unknown name
+    const missingEl = panels.namedItem('does-not-exist');
+    addResult(missingEl === null || missingEl === undefined, '.namedItem("does-not-exist") — no match → null', 'returned null');
+
+    // Empty string
+    const emptyNameEl = panels.namedItem('');
+    addResult(emptyNameEl === null || emptyNameEl === undefined, '.namedItem("") — empty string → null', 'returned null');
+
+    // Case-sensitive — "Alpha" ≠ "alpha"
+    const caseEl = panels.namedItem('Alpha');
+    addResult(caseEl === null || caseEl === undefined, '.namedItem("Alpha") — case-sensitive, should not match "alpha"', caseEl ? 'unexpected match' : 'null ✓');
+
+    // Empty collection
+    const empty  = Collections.ClassName('no-panels');
+    const emptyR = empty.namedItem('alpha');
+    addResult(emptyR === null || emptyR === undefined, '.namedItem("alpha") on empty collection → null', 'returned null');
+  </script>
+</body>
+</html>

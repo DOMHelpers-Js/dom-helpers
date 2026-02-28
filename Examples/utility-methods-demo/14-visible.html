@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: .visible()</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase;
+         letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
+    p.desc { font-size: 13px; color: #666; margin-bottom: 12px; line-height: 1.6; }
+
+    /* ── Controls ── */
+    .controls {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: #fff; padding: 12px 16px; border-radius: 10px;
+      border: 1px solid #e2e8f0; margin-bottom: 14px;
+    }
+    .btn { padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: #fff; }
+    .btn-run   { background: #0891b2; }
+    .btn-run:hover   { background: #0e7490; }
+    .btn-reset { background: #6b7280; }
+    .btn-reset:hover { background: #4b5563; }
+    .btn-hide  { background: #dc2626; }
+    .btn-hide:hover  { background: #b91c1c; }
+    .btn-show  { background: #16a34a; }
+    .btn-show:hover  { background: #15803d; }
+
+    /* ── Cards ── */
+    .collection { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; min-height: 90px; }
+    .card {
+      width: 120px; padding: 18px 10px; border-radius: 10px;
+      background: #fff; border: 2px solid #dde1e7;
+      text-align: center; font-size: 13px; font-weight: 600; color: #555;
+      transition: all .3s ease; position: relative;
+    }
+    .card .hide-method {
+      display: block; margin-top: 6px; font-size: 10px; font-family: monospace;
+      color: #aaa; font-weight: 400;
+    }
+
+    /* hidden states */
+    .card.hide-display    { display: none; }
+    .card.hide-visibility { visibility: hidden; }
+    .card.hide-opacity    { opacity: 0; pointer-events: none; }
+
+    /* highlight — returned by .visible() */
+    .card.matched {
+      border-color: #0891b2; background: #ecfeff;
+      color: #164e63;
+      box-shadow: 0 5px 16px rgba(8,145,178,.2);
+    }
+    .card.matched::after {
+      content: '✓ visible';
+      display: block; font-size: 10px; font-weight: 700;
+      color: #0891b2; margin-top: 6px;
+    }
+    /* dimmed — NOT returned */
+    .card.not-matched { opacity: .25; }
+
+    /* ── Filter result bar ── */
+    .result-bar {
+      background: #ecfeff; border: 1.5px solid #a5f3fc;
+      border-radius: 8px; padding: 10px 14px;
+      font-size: 13px; color: #164e63; font-family: monospace;
+      margin-bottom: 20px;
+    }
+
+    /* ── Results ── */
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 8px; padding: 10px 14px; border-left: 4px solid #ccc; font-size: 14px; color: #333; }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+
+  <h1>Demo — <code>.visible()</code></h1>
+  <p class="subtitle">
+    Filters the collection to only elements that are <strong>not</strong> hidden via
+    <code>display:none</code>, <code>visibility:hidden</code>, or <code>opacity:0</code>.
+    Returns an array. Matched cards get a cyan border — unmatched cards dim.
+  </p>
+
+  <!-- ── Interactive ── -->
+  <h2>Interactive — toggle visibility, then run filter</h2>
+  <p class="desc">
+    Use the hide buttons to hide individual cards in different ways, then click
+    <strong>Run .visible()</strong> to see which ones the filter returns.
+  </p>
+
+  <div class="controls">
+    <button class="btn btn-hide" onclick="hideDisplay()">Hide C3 (display:none)</button>
+    <button class="btn btn-hide" onclick="hideVisibility()">Hide C4 (visibility:hidden)</button>
+    <button class="btn btn-hide" onclick="hideOpacity()">Hide C5 (opacity:0)</button>
+    <button class="btn btn-show" onclick="showAll()">Show all</button>
+  </div>
+  <div class="controls">
+    <button class="btn btn-run"   onclick="runVisible()">Run .visible()</button>
+    <button class="btn btn-reset" onclick="resetFilter()">Clear highlights</button>
+  </div>
+
+  <div class="collection" id="card-collection">
+    <div class="card vcard" id="vc1">Card 1<span class="hide-method">fully visible</span></div>
+    <div class="card vcard" id="vc2">Card 2<span class="hide-method">fully visible</span></div>
+    <div class="card vcard" id="vc3">Card 3<span class="hide-method" id="hm3">fully visible</span></div>
+    <div class="card vcard" id="vc4">Card 4<span class="hide-method" id="hm4">fully visible</span></div>
+    <div class="card vcard" id="vc5">Card 5<span class="hide-method" id="hm5">fully visible</span></div>
+  </div>
+
+  <div class="result-bar" id="result-bar" style="display:none;"></div>
+
+  <!-- ── Automated tests ── -->
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
+  <script>
+    const resultsEl = document.getElementById('results');
+    const resultBar = document.getElementById('result-bar');
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML = '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span>' +
+        '<strong>' + label + '</strong>' +
+        (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    function hideDisplay()    {
+      document.getElementById('vc3').style.display = 'none';
+      document.getElementById('hm3').textContent = 'display:none';
+    }
+    function hideVisibility() {
+      document.getElementById('vc4').style.visibility = 'hidden';
+      document.getElementById('hm4').textContent = 'visibility:hidden';
+    }
+    function hideOpacity()    {
+      document.getElementById('vc5').style.opacity = '0';
+      document.getElementById('vc5').style.pointerEvents = 'none';
+      document.getElementById('hm5').textContent = 'opacity:0';
+    }
+    function showAll() {
+      ['vc3','vc4','vc5'].forEach(id => {
+        const el = document.getElementById(id);
+        el.style.display = '';
+        el.style.visibility = '';
+        el.style.opacity = '';
+        el.style.pointerEvents = '';
+      });
+      document.getElementById('hm3').textContent = 'fully visible';
+      document.getElementById('hm4').textContent = 'fully visible';
+      document.getElementById('hm5').textContent = 'fully visible';
+      resetFilter();
+    }
+
+    function runVisible() {
+      resetFilter();
+      const allCards = Collections.ClassName('vcard');
+      const visibleCards = allCards.visible();
+
+      // Collect ids of visible elements
+      const visibleIds = visibleCards.map(el => el.id);
+      const allIds = ['vc1','vc2','vc3','vc4','vc5'];
+
+      allIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (visibleIds.includes(id)) {
+          el.classList.add('matched');
+        } else {
+          el.classList.add('not-matched');
+        }
+      });
+
+      resultBar.style.display = 'block';
+      resultBar.textContent =
+        '.visible() returned ' + visibleCards.length + ' element(s): ' +
+        (visibleIds.length ? visibleIds.join(', ') : 'none');
+    }
+
+    function resetFilter() {
+      Collections.ClassName('vcard').forEach(el => {
+        el.classList.remove('matched', 'not-matched');
+      });
+      resultBar.style.display = 'none';
+    }
+
+    // ── Automated tests ───────────────────────────────────────────────────
+
+    // Setup: use hidden test elements, not the interactive ones
+    const t1 = document.createElement('div'); t1.className = 'tcard'; t1.id = 'tt1'; document.body.appendChild(t1);
+    const t2 = document.createElement('div'); t2.className = 'tcard'; t2.id = 'tt2'; t2.style.display = 'none'; document.body.appendChild(t2);
+    const t3 = document.createElement('div'); t3.className = 'tcard'; t3.id = 'tt3'; t3.style.visibility = 'hidden'; document.body.appendChild(t3);
+    const t4 = document.createElement('div'); t4.className = 'tcard'; t4.id = 'tt4'; t4.style.opacity = '0'; document.body.appendChild(t4);
+
+    const tcards = Collections.ClassName('tcard');
+
+    // Test 1: all visible — .visible() returns all 4
+    const allVisible = tcards.visible();
+    // tt1 is the only truly visible one; others are hidden
+    addResult(
+      Array.isArray(allVisible),
+      '.visible() returns an array',
+      'type: ' + typeof allVisible + ', isArray: ' + Array.isArray(allVisible)
+    );
+
+    // Test 2: display:none excluded
+    addResult(
+      !allVisible.includes(t2),
+      '.visible() excludes display:none elements',
+      '#tt2 (display:none) not in result ✓'
+    );
+
+    // Test 3: visibility:hidden excluded
+    addResult(
+      !allVisible.includes(t3),
+      '.visible() excludes visibility:hidden elements',
+      '#tt3 (visibility:hidden) not in result ✓'
+    );
+
+    // Test 4: opacity:0 excluded
+    addResult(
+      !allVisible.includes(t4),
+      '.visible() excludes opacity:0 elements',
+      '#tt4 (opacity:0) not in result ✓'
+    );
+
+    // Test 5: fully visible element IS included
+    addResult(
+      allVisible.includes(t1),
+      '.visible() includes fully visible element',
+      '#tt1 found in result ✓'
+    );
+
+    // Test 6: empty collection → empty array
+    const emptyResult = Collections.ClassName('nonexistent').visible();
+    addResult(
+      Array.isArray(emptyResult) && emptyResult.length === 0,
+      '.visible() on empty collection returns empty array',
+      'length: ' + emptyResult.length
+    );
+
+    // Cleanup test nodes
+    [t1,t2,t3,t4].forEach(el => document.body.removeChild(el));
+  </script>
+</body>
+</html>

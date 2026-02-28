@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: .at(index)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase;
+         letter-spacing: .6px; margin-bottom: 10px; }
+
+    /* ── Interactive controls ── */
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      background: #fff;
+      padding: 14px 16px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+    }
+    .controls label { font-size: 14px; font-weight: 600; color: #444; }
+    .controls input[type=number] {
+      width: 80px;
+      padding: 6px 10px;
+      border: 1.5px solid #c7d2fe;
+      border-radius: 6px;
+      font-size: 14px;
+      text-align: center;
+      outline: none;
+    }
+    .controls input[type=number]:focus { border-color: #6366f1; }
+    .controls button {
+      padding: 7px 18px;
+      background: #6366f1;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .controls button:hover { background: #4f46e5; }
+    #at-result-label {
+      font-size: 13px;
+      color: #6366f1;
+      font-weight: 600;
+    }
+
+    /* ── Collection row ── */
+    .collection {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+    .card {
+      width: 100px;
+      padding: 16px 10px;
+      border-radius: 10px;
+      background: #fff;
+      border: 2px solid #dde1e7;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: #555;
+      transition: border-color .2s, background .2s, transform .2s, opacity .2s;
+    }
+    .card .idx { font-size: 11px; color: #aaa; font-weight: 400; display: block; margin-bottom: 4px; }
+    .card .tag { font-size: 10px; font-weight: 700; color: #6366f1; display: block; margin-top: 5px; opacity: 0; transition: opacity .2s; }
+
+    .card.highlighted {
+      border-color: #6366f1;
+      background: #eef2ff;
+      color: #3730a3;
+      transform: translateY(-5px);
+      box-shadow: 0 6px 20px rgba(99,102,241,.22);
+    }
+    .card.highlighted .tag { opacity: 1; }
+    .card.dimmed { opacity: .35; }
+    .card.null-result { border-color: #f87171; background: #fff5f5; color: #b91c1c; }
+
+    /* ── Results panel ── */
+    .results { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+    .result-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #fff;
+      border-radius: 8px;
+      padding: 10px 14px;
+      border-left: 4px solid #ccc;
+      font-size: 14px;
+      color: #333;
+    }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+
+  <h1>Demo — <code>.at(index)</code></h1>
+  <p class="subtitle">Supports positive and negative indexes. Type any index and click <strong>Run .at()</strong> — the matched card lights up. Out-of-range shows a null indicator.</p>
+
+  <!-- ── Interactive section ── -->
+  <h2>Interactive — try any index</h2>
+  <div class="controls">
+    <label for="idx-input">Index:</label>
+    <input type="number" id="idx-input" value="-1" />
+    <button onclick="runAt()">Run .at()</button>
+    <span id="at-result-label"></span>
+  </div>
+
+  <div class="collection" id="live-collection">
+    <div class="card row" id="row-0"><span class="idx">[0]</span>Row 0<span class="tag"></span></div>
+    <div class="card row" id="row-1"><span class="idx">[1]</span>Row 1<span class="tag"></span></div>
+    <div class="card row" id="row-2"><span class="idx">[2]</span>Row 2<span class="tag"></span></div>
+    <div class="card row" id="row-3"><span class="idx">[3]</span>Row 3<span class="tag"></span></div>
+    <div class="card row" id="row-4"><span class="idx">[4]</span>Row 4<span class="tag"></span></div>
+  </div>
+
+  <!-- ── Static tests ── -->
+  <h2>Automated tests</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.2/dist/dom-helpers.min.js"></script>
+  <script>
+    const resultsEl = document.getElementById('results');
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML =
+        '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span>' +
+        '<strong>' + label + '</strong>' +
+        (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    const rows = Collections.ClassName('row');
+
+    // ── Interactive handler ───────────────────────────────────────────────
+    function runAt() {
+      const idx = parseInt(document.getElementById('idx-input').value);
+      const resultLabel = document.getElementById('at-result-label');
+
+      // Reset all cards
+      rows.forEach(el => {
+        el.classList.remove('highlighted', 'dimmed', 'null-result');
+        el.querySelector('.tag').textContent = '';
+      });
+
+      const found = rows.at(idx);
+
+      if (found) {
+        // Dim others, highlight found
+        rows.forEach(el => el.classList.add('dimmed'));
+        found.classList.remove('dimmed');
+        found.classList.add('highlighted');
+        found.querySelector('.tag').textContent = '.at(' + idx + ')';
+        resultLabel.textContent = '→ returned #' + found.id;
+        resultLabel.style.color = '#6366f1';
+      } else {
+        // null — show all cards with null style to indicate nothing found
+        resultLabel.textContent = '→ returned null (out of range)';
+        resultLabel.style.color = '#dc2626';
+      }
+    }
+
+    // Run default (-1) on load
+    runAt();
+
+    // ── Automated tests ──────────────────────────────────────────────────
+    const tests = [
+      { index: 0,   expectedId: 'row-0', label: '.at(0) — first element'              },
+      { index: 2,   expectedId: 'row-2', label: '.at(2) — middle element'             },
+      { index: 4,   expectedId: 'row-4', label: '.at(4) — last by positive index'     },
+      { index: -1,  expectedId: 'row-4', label: '.at(-1) — last via negative index'   },
+      { index: -2,  expectedId: 'row-3', label: '.at(-2) — second-to-last'            },
+      { index: -5,  expectedId: 'row-0', label: '.at(-5) — first via full negative span' },
+      { index: 99,  expectedId: null,    label: '.at(99) — out-of-range → null'        },
+      { index: -99, expectedId: null,    label: '.at(-99) — out-of-range negative → null' },
+    ];
+
+    tests.forEach(({ index, expectedId, label }) => {
+      const el = rows.at(index);
+      const pass = expectedId === null ? el === null : (el !== null && el.id === expectedId);
+      const detail = el ? 'returned #' + el.id : 'returned null';
+      addResult(pass, label, detail);
+    });
+
+    // at(0) === first(), at(-1) === last()
+    addResult(rows.at(0) === rows.first(),  '.at(0) === .first()', 'same element reference');
+    addResult(rows.at(-1) === rows.last(),  '.at(-1) === .last()', 'same element reference');
+
+    // Empty collection
+    const empty = Collections.ClassName('nonexistent');
+    addResult(empty.at(0) === null, '.at(0) on empty collection → null', 'returned null');
+  </script>
+</body>
+</html>
