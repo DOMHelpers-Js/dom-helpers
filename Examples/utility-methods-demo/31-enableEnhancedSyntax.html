@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: Collections.enableEnhancedSyntax()</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
+
+    /* ── Toggle state banner ── */
+    .mode-banner {
+      border-radius: 12px; padding: 18px 24px; margin-bottom: 20px;
+      border: 2px solid; transition: all .4s; display: flex; align-items: center; gap: 16px;
+    }
+    .mode-banner.enabled  { background: #f5f3ff; border-color: #c4b5fd; }
+    .mode-banner.disabled { background: #f8fafc; border-color: #cbd5e1; }
+    .mode-dot {
+      width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; transition: background .4s;
+    }
+    .mode-banner.enabled  .mode-dot { background: #7c3aed; box-shadow: 0 0 8px #7c3aed88; }
+    .mode-banner.disabled .mode-dot { background: #94a3b8; }
+    .mode-text .mode-title { font-size: 16px; font-weight: 700; }
+    .mode-banner.enabled  .mode-title { color: #5b21b6; }
+    .mode-banner.disabled .mode-title { color: #64748b; }
+    .mode-text .mode-desc { font-size: 12px; color: #888; margin-top: 2px; font-family: monospace; }
+
+    /* ── Syntax comparison ── */
+    .syntax-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+    .syntax-card {
+      border-radius: 10px; padding: 14px 16px; border: 2px solid; transition: all .3s;
+    }
+    .syntax-card.std  { border-color: #e2e8f0; background: #fff; }
+    .syntax-card.enh  { border-color: #c4b5fd; background: #faf5ff; }
+    .syntax-card h3 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
+    .syntax-card.std h3 { color: #64748b; }
+    .syntax-card.enh h3 { color: #7c3aed; }
+    .syntax-card code {
+      display: block; font-family: monospace; font-size: 12px;
+      background: #f1f5f9; padding: 8px 10px; border-radius: 6px;
+      margin-bottom: 8px; line-height: 1.6; white-space: pre;
+    }
+    .syntax-card.enh code { background: #ede9fe; }
+    .syntax-card .result-label { font-size: 12px; color: #888; }
+    .syntax-card .result-val   { font-weight: 700; color: #4f46e5; font-family: monospace; }
+    .syntax-card.enh.active-enh { border-color: #7c3aed; box-shadow: 0 4px 16px rgba(124,58,237,.15); }
+    .syntax-card.std.active-std { border-color: #64748b; }
+
+    /* ── Try it ── */
+    .try-panel {
+      background: #fff; border-radius: 12px; padding: 16px 18px;
+      border: 2px solid #dde1e7; margin-bottom: 14px;
+    }
+    .try-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+    .try-row label { font-size: 13px; font-weight: 600; color: #555; }
+    .try-row input {
+      padding: 6px 10px; border: 1.5px solid #dde1e7; border-radius: 6px;
+      font-size: 13px; font-family: monospace; outline: none; width: 140px;
+    }
+    .try-row input:focus { border-color: #818cf8; }
+    .try-result { font-family: monospace; font-size: 13px; padding: 8px 12px; border-radius: 6px; background: #f1f5f9; }
+    .try-result.ok  { background: #ede9fe; color: #5b21b6; }
+    .try-result.err { background: #fff5f5; color: #b91c1c; }
+
+    /* ── Demo elements ── */
+    .demo-elements { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .demo-el {
+      padding: 8px 14px; border-radius: 8px; background: #fff;
+      border: 2px solid #dde1e7; font-size: 13px; font-weight: 600; color: #555;
+      transition: all .25s;
+    }
+    .demo-el.lit { border-color: #c4b5fd; background: #faf5ff; color: #5b21b6; }
+
+    /* ── Controls ── */
+    .controls {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: #fff; padding: 12px 16px; border-radius: 10px;
+      border: 1px solid #e2e8f0; margin-bottom: 14px;
+    }
+    .btn { padding: 7px 18px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: #fff; }
+    .btn-enable  { background: #7c3aed; } .btn-enable:hover  { background: #6d28d9; }
+    .btn-disable { background: #64748b; } .btn-disable:hover { background: #475569; }
+    .btn-try     { background: #4f46e5; } .btn-try:hover     { background: #4338ca; }
+
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 8px; padding: 10px 14px; border-left: 4px solid #ccc; font-size: 14px; color: #333; }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <h1>Demo — <code>Collections.enableEnhancedSyntax()</code></h1>
+  <p class="subtitle">Activates Proxy-based dot-access syntax: <code>Collections.ClassName.myClass</code> instead of <code>Collections.ClassName('myClass')</code>. Useful for terse scripting — toggle it off with <code>disableEnhancedSyntax()</code>.</p>
+
+  <!-- ── Mode banner ── -->
+  <h2>Current mode</h2>
+  <div class="mode-banner disabled" id="mode-banner">
+    <div class="mode-dot" id="mode-dot"></div>
+    <div class="mode-text">
+      <div class="mode-title" id="mode-title">Enhanced syntax DISABLED</div>
+      <div class="mode-desc" id="mode-desc">Use Collections.ClassName('className') — standard call</div>
+    </div>
+  </div>
+
+  <!-- ── Demo elements ── -->
+  <h2>Demo elements</h2>
+  <div class="demo-elements">
+    <div class="demo-el ecard" id="e1">Alpha</div>
+    <div class="demo-el ecard" id="e2">Beta</div>
+    <div class="demo-el ecard" id="e3">Gamma</div>
+    <div class="demo-el fcard" id="e4">Delta</div>
+    <div class="demo-el fcard" id="e5">Epsilon</div>
+  </div>
+
+  <!-- ── Controls ── -->
+  <div class="controls">
+    <button class="btn btn-enable"  onclick="doEnable()">enableEnhancedSyntax()</button>
+    <button class="btn btn-disable" onclick="doDisable()">disableEnhancedSyntax()</button>
+  </div>
+
+  <!-- ── Syntax comparison ── -->
+  <h2>Syntax side-by-side</h2>
+  <div class="syntax-grid">
+    <div class="syntax-card std" id="std-card">
+      <h3>Standard syntax (always works)</h3>
+      <code>Collections.ClassName('ecard')</code>
+      <div class="result-label">Result: <span class="result-val" id="std-result">—</span></div>
+    </div>
+    <div class="syntax-card enh" id="enh-card">
+      <h3>Enhanced syntax (requires enable)</h3>
+      <code>Collections.ClassName.ecard</code>
+      <div class="result-label">Result: <span class="result-val" id="enh-result">—</span></div>
+    </div>
+  </div>
+
+  <!-- ── Try it ── -->
+  <h2>Try enhanced dot-access</h2>
+  <div class="try-panel">
+    <div class="try-row">
+      <label>Class name:</label>
+      <input type="text" id="try-class" value="ecard" />
+      <button class="btn btn-try" onclick="tryBoth()">Query both ways</button>
+    </div>
+    <div class="try-result" id="try-std">Standard: —</div>
+    <br>
+    <div class="try-result" id="try-enh">Enhanced: —</div>
+  </div>
+
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.3/dist/dom-helpers.min.js"></script>
+ 
+  <script>
+    const resultsEl = document.getElementById('results');
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML = '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span><strong>' + label + '</strong>' + (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    function setModeUI(enabled) {
+      const banner = document.getElementById('mode-banner');
+      banner.className = 'mode-banner ' + (enabled ? 'enabled' : 'disabled');
+      document.getElementById('mode-title').textContent = enabled ? 'Enhanced syntax ENABLED' : 'Enhanced syntax DISABLED';
+      document.getElementById('mode-desc').textContent  = enabled
+        ? 'Use Collections.ClassName.myClass — dot-access (Proxy)'
+        : "Use Collections.ClassName('myClass') — standard call";
+    }
+
+    function doEnable() {
+      Collections.enableEnhancedSyntax();
+      setModeUI(true);
+      updateSyntaxCards();
+    }
+
+    function doDisable() {
+      Collections.disableEnhancedSyntax();
+      setModeUI(false);
+      updateSyntaxCards();
+    }
+
+    function updateSyntaxCards() {
+      // Standard always works
+      const std = Collections.ClassName('ecard');
+      document.getElementById('std-result').textContent = std.length + ' elements';
+
+      // Enhanced only works when enabled
+      let enhResult;
+      try {
+        enhResult = Collections.ClassName.ecard;
+        document.getElementById('enh-result').textContent = enhResult.length + ' elements';
+        document.getElementById('enh-card').classList.add('active-enh');
+      } catch(e) {
+        document.getElementById('enh-result').textContent = 'Error: ' + e.message.substring(0, 40);
+        document.getElementById('enh-card').classList.remove('active-enh');
+      }
+    }
+
+    function tryBoth() {
+      const cls = document.getElementById('try-class').value.trim();
+      if (!cls) return;
+
+      // Standard
+      const stdEl  = document.getElementById('try-std');
+      const stdCol = Collections.ClassName(cls);
+      stdEl.className = 'try-result ok';
+      stdEl.textContent = 'Standard Collections.ClassName("' + cls + '") → ' + stdCol.length + ' elements';
+
+      // Enhanced
+      const enhEl = document.getElementById('try-enh');
+      try {
+        const enhCol = Collections.ClassName[cls];
+        enhEl.className = 'try-result ok';
+        enhEl.textContent = 'Enhanced Collections.ClassName.' + cls + ' → ' + enhCol.length + ' elements';
+        // Flash elements
+        for (let i = 0; i < enhCol.length; i++) {
+          enhCol[i].classList.add('lit');
+          setTimeout(() => enhCol[i].classList.remove('lit'), 700);
+        }
+      } catch(e) {
+        enhEl.className = 'try-result err';
+        enhEl.textContent = 'Enhanced syntax not available: ' + e.message.substring(0, 60);
+      }
+    }
+
+    // Init
+    updateSyntaxCards();
+
+    // ── Automated tests ───────────────────────────────────────────────────────
+
+    // 1. Standard syntax always works
+    const std1 = Collections.ClassName('ecard');
+    addResult(std1.length === 3, 'standard syntax works before enable', 'length: ' + std1.length);
+
+    // 2. enableEnhancedSyntax() returns undefined or Collections (for chaining)
+    const ret = Collections.enableEnhancedSyntax();
+    addResult(ret === undefined || ret === Collections, 'enableEnhancedSyntax() returns undefined or Collections', 'returned: ' + typeof ret);
+
+    // 3. Dot-access works after enabling
+    let dotWorks = false;
+    try {
+      const col = Collections.ClassName.ecard;
+      dotWorks = col.length === 3;
+    } catch(e) { /* not supported */ }
+    addResult(dotWorks, 'dot-access Collections.ClassName.ecard works after enable', dotWorks ? '3 elements' : 'not available');
+
+    // 4. Standard syntax still works after enabling
+    const std2 = Collections.ClassName('ecard');
+    addResult(std2.length === 3, 'standard syntax still works after enableEnhancedSyntax()', 'length: ' + std2.length);
+
+    // 5. disableEnhancedSyntax() — dot-access no longer works (or falls back)
+    Collections.disableEnhancedSyntax();
+    let dotDisabled = true;
+    try {
+      const col = Collections.ClassName.ecard;
+      // If it returned a collection rather than throwing, enhanced syntax may still proxy
+      // In some implementations, it returns undefined or an empty result when disabled
+      dotDisabled = (col === undefined || (col && col.length === 0));
+    } catch(e) {
+      dotDisabled = true; // threw = correctly disabled
+    }
+    addResult(dotDisabled, 'dot-access unavailable/returns undefined after disableEnhancedSyntax()', '');
+
+    // 6. Standard syntax still works after disable
+    const std3 = Collections.ClassName('ecard');
+    addResult(std3.length === 3, 'standard syntax works after disableEnhancedSyntax()', 'length: ' + std3.length);
+
+    // 7. Re-enable works again
+    Collections.enableEnhancedSyntax();
+    let dotWorksAgain = false;
+    try {
+      const col = Collections.ClassName.ecard;
+      dotWorksAgain = col.length === 3;
+    } catch(e) {}
+    addResult(dotWorksAgain, 'dot-access works again after re-enabling', dotWorksAgain ? '3 elements' : 'not available');
+
+    // Update UI to reflect final state
+    setModeUI(true);
+    updateSyntaxCards();
+  </script>
+</body>
+</html>

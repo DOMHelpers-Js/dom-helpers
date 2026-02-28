@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: Collections.stats()</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
+
+    /* ── Stats dashboard ── */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px; margin-bottom: 20px;
+    }
+    .stat-card {
+      background: #fff; border-radius: 12px; padding: 18px 16px;
+      border: 2px solid #dde1e7; text-align: center; transition: border-color .3s;
+    }
+    .stat-card .label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+    .stat-card .value { font-size: 28px; font-weight: 700; color: #4f46e5; font-family: monospace; transition: color .3s; }
+    .stat-card .sub { font-size: 11px; color: #aaa; margin-top: 4px; font-family: monospace; }
+    .stat-card.highlight { border-color: #818cf8; background: #f5f3ff; }
+    .stat-card.highlight .value { color: #4f46e5; }
+
+    /* ── Action buttons ── */
+    .controls {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: #fff; padding: 12px 16px; border-radius: 10px;
+      border: 1px solid #e2e8f0; margin-bottom: 14px;
+    }
+    .btn { padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: #fff; }
+    .btn-hit  { background: #4f46e5; } .btn-hit:hover  { background: #4338ca; }
+    .btn-miss { background: #dc2626; } .btn-miss:hover { background: #b91c1c; }
+    .btn-reset { background: #6b7280; } .btn-reset:hover { background: #4b5563; }
+    .btn-refresh { background: #0891b2; } .btn-refresh:hover { background: #0e7490; }
+
+    /* ── Demo elements (hidden targets) ── */
+    .demo-elements { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .demo-el {
+      padding: 8px 14px; border-radius: 8px; background: #fff;
+      border: 2px solid #dde1e7; font-size: 13px; font-weight: 600; color: #555;
+      transition: all .25s;
+    }
+    .demo-el.queried { border-color: #818cf8; background: #f5f3ff; color: #4f46e5; }
+
+    /* ── Log panel ── */
+    .log-panel {
+      background: #1e1e2e; border-radius: 10px; padding: 14px 16px;
+      font-family: monospace; font-size: 12px; color: #cdd6f4;
+      max-height: 160px; overflow-y: auto; margin-bottom: 20px;
+    }
+    .log-panel .log-line { padding: 2px 0; border-bottom: 1px solid #313244; }
+    .log-panel .log-line:last-child { border: none; }
+    .log-panel .log-hit  { color: #a6e3a1; }
+    .log-panel .log-miss { color: #f38ba8; }
+    .log-panel .log-info { color: #89dceb; }
+
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 8px; padding: 10px 14px; border-left: 4px solid #ccc; font-size: 14px; color: #333; }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <h1>Demo — <code>Collections.stats()</code></h1>
+  <p class="subtitle">Returns a snapshot of the internal cache statistics: hits, misses, cache size, hit rate, and uptime. Every <code>Collections.ClassName()</code> / <code>TagName()</code> call updates the counters.</p>
+
+  <!-- ── Live stat cards ── -->
+  <h2>Live statistics dashboard</h2>
+  <div class="stats-grid" id="stats-grid">
+    <div class="stat-card" id="sc-hits">
+      <div class="label">hits</div>
+      <div class="value" id="sv-hits">—</div>
+      <div class="sub">cache hits</div>
+    </div>
+    <div class="stat-card" id="sc-misses">
+      <div class="label">misses</div>
+      <div class="value" id="sv-misses">—</div>
+      <div class="sub">cache misses</div>
+    </div>
+    <div class="stat-card" id="sc-hitrate">
+      <div class="label">hit rate</div>
+      <div class="value" id="sv-hitrate">—</div>
+      <div class="sub">% of cache hits</div>
+    </div>
+    <div class="stat-card" id="sc-cachesize">
+      <div class="label">cache size</div>
+      <div class="value" id="sv-cachesize">—</div>
+      <div class="sub">entries in cache</div>
+    </div>
+    <div class="stat-card" id="sc-uptime">
+      <div class="label">uptime</div>
+      <div class="value" id="sv-uptime">—</div>
+      <div class="sub">ms since init</div>
+    </div>
+  </div>
+
+  <!-- ── Demo elements ── -->
+  <h2>Query targets (use the buttons to trigger hits/misses)</h2>
+  <div class="demo-elements">
+    <div class="demo-el dcard" id="d1">Card A</div>
+    <div class="demo-el dcard" id="d2">Card B</div>
+    <div class="demo-el dcard" id="d3">Card C</div>
+    <div class="demo-el xcard" id="d4">Other</div>
+    <div class="demo-el xcard" id="d5">Other</div>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-hit"   onclick="doHit()">Cache HIT — query 'dcard' again</button>
+    <button class="btn btn-miss"  onclick="doMiss()">Cache MISS — query 'zzz' (new)</button>
+    <button class="btn btn-refresh" onclick="refreshStats()">Refresh stats display</button>
+  </div>
+
+  <!-- ── Log panel ── -->
+  <h2>Query log</h2>
+  <div class="log-panel" id="log-panel">
+    <div class="log-line log-info">— Waiting for first query —</div>
+  </div>
+
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.3/dist/dom-helpers.min.js"></script>
+ 
+  <script>
+    const resultsEl = document.getElementById('results');
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML = '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span><strong>' + label + '</strong>' + (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    let queryCount = 0;
+
+    function refreshStats() {
+      const s = Collections.stats();
+      document.getElementById('sv-hits').textContent      = s.hits;
+      document.getElementById('sv-misses').textContent    = s.misses;
+      document.getElementById('sv-hitrate').textContent   = (s.hitRate * 100).toFixed(1) + '%';
+      document.getElementById('sv-cachesize').textContent = s.cacheSize;
+      document.getElementById('sv-uptime').textContent    = s.uptime;
+
+      // Highlight changed cards
+      ['sc-hits','sc-misses','sc-hitrate','sc-cachesize','sc-uptime'].forEach(id => {
+        const card = document.getElementById(id);
+        card.classList.add('highlight');
+        setTimeout(() => card.classList.remove('highlight'), 600);
+      });
+    }
+
+    function logLine(text, cls) {
+      const panel = document.getElementById('log-panel');
+      // Remove placeholder
+      const placeholder = panel.querySelector('.log-info');
+      if (placeholder && placeholder.textContent.includes('Waiting')) placeholder.remove();
+
+      const line = document.createElement('div');
+      line.className = 'log-line ' + cls;
+      line.textContent = '[' + queryCount + '] ' + text;
+      panel.appendChild(line);
+      panel.scrollTop = panel.scrollHeight;
+    }
+
+    function doHit() {
+      queryCount++;
+      // First call populates cache; second+ call hits cache
+      const col = Collections.ClassName('dcard');
+      const s   = Collections.stats();
+
+      document.querySelectorAll('.dcard').forEach(el => {
+        el.classList.add('queried');
+        setTimeout(() => el.classList.remove('queried'), 500);
+      });
+
+      logLine("Collections.ClassName('dcard') → " + col.length + ' elements  [hits: ' + s.hits + ', misses: ' + s.misses + ']', 'log-hit');
+      refreshStats();
+    }
+
+    function doMiss() {
+      queryCount++;
+      Collections.ClassName('zzz' + queryCount); // always new → always miss
+      const s = Collections.stats();
+      logLine("Collections.ClassName('zzz" + queryCount + "') → 0 elements  [hits: " + s.hits + ', misses: ' + s.misses + ']', 'log-miss');
+      refreshStats();
+    }
+
+    // ── Initial display ──────────────────────────────────────────────────────
+    Collections.ClassName('dcard'); // warm up
+    refreshStats();
+
+    // ── Automated tests ───────────────────────────────────────────────────────
+    const s0 = Collections.stats();
+
+    addResult(typeof s0 === 'object' && s0 !== null, 'stats() returns an object', JSON.stringify(Object.keys(s0)));
+
+    addResult(typeof s0.hits === 'number',     'stats().hits is a number',      'value: ' + s0.hits);
+    addResult(typeof s0.misses === 'number',   'stats().misses is a number',    'value: ' + s0.misses);
+    addResult(typeof s0.cacheSize === 'number','stats().cacheSize is a number', 'value: ' + s0.cacheSize);
+    addResult(typeof s0.hitRate === 'number',  'stats().hitRate is a number',   'value: ' + s0.hitRate);
+    addResult(typeof s0.uptime === 'number',   'stats().uptime is a number',    'value: ' + s0.uptime + 'ms');
+
+    // hitRate between 0 and 1
+    addResult(s0.hitRate >= 0 && s0.hitRate <= 1, 'hitRate is between 0 and 1', s0.hitRate.toFixed(3));
+
+    // cacheSize grows after new query
+    const sizeBefore = Collections.stats().cacheSize;
+    Collections.ClassName('unique-class-abc123');
+    const sizeAfter  = Collections.stats().cacheSize;
+    addResult(sizeAfter >= sizeBefore, 'cacheSize grows after new query', sizeBefore + ' → ' + sizeAfter);
+
+    // misses grow on unknown class
+    const missesBefore = Collections.stats().misses;
+    Collections.ClassName('definitely-does-not-exist-xyz');
+    const missesAfter  = Collections.stats().misses;
+    addResult(missesAfter > missesBefore, 'misses increment on cache miss', missesBefore + ' → ' + missesAfter);
+
+    // hits grow on repeated query
+    Collections.ClassName('dcard');
+    const hitsBefore = Collections.stats().hits;
+    Collections.ClassName('dcard');
+    const hitsAfter  = Collections.stats().hits;
+    addResult(hitsAfter > hitsBefore, 'hits increment on cache hit', hitsBefore + ' → ' + hitsAfter);
+
+    // uptime positive
+    addResult(s0.uptime >= 0, 'uptime is non-negative', s0.uptime + 'ms');
+
+    refreshStats();
+  </script>
+</body>
+</html>

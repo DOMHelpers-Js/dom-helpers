@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: Collections.getMultiple()</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
+
+    /* ── Request builder ── */
+    .request-builder {
+      background: #fff; border-radius: 12px; padding: 18px 20px;
+      border: 2px solid #dde1e7; margin-bottom: 16px;
+    }
+    .request-builder h3 { font-size: 12px; font-weight: 700; color: #888; text-transform: uppercase; margin-bottom: 12px; }
+    .req-row {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+      background: #f8fafc; border-radius: 8px; padding: 10px 12px;
+      border: 1.5px solid #e2e8f0;
+    }
+    .req-row select, .req-row input {
+      padding: 5px 8px; border: 1px solid #dde1e7; border-radius: 6px;
+      font-size: 12px; font-family: monospace; outline: none;
+    }
+    .req-row input { width: 120px; }
+    .req-row .as-input { width: 100px; }
+    .req-row label { font-size: 11px; color: #888; font-weight: 600; }
+
+    /* ── Controls ── */
+    .controls {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: #fff; padding: 12px 16px; border-radius: 10px;
+      border: 1px solid #e2e8f0; margin-bottom: 14px;
+    }
+    .btn { padding: 7px 18px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: #fff; }
+    .btn-run   { background: #4f46e5; } .btn-run:hover   { background: #4338ca; }
+    .btn-reset { background: #6b7280; } .btn-reset:hover { background: #4b5563; }
+
+    /* ── Result panel ── */
+    .result-panel {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 10px; margin-bottom: 20px;
+    }
+    .result-card {
+      background: #fff; border-radius: 10px; padding: 14px 16px;
+      border: 2px solid #dde1e7; transition: all .3s;
+    }
+    .result-card.populated { border-color: #818cf8; background: #f5f3ff; }
+    .result-card .key-label {
+      font-family: monospace; font-size: 11px; color: #818cf8;
+      font-weight: 700; margin-bottom: 6px;
+    }
+    .result-card .count {
+      font-size: 26px; font-weight: 700; color: #4f46e5;
+    }
+    .result-card .els { font-size: 11px; color: #888; margin-top: 4px; font-family: monospace; }
+
+    /* ── Demo elements ── */
+    .demo-section { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; align-items: center; }
+    .demo-label { font-size: 11px; font-weight: 700; color: #888; min-width: 80px; }
+    .demo-el {
+      padding: 6px 12px; border-radius: 8px; background: #fff;
+      border: 2px solid #dde1e7; font-size: 12px; font-weight: 600; color: #555;
+      transition: all .25s;
+    }
+    .demo-el.lit { border-color: #818cf8; background: #ede9fe; color: #5b21b6; }
+
+    /* ── Code preview ── */
+    .code-preview {
+      background: #1e1e2e; border-radius: 10px; padding: 14px 16px;
+      font-family: monospace; font-size: 12px; color: #cdd6f4;
+      white-space: pre; overflow-x: auto; margin-bottom: 16px;
+    }
+    .kw { color: #cba6f7; }
+    .str { color: #a6e3a1; }
+    .key { color: #89dceb; }
+
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 8px; padding: 10px 14px; border-left: 4px solid #ccc; font-size: 14px; color: #333; }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <h1>Demo — <code>Collections.getMultiple(requests)</code></h1>
+  <p class="subtitle">Fetches several collections in one call. Pass an array of <code>{type, value, as?}</code> objects — the method returns a plain object keyed by the <code>as</code> alias (or <code>type_value</code> if not provided).</p>
+
+  <!-- ── Demo elements ── -->
+  <h2>Demo elements in the page</h2>
+  <div class="demo-section">
+    <span class="demo-label">class=mcard</span>
+    <div class="demo-el mcard" id="m1">Apple</div>
+    <div class="demo-el mcard" id="m2">Banana</div>
+    <div class="demo-el mcard" id="m3">Cherry</div>
+  </div>
+  <div class="demo-section">
+    <span class="demo-label">class=ncard</span>
+    <div class="demo-el ncard" id="n1">Dog</div>
+    <div class="demo-el ncard" id="n2">Elephant</div>
+  </div>
+  <div class="demo-section">
+    <span class="demo-label">tag=button</span>
+    <button class="demo-el" id="b1">Btn 1</button>
+    <button class="demo-el" id="b2">Btn 2</button>
+  </div>
+
+  <!-- ── Request builder ── -->
+  <h2>Request array (editable)</h2>
+  <div class="request-builder">
+    <h3>Requests passed to getMultiple()</h3>
+    <div class="req-row">
+      <label>type:</label>
+      <select id="t1"><option value="className">className</option><option value="tagName">tagName</option><option value="name">name</option></select>
+      <label>value:</label>
+      <input id="v1" value="mcard" />
+      <label>as:</label>
+      <input id="a1" class="as-input" value="fruits" placeholder="(optional)" />
+    </div>
+    <div class="req-row">
+      <label>type:</label>
+      <select id="t2"><option value="className">className</option><option value="tagName">tagName</option><option value="name">name</option></select>
+      <label>value:</label>
+      <input id="v2" value="ncard" />
+      <label>as:</label>
+      <input id="a2" class="as-input" value="animals" placeholder="(optional)" />
+    </div>
+    <div class="req-row">
+      <label>type:</label>
+      <select id="t3"><option value="tagName" selected>tagName</option><option value="className">className</option><option value="name">name</option></select>
+      <label>value:</label>
+      <input id="v3" value="button" />
+      <label>as:</label>
+      <input id="a3" class="as-input" placeholder="(optional)" />
+    </div>
+  </div>
+
+  <!-- ── Code preview ── -->
+  <div class="code-preview" id="code-preview">Loading…</div>
+
+  <!-- ── Controls ── -->
+  <div class="controls">
+    <button class="btn btn-run"   onclick="runGetMultiple()">Run getMultiple()</button>
+    <button class="btn btn-reset" onclick="resetHighlights()">Clear highlights</button>
+  </div>
+
+  <!-- ── Results ── -->
+  <h2>Returned object keys</h2>
+  <div class="result-panel" id="result-panel">
+    <div style="color:#aaa;font-size:13px;font-style:italic;padding:10px;">Run getMultiple() to see results here</div>
+  </div>
+
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+ <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.3/dist/dom-helpers.min.js"></script>
+ 
+  <script>
+    const resultsEl = document.getElementById('results');
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML = '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span><strong>' + label + '</strong>' + (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    function buildRequests() {
+      const rows = [
+        { t: document.getElementById('t1'), v: document.getElementById('v1'), a: document.getElementById('a1') },
+        { t: document.getElementById('t2'), v: document.getElementById('v2'), a: document.getElementById('a2') },
+        { t: document.getElementById('t3'), v: document.getElementById('v3'), a: document.getElementById('a3') },
+      ];
+      return rows.map(r => {
+        const req = { type: r.t.value, value: r.v.value.trim() };
+        if (r.a.value.trim()) req.as = r.a.value.trim();
+        return req;
+      }).filter(r => r.value);
+    }
+
+    function updateCodePreview(requests) {
+      const lines = requests.map(r => {
+        const parts = ['  { <span class="key">type</span>: <span class="str">"' + r.type + '"</span>, <span class="key">value</span>: <span class="str">"' + r.value + '"</span>'];
+        if (r.as) parts.push(', <span class="key">as</span>: <span class="str">"' + r.as + '"</span>');
+        return parts.join('') + ' }';
+      });
+      document.getElementById('code-preview').innerHTML =
+        '<span class="kw">const</span> result = Collections.getMultiple([\n' +
+        lines.join(',\n') + '\n]);\n\n' +
+        '<span class="kw">// Access via key:</span>\n' +
+        requests.map(r => {
+          const key = r.as || (r.type + '_' + r.value);
+          return 'result.<span class="key">' + key + '</span>.length  <span class="kw">// →</span> ?';
+        }).join('\n');
+    }
+
+    function runGetMultiple() {
+      const requests = buildRequests();
+      updateCodePreview(requests);
+
+      const result = Collections.getMultiple(requests);
+      renderResultCards(result, requests);
+      highlightElements(result);
+    }
+
+    function renderResultCards(result, requests) {
+      const panel = document.getElementById('result-panel');
+      panel.innerHTML = '';
+
+      Object.entries(result).forEach(([key, col]) => {
+        const card = document.createElement('div');
+        card.className = 'result-card populated';
+        const ids = [];
+        for (let i = 0; i < col.length; i++) ids.push('#' + col[i].id);
+        card.innerHTML =
+          '<div class="key-label">result.' + key + '</div>' +
+          '<div class="count">' + col.length + '</div>' +
+          '<div class="els">' + (ids.length ? ids.join(', ') : 'empty collection') + '</div>';
+        panel.appendChild(card);
+      });
+    }
+
+    function highlightElements(result) {
+      // Clear old highlights
+      document.querySelectorAll('.demo-el').forEach(el => el.classList.remove('lit'));
+
+      Object.values(result).forEach(col => {
+        for (let i = 0; i < col.length; i++) {
+          if (col[i].classList) col[i].classList.add('lit');
+        }
+      });
+      setTimeout(() => document.querySelectorAll('.demo-el.lit').forEach(el => el.classList.remove('lit')), 1200);
+    }
+
+    function resetHighlights() {
+      document.querySelectorAll('.demo-el').forEach(el => el.classList.remove('lit'));
+    }
+
+    // ── Initial code preview ─────────────────────────────────────────────────
+    updateCodePreview(buildRequests());
+
+    // ── Automated tests ───────────────────────────────────────────────────────
+
+    // 1. Returns an object
+    const r1 = Collections.getMultiple([
+      { type: 'className', value: 'mcard', as: 'fruits' },
+      { type: 'className', value: 'ncard', as: 'animals' },
+    ]);
+    addResult(typeof r1 === 'object' && r1 !== null && !Array.isArray(r1), 'getMultiple() returns a plain object', 'type: ' + typeof r1);
+
+    // 2. Keys match 'as' aliases
+    addResult('fruits' in r1 && 'animals' in r1, 'keys match provided "as" aliases', Object.keys(r1).join(', '));
+
+    // 3. Correct counts
+    addResult(r1.fruits.length === 3,  'fruits collection has 3 elements (mcard)',  'length: ' + r1.fruits.length);
+    addResult(r1.animals.length === 2, 'animals collection has 2 elements (ncard)', 'length: ' + r1.animals.length);
+
+    // 4. Falls back to type_value when no 'as'
+    const r2 = Collections.getMultiple([
+      { type: 'className', value: 'mcard' }, // no 'as'
+    ]);
+    const expectedKey = 'className_mcard';
+    addResult(expectedKey in r2, 'key defaults to "type_value" when no "as" provided', 'key: ' + expectedKey);
+
+    // 5. tagName request
+    const r3 = Collections.getMultiple([
+      { type: 'tagName', value: 'button', as: 'buttons' },
+    ]);
+    addResult(r3.buttons.length >= 2, 'tagName request works correctly', 'found: ' + r3.buttons.length + ' buttons');
+
+    // 6. Empty value query returns empty-ish collection
+    const r4 = Collections.getMultiple([
+      { type: 'className', value: 'does-not-exist', as: 'empty' },
+    ]);
+    addResult(r4.empty.length === 0, 'empty result for non-existent class', 'length: ' + r4.empty.length);
+
+    // 7. Multiple requests batched — result has all keys
+    const r5 = Collections.getMultiple([
+      { type: 'className', value: 'mcard',  as: 'a' },
+      { type: 'className', value: 'ncard',  as: 'b' },
+      { type: 'tagName',   value: 'button', as: 'c' },
+    ]);
+    addResult(Object.keys(r5).length === 3, 'getMultiple() handles 3 requests at once', 'keys: ' + Object.keys(r5).join(', '));
+  </script>
+</body>
+</html>

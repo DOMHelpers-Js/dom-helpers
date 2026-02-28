@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: Collections.waitFor()</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
+
+    /* ── Timeline visualiser ── */
+    .timeline {
+      background: #fff; border-radius: 12px; padding: 18px 20px;
+      border: 2px solid #dde1e7; margin-bottom: 16px;
+    }
+    .timeline-track {
+      height: 10px; border-radius: 99px; background: #e2e8f0; margin: 14px 0;
+      position: relative; overflow: hidden;
+    }
+    .timeline-fill {
+      height: 100%; border-radius: 99px; background: linear-gradient(90deg, #818cf8, #4f46e5);
+      width: 0%; transition: width .1s linear;
+    }
+    .timeline-labels { display: flex; justify-content: space-between; font-size: 11px; color: #888; margin-top: 4px; }
+
+    /* ── State display ── */
+    .state-box {
+      border-radius: 10px; padding: 16px 20px; font-size: 15px; font-weight: 700;
+      font-family: monospace; text-align: center; margin-bottom: 16px;
+      border: 2px solid; transition: all .4s;
+    }
+    .state-box.waiting  { background: #fefce8; border-color: #fde047; color: #854d0e; }
+    .state-box.resolved { background: #f0fdf4; border-color: #86efac; color: #15803d; }
+    .state-box.rejected { background: #fff5f5; border-color: #fca5a5; color: #b91c1c; }
+    .state-box.idle     { background: #f8fafc; border-color: #e2e8f0; color: #94a3b8; }
+
+    /* ── Injected elements area ── */
+    .injection-area {
+      display: flex; gap: 8px; flex-wrap: wrap; min-height: 48px;
+      background: #fff; border-radius: 10px; padding: 10px 14px;
+      border: 2px dashed #dde1e7; margin-bottom: 16px; align-items: center;
+    }
+    .injection-area .placeholder { font-size: 13px; color: #aaa; font-style: italic; }
+    .injected-el {
+      padding: 8px 14px; border-radius: 8px; background: #f0fdf4;
+      border: 2px solid #86efac; font-size: 13px; font-weight: 600;
+      color: #15803d; animation: popIn .3s ease;
+    }
+    @keyframes popIn { from { opacity:0; transform: scale(.7); } to { opacity:1; transform: scale(1); } }
+
+    /* ── Config controls ── */
+    .config-row {
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+      background: #fff; padding: 12px 16px; border-radius: 10px;
+      border: 1px solid #e2e8f0; margin-bottom: 10px;
+    }
+    .config-row label { font-size: 13px; font-weight: 600; color: #555; }
+    .config-row input[type=number] {
+      width: 80px; padding: 6px 8px; border: 1.5px solid #dde1e7;
+      border-radius: 6px; font-size: 13px; font-family: monospace; outline: none;
+    }
+
+    .controls {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: #fff; padding: 12px 16px; border-radius: 10px;
+      border: 1px solid #e2e8f0; margin-bottom: 14px;
+    }
+    .btn { padding: 7px 18px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: #fff; }
+    .btn:disabled { opacity: .4; cursor: not-allowed; }
+    .btn-success { background: #16a34a; } .btn-success:hover:not(:disabled) { background: #15803d; }
+    .btn-timeout { background: #dc2626; } .btn-timeout:hover:not(:disabled) { background: #b91c1c; }
+    .btn-reset   { background: #6b7280; } .btn-reset:hover:not(:disabled)   { background: #4b5563; }
+
+    /* ── Log ── */
+    .log-panel {
+      background: #1e1e2e; border-radius: 10px; padding: 14px 16px;
+      font-family: monospace; font-size: 12px; color: #cdd6f4;
+      max-height: 160px; overflow-y: auto; margin-bottom: 20px;
+    }
+    .log-panel .log-line { padding: 2px 0; }
+    .log-ok  { color: #a6e3a1; }
+    .log-err { color: #f38ba8; }
+    .log-inf { color: #89dceb; }
+    .log-warn{ color: #f9e2af; }
+
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 8px; padding: 10px 14px; border-left: 4px solid #ccc; font-size: 14px; color: #333; }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <h1>Demo — <code>Collections.waitFor(type, value, minCount, timeout)</code></h1>
+  <p class="subtitle">Returns a <code>Promise</code> that resolves with a collection once at least <code>minCount</code> matching elements exist in the DOM, or rejects with an <code>Error</code> after the timeout (ms). Polls every 100 ms.</p>
+
+  <!-- ── State display ── -->
+  <h2>Promise state</h2>
+  <div class="state-box idle" id="state-box">— Idle — press a button below to start —</div>
+
+  <!-- ── Timeline ── -->
+  <div class="timeline">
+    <div style="font-size:12px;font-weight:700;color:#888;">Waiting… (poll every 100ms)</div>
+    <div class="timeline-track">
+      <div class="timeline-fill" id="timeline-fill"></div>
+    </div>
+    <div class="timeline-labels">
+      <span>0ms</span>
+      <span id="timeout-label">2000ms</span>
+    </div>
+  </div>
+
+  <!-- ── Injection area ── -->
+  <h2>Dynamic elements (injected into DOM)</h2>
+  <div class="injection-area" id="injection-area">
+    <span class="placeholder" id="inject-placeholder">Elements will appear here after a delay…</span>
+  </div>
+
+  <!-- ── Config ── -->
+  <div class="config-row">
+    <label>Inject after (ms):</label>
+    <input type="number" id="inject-delay" value="800" min="100" max="3000" step="100" />
+    <label>Timeout (ms):</label>
+    <input type="number" id="timeout-val" value="2000" min="300" max="8000" step="100" />
+    <label>minCount:</label>
+    <input type="number" id="min-count" value="1" min="1" max="5" />
+  </div>
+
+  <!-- ── Controls ── -->
+  <div class="controls">
+    <button class="btn btn-success" id="btn-success" onclick="runSuccess()">Demo: resolve (inject elements in time)</button>
+    <button class="btn btn-timeout" id="btn-timeout" onclick="runTimeout()">Demo: timeout (no elements added)</button>
+    <button class="btn btn-reset"   id="btn-reset"   onclick="doReset()">Reset</button>
+  </div>
+
+  <!-- ── Log ── -->
+  <h2>Async event log</h2>
+  <div class="log-panel" id="log-panel">
+    <div class="log-line log-inf">— Waiting for demo to start —</div>
+  </div>
+
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.3/dist/dom-helpers.min.js"></script>
+ 
+  <script>
+    const resultsEl = document.getElementById('results');
+    let timerInterval = null;
+    let running = false;
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML = '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span><strong>' + label + '</strong>' + (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    function log(msg, cls) {
+      const panel = document.getElementById('log-panel');
+      const line = document.createElement('div');
+      line.className = 'log-line ' + cls;
+      line.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
+      panel.appendChild(line);
+      panel.scrollTop = panel.scrollHeight;
+    }
+
+    function setState(state, text) {
+      const box = document.getElementById('state-box');
+      box.className = 'state-box ' + state;
+      box.textContent = text;
+    }
+
+    function startTimer(timeoutMs) {
+      const fill = document.getElementById('timeline-fill');
+      document.getElementById('timeout-label').textContent = timeoutMs + 'ms';
+      const start = Date.now();
+      timerInterval = setInterval(() => {
+        const elapsed = Date.now() - start;
+        const pct = Math.min(100, (elapsed / timeoutMs) * 100);
+        fill.style.width = pct + '%';
+        if (pct >= 100) clearInterval(timerInterval);
+      }, 50);
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+    }
+
+    function setButtons(disabled) {
+      document.getElementById('btn-success').disabled = disabled;
+      document.getElementById('btn-timeout').disabled = disabled;
+    }
+
+    function doReset() {
+      stopTimer();
+      running = false;
+      document.getElementById('timeline-fill').style.width = '0%';
+      document.getElementById('injection-area').innerHTML = '<span class="placeholder" id="inject-placeholder">Elements will appear here after a delay…</span>';
+      setState('idle', '— Idle — press a button below to start —');
+      setButtons(false);
+      // Remove any injected waitFor elements
+      document.querySelectorAll('.wcard').forEach(el => el.remove());
+    }
+
+    async function runSuccess() {
+      if (running) return;
+      running = true;
+      doReset();
+      running = true;
+      setButtons(true);
+
+      const delayMs   = +document.getElementById('inject-delay').value;
+      const timeoutMs = +document.getElementById('timeout-val').value;
+      const minCount  = +document.getElementById('min-count').value;
+
+      document.getElementById('inject-placeholder').style.display = 'none';
+
+      setState('waiting', 'waitFor() polling… waiting for ' + minCount + ' element(s) with class "wcard"');
+      log('Collections.waitFor("className","wcard",' + minCount + ',' + timeoutMs + ') started', 'log-inf');
+      startTimer(timeoutMs);
+
+      // Inject elements after delay
+      setTimeout(() => {
+        const area = document.getElementById('injection-area');
+        for (let i = 1; i <= minCount; i++) {
+          const el = document.createElement('div');
+          el.className = 'injected-el wcard';
+          el.textContent = 'Injected ' + i;
+          area.appendChild(el);
+        }
+        log('Injected ' + minCount + ' .wcard element(s) into DOM after ' + delayMs + 'ms', 'log-warn');
+      }, delayMs);
+
+      try {
+        const col = await Collections.waitFor('className', 'wcard', minCount, timeoutMs);
+        stopTimer();
+        document.getElementById('timeline-fill').style.background = 'linear-gradient(90deg,#86efac,#16a34a)';
+        setState('resolved', 'Promise resolved! Found ' + col.length + ' element(s) with class "wcard"');
+        log('Promise resolved → ' + col.length + ' element(s) found', 'log-ok');
+      } catch(e) {
+        stopTimer();
+        document.getElementById('timeline-fill').style.background = 'linear-gradient(90deg,#fca5a5,#dc2626)';
+        setState('rejected', 'Promise rejected: ' + e.message);
+        log('Promise rejected → ' + e.message, 'log-err');
+      }
+
+      setButtons(false);
+      running = false;
+    }
+
+    async function runTimeout() {
+      if (running) return;
+      running = true;
+      doReset();
+      running = true;
+      setButtons(true);
+
+      const timeoutMs = +document.getElementById('timeout-val').value;
+      const minCount  = +document.getElementById('min-count').value;
+
+      setState('waiting', 'waitFor() polling… no elements will be added — expecting timeout');
+      log('Collections.waitFor("className","wcard",' + minCount + ',' + timeoutMs + ') started (no injection)', 'log-inf');
+      startTimer(timeoutMs);
+
+      try {
+        await Collections.waitFor('className', 'wcard', minCount, timeoutMs);
+        stopTimer();
+        setState('resolved', 'Unexpected resolve');
+        log('Unexpectedly resolved', 'log-warn');
+      } catch(e) {
+        stopTimer();
+        document.getElementById('timeline-fill').style.background = 'linear-gradient(90deg,#fca5a5,#dc2626)';
+        setState('rejected', 'Promise rejected (expected): ' + e.message);
+        log('Promise correctly rejected after timeout → ' + e.message, 'log-ok');
+      }
+
+      setButtons(false);
+      running = false;
+    }
+
+    // ── Automated tests ───────────────────────────────────────────────────────
+    (async () => {
+      // 1. waitFor returns a Promise
+      const p = Collections.waitFor('className', 'mcard-exists', 1, 200);
+      addResult(p instanceof Promise, 'waitFor() returns a Promise', 'instanceof Promise: true');
+
+      // 2. Resolves when elements already exist
+      // Inject an element first
+      const existingEl = document.createElement('div');
+      existingEl.className = 'auto-test-el';
+      document.body.appendChild(existingEl);
+
+      try {
+        const col = await Collections.waitFor('className', 'auto-test-el', 1, 1000);
+        addResult(col.length >= 1, 'waitFor() resolves when element exists', 'found: ' + col.length);
+      } catch(e) {
+        addResult(false, 'waitFor() resolves when element exists', 'ERROR: ' + e.message);
+      }
+
+      // 3. Resolves when element appears later
+      const laterEl = document.createElement('div');
+      laterEl.className = 'later-el';
+      setTimeout(() => document.body.appendChild(laterEl), 300);
+      try {
+        const col = await Collections.waitFor('className', 'later-el', 1, 2000);
+        addResult(col.length >= 1, 'waitFor() resolves when element appears after delay', 'found: ' + col.length);
+      } catch(e) {
+        addResult(false, 'waitFor() resolves when element appears after delay', 'ERROR: ' + e.message);
+      }
+
+      // 4. Rejects on timeout
+      try {
+        await Collections.waitFor('className', 'never-exists-xyz', 1, 300);
+        addResult(false, 'waitFor() rejects on timeout', 'should have thrown');
+      } catch(e) {
+        addResult(e instanceof Error, 'waitFor() rejects with Error on timeout', e.message.substring(0, 60));
+      }
+
+      // Cleanup
+      existingEl.remove();
+      laterEl.remove();
+    })();
+  </script>
+</body>
+</html>

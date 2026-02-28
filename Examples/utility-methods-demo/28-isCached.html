@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: Collections.isCached()</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
+
+    /* ── Lookup panel ── */
+    .lookup-panel {
+      background: #fff; border-radius: 12px; padding: 18px 20px;
+      border: 2px solid #dde1e7; margin-bottom: 16px;
+    }
+    .lookup-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+    .lookup-row label { font-size: 13px; font-weight: 600; color: #555; min-width: 70px; }
+    .lookup-row select, .lookup-row input {
+      padding: 7px 10px; border: 1.5px solid #dde1e7; border-radius: 6px;
+      font-size: 13px; font-family: monospace; outline: none;
+    }
+    .lookup-row select:focus, .lookup-row input:focus { border-color: #818cf8; }
+    .lookup-row input { width: 160px; }
+    .btn { padding: 7px 18px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: #fff; }
+    .btn-check   { background: #4f46e5; } .btn-check:hover   { background: #4338ca; }
+    .btn-query   { background: #16a34a; } .btn-query:hover   { background: #15803d; }
+    .btn-clear   { background: #dc2626; } .btn-clear:hover   { background: #b91c1c; }
+
+    /* ── Result badge ── */
+    .check-result {
+      padding: 14px 18px; border-radius: 10px; font-size: 18px; font-weight: 700;
+      font-family: monospace; text-align: center; margin-bottom: 16px;
+      border: 2px solid; transition: all .3s;
+    }
+    .check-result.true-state  { background: #f0fdf4; border-color: #86efac; color: #16a34a; }
+    .check-result.false-state { background: #fff5f5; border-color: #fca5a5; color: #dc2626; }
+    .check-result.neutral     { background: #f8fafc; border-color: #e2e8f0; color: #94a3b8; }
+
+    /* ── Cache grid ── */
+    .cache-grid { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+    .cache-pill {
+      padding: 6px 14px; border-radius: 99px; font-family: monospace; font-size: 12px;
+      font-weight: 600; border: 1.5px solid; transition: all .3s;
+    }
+    .cache-pill.hit  { background: #ede9fe; border-color: #c4b5fd; color: #5b21b6; }
+    .cache-pill.miss { background: #f1f5f9; border-color: #cbd5e1; color: #64748b; }
+    .cache-pill.queried { background: #fef9c3; border-color: #fde047; color: #854d0e; animation: pulse .4s; }
+    @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+
+    /* ── Demo elements ── */
+    .demo-elements { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .demo-el {
+      padding: 8px 14px; border-radius: 8px; background: #fff;
+      border: 2px solid #dde1e7; font-size: 13px; font-weight: 600; color: #555;
+    }
+
+    /* ── Controls ── */
+    .controls {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: #fff; padding: 12px 16px; border-radius: 10px;
+      border: 1px solid #e2e8f0; margin-bottom: 14px;
+    }
+
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 8px; padding: 10px 14px; border-left: 4px solid #ccc; font-size: 14px; color: #333; }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <h1>Demo — <code>Collections.isCached(type, value)</code></h1>
+  <p class="subtitle">Returns <code>true</code> if the given query is already in the internal cache, <code>false</code> otherwise. Use it to inspect cache state without triggering a query. Type is <code>'className'</code>, <code>'tagName'</code>, or <code>'name'</code>.</p>
+
+  <!-- ── Demo elements ── -->
+  <h2>Demo elements</h2>
+  <div class="demo-elements">
+    <div class="demo-el icard" id="i1">Alpha</div>
+    <div class="demo-el icard" id="i2">Beta</div>
+    <div class="demo-el icard" id="i3">Gamma</div>
+    <div class="demo-el jcard" id="i4">Delta</div>
+    <div class="demo-el jcard" id="i5">Epsilon</div>
+  </div>
+
+  <!-- ── Interactive lookup ── -->
+  <h2>Check if a query is cached</h2>
+  <div class="lookup-panel">
+    <div class="lookup-row">
+      <label>Type:</label>
+      <select id="lu-type">
+        <option value="className">className</option>
+        <option value="tagName">tagName</option>
+        <option value="name">name</option>
+      </select>
+    </div>
+    <div class="lookup-row">
+      <label>Value:</label>
+      <input type="text" id="lu-value" value="icard" placeholder="e.g. icard" />
+    </div>
+    <div class="lookup-row">
+      <button class="btn btn-check" onclick="doCheck()">isCached(type, value)</button>
+      <button class="btn btn-query" onclick="doQuery()">Query first, then check</button>
+    </div>
+  </div>
+
+  <!-- ── Result display ── -->
+  <div class="check-result neutral" id="check-result">
+    — Run a check above —
+  </div>
+
+  <!-- ── Cache pills ── -->
+  <h2>Known cache entries</h2>
+  <div class="cache-grid" id="cache-grid">
+    <span style="color:#aaa;font-size:13px;font-style:italic;">No queries made yet</span>
+  </div>
+
+  <!-- ── Controls ── -->
+  <div class="controls">
+    <button class="btn btn-query" onclick="populateCache()">Populate cache (icard + jcard + div)</button>
+    <button class="btn btn-clear" onclick="doClear()">Collections.clear()</button>
+  </div>
+
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.3/dist/dom-helpers.min.js"></script>
+ 
+  <script>
+    const resultsEl = document.getElementById('results');
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML = '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span><strong>' + label + '</strong>' + (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    const knownKeys = [
+      { type: 'className', value: 'icard' },
+      { type: 'className', value: 'jcard' },
+      { type: 'tagName',   value: 'div'   },
+      { type: 'className', value: 'never-queried' },
+    ];
+
+    function refreshCacheGrid(highlight) {
+      const grid = document.getElementById('cache-grid');
+      grid.innerHTML = '';
+
+      knownKeys.forEach(k => {
+        const cached = Collections.isCached(k.type, k.value);
+        const pill = document.createElement('span');
+        pill.className = 'cache-pill ' + (cached ? 'hit' : 'miss');
+        if (highlight && k.type === highlight.type && k.value === highlight.value) {
+          pill.classList.add('queried');
+        }
+        pill.textContent = k.type + ':' + k.value + ' → ' + (cached ? 'true' : 'false');
+        grid.appendChild(pill);
+      });
+    }
+
+    function doCheck() {
+      const type  = document.getElementById('lu-type').value;
+      const value = document.getElementById('lu-value').value.trim();
+      const result = Collections.isCached(type, value);
+
+      const box = document.getElementById('check-result');
+      box.className = 'check-result ' + (result ? 'true-state' : 'false-state');
+      box.textContent = 'Collections.isCached("' + type + '", "' + value + '") → ' + result;
+
+      refreshCacheGrid({ type, value });
+    }
+
+    function doQuery() {
+      const type  = document.getElementById('lu-type').value;
+      const value = document.getElementById('lu-value').value.trim();
+
+      if (type === 'className')    Collections.ClassName(value);
+      else if (type === 'tagName') Collections.TagName(value);
+      else                         Collections.Name(value);
+
+      doCheck();
+    }
+
+    function populateCache() {
+      Collections.ClassName('icard');
+      Collections.ClassName('jcard');
+      Collections.TagName('div');
+      refreshCacheGrid(null);
+    }
+
+    function doClear() {
+      Collections.clear();
+      refreshCacheGrid(null);
+      const box = document.getElementById('check-result');
+      box.className = 'check-result false-state';
+      box.textContent = 'Collections.clear() called — all entries removed';
+    }
+
+    // ── Initial display ──────────────────────────────────────────────────────
+    refreshCacheGrid(null);
+
+    // ── Automated tests ───────────────────────────────────────────────────────
+
+    // 1. Returns boolean
+    Collections.clear();
+    const r1 = Collections.isCached('className', 'icard');
+    addResult(typeof r1 === 'boolean', 'isCached() returns a boolean', 'type: ' + typeof r1);
+
+    // 2. Returns false before querying
+    addResult(r1 === false, 'isCached() → false before first query', 'returned: ' + r1);
+
+    // 3. Returns true after query
+    Collections.ClassName('icard');
+    const r2 = Collections.isCached('className', 'icard');
+    addResult(r2 === true, 'isCached() → true after querying the class', 'returned: ' + r2);
+
+    // 4. Unknown class still false
+    const r3 = Collections.isCached('className', 'not-a-real-class');
+    addResult(r3 === false, 'isCached() → false for never-queried class', 'returned: ' + r3);
+
+    // 5. tagName variant
+    Collections.TagName('span');
+    const r4 = Collections.isCached('tagName', 'span');
+    addResult(r4 === true, 'isCached("tagName", "span") → true after TagName("span")', 'returned: ' + r4);
+
+    // 6. After clear() → all false
+    Collections.clear();
+    const r5 = Collections.isCached('className', 'icard');
+    addResult(r5 === false, 'isCached() → false after Collections.clear()', 'returned: ' + r5);
+
+    // 7. Re-query after clear → true again
+    Collections.ClassName('jcard');
+    const r6 = Collections.isCached('className', 'jcard');
+    addResult(r6 === true, 'isCached() → true after re-querying post-clear', 'returned: ' + r6);
+
+    // 8. Case sensitivity: 'icard' ≠ 'ICard'
+    Collections.ClassName('icard');
+    const r7 = Collections.isCached('className', 'ICard');
+    addResult(r7 === false, 'isCached() is case-sensitive ("icard" ≠ "ICard")', 'returned: ' + r7);
+
+    // Refresh display after tests
+    populateCache();
+    refreshCacheGrid(null);
+  </script>
+</body>
+</html>

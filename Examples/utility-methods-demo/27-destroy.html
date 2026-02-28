@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: Collections.destroy()</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
+
+    /* ── State indicator ── */
+    .state-banner {
+      border-radius: 12px; padding: 20px 24px; margin-bottom: 20px;
+      border: 2px solid; transition: all .4s; text-align: center;
+    }
+    .state-banner.alive  { background: #f0fdf4; border-color: #86efac; }
+    .state-banner.dead   { background: #fff5f5; border-color: #fca5a5; }
+    .state-banner .state-label { font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+    .state-banner.alive  .state-label { color: #16a34a; }
+    .state-banner.dead   .state-label { color: #dc2626; }
+    .state-banner .state-sub { font-size: 13px; color: #888; font-family: monospace; }
+
+    /* ── Lifecycle steps ── */
+    .lifecycle { display: flex; gap: 0; margin-bottom: 20px; }
+    .step {
+      flex: 1; padding: 14px 10px; text-align: center; font-size: 12px;
+      font-weight: 600; color: #aaa; border: 2px solid #e2e8f0;
+      background: #fff; position: relative;
+    }
+    .step:not(:last-child)::after {
+      content: '→'; position: absolute; right: -14px; top: 50%;
+      transform: translateY(-50%); color: #aaa; font-size: 18px; z-index: 1;
+    }
+    .step:first-child { border-radius: 10px 0 0 10px; }
+    .step:last-child  { border-radius: 0 10px 10px 0; }
+    .step.active { background: #f0fdf4; border-color: #86efac; color: #15803d; }
+    .step.done   { background: #fef3c7; border-color: #fcd34d; color: #92400e; }
+    .step.destroyed { background: #fff5f5; border-color: #fca5a5; color: #b91c1c; }
+    .step .step-num { font-size: 20px; font-weight: 700; display: block; margin-bottom: 4px; }
+
+    /* ── Controls ── */
+    .controls {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: #fff; padding: 12px 16px; border-radius: 10px;
+      border: 1px solid #e2e8f0; margin-bottom: 14px;
+    }
+    .btn { padding: 7px 18px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: #fff; transition: background .15s; }
+    .btn:disabled { opacity: .4; cursor: not-allowed; }
+    .btn-query   { background: #4f46e5; } .btn-query:hover:not(:disabled)   { background: #4338ca; }
+    .btn-destroy { background: #dc2626; } .btn-destroy:hover:not(:disabled) { background: #b91c1c; }
+    .btn-after   { background: #d97706; } .btn-after:hover:not(:disabled)   { background: #b45309; }
+
+    /* ── Demo elements ── */
+    .demo-elements { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .demo-el {
+      padding: 8px 14px; border-radius: 8px; background: #fff;
+      border: 2px solid #dde1e7; font-size: 13px; font-weight: 600; color: #555;
+    }
+
+    /* ── Log panel ── */
+    .log-panel {
+      background: #1e1e2e; border-radius: 10px; padding: 14px 16px;
+      font-family: monospace; font-size: 12px; color: #cdd6f4;
+      max-height: 180px; overflow-y: auto; margin-bottom: 20px;
+    }
+    .log-panel .log-line { padding: 2px 0; }
+    .log-ok      { color: #a6e3a1; }
+    .log-warn    { color: #f9e2af; }
+    .log-err     { color: #f38ba8; }
+    .log-neutral { color: #89dceb; }
+
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 8px; padding: 10px 14px; border-left: 4px solid #ccc; font-size: 14px; color: #333; }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <h1>Demo — <code>Collections.destroy()</code></h1>
+  <p class="subtitle">Destroys the Collections helper: disconnects its internal <code>MutationObserver</code>, clears any timers, and empties the cache. After destruction, <code>Collections.stats().cacheSize</code> is 0 and no more DOM watching happens.</p>
+
+  <!-- ── State banner ── -->
+  <h2>Helper state</h2>
+  <div class="state-banner alive" id="state-banner">
+    <div class="state-label" id="state-label">ALIVE</div>
+    <div class="state-sub" id="state-sub">Collections helper is running normally</div>
+  </div>
+
+  <!-- ── Lifecycle steps ── -->
+  <div class="lifecycle">
+    <div class="step active" id="step-init">
+      <span class="step-num">1</span>Initialised
+    </div>
+    <div class="step" id="step-query">
+      <span class="step-num">2</span>Cache populated
+    </div>
+    <div class="step" id="step-destroy">
+      <span class="step-num">3</span>Destroyed
+    </div>
+    <div class="step" id="step-after">
+      <span class="step-num">4</span>Post-destroy
+    </div>
+  </div>
+
+  <!-- ── Demo elements ── -->
+  <h2>Demo elements</h2>
+  <div class="demo-elements">
+    <div class="demo-el dcard" id="d1">Alpha</div>
+    <div class="demo-el dcard" id="d2">Beta</div>
+    <div class="demo-el dcard" id="d3">Gamma</div>
+  </div>
+
+  <!-- ── Controls ── -->
+  <div class="controls">
+    <button class="btn btn-query"   id="btn-query"   onclick="doQuery()">1. Query (populate cache)</button>
+    <button class="btn btn-destroy" id="btn-destroy" onclick="doDestroy()">2. Collections.destroy()</button>
+    <button class="btn btn-after"   id="btn-after"   onclick="doAfter()" disabled>3. Check state after destroy</button>
+  </div>
+
+  <!-- ── Log panel ── -->
+  <h2>Event log</h2>
+  <div class="log-panel" id="log-panel">
+    <div class="log-line log-neutral">— Helper initialised and ready —</div>
+  </div>
+
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.3/dist/dom-helpers.min.js"></script>
+ 
+  <script>
+    const resultsEl = document.getElementById('results');
+    let destroyed = false;
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML = '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span><strong>' + label + '</strong>' + (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    function log(msg, cls) {
+      const panel = document.getElementById('log-panel');
+      const line = document.createElement('div');
+      line.className = 'log-line ' + cls;
+      line.textContent = msg;
+      panel.appendChild(line);
+      panel.scrollTop = panel.scrollHeight;
+    }
+
+    function setStep(id) {
+      ['step-init','step-query','step-destroy','step-after'].forEach((s, i) => {
+        const el = document.getElementById(s);
+        el.className = 'step';
+        if (s === id) el.classList.add('active');
+        else if (['step-init','step-query'].includes(s) && id !== 'step-init') el.classList.add('done');
+      });
+      if (id === 'step-destroy' || id === 'step-after') {
+        document.getElementById('step-destroy').className = 'step ' + (id === 'step-destroy' ? 'active' : 'destroyed');
+      }
+    }
+
+    function doQuery() {
+      Collections.ClassName('dcard');
+      Collections.ClassName('dcard'); // second call = hit
+      const s = Collections.stats();
+      log('Collections.ClassName("dcard") called twice → cacheSize: ' + s.cacheSize + ', hits: ' + s.hits, 'log-ok');
+      setStep('step-query');
+      document.getElementById('btn-destroy').disabled = false;
+    }
+
+    function doDestroy() {
+      const sizeBefore = Collections.stats().cacheSize;
+      log('Before destroy → cacheSize: ' + sizeBefore, 'log-warn');
+
+      Collections.destroy();
+      destroyed = true;
+
+      const sizeAfter = Collections.stats().cacheSize;
+      log('Collections.destroy() called → cacheSize now: ' + sizeAfter, 'log-err');
+
+      const banner = document.getElementById('state-banner');
+      banner.className = 'state-banner dead';
+      document.getElementById('state-label').textContent = 'DESTROYED';
+      document.getElementById('state-sub').textContent   = 'MutationObserver disconnected · cache cleared';
+
+      setStep('step-destroy');
+      document.getElementById('btn-after').disabled = false;
+      document.getElementById('btn-destroy').disabled = true;
+    }
+
+    function doAfter() {
+      // After destroy, ClassName still works (library re-queries DOM without cache)
+      let threw = false;
+      let col;
+      try { col = Collections.ClassName('dcard'); }
+      catch(e) { threw = true; log('ERROR: ' + e.message, 'log-err'); }
+
+      if (!threw) {
+        log('Post-destroy Collections.ClassName("dcard") → length: ' + col.length + ' (DOM re-queried)', 'log-warn');
+      }
+
+      const s = Collections.stats();
+      log('Post-destroy stats → cacheSize: ' + s.cacheSize, 'log-neutral');
+
+      setStep('step-after');
+    }
+
+    // ── Automated tests ───────────────────────────────────────────────────────
+
+    // 1. Populate cache first
+    Collections.ClassName('dcard');
+    Collections.TagName('div');
+    const sizeBefore = Collections.stats().cacheSize;
+    addResult(sizeBefore > 0, 'cache is populated before destroy()', 'size: ' + sizeBefore);
+
+    // 2. destroy() empties cache
+    Collections.destroy();
+    destroyed = true;
+    const sizeAfter = Collections.stats().cacheSize;
+    addResult(sizeAfter === 0, 'destroy() clears cache (cacheSize → 0)', 'size after: ' + sizeAfter);
+
+    // 3. destroy() returns undefined
+    const ret = Collections.destroy(); // second destroy is safe
+    addResult(ret === undefined, 'destroy() returns undefined', 'returned: ' + ret);
+
+    // 4. Calling destroy() multiple times does not throw
+    let threw2 = false;
+    try { Collections.destroy(); Collections.destroy(); }
+    catch(e) { threw2 = true; }
+    addResult(!threw2, 'calling destroy() multiple times is safe', '');
+
+    // 5. Collections.ClassName() still works after destroy (re-queries DOM)
+    let worked = false;
+    try {
+      const col = Collections.ClassName('dcard');
+      worked = col !== null && col !== undefined;
+    } catch(e) { /* ignore */ }
+    addResult(worked, 'Collections.ClassName() still returns results after destroy()', '');
+
+    // ── Update interactive UI to reflect destroyed state ──────────────────────
+    const banner = document.getElementById('state-banner');
+    banner.className = 'state-banner dead';
+    document.getElementById('state-label').textContent = 'DESTROYED (by tests)';
+    document.getElementById('state-sub').textContent   = 'Interactive buttons above re-demonstrate the same behaviour';
+    document.getElementById('btn-destroy').disabled    = true;
+    document.getElementById('btn-after').disabled      = false;
+    setStep('step-after');
+    log('Automated tests ran destroy() — see results below', 'log-warn');
+  </script>
+</body>
+</html>
