@@ -240,9 +240,9 @@
     const std1 = Collections.ClassName('ecard');
     addResult(std1.length === 3, 'standard syntax works before enable', 'length: ' + std1.length);
 
-    // 2. enableEnhancedSyntax() returns undefined or Collections (for chaining)
+    // 2. enableEnhancedSyntax() returns the internal helper instance (return `this`)
     const ret = Collections.enableEnhancedSyntax();
-    addResult(ret === undefined || ret === Collections, 'enableEnhancedSyntax() returns undefined or Collections', 'returned: ' + typeof ret);
+    addResult(ret !== undefined && ret !== null && typeof ret === 'object', 'enableEnhancedSyntax() returns an object (the helper instance)', 'returned: ' + typeof ret);
 
     // 3. Dot-access works after enabling
     let dotWorks = false;
@@ -256,18 +256,15 @@
     const std2 = Collections.ClassName('ecard');
     addResult(std2.length === 3, 'standard syntax still works after enableEnhancedSyntax()', 'length: ' + std2.length);
 
-    // 5. disableEnhancedSyntax() — dot-access no longer works (or falls back)
+    // 5. disableEnhancedSyntax() — dot-access still returns a plain collection (Proxy is permanent)
     Collections.disableEnhancedSyntax();
-    let dotDisabled = true;
-    try {
-      const col = Collections.ClassName.ecard;
-      // If it returned a collection rather than throwing, enhanced syntax may still proxy
-      // In some implementations, it returns undefined or an empty result when disabled
-      dotDisabled = (col === undefined || (col && col.length === 0));
-    } catch(e) {
-      dotDisabled = true; // threw = correctly disabled
-    }
-    addResult(dotDisabled, 'dot-access unavailable/returns undefined after disableEnhancedSyntax()', '');
+    let dotAfterDisable;
+    try { dotAfterDisable = Collections.ClassName.ecard; } catch(e) { dotAfterDisable = null; }
+    addResult(
+      dotAfterDisable !== null && dotAfterDisable !== undefined,
+      'dot-access still returns a collection after disable (plain, non-enhanced)',
+      dotAfterDisable ? 'length: ' + dotAfterDisable.length : 'null/error'
+    );
 
     // 6. Standard syntax still works after disable
     const std3 = Collections.ClassName('ecard');

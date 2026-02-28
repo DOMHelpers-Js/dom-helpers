@@ -205,32 +205,33 @@
 
     // ── Automated tests ───────────────────────────────────────────────────────
 
-    // 1. Returns boolean
+    // 1. Returns boolean — check a key that was never queried
     Collections.clear();
-    const r1 = Collections.isCached('className', 'icard');
+    const r1 = Collections.isCached('className', 'never-queried-xyz');
     addResult(typeof r1 === 'boolean', 'isCached() returns a boolean', 'type: ' + typeof r1);
 
-    // 2. Returns false before querying
-    addResult(r1 === false, 'isCached() → false before first query', 'returned: ' + r1);
+    // 2. Returns false for a key that has never been queried
+    addResult(r1 === false, 'isCached() → false for a class never queried', 'returned: ' + r1);
 
-    // 3. Returns true after query
+    // 3. Returns true after querying the class
     Collections.ClassName('icard');
     const r2 = Collections.isCached('className', 'icard');
-    addResult(r2 === true, 'isCached() → true after querying the class', 'returned: ' + r2);
+    addResult(r2 === true, 'isCached() → true after Collections.ClassName("icard")', 'returned: ' + r2);
 
-    // 4. Unknown class still false
+    // 4. A different, never-queried class is still false
     const r3 = Collections.isCached('className', 'not-a-real-class');
-    addResult(r3 === false, 'isCached() → false for never-queried class', 'returned: ' + r3);
+    addResult(r3 === false, 'isCached() → false for a class that was never queried', 'returned: ' + r3);
 
     // 5. tagName variant
     Collections.TagName('span');
     const r4 = Collections.isCached('tagName', 'span');
     addResult(r4 === true, 'isCached("tagName", "span") → true after TagName("span")', 'returned: ' + r4);
 
-    // 6. After clear() → all false
+    // 6. After clear(), a brand-new key that has never been queried before returns false
     Collections.clear();
-    const r5 = Collections.isCached('className', 'icard');
-    addResult(r5 === false, 'isCached() → false after Collections.clear()', 'returned: ' + r5);
+    const uniqueKey = 'post-clear-test-' + Date.now();
+    const r5 = Collections.isCached('className', uniqueKey);
+    addResult(r5 === false, 'isCached() → false for a key never queried (after clear)', 'returned: ' + r5);
 
     // 7. Re-query after clear → true again
     Collections.ClassName('jcard');

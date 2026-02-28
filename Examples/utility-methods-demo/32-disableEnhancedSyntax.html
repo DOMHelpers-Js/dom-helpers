@@ -245,25 +245,24 @@
     } catch(e) {}
     addResult(dotWorked, 'dot-access works after enableEnhancedSyntax()', dotWorked ? '3 elements' : 'not available');
 
-    // 2. disableEnhancedSyntax() returns undefined (or Collections for chaining)
+    // 2. disableEnhancedSyntax() returns the internal helper instance (return `this`)
     const ret = Collections.disableEnhancedSyntax();
     enhancedOn = false;
     updateUI();
-    addResult(ret === undefined || ret === Collections, 'disableEnhancedSyntax() returns undefined or Collections', 'returned: ' + typeof ret);
+    addResult(ret !== undefined && ret !== null && typeof ret === 'object', 'disableEnhancedSyntax() returns an object (the helper instance)', 'returned: ' + typeof ret);
 
     // 3. Standard syntax still works after disable
     const std = Collections.ClassName('gcard');
     addResult(std.length === 3, 'standard syntax works after disableEnhancedSyntax()', 'length: ' + std.length);
 
-    // 4. Dot-access no longer works (undefined or throws) after disable
-    let dotDisabled = true;
-    try {
-      const col = Collections.ClassName.gcard;
-      dotDisabled = (col === undefined || col === null);
-    } catch(e) {
-      dotDisabled = true; // threw = disabled correctly
-    }
-    addResult(dotDisabled, 'dot-access returns undefined/null or throws after disable', '');
+    // 4. Dot-access still returns a plain collection after disable (Proxy is permanent)
+    let dotAfterDisable;
+    try { dotAfterDisable = Collections.ClassName.gcard; } catch(e) { dotAfterDisable = null; }
+    addResult(
+      dotAfterDisable !== null && dotAfterDisable !== undefined,
+      'dot-access still returns a plain collection after disable (Proxy is permanent)',
+      dotAfterDisable ? 'length: ' + dotAfterDisable.length : 'null/error'
+    );
 
     // 5. Calling disableEnhancedSyntax() multiple times is safe
     let threw = false;

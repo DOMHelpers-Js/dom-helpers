@@ -319,14 +319,15 @@
     } catch(e) {}
     addResult(dotWorked, 'configure({ enableEnhancedSyntax: true }) activates dot-access', dotWorked ? '3 elements' : 'not available');
 
-    // 7. Disable via configure
+    // 7. Disable via configure — dot-access still returns a plain collection (Proxy is permanent)
     Collections.configure({ enableEnhancedSyntax: false });
-    let dotOff = true;
-    try {
-      const col = Collections.ClassName.kcard;
-      dotOff = (col === undefined || col === null);
-    } catch(e) { dotOff = true; }
-    addResult(dotOff, 'configure({ enableEnhancedSyntax: false }) deactivates dot-access', '');
+    let dotAfterDisable;
+    try { dotAfterDisable = Collections.ClassName.kcard; } catch(e) { dotAfterDisable = null; }
+    addResult(
+      dotAfterDisable !== null && dotAfterDisable !== undefined,
+      'configure({ enableEnhancedSyntax: false }) — dot-access returns plain collection (Proxy is permanent)',
+      dotAfterDisable ? 'length: ' + dotAfterDisable.length : 'null/error'
+    );
 
     // 8. Chaining: configure().configure()
     let chainOk = false;

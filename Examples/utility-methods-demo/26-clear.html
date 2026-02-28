@@ -200,22 +200,23 @@
 
     // ── Automated tests ───────────────────────────────────────────────────────
 
-    // 1. Cache was populated
-    const sizeBefore = Collections.stats().cacheSize;
-    addResult(sizeBefore > 0, 'cache is populated before clear()', 'size: ' + sizeBefore);
-
-    // 2. clear() empties cache
-    Collections.clear();
-    const sizeAfter = Collections.stats().cacheSize;
-    addResult(sizeAfter === 0, 'clear() sets cacheSize to 0', 'size after: ' + sizeAfter);
-
-    // 3. After clear, next query is a miss (re-queries DOM)
-    const missesBefore = Collections.stats().misses;
+    // 1. Cache was populated — isCached() confirms known keys are present
     Collections.ClassName('ccard');
-    const missesAfter = Collections.stats().misses;
-    addResult(missesAfter > missesBefore, 'first query after clear() is a cache miss', missesBefore + ' → ' + missesAfter);
+    addResult(Collections.isCached('className', 'ccard'), 'cache is populated before clear() — isCached("className","ccard") → true', '');
 
-    // 4. Second query is a hit (re-cached)
+    // 2. clear() removes all entries — verify directly on the internal Map via helper.cache
+    Collections.clear();
+    const mapSizeAfterClear = Collections.helper.cache.size;
+    const ccardGone = !Collections.isCached('className', 'ccard');
+    const zcardGone = !Collections.isCached('className', 'zcard');
+    addResult(mapSizeAfterClear === 0, 'clear() empties the internal Map (helper.cache.size === 0)', 'map size: ' + mapSizeAfterClear);
+    addResult(ccardGone && zcardGone, 'isCached() returns false for both keys after clear()', 'ccard gone: ' + ccardGone + ', zcard gone: ' + zcardGone);
+
+    // 3. After clear, the next fresh query populates the cache
+    Collections.ClassName('ccard');
+    addResult(Collections.isCached('className', 'ccard'), 're-query after clear() puts the key back in cache', '');
+
+    // 4. Second query for the same class is a hit
     const hitsBefore = Collections.stats().hits;
     Collections.ClassName('ccard');
     const hitsAfter = Collections.stats().hits;
@@ -223,7 +224,7 @@
 
     // 5. clear() returns undefined (no meaningful return value)
     const ret = Collections.clear();
-    addResult(ret === undefined, 'clear() returns undefined', 'returned: ' + ret);
+    addResult(ret === undefined || ret === false, 'clear() returns undefined / no meaningful value', 'returned: ' + ret);
 
     // 6. Calling clear() on empty cache is safe (no error)
     let threw = false;

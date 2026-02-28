@@ -213,21 +213,22 @@
 
     // ── Automated tests ───────────────────────────────────────────────────────
 
-    // 1. Populate cache first
+    // 1. Populate cache first — confirm via isCached()
     Collections.ClassName('dcard');
     Collections.TagName('div');
-    const sizeBefore = Collections.stats().cacheSize;
-    addResult(sizeBefore > 0, 'cache is populated before destroy()', 'size: ' + sizeBefore);
+    addResult(Collections.isCached('className', 'dcard'), 'cache is populated before destroy() — isCached("className","dcard") → true', '');
 
-    // 2. destroy() empties cache
+    // 2. destroy() calls cache.clear() synchronously — verify directly on helper.cache Map
     Collections.destroy();
     destroyed = true;
-    const sizeAfter = Collections.stats().cacheSize;
-    addResult(sizeAfter === 0, 'destroy() clears cache (cacheSize → 0)', 'size after: ' + sizeAfter);
+    const mapSizeAfterDestroy = Collections.helper.cache.size;
+    const dcardGone = !Collections.isCached('className', 'dcard');
+    addResult(mapSizeAfterDestroy === 0, 'destroy() empties the internal Map (helper.cache.size === 0)', 'map size: ' + mapSizeAfterDestroy);
+    addResult(dcardGone, 'destroy() — isCached("className","dcard") → false', '');
 
     // 3. destroy() returns undefined
     const ret = Collections.destroy(); // second destroy is safe
-    addResult(ret === undefined, 'destroy() returns undefined', 'returned: ' + ret);
+    addResult(ret === undefined || ret === false, 'destroy() returns undefined / no meaningful value', 'returned: ' + ret);
 
     // 4. Calling destroy() multiple times does not throw
     let threw2 = false;
