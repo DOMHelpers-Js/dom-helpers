@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: Selector.clear()</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
+
+    /* ── Difference note ── */
+    .diff-note {
+      background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 8px;
+      padding: 10px 14px; font-size: 13px; color: #15803d; margin-bottom: 20px;
+    }
+    .diff-note strong { font-weight: 700; }
+
+    /* ── Cache visualiser ── */
+    .cache-vis {
+      background: #fff; border-radius: 12px; padding: 18px 20px;
+      border: 2px solid #dde1e7; margin-bottom: 16px;
+    }
+    .cache-vis h3 { font-size: 12px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; }
+    .cache-entries { display: flex; flex-wrap: wrap; gap: 8px; min-height: 40px; }
+    .cache-entry {
+      padding: 6px 12px; border-radius: 99px; background: #e0f2fe;
+      border: 1.5px solid #38bdf8; font-family: monospace; font-size: 12px;
+      color: #0c4a6e; font-weight: 600; transition: all .3s;
+    }
+    .cache-entry.clearing {
+      background: #fee2e2; border-color: #fca5a5; color: #b91c1c;
+      animation: shake .3s ease;
+    }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25%      { transform: translateX(-4px); }
+      75%      { transform: translateX(4px); }
+    }
+    .cache-empty { font-size: 13px; color: #aaa; font-style: italic; padding: 8px 0; }
+
+    /* ── Stat row ── */
+    .stat-row { display: flex; gap: 16px; margin-bottom: 16px; }
+    .mini-stat {
+      flex: 1; background: #fff; border-radius: 10px; padding: 14px 16px;
+      border: 2px solid #dde1e7; text-align: center; transition: border-color .3s;
+    }
+    .mini-stat .lbl { font-size: 11px; color: #888; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+    .mini-stat .val { font-size: 24px; font-weight: 700; color: #0891b2; font-family: monospace; }
+    .mini-stat.zeroed { border-color: #86efac; background: #f0fdf4; }
+    .mini-stat.zeroed .val { color: #16a34a; }
+
+    /* ── Controls ── */
+    .controls {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: #fff; padding: 12px 16px; border-radius: 10px;
+      border: 1px solid #e2e8f0; margin-bottom: 14px;
+    }
+    .btn { padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: #fff; }
+    .btn-add   { background: #0891b2; } .btn-add:hover   { background: #0e7490; }
+    .btn-clear { background: #dc2626; } .btn-clear:hover { background: #b91c1c; }
+    .btn-info  { background: #4f46e5; } .btn-info:hover  { background: #4338ca; }
+
+    /* ── Demo elements ── */
+    .demo-elements { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .demo-el {
+      padding: 8px 14px; border-radius: 8px; background: #fff;
+      border: 2px solid #dde1e7; font-size: 13px; font-weight: 600; color: #555;
+    }
+
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 8px; padding: 10px 14px; border-left: 4px solid #ccc; font-size: 14px; color: #333; }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <h1>Demo — <code>Selector.clear()</code></h1>
+  <p class="subtitle">Clears the internal cache, forcing the next lookup to re-query the DOM (cache miss). Stats counters (hits/misses) are preserved — only the cache map is emptied.</p>
+
+  <div class="diff-note">
+    <strong>Note:</strong> Like <code>Collections.clear()</code>, calling <code>Selector.clear()</code> directly is intercepted by the reactive namespace-methods layer. Use <code>Selector.helper.clearCache()</code> to bypass it and directly clear the cache.
+  </div>
+
+  <!-- ── Cache visualiser ── -->
+  <h2>Cache state</h2>
+  <div class="cache-vis">
+    <h3>Cached selectors</h3>
+    <div class="cache-entries" id="cache-entries">
+      <span class="cache-empty">Cache is empty — make some queries first</span>
+    </div>
+  </div>
+
+  <!-- ── Stats ── -->
+  <div class="stat-row">
+    <div class="mini-stat" id="ms-size">
+      <div class="lbl">Cache size</div>
+      <div class="val" id="mv-size">0</div>
+    </div>
+    <div class="mini-stat" id="ms-hits">
+      <div class="lbl">Hits</div>
+      <div class="val" id="mv-hits">0</div>
+    </div>
+    <div class="mini-stat" id="ms-misses">
+      <div class="lbl">Misses</div>
+      <div class="val" id="mv-misses">0</div>
+    </div>
+  </div>
+
+  <!-- ── Demo elements ── -->
+  <h2>Demo elements</h2>
+  <div class="demo-elements">
+    <div class="demo-el sccard" id="sc1">Alpha</div>
+    <div class="demo-el sccard" id="sc2">Beta</div>
+    <div class="demo-el sccard" id="sc3">Gamma</div>
+    <div class="demo-el szcard" id="sc4">Zeta</div>
+    <div class="demo-el szcard" id="sc5">Eta</div>
+  </div>
+
+  <!-- ── Controls ── -->
+  <div class="controls">
+    <button class="btn btn-add"   onclick="addQueries()">Populate cache (3 queries)</button>
+    <button class="btn btn-clear" onclick="doClear()">Selector.helper.clearCache()</button>
+    <button class="btn btn-info"  onclick="refreshDisplay()">Refresh display</button>
+  </div>
+
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.3/dist/dom-helpers.min.js"></script>
+  <script>
+    const resultsEl = document.getElementById('results');
+    const H = Selector.helper;
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML = '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span><strong>' + label + '</strong>' + (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    const queryKeys = ['.sccard', '.szcard', 'div'];
+
+    function refreshDisplay() {
+      const s = Selector.stats();
+
+      document.getElementById('mv-size').textContent   = s.cacheSize;
+      document.getElementById('mv-hits').textContent   = s.hits;
+      document.getElementById('mv-misses').textContent = s.misses;
+
+      ['ms-size','ms-hits','ms-misses'].forEach(id => {
+        const el = document.getElementById(id);
+        el.classList.toggle('zeroed', id === 'ms-size' && s.cacheSize === 0);
+      });
+
+      // Rebuild cache-entry pills using raw cache map
+      const container = document.getElementById('cache-entries');
+      container.innerHTML = '';
+      const snap = Array.from(H.cache.keys());
+
+      if (snap.length === 0) {
+        container.innerHTML = '<span class="cache-empty">Cache is empty</span>';
+      } else {
+        snap.forEach(key => {
+          const pill = document.createElement('span');
+          pill.className = 'cache-entry';
+          pill.textContent = key;
+          container.appendChild(pill);
+        });
+      }
+    }
+
+    function addQueries() {
+      Selector.queryAll('.sccard');
+      Selector.queryAll('.szcard');
+      Selector.queryAll('div');
+      refreshDisplay();
+    }
+
+    function doClear() {
+      document.querySelectorAll('.cache-entry').forEach(el => el.classList.add('clearing'));
+      setTimeout(() => {
+        H.clearCache();
+        refreshDisplay();
+      }, 350);
+    }
+
+    // ── Initial populate ─────────────────────────────────────────────────────
+    addQueries();
+
+    // ── Automated tests ──────────────────────────────────────────────────────
+
+    // 1. Cache was populated — confirm entries are present via raw cache map
+    Selector.queryAll('.sccard');
+    const snapBefore = Array.from(H.cache.keys());
+    addResult(snapBefore.length > 0, 'cache is populated before clear()', 'keys: ' + snapBefore.length);
+
+    // 2. clearCache() removes all entries — verify via raw cache map
+    H.clearCache();
+    const snapAfterClear = Array.from(H.cache.keys());
+    addResult(snapAfterClear.length === 0, 'clear() empties the cache (cache.size === 0)', 'keys remaining: ' + snapAfterClear.length + (snapAfterClear.length ? ' [' + snapAfterClear.join(', ') + ']' : ''));
+
+    // 3. After clear, re-query and confirm key appears in cache
+    Selector.queryAll('.sccard');
+    const snapAfterRequery = Array.from(H.cache.keys());
+    addResult(snapAfterRequery.some(k => k.includes('sccard')), 're-query after clear() puts the key back in cache', 'snapshot: ' + snapAfterRequery.join(', '));
+
+    // 4. Second query for the same selector is a hit
+    const hitsBefore = Selector.stats().hits;
+    Selector.queryAll('.sccard');
+    const hitsAfter = Selector.stats().hits;
+    addResult(hitsAfter > hitsBefore, 'second query after clear() is a cache hit', hitsBefore + ' → ' + hitsAfter);
+
+    // 5. clearCache() returns undefined / no meaningful value
+    const ret = H.clearCache();
+    addResult(ret === undefined || ret === false || ret === null, 'clearCache() returns no meaningful value', 'returned: ' + typeof ret);
+
+    // 6. Calling clearCache() multiple times is safe (no error)
+    let threw = false;
+    try { H.clearCache(); H.clearCache(); }
+    catch(e) { threw = true; }
+    addResult(!threw, 'calling clearCache() multiple times is safe (no error)', '');
+
+    // 7. hits/misses are NOT reset by clearCache()
+    const statsBefore = { hits: Selector.stats().hits, misses: Selector.stats().misses };
+    H.clearCache();
+    const statsAfter  = { hits: Selector.stats().hits, misses: Selector.stats().misses };
+    addResult(
+      statsAfter.hits === statsBefore.hits && statsAfter.misses === statsBefore.misses,
+      'clear() does NOT reset hits/misses counters',
+      'hits: ' + statsBefore.hits + ' → ' + statsAfter.hits
+    );
+
+    // Repopulate for display
+    addQueries();
+    refreshDisplay();
+  </script>
+</body>
+</html>

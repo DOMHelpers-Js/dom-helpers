@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: Selector.queryAll() — DOM Manipulation Methods</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
+
+    /* ── Method index ── */
+    .method-index { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+    .method-chip {
+      padding: 4px 12px; border-radius: 99px; background: #fff;
+      border: 1.5px solid #e2e8f0; font-family: monospace; font-size: 12px;
+      color: #059669; font-weight: 600;
+    }
+
+    /* ── Cards ── */
+    .card-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .card {
+      padding: 10px 16px; border-radius: 9px; background: #fff;
+      border: 2px solid #dde1e7; font-size: 13px; font-weight: 600;
+      color: #555; min-width: 90px; text-align: center; transition: all .3s;
+    }
+    /* class-based states */
+    .card.active   { background: #d1fae5; border-color: #34d399; color: #065f46; }
+    .card.featured { background: #fef3c7; border-color: #fcd34d; color: #92400e; }
+    .card.highlight { background: #ede9fe; border-color: #a78bfa; color: #5b21b6; }
+
+    /* ── Controls ── */
+    .controls {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: #fff; padding: 12px 16px; border-radius: 10px;
+      border: 1px solid #e2e8f0; margin-bottom: 14px;
+    }
+    .btn { padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: #fff; }
+    .btn-add    { background: #059669; } .btn-add:hover    { background: #047857; }
+    .btn-remove { background: #dc2626; } .btn-remove:hover { background: #b91c1c; }
+    .btn-toggle { background: #d97706; } .btn-toggle:hover { background: #b45309; }
+    .btn-prop   { background: #7c3aed; } .btn-prop:hover   { background: #6d28d9; }
+    .btn-attr   { background: #0891b2; } .btn-attr:hover   { background: #0e7490; }
+    .btn-style  { background: #4f46e5; } .btn-style:hover  { background: #4338ca; }
+    .btn-reset  { background: #6b7280; } .btn-reset:hover  { background: #4b5563; }
+    .btn-event  { background: #be185d; } .btn-event:hover  { background: #9d174d; }
+
+    /* ── Event log ── */
+    .event-log {
+      background: #1e1e2e; border-radius: 10px; padding: 12px 14px;
+      font-family: monospace; font-size: 12px; color: #cdd6f4;
+      max-height: 120px; overflow-y: auto; margin-bottom: 14px;
+    }
+    .event-log .log-line { padding: 1px 0; }
+    .log-click { color: #a6e3a1; }
+    .log-info  { color: #89dceb; }
+
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 8px; padding: 10px 14px; border-left: 4px solid #ccc; font-size: 14px; color: #333; }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <h1>Demo — DOM Manipulation Methods on <code>Selector.queryAll()</code> results</h1>
+  <p class="subtitle">All DOM manipulation methods available on <code>Collections</code> are also available on the enhanced collection returned by <code>Selector.queryAll()</code>. Each method operates on every element in the collection and returns <code>this</code> for chaining.</p>
+
+  <div class="method-index">
+    <span class="method-chip">.addClass()</span>
+    <span class="method-chip">.removeClass()</span>
+    <span class="method-chip">.toggleClass()</span>
+    <span class="method-chip">.setProperty()</span>
+    <span class="method-chip">.setAttribute()</span>
+    <span class="method-chip">.setStyle()</span>
+    <span class="method-chip">.on()</span>
+    <span class="method-chip">.off()</span>
+  </div>
+
+  <!-- ── Demo cards ── -->
+  <h2>Demo elements</h2>
+  <div class="card-grid" id="card-grid">
+    <div class="card mcard" id="m1">Alpha</div>
+    <div class="card mcard" id="m2">Beta</div>
+    <div class="card mcard" id="m3">Gamma</div>
+    <div class="card mcard" id="m4">Delta</div>
+  </div>
+
+  <!-- ── addClass / removeClass / toggleClass ── -->
+  <h2>Class manipulation</h2>
+  <div class="controls">
+    <button class="btn btn-add"    onclick="doAddClass()">   .addClass('active')</button>
+    <button class="btn btn-remove" onclick="doRemoveClass()">.removeClass('active')</button>
+    <button class="btn btn-toggle" onclick="doToggleClass()">.toggleClass('featured')</button>
+    <button class="btn btn-reset"  onclick="resetCards()">Reset</button>
+  </div>
+
+  <!-- ── setProperty / setAttribute / setStyle ── -->
+  <h2>Property / attribute / style</h2>
+  <div class="controls">
+    <button class="btn btn-prop"  onclick="doSetProperty()">.setProperty('title', 'Demo card')</button>
+    <button class="btn btn-attr"  onclick="doSetAttribute()">.setAttribute('data-demo', 'true')</button>
+    <button class="btn btn-style" onclick="doSetStyle()">.setStyle({ letterSpacing: '3px' })</button>
+    <button class="btn btn-reset" onclick="resetCards()">Reset</button>
+  </div>
+
+  <!-- ── .on() / .off() ── -->
+  <h2>Event binding (.on / .off)</h2>
+  <div class="controls">
+    <button class="btn btn-event" onclick="doBindEvents()">   .on('click', handler)</button>
+    <button class="btn btn-reset" onclick="doUnbindEvents()">.off('click', handler) + reset</button>
+  </div>
+  <div class="event-log" id="event-log">
+    <div class="log-line log-info">— Click cards after binding events —</div>
+  </div>
+
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.3/dist/dom-helpers.min.js"></script>
+  <script>
+    const resultsEl = document.getElementById('results');
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML = '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span><strong>' + label + '</strong>' + (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    const col = Selector.queryAll('.mcard');
+
+    function resetCards() {
+      col.forEach(el => {
+        el.className = 'card mcard';
+        el.removeAttribute('data-demo');
+        el.removeAttribute('title');
+        el.style.letterSpacing = '';
+        el.style.background = '';
+        el.style.borderColor = '';
+      });
+      logInfo('Cards reset to default state');
+    }
+
+    function log(msg, cls) {
+      const panel = document.getElementById('event-log');
+      const line = document.createElement('div');
+      line.className = 'log-line ' + cls;
+      line.textContent = msg;
+      panel.appendChild(line);
+      panel.scrollTop = panel.scrollHeight;
+    }
+    function logInfo(msg) { log(msg, 'log-info'); }
+
+    function doAddClass()    { col.addClass('active');   logInfo('.addClass("active") called'); }
+    function doRemoveClass() { col.removeClass('active'); logInfo('.removeClass("active") called'); }
+    function doToggleClass() { col.toggleClass('featured'); logInfo('.toggleClass("featured") called'); }
+    function doSetProperty() { col.setProperty('title', 'Demo card'); logInfo('.setProperty("title", "Demo card") called'); }
+    function doSetAttribute(){ col.setAttribute('data-demo', 'true'); logInfo('.setAttribute("data-demo", "true") called'); }
+    function doSetStyle()    { col.setStyle({ letterSpacing: '3px' }); logInfo('.setStyle({ letterSpacing: "3px" }) called'); }
+
+    let clickHandler = null;
+    let eventsbound = false;
+    function doBindEvents() {
+      if (eventsbound) return;
+      clickHandler = function() { log('Clicked: #' + this.id, 'log-click'); };
+      col.on('click', clickHandler);
+      eventsbound = true;
+      logInfo('.on("click", handler) bound to all 4 cards — click them!');
+    }
+    function doUnbindEvents() {
+      if (clickHandler) { col.off('click', clickHandler); clickHandler = null; }
+      eventsbound = false;
+      resetCards();
+      logInfo('.off("click", handler) removed from all cards');
+    }
+
+    // ── Automated tests ────────────────────────────────────────────────────────
+
+    // .addClass()
+    col.addClass('highlight');
+    const allHighlight = Array.from(document.querySelectorAll('.mcard')).every(el => el.classList.contains('highlight'));
+    addResult(allHighlight, '.addClass() adds class to all elements in collection', '');
+    col.removeClass('highlight');
+
+    // .addClass() returns this (chainable)
+    const chainResult = col.addClass('highlight').removeClass('highlight');
+    addResult(chainResult !== undefined && chainResult !== null, '.addClass() returns the collection (chainable)', 'returned: ' + typeof chainResult);
+
+    // .removeClass()
+    col.addClass('active');
+    col.removeClass('active');
+    const noneActive = Array.from(document.querySelectorAll('.mcard')).every(el => !el.classList.contains('active'));
+    addResult(noneActive, '.removeClass() removes class from all elements', '');
+
+    // .toggleClass()
+    col.toggleClass('featured');
+    const allFeatured = Array.from(document.querySelectorAll('.mcard')).every(el => el.classList.contains('featured'));
+    addResult(allFeatured, '.toggleClass() adds class when absent (all got "featured")', '');
+    col.toggleClass('featured');
+    const noneFeatured = Array.from(document.querySelectorAll('.mcard')).every(el => !el.classList.contains('featured'));
+    addResult(noneFeatured, '.toggleClass() removes class when present (all lost "featured")', '');
+
+    // .setProperty()
+    col.setProperty('title', 'test-title');
+    const allTitle = Array.from(document.querySelectorAll('.mcard')).every(el => el.title === 'test-title');
+    addResult(allTitle, '.setProperty("title", ...) sets DOM property on all elements', '');
+    col.setProperty('title', '');
+
+    // .setAttribute()
+    col.setAttribute('data-test', 'yes');
+    const allAttr = Array.from(document.querySelectorAll('.mcard')).every(el => el.getAttribute('data-test') === 'yes');
+    addResult(allAttr, '.setAttribute() sets attribute on all elements', '');
+    col.forEach(el => el.removeAttribute('data-test'));
+
+    // .setStyle()
+    col.setStyle({ opacity: '0.5' });
+    const allOpacity = Array.from(document.querySelectorAll('.mcard')).every(el => el.style.opacity === '0.5');
+    addResult(allOpacity, '.setStyle() applies style to all elements', '');
+    col.setStyle({ opacity: '' });
+
+    // .on() / .off()
+    let clickCount = 0;
+    const testHandler = () => clickCount++;
+    col.on('click', testHandler);
+    document.getElementById('m1').click();
+    document.getElementById('m2').click();
+    addResult(clickCount === 2, '.on() binds event handler to all elements (2 clicks registered)', 'clicks: ' + clickCount);
+
+    col.off('click', testHandler);
+    const beforeOff = clickCount;
+    document.getElementById('m1').click();
+    addResult(clickCount === beforeOff, '.off() removes event handler from all elements (no more clicks registered)', 'clicks after off: ' + clickCount);
+
+    // Chaining: addClass().setStyle().setAttribute()
+    let chainOk = false;
+    try {
+      col.addClass('highlight').setStyle({ letterSpacing: '' }).removeClass('highlight');
+      chainOk = true;
+    } catch(e) {}
+    addResult(chainOk, 'methods can be chained: .addClass().setStyle().removeClass()', '');
+  </script>
+</body>
+</html>

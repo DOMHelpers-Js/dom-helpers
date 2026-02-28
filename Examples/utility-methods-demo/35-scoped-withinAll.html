@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: Selector.Scoped.withinAll()</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
+
+    /* ── Container layout ── */
+    .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+    .panel {
+      border-radius: 12px; padding: 16px 18px; border: 2px solid #dde1e7;
+      background: #fff; transition: border-color .3s;
+    }
+    .panel.highlighted { border-color: #0891b2; background: #f0f9ff; }
+    .panel-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+      color: #888; margin-bottom: 12px;
+    }
+    .panel-label span { font-family: monospace; color: #0891b2; }
+
+    /* ── Items inside panels ── */
+    .item {
+      padding: 8px 12px; border-radius: 7px; background: #f8fafc;
+      border: 1.5px solid #e2e8f0; font-size: 13px; font-weight: 600;
+      color: #555; margin-bottom: 8px; transition: all .25s;
+    }
+    .item:last-child { margin-bottom: 0; }
+    .item.found {
+      background: #e0f2fe; border-color: #38bdf8; color: #0c4a6e;
+      box-shadow: 0 2px 10px rgba(8,145,178,.15);
+    }
+    .item.found::after { content: ' ← withinAll()'; font-size: 11px; color: #0891b2; font-weight: 700; }
+
+    /* ── Count badge ── */
+    .count-badge {
+      display: inline-block; background: #0891b2; color: #fff;
+      font-size: 13px; font-weight: 700; padding: 4px 14px; border-radius: 99px;
+      margin-bottom: 16px; font-family: monospace;
+    }
+
+    /* ── Controls ── */
+    .controls {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: #fff; padding: 12px 16px; border-radius: 10px;
+      border: 1px solid #e2e8f0; margin-bottom: 14px;
+    }
+    .controls label { font-size: 13px; font-weight: 600; color: #444; }
+    .controls select, .controls input[type=text] {
+      padding: 6px 10px; border: 1.5px solid #7dd3fc; border-radius: 6px;
+      font-size: 13px; font-family: monospace; outline: none;
+    }
+    .controls select:focus, .controls input:focus { border-color: #0891b2; }
+    .btn { padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: #fff; }
+    .btn-run   { background: #0891b2; } .btn-run:hover   { background: #0e7490; }
+    .btn-reset { background: #6b7280; } .btn-reset:hover { background: #4b5563; }
+
+    /* ── Result box ── */
+    .result-box {
+      border-radius: 10px; padding: 14px 18px; font-family: monospace; font-size: 13px;
+      border: 1.5px solid; margin-bottom: 20px; transition: all .3s;
+    }
+    .result-box.found   { background: #e0f2fe; border-color: #38bdf8; color: #0c4a6e; }
+    .result-box.empty   { background: #fff5f5; border-color: #fca5a5; color: #b91c1c; }
+    .result-box.idle    { background: #f8fafc; border-color: #e2e8f0; color: #94a3b8; }
+
+    /* ── Comparison table ── */
+    .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+    .compare-card {
+      background: #fff; border-radius: 10px; padding: 14px 16px;
+      border: 2px solid #e2e8f0;
+    }
+    .compare-card h3 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #888; margin-bottom: 10px; }
+    .compare-card code { display: block; font-size: 12px; background: #f1f5f9; padding: 8px 10px; border-radius: 6px; margin-bottom: 8px; line-height: 1.6; white-space: pre; }
+    .compare-card .desc { font-size: 12px; color: #666; }
+
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 8px; padding: 10px 14px; border-left: 4px solid #ccc; font-size: 14px; color: #333; }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <h1>Demo — <code>Selector.Scoped.withinAll(container, selector)</code></h1>
+  <p class="subtitle">Queries for <strong>all</strong> elements matching <code>selector</code> inside a specific <code>container</code>. Returns an enhanced collection (like <code>queryAll</code>) scoped to the container. Returns an empty collection if the container doesn't exist or nothing matches. Pairs with <code>within()</code> which returns only the first match.</p>
+
+  <!-- ── Comparison ── -->
+  <h2>within() vs withinAll()</h2>
+  <div class="compare-grid">
+    <div class="compare-card">
+      <h3>within() — single</h3>
+      <code>Selector.Scoped.within(
+  '#panel-a', '.item'
+)</code>
+      <div class="desc">Returns the <strong>first</strong> matching element (or null)</div>
+    </div>
+    <div class="compare-card">
+      <h3>withinAll() — multiple</h3>
+      <code>Selector.Scoped.withinAll(
+  '#panel-a', '.item'
+)</code>
+      <div class="desc">Returns <strong>all</strong> matching elements as an enhanced collection</div>
+    </div>
+  </div>
+
+  <!-- ── Two containers ── -->
+  <h2>Demo containers</h2>
+  <div class="panels">
+    <div class="panel" id="panel-a">
+      <div class="panel-label">Container <span>#panel-a</span></div>
+      <div class="item" id="pa-1" data-role="editor">Item A1 — editor</div>
+      <div class="item" id="pa-2" data-role="viewer">Item A2 — viewer</div>
+      <div class="item" id="pa-3" data-role="admin">Item A3 — admin</div>
+      <div class="item" id="pa-4" data-role="editor">Item A4 — editor</div>
+    </div>
+    <div class="panel" id="panel-b">
+      <div class="panel-label">Container <span>#panel-b</span></div>
+      <div class="item" id="pb-1" data-role="viewer">Item B1 — viewer</div>
+      <div class="item" id="pb-2" data-role="admin">Item B2 — admin</div>
+      <div class="item" id="pb-3" data-role="editor">Item B3 — editor</div>
+      <div class="item" id="pb-4" data-role="admin">Item B4 — admin</div>
+    </div>
+  </div>
+
+  <!-- ── Controls ── -->
+  <h2>Try it</h2>
+  <div class="controls">
+    <label>Container:</label>
+    <select id="sel-container">
+      <option value="#panel-a">#panel-a</option>
+      <option value="#panel-b">#panel-b</option>
+    </select>
+    <label>CSS selector:</label>
+    <input type="text" id="sel-selector" value="[data-role='editor']" style="width:200px;" />
+    <button class="btn btn-run" onclick="runWithinAll()">Scoped.withinAll()</button>
+    <button class="btn btn-reset" onclick="resetDemo()">Reset</button>
+  </div>
+
+  <!-- ── Result ── -->
+  <div id="count-wrap" style="display:none;"><span class="count-badge" id="count-badge">0 matched</span></div>
+  <div class="result-box idle" id="result-box">— Press the button to run a scoped query —</div>
+
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.3/dist/dom-helpers.min.js"></script>
+  <script>
+    const resultsEl = document.getElementById('results');
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML = '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span><strong>' + label + '</strong>' + (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    function resetDemo() {
+      document.querySelectorAll('.item').forEach(el => el.classList.remove('found'));
+      document.querySelectorAll('.panel').forEach(el => el.classList.remove('highlighted'));
+      document.getElementById('count-wrap').style.display = 'none';
+      const box = document.getElementById('result-box');
+      box.className = 'result-box idle';
+      box.textContent = '— Press the button to run a scoped query —';
+    }
+
+    function runWithinAll() {
+      resetDemo();
+      const container = document.getElementById('sel-container').value;
+      const selector  = document.getElementById('sel-selector').value.trim();
+      if (!selector) return;
+
+      const results = Selector.Scoped.withinAll(container, selector);
+      const box     = document.getElementById('result-box');
+      const len     = results ? results.length : 0;
+
+      // Highlight container panel
+      const panelEl = document.querySelector(container);
+      if (panelEl) panelEl.classList.add('highlighted');
+
+      if (len > 0) {
+        results.forEach(el => el.classList.add('found'));
+        box.className = 'result-box found';
+        const ids = [];
+        results.forEach(el => ids.push('#' + el.id));
+        box.textContent = 'Selector.Scoped.withinAll("' + container + '", "' + selector + '") → ' + len + ' element' + (len === 1 ? '' : 's') + ': ' + ids.join(', ');
+      } else {
+        box.className = 'result-box empty';
+        box.textContent = 'Selector.Scoped.withinAll("' + container + '", "' + selector + '") → 0 elements (empty collection)';
+      }
+
+      const countBadge = document.getElementById('count-badge');
+      countBadge.textContent = len + ' matched';
+      document.getElementById('count-wrap').style.display = 'block';
+    }
+
+    // ── Automated tests ───────────────────────────────────────────────────────
+
+    // 1. Returns a collection object (not null)
+    const r1 = Selector.Scoped.withinAll('#panel-a', '.item');
+    addResult(r1 !== null && r1 !== undefined, 'returns a collection (not null) when matches exist', 'type: ' + typeof r1);
+
+    // 2. Returns ALL matching elements inside the container
+    addResult(r1.length === 4, 'returns ALL matching elements inside container (4 items in #panel-a)', 'length: ' + r1.length);
+
+    // 3. Elements are all inside the container — none leak from other containers
+    let allInsideA = true;
+    const panelA = document.getElementById('panel-a');
+    r1.forEach(el => { if (!panelA.contains(el)) allInsideA = false; });
+    addResult(allInsideA, 'all returned elements are inside the specified container', '');
+
+    // 4. Different containers return different sets of elements
+    const r2a = Selector.Scoped.withinAll('#panel-a', '[data-role="admin"]');
+    const r2b = Selector.Scoped.withinAll('#panel-b', '[data-role="admin"]');
+    addResult(r2a.length === 1 && r2b.length === 2, 'different containers return different result sets for same selector', '#panel-a → ' + r2a.length + ' admin, #panel-b → ' + r2b.length + ' admin');
+
+    // 5. Correct IDs from panel A admin query
+    addResult(r2a.length === 1 && r2a[0].id === 'pa-3', '#panel-a admin query returns #pa-3', r2a[0] ? '#' + r2a[0].id : 'none');
+
+    // 6. Correct IDs from panel B admin query
+    const bIds = [];
+    r2b.forEach(el => bIds.push(el.id));
+    addResult(bIds.includes('pb-2') && bIds.includes('pb-4'), '#panel-b admin query returns #pb-2 and #pb-4', bIds.join(', '));
+
+    // 7. Returns empty collection (not null) when no elements match
+    const r3 = Selector.Scoped.withinAll('#panel-a', '[data-role="superuser"]');
+    addResult(r3 !== null && r3 !== undefined, 'returns empty collection (not null) when nothing matches', 'type: ' + typeof r3);
+    addResult(r3.length === 0, 'empty collection has length 0', 'length: ' + r3.length);
+
+    // 8. Works with a DOM element reference as container
+    const panelBEl = document.getElementById('panel-b');
+    const r4 = Selector.Scoped.withinAll(panelBEl, '.item');
+    addResult(r4 !== null && r4 !== undefined, 'works with a DOM element reference as container', 'type: ' + typeof r4);
+    addResult(r4.length === 4, 'correct count when using DOM element reference (4 items in #panel-b)', 'length: ' + r4.length);
+
+    // 9. Returns empty collection for non-existent container (does not throw)
+    let threw = false;
+    let r5;
+    try { r5 = Selector.Scoped.withinAll('#does-not-exist', '.item'); }
+    catch(e) { threw = true; }
+    addResult(!threw, 'does not throw when container does not exist in DOM', '');
+    addResult(!threw && (r5 === null || r5 === undefined || r5.length === 0), 'returns null or empty collection for missing container', 'returned: ' + (r5 === null ? 'null' : r5 === undefined ? 'undefined' : 'length ' + r5.length));
+
+    // 10. Collection supports forEach (enhanced collection API)
+    let forEachCount = 0;
+    const r6 = Selector.Scoped.withinAll('#panel-a', '.item');
+    try { r6.forEach(() => forEachCount++); } catch(e) {}
+    addResult(forEachCount === 4, 'returned collection supports .forEach()', 'iterated: ' + forEachCount + ' elements');
+
+    // 11. withinAll() returns MORE elements than within() for the same query
+    const single = Selector.Scoped.within('#panel-b', '[data-role="admin"]');
+    const all    = Selector.Scoped.withinAll('#panel-b', '[data-role="admin"]');
+    addResult(single !== null && all.length > 1, 'withinAll() returns more elements than within() for same selector', 'within: 1, withinAll: ' + all.length);
+  </script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: Selector.Scoped.within()</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
+
+    /* ── Container layout ── */
+    .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+    .panel {
+      border-radius: 12px; padding: 16px 18px; border: 2px solid #dde1e7;
+      background: #fff; transition: border-color .3s;
+    }
+    .panel.highlighted { border-color: #6366f1; background: #f5f3ff; }
+    .panel-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+      color: #888; margin-bottom: 12px;
+    }
+    .panel-label span { font-family: monospace; color: #6366f1; }
+
+    /* ── Items inside panels ── */
+    .item {
+      padding: 8px 12px; border-radius: 7px; background: #f8fafc;
+      border: 1.5px solid #e2e8f0; font-size: 13px; font-weight: 600;
+      color: #555; margin-bottom: 8px; transition: all .25s;
+    }
+    .item:last-child { margin-bottom: 0; }
+    .item.found {
+      background: #ede9fe; border-color: #a78bfa; color: #5b21b6;
+      box-shadow: 0 2px 10px rgba(99,102,241,.18);
+    }
+    .item.found::after { content: ' ← within()'; font-size: 11px; color: #7c3aed; font-weight: 700; }
+
+    /* ── Controls ── */
+    .controls {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: #fff; padding: 12px 16px; border-radius: 10px;
+      border: 1px solid #e2e8f0; margin-bottom: 14px;
+    }
+    .controls label { font-size: 13px; font-weight: 600; color: #444; }
+    .controls select, .controls input[type=text] {
+      padding: 6px 10px; border: 1.5px solid #c4b5fd; border-radius: 6px;
+      font-size: 13px; font-family: monospace; outline: none;
+    }
+    .controls select:focus, .controls input:focus { border-color: #6366f1; }
+    .btn { padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: #fff; }
+    .btn-run   { background: #6366f1; } .btn-run:hover   { background: #4f46e5; }
+    .btn-reset { background: #6b7280; } .btn-reset:hover { background: #4b5563; }
+
+    /* ── Result box ── */
+    .result-box {
+      border-radius: 10px; padding: 14px 18px; font-family: monospace; font-size: 13px;
+      border: 1.5px solid; margin-bottom: 20px; transition: all .3s;
+    }
+    .result-box.found  { background: #ede9fe; border-color: #a78bfa; color: #5b21b6; }
+    .result-box.null   { background: #fff5f5; border-color: #fca5a5; color: #b91c1c; }
+    .result-box.idle   { background: #f8fafc; border-color: #e2e8f0; color: #94a3b8; }
+
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 8px; padding: 10px 14px; border-left: 4px solid #ccc; font-size: 14px; color: #333; }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <h1>Demo — <code>Selector.Scoped.within(container, selector)</code></h1>
+  <p class="subtitle">Queries for the <strong>first</strong> element matching <code>selector</code> inside a specific <code>container</code>. Container can be a CSS selector string or a DOM element reference. Returns <code>null</code> if nothing matches or the container is not found.</p>
+
+  <!-- ── Two containers ── -->
+  <h2>Demo containers</h2>
+  <div class="panels">
+    <div class="panel" id="panel-a">
+      <div class="panel-label">Container <span>#panel-a</span></div>
+      <div class="item" id="pa-1" data-role="editor">Item A1 — editor</div>
+      <div class="item" id="pa-2" data-role="viewer">Item A2 — viewer</div>
+      <div class="item" id="pa-3" data-role="admin">Item A3 — admin</div>
+    </div>
+    <div class="panel" id="panel-b">
+      <div class="panel-label">Container <span>#panel-b</span></div>
+      <div class="item" id="pb-1" data-role="viewer">Item B1 — viewer</div>
+      <div class="item" id="pb-2" data-role="admin">Item B2 — admin</div>
+      <div class="item" id="pb-3" data-role="editor">Item B3 — editor</div>
+    </div>
+  </div>
+
+  <!-- ── Controls ── -->
+  <h2>Try it</h2>
+  <div class="controls">
+    <label>Container:</label>
+    <select id="sel-container">
+      <option value="#panel-a">#panel-a</option>
+      <option value="#panel-b">#panel-b</option>
+    </select>
+    <label>CSS selector:</label>
+    <input type="text" id="sel-selector" value="[data-role='admin']" style="width:200px;" />
+    <button class="btn btn-run" onclick="runWithin()">Scoped.within()</button>
+    <button class="btn btn-reset" onclick="resetDemo()">Reset</button>
+  </div>
+
+  <!-- ── Result ── -->
+  <div class="result-box idle" id="result-box">— Press the button to run a scoped query —</div>
+
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.3/dist/dom-helpers.min.js"></script>
+  <script>
+    const resultsEl = document.getElementById('results');
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML = '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span><strong>' + label + '</strong>' + (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    function resetDemo() {
+      document.querySelectorAll('.item').forEach(el => el.classList.remove('found'));
+      document.querySelectorAll('.panel').forEach(el => el.classList.remove('highlighted'));
+      const box = document.getElementById('result-box');
+      box.className = 'result-box idle';
+      box.textContent = '— Press the button to run a scoped query —';
+    }
+
+    function runWithin() {
+      resetDemo();
+      const container = document.getElementById('sel-container').value;
+      const selector  = document.getElementById('sel-selector').value.trim();
+      if (!selector) return;
+
+      const result = Selector.Scoped.within(container, selector);
+      const box    = document.getElementById('result-box');
+
+      // Highlight container panel
+      const panelEl = document.querySelector(container);
+      if (panelEl) panelEl.classList.add('highlighted');
+
+      if (result) {
+        result.classList.add('found');
+        box.className = 'result-box found';
+        box.textContent = 'Selector.Scoped.within("' + container + '", "' + selector + '") → #' + result.id;
+      } else {
+        box.className = 'result-box null';
+        box.textContent = 'Selector.Scoped.within("' + container + '", "' + selector + '") → null  (no match)';
+      }
+    }
+
+    // ── Automated tests ───────────────────────────────────────────────────────
+
+    // 1. Returns a DOM element (not null) when selector matches inside container
+    const r1 = Selector.Scoped.within('#panel-a', '[data-role="admin"]');
+    addResult(r1 !== null && r1 !== undefined, 'returns an element when selector matches', r1 ? '#' + r1.id : 'null');
+
+    // 2. Returns the CORRECT element — the one inside the given container
+    addResult(r1 && r1.id === 'pa-3', 'returns the element inside the specified container (#pa-3)', r1 ? '#' + r1.id : 'null');
+
+    // 3. Scoped to container — does NOT cross into sibling containers
+    const r2 = Selector.Scoped.within('#panel-a', '[data-role="admin"]');
+    const r3 = Selector.Scoped.within('#panel-b', '[data-role="admin"]');
+    addResult(r2 && r3 && r2.id !== r3.id, 'different containers return different elements for same selector', '#panel-a → #' + (r2 && r2.id) + ', #panel-b → #' + (r3 && r3.id));
+
+    // 4. Returns only the FIRST match inside the container (single element)
+    const r4 = Selector.Scoped.within('#panel-a', '.item');
+    addResult(r4 && r4.nodeType === Node.ELEMENT_NODE, 'returns a single DOM element (not a NodeList)', 'nodeType: ' + (r4 && r4.nodeType));
+    addResult(r4 && r4.id === 'pa-1', 'returns the FIRST matching element inside container', r4 ? '#' + r4.id : 'null');
+
+    // 5. Returns null when selector does not match inside container
+    const r5 = Selector.Scoped.within('#panel-a', '[data-role="superuser"]');
+    addResult(r5 === null || r5 === undefined, 'returns null when no element matches inside container', 'returned: ' + r5);
+
+    // 6. Works with a DOM element reference as container (not just a string)
+    const panelBEl = document.getElementById('panel-b');
+    const r6 = Selector.Scoped.within(panelBEl, '[data-role="editor"]');
+    addResult(r6 !== null && r6 !== undefined, 'works with a DOM element reference as container', r6 ? '#' + r6.id : 'null');
+    addResult(r6 && r6.id === 'pb-3', 'correct element found when using DOM element reference', r6 ? '#' + r6.id : 'null');
+
+    // 7. Returns null for a non-existent container
+    const r7 = Selector.Scoped.within('#does-not-exist', '.item');
+    addResult(r7 === null || r7 === undefined, 'returns null when container does not exist in DOM', 'returned: ' + r7);
+
+    // 8. Standard querySelector semantics — works with any valid CSS selector
+    const r8 = Selector.Scoped.within('#panel-b', '#pb-2');
+    addResult(r8 !== null && r8 !== undefined, 'works with an ID selector inside container', r8 ? '#' + r8.id : 'null');
+    addResult(r8 && r8.id === 'pb-2', 'ID selector returns the correct element', r8 ? '#' + r8.id : 'null');
+  </script>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: Selector.queryAll() — Array-like Methods</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
+
+    /* ── Method index ── */
+    .method-index { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+    .method-chip {
+      padding: 4px 12px; border-radius: 99px; background: #fff;
+      border: 1.5px solid #e2e8f0; font-family: monospace; font-size: 12px;
+      color: #4f46e5; font-weight: 600; cursor: pointer; transition: all .2s;
+    }
+    .method-chip:hover { background: #eef2ff; border-color: #818cf8; }
+
+    /* ── Cards ── */
+    .card-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .card {
+      padding: 10px 14px; border-radius: 9px; background: #fff;
+      border: 2px solid #dde1e7; font-size: 13px; font-weight: 600;
+      color: #555; min-width: 100px; text-align: center; transition: all .25s;
+    }
+    .card .meta { font-size: 11px; color: #aaa; font-family: monospace; margin-top: 3px; }
+    .card.highlight { border-color: #818cf8; background: #eef2ff; color: #3730a3; }
+
+    /* ── Method demo panels ── */
+    .method-section {
+      background: #fff; border-radius: 12px; padding: 16px 18px;
+      border: 2px solid #e2e8f0; margin-bottom: 14px;
+    }
+    .method-section h3 {
+      font-size: 13px; font-weight: 700; color: #4f46e5;
+      font-family: monospace; margin-bottom: 6px;
+    }
+    .method-section .desc { font-size: 12px; color: #666; margin-bottom: 10px; }
+    .output-box {
+      font-family: monospace; font-size: 12px; background: #f8fafc;
+      border: 1.5px solid #e2e8f0; border-radius: 6px; padding: 8px 12px;
+      color: #333; line-height: 1.6; white-space: pre-wrap;
+    }
+
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 8px; padding: 10px 14px; border-left: 4px solid #ccc; font-size: 14px; color: #333; }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <h1>Demo — Array-like Methods on <code>Selector.queryAll()</code> results</h1>
+  <p class="subtitle"><code>Selector.queryAll(selector)</code> returns an enhanced collection that supports the same array-like methods as <code>Collections</code>: <code>.toArray()</code>, <code>.forEach()</code>, <code>.map()</code>, <code>.filter()</code>, <code>.find()</code>, <code>.some()</code>, <code>.every()</code>, <code>.reduce()</code>, <code>.first()</code>, <code>.last()</code>, <code>.at()</code>, <code>.isEmpty()</code>.</p>
+
+  <!-- ── Method chips ── -->
+  <div class="method-index">
+    <span class="method-chip">.toArray()</span>
+    <span class="method-chip">.forEach()</span>
+    <span class="method-chip">.map()</span>
+    <span class="method-chip">.filter()</span>
+    <span class="method-chip">.find()</span>
+    <span class="method-chip">.some()</span>
+    <span class="method-chip">.every()</span>
+    <span class="method-chip">.reduce()</span>
+    <span class="method-chip">.first()</span>
+    <span class="method-chip">.last()</span>
+    <span class="method-chip">.at()</span>
+    <span class="method-chip">.isEmpty()</span>
+  </div>
+
+  <!-- ── Demo elements ── -->
+  <h2>Demo elements (queried via Selector.queryAll)</h2>
+  <div class="card-grid">
+    <div class="card scard" id="s1" data-score="40" data-role="viewer">Alice<div class="meta">score:40 viewer</div></div>
+    <div class="card scard" id="s2" data-score="70" data-role="editor">Bob<div class="meta">score:70 editor</div></div>
+    <div class="card scard" id="s3" data-score="90" data-role="admin">Carol<div class="meta">score:90 admin</div></div>
+    <div class="card scard" id="s4" data-score="85" data-role="admin">Dave<div class="meta">score:85 admin</div></div>
+    <div class="card scard" id="s5" data-score="55" data-role="viewer">Eve<div class="meta">score:55 viewer</div></div>
+  </div>
+
+  <!-- ── Live method demos ── -->
+  <h2>Method output</h2>
+
+  <div class="method-section">
+    <h3>Selector.queryAll('.scard').toArray()</h3>
+    <div class="desc">Returns a plain JS array of DOM elements.</div>
+    <div class="output-box" id="out-toArray">—</div>
+  </div>
+
+  <div class="method-section">
+    <h3>Selector.queryAll('.scard').map(el => el.dataset.score)</h3>
+    <div class="desc">Returns an array of values derived from each element.</div>
+    <div class="output-box" id="out-map">—</div>
+  </div>
+
+  <div class="method-section">
+    <h3>Selector.queryAll('.scard').filter(el => +el.dataset.score >= 70)</h3>
+    <div class="desc">Returns elements matching the predicate.</div>
+    <div class="output-box" id="out-filter">—</div>
+  </div>
+
+  <div class="method-section">
+    <h3>Selector.queryAll('.scard').find(el => el.dataset.role === 'admin')</h3>
+    <div class="desc">Returns the first admin element.</div>
+    <div class="output-box" id="out-find">—</div>
+  </div>
+
+  <div class="method-section">
+    <h3>Selector.queryAll('.scard').reduce((sum, el) => sum + +el.dataset.score, 0)</h3>
+    <div class="desc">Accumulates a total score from all cards.</div>
+    <div class="output-box" id="out-reduce">—</div>
+  </div>
+
+  <div class="method-section">
+    <h3>.first() / .last() / .at(index)</h3>
+    <div class="output-box" id="out-access">—</div>
+  </div>
+
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.3/dist/dom-helpers.min.js"></script>
+  <script>
+    const resultsEl = document.getElementById('results');
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML = '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span><strong>' + label + '</strong>' + (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    const col = Selector.queryAll('.scard');
+
+    // ── Live output ────────────────────────────────────────────────────────────
+    document.getElementById('out-toArray').textContent =
+      'Array.isArray: ' + Array.isArray(col.toArray()) + '\n' +
+      'IDs: ' + col.toArray().map(el => el.id).join(', ');
+
+    document.getElementById('out-map').textContent =
+      col.map(el => el.dataset.score).join(', ');
+
+    const filtered = col.filter(el => +el.dataset.score >= 70);
+    document.getElementById('out-filter').textContent =
+      filtered.map(el => '#' + el.id + ' (score:' + el.dataset.score + ')').join('\n');
+
+    const found = col.find(el => el.dataset.role === 'admin');
+    document.getElementById('out-find').textContent =
+      found ? '#' + found.id + ' — role:' + found.dataset.role : 'undefined';
+
+    const total = col.reduce((sum, el) => sum + +el.dataset.score, 0);
+    document.getElementById('out-reduce').textContent = 'Total score: ' + total;
+
+    document.getElementById('out-access').textContent =
+      'first(): #' + (col.first() ? col.first().id : 'null') + '\n' +
+      'last():  #' + (col.last()  ? col.last().id  : 'null') + '\n' +
+      'at(2):   #' + (col.at(2)   ? col.at(2).id   : 'null') + '\n' +
+      'at(-1):  #' + (col.at(-1)  ? col.at(-1).id  : 'null');
+
+    // ── Automated tests ────────────────────────────────────────────────────────
+
+    // .length
+    addResult(col.length === 5, '.length returns correct count', 'length: ' + col.length);
+
+    // .toArray()
+    const arr = col.toArray();
+    addResult(Array.isArray(arr), '.toArray() returns a plain JS Array', 'Array.isArray: ' + Array.isArray(arr));
+    addResult(arr.length === 5, '.toArray() contains all 5 elements', 'length: ' + arr.length);
+
+    // .forEach()
+    let forEachCount = 0;
+    col.forEach(() => forEachCount++);
+    addResult(forEachCount === 5, '.forEach() iterates all elements', 'count: ' + forEachCount);
+
+    // .map()
+    const scores = col.map(el => +el.dataset.score);
+    addResult(Array.isArray(scores) && scores.length === 5, '.map() returns an array with one value per element', 'length: ' + scores.length);
+    addResult(scores[0] === 40 && scores[2] === 90, '.map() returns correct values', scores.join(', '));
+
+    // .filter()
+    const highScorers = col.filter(el => +el.dataset.score >= 70);
+    addResult(highScorers.length === 3, '.filter() returns only matching elements (score ≥ 70)', 'count: ' + highScorers.length);
+
+    // .find()
+    const firstAdmin = col.find(el => el.dataset.role === 'admin');
+    addResult(firstAdmin !== undefined, '.find() returns the first matching element', '#' + (firstAdmin && firstAdmin.id));
+    addResult(firstAdmin && firstAdmin.id === 's3', '.find() stops at first match (#s3 is first admin)', '#' + (firstAdmin && firstAdmin.id));
+
+    // .find() — no match
+    const noMatch = col.find(el => el.dataset.role === 'superuser');
+    addResult(noMatch === undefined, '.find() returns undefined when nothing matches', 'returned: ' + noMatch);
+
+    // .some()
+    addResult(col.some(el => el.dataset.role === 'admin'), '.some() returns true when at least one matches', '');
+    addResult(!col.some(el => el.dataset.role === 'superuser'), '.some() returns false when nothing matches', '');
+
+    // .every()
+    addResult(!col.every(el => el.dataset.role === 'admin'), '.every() returns false when not all match', '');
+    addResult(col.every(el => el.classList.contains('scard')), '.every() returns true when all elements share the class', '');
+
+    // .reduce()
+    const totalScore = col.reduce((sum, el) => sum + +el.dataset.score, 0);
+    addResult(totalScore === 340, '.reduce() accumulates correctly (sum of scores: 40+70+90+85+55)', 'sum: ' + totalScore);
+
+    // .first() / .last()
+    addResult(col.first() && col.first().id === 's1', '.first() returns the first element', '#' + (col.first() && col.first().id));
+    addResult(col.last()  && col.last().id  === 's5', '.last() returns the last element',  '#' + (col.last()  && col.last().id));
+
+    // .at()
+    addResult(col.at(0) && col.at(0).id === 's1', '.at(0) returns the first element', '#' + (col.at(0) && col.at(0).id));
+    addResult(col.at(2) && col.at(2).id === 's3', '.at(2) returns the third element',  '#' + (col.at(2) && col.at(2).id));
+    addResult(col.at(-1) && col.at(-1).id === 's5', '.at(-1) returns the last element (negative index)', '#' + (col.at(-1) && col.at(-1).id));
+
+    // .isEmpty()
+    addResult(!col.isEmpty(), '.isEmpty() returns false when collection has elements', '');
+    addResult(Selector.queryAll('.nonexistent-xyz').isEmpty(), '.isEmpty() returns true for empty collection', '');
+  </script>
+</body>
+</html>

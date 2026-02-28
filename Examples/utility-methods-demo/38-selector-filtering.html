@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: Selector.queryAll() — Filtering Methods</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
+
+    /* ── Method chips ── */
+    .method-index { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+    .method-chip {
+      padding: 4px 12px; border-radius: 99px; background: #fff;
+      border: 1.5px solid #e2e8f0; font-family: monospace; font-size: 12px;
+      color: #0891b2; font-weight: 600;
+    }
+
+    /* ── Mixed element grid ── */
+    .element-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .fcard {
+      padding: 10px 14px; border-radius: 9px; background: #fff;
+      border: 2px solid #dde1e7; font-size: 13px; font-weight: 600;
+      color: #555; min-width: 100px; text-align: center;
+    }
+    .fcard .state { font-size: 10px; font-family: monospace; color: #aaa; margin-top: 3px; }
+    .fcard.matched { border-color: #0891b2; background: #e0f2fe; color: #0c4a6e; }
+    .fcard.matched::after { content: '✓'; display: block; font-size: 16px; color: #0891b2; }
+
+    /* ── Form elements for enabled/disabled ── */
+    .form-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .form-row input, .form-row button, .form-row select {
+      padding: 8px 14px; border-radius: 7px; font-size: 13px; font-weight: 600;
+      border: 2px solid #dde1e7; background: #fff; color: #555;
+    }
+    .form-row input:disabled, .form-row button:disabled, .form-row select:disabled {
+      background: #f1f5f9; color: #aaa; border-color: #e2e8f0; cursor: not-allowed;
+    }
+
+    /* ── within() nested structure ── */
+    .within-container {
+      background: #fff; border-radius: 12px; padding: 16px 18px;
+      border: 2px solid #dde1e7; margin-bottom: 16px;
+    }
+    .within-section {
+      border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 10px 12px;
+      margin-bottom: 10px; background: #f8fafc;
+    }
+    .within-section:last-child { margin-bottom: 0; }
+    .within-section h4 { font-size: 11px; color: #888; font-family: monospace; margin-bottom: 8px; }
+    .within-item {
+      display: inline-block; padding: 4px 10px; border-radius: 6px;
+      background: #fff; border: 1.5px solid #e2e8f0; font-size: 12px;
+      font-weight: 600; color: #555; margin: 3px;
+    }
+    .within-item.wfound { background: #e0f2fe; border-color: #38bdf8; color: #0c4a6e; }
+
+    /* ── Controls ── */
+    .controls {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: #fff; padding: 12px 16px; border-radius: 10px;
+      border: 1px solid #e2e8f0; margin-bottom: 14px;
+    }
+    .btn { padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: #fff; }
+    .btn-vis   { background: #16a34a; } .btn-vis:hover   { background: #15803d; }
+    .btn-hid   { background: #dc2626; } .btn-hid:hover   { background: #b91c1c; }
+    .btn-en    { background: #0891b2; } .btn-en:hover    { background: #0e7490; }
+    .btn-dis   { background: #7c3aed; } .btn-dis:hover   { background: #6d28d9; }
+    .btn-with  { background: #d97706; } .btn-with:hover  { background: #b45309; }
+    .btn-reset { background: #6b7280; } .btn-reset:hover { background: #4b5563; }
+
+    /* ── Result box ── */
+    .result-box {
+      font-family: monospace; font-size: 12px; background: #f8fafc;
+      border: 1.5px solid #e2e8f0; border-radius: 6px; padding: 8px 12px;
+      color: #333; line-height: 1.6; margin-bottom: 10px;
+    }
+
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 8px; padding: 10px 14px; border-left: 4px solid #ccc; font-size: 14px; color: #333; }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <h1>Demo — Filtering Methods on <code>Selector.queryAll()</code> results</h1>
+  <p class="subtitle">The enhanced collection returned by <code>queryAll()</code> supports <code>.visible()</code>, <code>.hidden()</code>, <code>.enabled()</code>, <code>.disabled()</code>, and a Selector-exclusive <code>.within(selector)</code> that searches inside each matched element.</p>
+
+  <div class="method-index">
+    <span class="method-chip">.visible()</span>
+    <span class="method-chip">.hidden()</span>
+    <span class="method-chip">.enabled()</span>
+    <span class="method-chip">.disabled()</span>
+    <span class="method-chip">.within(selector) ← Selector-only</span>
+  </div>
+
+  <!-- ── visible / hidden ── -->
+  <h2>.visible() and .hidden()</h2>
+  <div class="element-grid">
+    <div class="fcard fvis" id="v1">Visible A<div class="state">display:block</div></div>
+    <div class="fcard fvis" id="v2" style="display:none">Hidden B<div class="state">display:none</div></div>
+    <div class="fcard fvis" id="v3">Visible C<div class="state">display:block</div></div>
+    <div class="fcard fvis" id="v4" style="visibility:hidden">Invisible D<div class="state">visibility:hidden</div></div>
+    <div class="fcard fvis" id="v5">Visible E<div class="state">display:block</div></div>
+  </div>
+  <div class="controls">
+    <button class="btn btn-vis" onclick="showVisible()">.visible() — highlight visible</button>
+    <button class="btn btn-hid" onclick="showHidden()">.hidden() — highlight hidden</button>
+    <button class="btn btn-reset" onclick="resetVis()">Reset</button>
+  </div>
+  <div class="result-box" id="out-vis">—</div>
+
+  <!-- ── enabled / disabled ── -->
+  <h2>.enabled() and .disabled()</h2>
+  <div class="form-row">
+    <input  type="text"   class="fform" id="f1" value="Enabled input" />
+    <input  type="text"   class="fform" id="f2" value="Disabled input" disabled />
+    <button class="fform" id="f3">Enabled btn</button>
+    <button class="fform" id="f4" disabled>Disabled btn</button>
+    <select class="fform" id="f5"><option>Enabled select</option></select>
+    <select class="fform" id="f6" disabled><option>Disabled select</option></select>
+  </div>
+  <div class="controls">
+    <button class="btn btn-en"  onclick="showEnabled()">.enabled() — count enabled</button>
+    <button class="btn btn-dis" onclick="showDisabled()">.disabled() — count disabled</button>
+    <button class="btn btn-reset" onclick="resetForm()">Reset</button>
+  </div>
+  <div class="result-box" id="out-form">—</div>
+
+  <!-- ── .within() ── -->
+  <h2>.within(selector) — Selector-exclusive</h2>
+  <p style="font-size:13px;color:#666;margin-bottom:12px;">Queries <em>inside</em> each element in the collection, returning a flat collection of all descendants that match the selector.</p>
+  <div class="within-container" id="wc">
+    <div class="within-section" id="ws1">
+      <h4>.within-section #1</h4>
+      <span class="within-item wtarget" id="wt1">Tag A</span>
+      <span class="within-item" id="wt2">Other</span>
+      <span class="within-item wtarget" id="wt3">Tag B</span>
+    </div>
+    <div class="within-section" id="ws2">
+      <h4>.within-section #2</h4>
+      <span class="within-item" id="wt4">Other</span>
+      <span class="within-item wtarget" id="wt5">Tag C</span>
+    </div>
+    <div class="within-section" id="ws3">
+      <h4>.within-section #3</h4>
+      <span class="within-item wtarget" id="wt6">Tag D</span>
+      <span class="within-item wtarget" id="wt7">Tag E</span>
+    </div>
+  </div>
+  <div class="controls">
+    <button class="btn btn-with" onclick="doWithin()">queryAll('.within-section').within('.wtarget')</button>
+    <button class="btn btn-reset" onclick="resetWithin()">Reset</button>
+  </div>
+  <div class="result-box" id="out-within">—</div>
+
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.3/dist/dom-helpers.min.js"></script>
+  <script>
+    const resultsEl = document.getElementById('results');
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML = '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span><strong>' + label + '</strong>' + (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    // ── Visible / hidden interactive ────────────────────────────────────────────
+    function showVisible() {
+      resetVis();
+      const vis = Selector.queryAll('.fvis').visible();
+      vis.forEach(el => el.classList.add('matched'));
+      document.getElementById('out-vis').textContent =
+        '.visible() → ' + vis.length + ' element(s): ' +
+        vis.map(el => '#' + el.id).join(', ');
+    }
+    function showHidden() {
+      resetVis();
+      const hid = Selector.queryAll('.fvis').hidden();
+      // Hidden elements can't show a visual cue, so just report
+      document.getElementById('out-vis').textContent =
+        '.hidden() → ' + hid.length + ' element(s): ' +
+        hid.map(el => '#' + el.id).join(', ');
+    }
+    function resetVis() {
+      document.querySelectorAll('.fvis').forEach(el => el.classList.remove('matched'));
+      document.getElementById('out-vis').textContent = '—';
+    }
+
+    // ── Enabled / disabled interactive ─────────────────────────────────────────
+    function showEnabled() {
+      const en = Selector.queryAll('.fform').enabled();
+      document.getElementById('out-form').textContent =
+        '.enabled() → ' + en.length + ' element(s): ' +
+        en.map(el => '#' + el.id).join(', ');
+    }
+    function showDisabled() {
+      const dis = Selector.queryAll('.fform').disabled();
+      document.getElementById('out-form').textContent =
+        '.disabled() → ' + dis.length + ' element(s): ' +
+        dis.map(el => '#' + el.id).join(', ');
+    }
+    function resetForm() {
+      document.getElementById('out-form').textContent = '—';
+    }
+
+    // ── .within() interactive ──────────────────────────────────────────────────
+    function doWithin() {
+      resetWithin();
+      const result = Selector.queryAll('.within-section').within('.wtarget');
+      result.forEach(el => el.classList.add('wfound'));
+      document.getElementById('out-within').textContent =
+        'queryAll(".within-section").within(".wtarget") → ' + result.length + ' element(s): ' +
+        result.map(el => '#' + el.id).join(', ');
+    }
+    function resetWithin() {
+      document.querySelectorAll('.within-item').forEach(el => el.classList.remove('wfound'));
+      document.getElementById('out-within').textContent = '—';
+    }
+
+    // ── Automated tests ────────────────────────────────────────────────────────
+
+    // .visible()
+    const visCol = Selector.queryAll('.fvis').visible();
+    addResult(visCol.length === 3, '.visible() returns only visible elements (3 of 5)', 'count: ' + visCol.length);
+    addResult(visCol.every(el => el.style.display !== 'none' && el.style.visibility !== 'hidden'),
+      '.visible() excludes display:none and visibility:hidden elements', '');
+
+    // .hidden()
+    const hidCol = Selector.queryAll('.fvis').hidden();
+    addResult(hidCol.length === 2, '.hidden() returns only hidden elements (2 of 5)', 'count: ' + hidCol.length);
+    const hidIds = hidCol.map(el => el.id);
+    addResult(hidIds.includes('v2') && hidIds.includes('v4'),
+      '.hidden() catches both display:none (#v2) and visibility:hidden (#v4)', hidIds.join(', '));
+
+    // .visible() + .hidden() are complementary
+    addResult(visCol.length + hidCol.length === Selector.queryAll('.fvis').length,
+      '.visible() + .hidden() together cover all elements', visCol.length + ' + ' + hidCol.length + ' = ' + Selector.queryAll('.fvis').length);
+
+    // .enabled()
+    const enCol = Selector.queryAll('.fform').enabled();
+    addResult(enCol.length === 3, '.enabled() returns only non-disabled form elements (3 of 6)', 'count: ' + enCol.length);
+
+    // .disabled()
+    const disCol = Selector.queryAll('.fform').disabled();
+    addResult(disCol.length === 3, '.disabled() returns only disabled form elements (3 of 6)', 'count: ' + disCol.length);
+    addResult(disCol.every(el => el.disabled || el.hasAttribute('disabled')),
+      '.disabled() only contains elements with disabled attribute or property', '');
+
+    // .enabled() + .disabled() are complementary
+    addResult(enCol.length + disCol.length === Selector.queryAll('.fform').length,
+      '.enabled() + .disabled() together cover all form elements', enCol.length + ' + ' + disCol.length + ' = ' + Selector.queryAll('.fform').length);
+
+    // .within() — Selector-exclusive
+    const withinResult = Selector.queryAll('.within-section').within('.wtarget');
+    addResult(withinResult !== null && withinResult !== undefined,
+      '.within() returns a collection (not null)', 'type: ' + typeof withinResult);
+    addResult(withinResult.length === 5,
+      '.within() finds all .wtarget descendants across all matched sections (5 total)', 'count: ' + withinResult.length);
+
+    // .within() returns flat list of descendants — not the sections themselves
+    const allAreWtarget = withinResult.every(el => el.classList.contains('wtarget'));
+    addResult(allAreWtarget, '.within() returns the descendants, not the containers', '');
+
+    // .within() with no match returns empty collection
+    const withinEmpty = Selector.queryAll('.within-section').within('.nonexistent-xyz');
+    addResult(withinEmpty !== null && withinEmpty.length === 0,
+      '.within() returns empty collection when no descendants match', 'length: ' + withinEmpty.length);
+  </script>
+</body>
+</html>

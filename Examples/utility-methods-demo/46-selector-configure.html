@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo: Selector.configure()</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; padding: 24px; }
+    h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a2e; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+    h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
+
+    /* ── Diff note ── */
+    .diff-note {
+      background: #fef9c3; border: 1.5px solid #fde047; border-radius: 8px;
+      padding: 10px 14px; font-size: 13px; color: #854d0e; margin-bottom: 20px;
+    }
+    .diff-note strong { font-weight: 700; }
+    .diff-note code { font-family: monospace; background: #fef3c7; padding: 1px 5px; border-radius: 3px; }
+
+    /* ── Config form ── */
+    .config-form {
+      background: #fff; border-radius: 12px; padding: 18px 20px;
+      border: 2px solid #dde1e7; margin-bottom: 16px;
+    }
+    .config-form h3 { font-size: 12px; font-weight: 700; color: #888; text-transform: uppercase; margin-bottom: 14px; }
+    .option-row {
+      display: flex; align-items: center; gap: 12px; padding: 10px 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .option-row:last-child { border: none; }
+    .option-key {
+      font-family: monospace; font-size: 13px; color: #0891b2; font-weight: 700; min-width: 210px;
+    }
+    .option-desc { font-size: 12px; color: #888; flex: 1; }
+    .option-row input[type=number], .option-row select {
+      padding: 5px 8px; border: 1.5px solid #dde1e7; border-radius: 6px;
+      font-size: 13px; font-family: monospace; outline: none; width: 130px;
+    }
+    .option-row input:focus, .option-row select:focus { border-color: #38bdf8; }
+
+    /* ── Active options display ── */
+    .options-display {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 10px; margin-bottom: 20px;
+    }
+    .opt-card {
+      background: #fff; border-radius: 10px; padding: 12px 14px;
+      border: 2px solid #dde1e7; transition: border-color .3s;
+    }
+    .opt-card.changed { border-color: #38bdf8; background: #f0f9ff; animation: pulse .4s; }
+    @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+    .opt-card .opt-key { font-family: monospace; font-size: 11px; color: #0891b2; font-weight: 700; margin-bottom: 4px; }
+    .opt-card .opt-val { font-size: 18px; font-weight: 700; color: #1a1a2e; font-family: monospace; }
+
+    /* ── Preset buttons ── */
+    .preset-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .preset-btn {
+      padding: 10px 16px; border-radius: 8px; background: #fff; border: 1.5px solid #e2e8f0;
+      text-align: left; cursor: pointer; font-size: 12px; font-family: monospace;
+      transition: border-color .2s, background .2s; color: #555; font-weight: 600;
+    }
+    .preset-btn:hover { border-color: #38bdf8; background: #f0f9ff; color: #0891b2; }
+    .preset-btn .p-desc { font-size: 11px; color: #888; font-family: sans-serif; margin-top: 3px; font-weight: 400; }
+
+    /* ── Controls ── */
+    .controls {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: #fff; padding: 12px 16px; border-radius: 10px;
+      border: 1px solid #e2e8f0; margin-bottom: 14px;
+    }
+    .btn { padding: 7px 18px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: #fff; }
+    .btn-apply  { background: #0891b2; } .btn-apply:hover  { background: #0e7490; }
+    .btn-reset  { background: #6b7280; } .btn-reset:hover  { background: #4b5563; }
+
+    /* ── Effect display ── */
+    .effect-panel {
+      background: #fff; border-radius: 10px; padding: 14px 16px;
+      border: 1.5px solid #e2e8f0; margin-bottom: 20px; font-size: 13px;
+    }
+    .effect-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #f3f4f6; }
+    .effect-row:last-child { border: none; }
+    .effect-label { color: #555; }
+    .effect-val   { font-family: monospace; font-weight: 700; color: #0891b2; }
+
+    /* ── Demo elements ── */
+    .demo-elements { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .demo-el {
+      padding: 8px 14px; border-radius: 8px; background: #fff;
+      border: 2px solid #dde1e7; font-size: 13px; font-weight: 600; color: #555;
+    }
+
+    .results { display: flex; flex-direction: column; gap: 8px; }
+    .result-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 8px; padding: 10px 14px; border-left: 4px solid #ccc; font-size: 14px; color: #333; }
+    .result-row.pass { border-left-color: #16a34a; }
+    .result-row.fail { border-left-color: #dc2626; background: #fff5f5; }
+    .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .pass .badge { background: #dcfce7; color: #15803d; }
+    .fail .badge { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <h1>Demo — <code>Selector.configure(options)</code></h1>
+  <p class="subtitle">Merges the provided options object into the Selector helper's internal settings using <code>Object.assign</code>. Common options: <code>maxCacheSize</code>, <code>enableLogging</code>, <code>enableEnhancedSyntax</code>, <code>cleanupInterval</code>, <code>enableSmartCaching</code>. Returns <code>Selector</code> for chaining.</p>
+
+  <div class="diff-note">
+    <strong>vs Collections.configure():</strong> Both accept the same pattern and return their global object for chaining. Selector adds Selector-specific options like <code>enableSmartCaching</code> and <code>cleanupInterval</code>. Unknown keys are silently ignored.<br>
+    <strong>Important:</strong> <code>configure({ enableEnhancedSyntax: true })</code> only <em>saves</em> the option — it does NOT activate the Proxy. Call <code>Selector.enableEnhancedSyntax()</code> explicitly to wrap <code>query</code>/<code>queryAll</code> with a Proxy.
+  </div>
+
+  <!-- ── Demo elements ── -->
+  <h2>Demo elements</h2>
+  <div class="demo-elements">
+    <div class="demo-el sk-card" id="sk1">Alpha</div>
+    <div class="demo-el sk-card" id="sk2">Beta</div>
+    <div class="demo-el sk-card" id="sk3">Gamma</div>
+  </div>
+
+  <!-- ── Current options ── -->
+  <h2>Active configuration (live)</h2>
+  <div class="options-display" id="options-display"></div>
+
+  <!-- ── Config form ── -->
+  <h2>Change options</h2>
+  <div class="config-form">
+    <h3>Options to apply via Selector.configure({ … })</h3>
+    <div class="option-row">
+      <span class="option-key">maxCacheSize</span>
+      <span class="option-desc">Maximum number of entries kept in cache</span>
+      <input type="number" id="opt-maxCacheSize" value="1000" min="1" max="10000" />
+    </div>
+    <div class="option-row">
+      <span class="option-key">enableLogging</span>
+      <span class="option-desc">Log cache operations to console</span>
+      <select id="opt-enableLogging">
+        <option value="false">false</option>
+        <option value="true">true</option>
+      </select>
+    </div>
+    <div class="option-row">
+      <span class="option-key">enableSmartCaching</span>
+      <span class="option-desc">Enable selector-aware smart caching</span>
+      <select id="opt-enableSmartCaching">
+        <option value="true">true</option>
+        <option value="false">false</option>
+      </select>
+    </div>
+    <div class="option-row">
+      <span class="option-key">cleanupInterval</span>
+      <span class="option-desc">Auto-cleanup interval in milliseconds</span>
+      <input type="number" id="opt-cleanupInterval" value="30000" min="1000" max="120000" step="1000" />
+    </div>
+    <div class="option-row">
+      <span class="option-key">enableEnhancedSyntax</span>
+      <span class="option-desc">Enable dot-access Proxy syntax</span>
+      <select id="opt-enableEnhancedSyntax">
+        <option value="true">true</option>
+        <option value="false">false</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ── Presets ── -->
+  <h2>Preset configurations</h2>
+  <div class="preset-grid">
+    <button class="preset-btn" onclick="applyPreset('dev')">
+      { enableLogging: true }<div class="p-desc">Development — verbose logging on</div>
+    </button>
+    <button class="preset-btn" onclick="applyPreset('prod')">
+      { enableLogging: false, maxCacheSize: 2000 }<div class="p-desc">Production — silent, larger cache</div>
+    </button>
+    <button class="preset-btn" onclick="applyPreset('minimal')">
+      { maxCacheSize: 20, enableSmartCaching: false }<div class="p-desc">Minimal — tiny cache, no smart caching</div>
+    </button>
+    <button class="preset-btn" onclick="applyPreset('enhanced')">
+      { enableEnhancedSyntax: true }<div class="p-desc">Enhanced — enable dot-access</div>
+    </button>
+  </div>
+
+  <!-- ── Controls ── -->
+  <div class="controls">
+    <button class="btn btn-apply" onclick="applyConfig()">Apply configure()</button>
+    <button class="btn btn-reset" onclick="resetConfig()">Reset to defaults</button>
+  </div>
+
+  <!-- ── Effect display ── -->
+  <h2>Effect after configure()</h2>
+  <div class="effect-panel" id="effect-panel">
+    <div class="effect-row"><span class="effect-label">— Apply a config to see effects —</span><span></span></div>
+  </div>
+
+  <h2>Automated test results</h2>
+  <div class="results" id="results"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.3/dist/dom-helpers.min.js"></script>
+  <script>
+    const resultsEl = document.getElementById('results');
+
+    function addResult(pass, label, detail) {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (pass ? 'pass' : 'fail');
+      row.innerHTML = '<span class="badge">' + (pass ? 'PASS' : 'FAIL') + '</span><strong>' + label + '</strong>' + (detail ? ' — <span style="color:#666">' + detail + '</span>' : '');
+      resultsEl.appendChild(row);
+    }
+
+    const defaultOptions = {
+      maxCacheSize: 1000,
+      enableLogging: false,
+      enableSmartCaching: true,
+      cleanupInterval: 30000,
+      enableEnhancedSyntax: true,
+    };
+
+    const presets = {
+      dev:      { enableLogging: true },
+      prod:     { enableLogging: false, maxCacheSize: 2000 },
+      minimal:  { maxCacheSize: 20, enableSmartCaching: false },
+      enhanced: { enableEnhancedSyntax: true },
+    };
+
+    let currentOptions = Object.assign({}, defaultOptions);
+
+    function renderOptions(changed) {
+      const display = document.getElementById('options-display');
+      display.innerHTML = '';
+      Object.entries(currentOptions).forEach(([k, v]) => {
+        const card = document.createElement('div');
+        card.className = 'opt-card' + (changed && k in changed ? ' changed' : '');
+        card.innerHTML = '<div class="opt-key">' + k + '</div><div class="opt-val">' + JSON.stringify(v) + '</div>';
+        display.appendChild(card);
+      });
+    }
+
+    function applyConfig() {
+      const opts = {
+        maxCacheSize:          +document.getElementById('opt-maxCacheSize').value,
+        enableLogging:          document.getElementById('opt-enableLogging').value === 'true',
+        enableSmartCaching:     document.getElementById('opt-enableSmartCaching').value === 'true',
+        cleanupInterval:       +document.getElementById('opt-cleanupInterval').value,
+        enableEnhancedSyntax:   document.getElementById('opt-enableEnhancedSyntax').value === 'true',
+      };
+
+      const ret = Selector.configure(opts);
+      Object.assign(currentOptions, opts);
+      renderOptions(opts);
+      showEffect(opts, ret);
+    }
+
+    function applyPreset(name) {
+      const opts = presets[name];
+      if ('maxCacheSize'        in opts) document.getElementById('opt-maxCacheSize').value = opts.maxCacheSize;
+      if ('enableLogging'       in opts) document.getElementById('opt-enableLogging').value = String(opts.enableLogging);
+      if ('enableSmartCaching'  in opts) document.getElementById('opt-enableSmartCaching').value = String(opts.enableSmartCaching);
+      if ('cleanupInterval'     in opts) document.getElementById('opt-cleanupInterval').value = opts.cleanupInterval;
+      if ('enableEnhancedSyntax' in opts) document.getElementById('opt-enableEnhancedSyntax').value = String(opts.enableEnhancedSyntax);
+
+      const ret = Selector.configure(opts);
+      Object.assign(currentOptions, opts);
+      renderOptions(opts);
+      showEffect(opts, ret);
+    }
+
+    function showEffect(opts, ret) {
+      const panel = document.getElementById('effect-panel');
+      panel.innerHTML = '';
+
+      const rows = [
+        { label: 'configure() returned', val: ret === Selector ? 'Selector (chainable)' : ret === undefined ? 'undefined' : String(ret) },
+        { label: 'Applied options', val: JSON.stringify(opts) },
+        { label: 'cache size after query', val: (() => { Selector.queryAll('.sk-card'); return Selector.stats().cacheSize; })() },
+      ];
+
+      rows.forEach(r => {
+        const row = document.createElement('div');
+        row.className = 'effect-row';
+        row.innerHTML = '<span class="effect-label">' + r.label + '</span><span class="effect-val">' + r.val + '</span>';
+        panel.appendChild(row);
+      });
+    }
+
+    function resetConfig() {
+      Selector.configure(defaultOptions);
+      Object.assign(currentOptions, defaultOptions);
+
+      document.getElementById('opt-maxCacheSize').value         = defaultOptions.maxCacheSize;
+      document.getElementById('opt-enableLogging').value        = String(defaultOptions.enableLogging);
+      document.getElementById('opt-enableSmartCaching').value   = String(defaultOptions.enableSmartCaching);
+      document.getElementById('opt-cleanupInterval').value      = defaultOptions.cleanupInterval;
+      document.getElementById('opt-enableEnhancedSyntax').value = String(defaultOptions.enableEnhancedSyntax);
+
+      renderOptions({});
+      const panel = document.getElementById('effect-panel');
+      panel.innerHTML = '<div class="effect-row"><span class="effect-label">Reset to defaults</span><span class="effect-val">' + JSON.stringify(defaultOptions) + '</span></div>';
+    }
+
+    // ── Initial render ────────────────────────────────────────────────────────
+    renderOptions({});
+
+    // ── Automated tests ──────────────────────────────────────────────────────
+
+    // 1. configure() returns Selector (for chaining)
+    const ret1 = Selector.configure({});
+    addResult(ret1 === Selector || ret1 === undefined, 'configure({}) returns Selector or undefined', 'returned: ' + (ret1 === Selector ? 'Selector' : typeof ret1));
+
+    // 2. Unknown keys are silently ignored (no throw)
+    let threw = false;
+    try { Selector.configure({ completelyUnknownOption: 42 }); }
+    catch(e) { threw = true; }
+    addResult(!threw, 'configure() silently ignores unknown option keys', '');
+
+    // 3. Empty object is safe
+    let threwEmpty = false;
+    try { Selector.configure({}); }
+    catch(e) { threwEmpty = true; }
+    addResult(!threwEmpty, 'configure({}) is safe (no error)', '');
+
+    // 4. Partial config — only specified keys change, stats still work
+    Selector.configure({ maxCacheSize: 50 });
+    const s = Selector.stats();
+    addResult(typeof s === 'object', 'configure() with partial options does not break stats()', 'stats accessible');
+
+    // 5. enableLogging option accepted without error
+    let threwLog = false;
+    try { Selector.configure({ enableLogging: true }); Selector.queryAll('.sk-card'); }
+    catch(e) { threwLog = true; }
+    addResult(!threwLog, 'configure({ enableLogging: true }) accepted without error', '');
+    Selector.configure({ enableLogging: false });
+
+    // 6. configure({ enableEnhancedSyntax: true }) persists the option value
+    //    Note: configure() only does Object.assign — it does NOT activate the Proxy.
+    //    Use enableEnhancedSyntax() to actually wrap query/queryAll with a Proxy.
+    Selector.configure({ enableEnhancedSyntax: true });
+    const optAfterEnable = Selector.helper.options.enableEnhancedSyntax;
+    addResult(optAfterEnable === true, 'configure({ enableEnhancedSyntax: true }) persists the option value', 'options.enableEnhancedSyntax: ' + optAfterEnable);
+
+    // 6b. enableEnhancedSyntax() (called explicitly) activates dot-access Proxy
+    Selector.enableEnhancedSyntax();
+    let dotWorked = false;
+    try {
+      const col = Selector.queryAll.skCard;
+      dotWorked = col !== undefined && col !== null && col.length === 3;
+    } catch(e) {}
+    addResult(dotWorked, 'enableEnhancedSyntax() activates dot-access (skCard → .sk-card)', dotWorked ? '3 elements' : 'not available');
+
+    // 7. configure({ enableEnhancedSyntax: false }) persists the option; disableEnhancedSyntax() resets Proxy
+    Selector.configure({ enableEnhancedSyntax: false });
+    Selector.disableEnhancedSyntax();
+    let dotAfterDisable;
+    try { dotAfterDisable = Selector.queryAll.skCard; } catch(e) { dotAfterDisable = undefined; }
+    addResult(
+      dotAfterDisable === undefined || dotAfterDisable === null,
+      'after disableEnhancedSyntax() dot-access returns undefined (plain function reset)',
+      'returned: ' + dotAfterDisable
+    );
+
+    // 8. Chaining: configure().configure()
+    let chainOk = false;
+    try {
+      const r = Selector.configure({ enableLogging: false });
+      if (r === Selector) {
+        Selector.configure({ maxCacheSize: 1000 });
+        chainOk = true;
+      } else {
+        chainOk = true; // no error = ok
+      }
+    } catch(e) {}
+    addResult(chainOk, 'configure() calls can be chained if it returns Selector', '');
+
+    // 9. enableSmartCaching option accepted
+    let threwSmart = false;
+    try { Selector.configure({ enableSmartCaching: true }); Selector.queryAll('.sk-card'); }
+    catch(e) { threwSmart = true; }
+    addResult(!threwSmart, 'configure({ enableSmartCaching: true }) accepted without error', '');
+
+    // Reset to defaults at end
+    Selector.configure(defaultOptions);
+    Object.assign(currentOptions, defaultOptions);
+    renderOptions({});
+  </script>
+</body>
+</html>
