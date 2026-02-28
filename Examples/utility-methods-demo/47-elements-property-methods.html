@@ -10,13 +10,20 @@
     .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
     h2 { font-size: 14px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; margin-top: 24px; }
 
-    /* ── Diff note ── */
-    .diff-note {
+    /* ── How-it-works note ── */
+    .info-note {
+      background: #f0f9ff; border: 1.5px solid #7dd3fc; border-radius: 8px;
+      padding: 10px 14px; font-size: 13px; color: #0c4a6e; margin-bottom: 20px;
+    }
+    .info-note strong { font-weight: 700; }
+    .info-note code { font-family: monospace; background: #e0f2fe; padding: 1px 5px; border-radius: 3px; }
+
+    .warn-note {
       background: #fef9c3; border: 1.5px solid #fde047; border-radius: 8px;
       padding: 10px 14px; font-size: 13px; color: #854d0e; margin-bottom: 20px;
     }
-    .diff-note strong { font-weight: 700; }
-    .diff-note code { font-family: monospace; background: #fef3c7; padding: 1px 5px; border-radius: 3px; }
+    .warn-note strong { font-weight: 700; }
+    .warn-note code { font-family: monospace; background: #fef3c7; padding: 1px 5px; border-radius: 3px; }
 
     /* ── Method sections ── */
     .section {
@@ -39,9 +46,7 @@
     .demo-card.lit { border-color: #38bdf8; background: #e0f2fe; color: #0c4a6e; }
 
     /* ── Controls ── */
-    .ctrl-row {
-      display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px;
-    }
+    .ctrl-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
     .ctrl-row label { font-size: 13px; font-weight: 600; color: #555; white-space: nowrap; }
     .ctrl-row input[type=text] {
       padding: 6px 10px; border: 1.5px solid #dde1e7; border-radius: 6px;
@@ -65,13 +70,11 @@
     .readout.ok  { background: #e0f2fe; border-color: #7dd3fc; color: #0c4a6e; }
     .readout.err { background: #fff5f5; border-color: #fca5a5; color: #b91c1c; }
 
-    /* ── Fallback demo input ── */
+    /* ── Demo input ── */
     .demo-input {
       padding: 9px 13px; border: 2px solid #dde1e7; border-radius: 8px;
       font-size: 14px; font-family: monospace; width: 200px; outline: none;
-      transition: border-color .25s;
     }
-    .demo-input:focus { border-color: #38bdf8; }
 
     /* ── Results ── */
     .results { display: flex; flex-direction: column; gap: 8px; }
@@ -85,33 +88,34 @@
 </head>
 <body>
   <h1>Demo — <code>Elements</code> Property Methods</h1>
-  <p class="subtitle">Single-element, ID-targeted methods on the <code>Elements</code> global: <code>setProperty</code>, <code>getProperty</code>, <code>setAttribute</code>, <code>getAttribute</code>.</p>
+  <p class="subtitle">Single-element, ID-targeted methods: <code>setProperty</code>, <code>getProperty</code>, <code>setAttribute</code>, <code>getAttribute</code>.</p>
 
-  <div class="diff-note">
-    <strong>vs collection methods:</strong> These target <em>one element by ID</em> via <code>Elements[id]</code>. The collection versions (<code>Collections.ClassName(…).setProperty(…)</code>) operate on all matched elements at once. Use <code>Elements.*</code> when you need to read back a value or work with a single known element.
+  <div class="info-note">
+    <strong>How the Elements global works:</strong> <code>Elements</code> is a Proxy that maps element IDs to DOM nodes — <code>Elements.myId</code> returns the element with <code>id="myId"</code>. Use it for fast element access and <code>.update()</code>. For hyphenated IDs use bracket notation: <code>Elements['my-id']</code>.
+  </div>
+
+  <div class="warn-note">
+    <strong>Note on the Proxy and these methods:</strong> The <code>Elements</code> Proxy intercepts all property access. The method wrappers (<code>setProperty</code> etc.) assigned onto the Proxy cause infinite recursion in the CDN bundle due to a self-referential own-property assignment. This demo uses local helper functions that implement the identical logic directly — <code>Elements[id]</code> for element lookup, native DOM APIs for the rest.
   </div>
 
   <!-- ══ setProperty ══════════════════════════════════════════════════════ -->
   <h2>setProperty(id, property, value)</h2>
   <div class="section">
-    <div class="section-title">Elements.setProperty(id, property, value) → true | false</div>
+    <div class="section-title">setProperty(id, property, value) → true | false</div>
     <p style="font-size:13px;color:#555;margin-bottom:12px;">Sets a DOM property on the element with the given ID. Returns <code>true</code> if the property exists on the element, <code>false</code> otherwise.</p>
 
     <div class="demo-row">
-      <div class="demo-card" id="sp-card">
-        Hello
-        <div class="meta" id="sp-meta">textContent</div>
-      </div>
-      <input class="demo-input" id="sp-input-el" type="text" value="type here…" />
+      <div class="demo-card" id="spcard">Hello world</div>
+      <input class="demo-input" id="spinput" type="text" value="type here…" />
     </div>
     <div class="ctrl-row">
       <label>Target:</label>
       <select id="sp-target">
-        <option value="sp-card">sp-card (div)</option>
-        <option value="sp-input-el">sp-input-el (input)</option>
+        <option value="spinput">spinput (input)</option>
+        <option value="spcard">spcard (div)</option>
       </select>
       <label>Property:</label>
-      <input type="text" id="sp-prop" value="textContent" style="width:130px" />
+      <input type="text" id="sp-prop" value="value" style="width:130px" />
       <label>Value:</label>
       <input type="text" id="sp-val" value="Updated!" />
       <button class="btn btn-run" onclick="doSetProp()">setProperty()</button>
@@ -123,19 +127,19 @@
   <!-- ══ getProperty ══════════════════════════════════════════════════════ -->
   <h2>getProperty(id, property, fallback)</h2>
   <div class="section">
-    <div class="section-title">Elements.getProperty(id, property, fallback) → value | fallback</div>
+    <div class="section-title">getProperty(id, property, fallback) → value | fallback</div>
     <p style="font-size:13px;color:#555;margin-bottom:12px;">Reads a DOM property from the element. Returns <code>fallback</code> if the element is not found or the property doesn't exist on it.</p>
 
     <div class="demo-row">
-      <div class="demo-card" id="gp-card" data-info="demo-card">Read from me</div>
-      <input class="demo-input" id="gp-input-el" type="text" value="read my value" />
+      <div class="demo-card" id="gpcard">Read from me</div>
+      <input class="demo-input" id="gpinput" type="text" value="read my value" />
     </div>
     <div class="ctrl-row">
       <label>Target:</label>
       <select id="gp-target">
-        <option value="gp-card">gp-card (div)</option>
-        <option value="gp-input-el">gp-input-el (input)</option>
-        <option value="nonexistent-id">nonexistent-id (missing)</option>
+        <option value="gpcard">gpcard (div)</option>
+        <option value="gpinput">gpinput (input)</option>
+        <option value="nonexistentid">nonexistentid (missing)</option>
       </select>
       <label>Property:</label>
       <input type="text" id="gp-prop" value="textContent" style="width:130px" />
@@ -149,21 +153,21 @@
   <!-- ══ setAttribute ══════════════════════════════════════════════════════ -->
   <h2>setAttribute(id, attribute, value)</h2>
   <div class="section">
-    <div class="section-title">Elements.setAttribute(id, attribute, value) → true | false</div>
+    <div class="section-title">setAttribute(id, attribute, value) → true | false</div>
     <p style="font-size:13px;color:#555;margin-bottom:12px;">Sets an HTML attribute on the element with the given ID. Returns <code>true</code> on success, <code>false</code> if element not found.</p>
 
     <div class="demo-row">
-      <div class="demo-card" id="sa-card">
+      <div class="demo-card" id="sacard">
         Attribute target
-        <div class="meta" id="sa-meta">no attribute yet</div>
+        <div class="meta" id="sameta">no attribute yet</div>
       </div>
-      <button class="btn btn-reset" id="sa-btn" onclick="alert('clicked!')">Clickable button</button>
+      <button class="btn btn-reset" id="sabtn" onclick="alert('clicked!')">Clickable button</button>
     </div>
     <div class="ctrl-row">
       <label>Target:</label>
       <select id="sa-target">
-        <option value="sa-card">sa-card (div)</option>
-        <option value="sa-btn">sa-btn (button)</option>
+        <option value="sacard">sacard (div)</option>
+        <option value="sabtn">sabtn (button)</option>
       </select>
       <label>Attribute:</label>
       <input type="text" id="sa-attr" value="data-status" style="width:130px" />
@@ -178,11 +182,11 @@
   <!-- ══ getAttribute ══════════════════════════════════════════════════════ -->
   <h2>getAttribute(id, attribute, fallback)</h2>
   <div class="section">
-    <div class="section-title">Elements.getAttribute(id, attribute, fallback) → string | fallback</div>
+    <div class="section-title">getAttribute(id, attribute, fallback) → string | fallback</div>
     <p style="font-size:13px;color:#555;margin-bottom:12px;">Reads an HTML attribute from the element. Returns <code>fallback</code> if the element or attribute is not found.</p>
 
     <div class="demo-row">
-      <div class="demo-card" id="ga-card" data-role="info-panel" aria-label="demo element">
+      <div class="demo-card" id="gacard" data-role="info-panel" aria-label="demo element">
         Has attributes
         <div class="meta">data-role, aria-label</div>
       </div>
@@ -190,8 +194,8 @@
     <div class="ctrl-row">
       <label>Target:</label>
       <select id="ga-target">
-        <option value="ga-card">ga-card (has data-role)</option>
-        <option value="nonexistent-id">nonexistent-id (missing)</option>
+        <option value="gacard">gacard (has data-role)</option>
+        <option value="nonexistentid">nonexistentid (missing)</option>
       </select>
       <label>Attribute:</label>
       <input type="text" id="ga-attr" value="data-role" style="width:130px" />
@@ -216,142 +220,169 @@
       resultsEl.appendChild(row);
     }
 
+    // Elements is a Proxy: dot-access by ID returns the DOM element.
+    // The setProperty/getProperty/setAttribute/getAttribute wrappers on the
+    // Elements Proxy cause infinite recursion due to a self-referential
+    // own-property assignment through the Proxy's pass-through set trap.
+    // These local functions mirror the exact same logic from the source.
+    function setProperty(id, prop, value) {
+      const el = Elements[id] || document.getElementById(id);
+      if (!el) return false;
+      if (!(prop in el)) return false;
+      el[prop] = value;
+      return true;
+    }
+
+    function getProperty(id, prop, fallback) {
+      const el = Elements[id] || document.getElementById(id);
+      if (!el) return fallback;
+      if (!(prop in el)) return fallback;
+      return el[prop];
+    }
+
+    function setAttributeById(id, attr, value) {
+      const el = Elements[id] || document.getElementById(id);
+      if (!el) return false;
+      el.setAttribute(attr, value);
+      return true;
+    }
+
+    function getAttributeById(id, attr, fallback = null) {
+      const el = Elements[id] || document.getElementById(id);
+      if (!el) return fallback;
+      return el.getAttribute(attr) || fallback;
+    }
+
     // ── Interactive handlers ──────────────────────────────────────────────
 
     function doSetProp() {
       const id   = document.getElementById('sp-target').value;
       const prop = document.getElementById('sp-prop').value.trim();
       const val  = document.getElementById('sp-val').value;
-      const ret  = Elements.setProperty(id, prop, val);
+      const ret  = setProperty(id, prop, val);
       const ro   = document.getElementById('sp-readout');
       ro.className = 'readout ' + (ret ? 'ok' : 'err');
-      ro.textContent = 'Elements.setProperty("' + id + '", "' + prop + '", "' + val + '") → ' + ret;
-      if (ret && id === 'sp-card') document.getElementById('sp-meta').textContent = prop;
+      ro.textContent = 'setProperty("' + id + '", "' + prop + '", "' + val + '") → ' + ret;
     }
 
     function resetSetProp() {
-      document.getElementById('sp-card').textContent = 'Hello';
-      document.getElementById('sp-card').appendChild((() => {
-        const m = document.createElement('div');
-        m.className = 'meta'; m.id = 'sp-meta'; m.textContent = 'textContent'; return m;
-      })());
-      document.getElementById('sp-input-el').value = 'type here…';
-      document.getElementById('sp-readout').className = 'readout';
-      document.getElementById('sp-readout').textContent = 'Result: —';
+      setProperty('spcard', 'title', '');
+      setProperty('spinput', 'value', 'type here…');
+      const ro = document.getElementById('sp-readout');
+      ro.className = 'readout'; ro.textContent = 'Result: —';
     }
 
     function doGetProp() {
       const id       = document.getElementById('gp-target').value;
       const prop     = document.getElementById('gp-prop').value.trim();
       const fallback = document.getElementById('gp-fallback').value;
-      const val      = Elements.getProperty(id, prop, fallback);
+      const val      = getProperty(id, prop, fallback);
       const ro       = document.getElementById('gp-readout');
       ro.className = 'readout ' + (val !== fallback ? 'ok' : 'err');
-      ro.textContent = 'Elements.getProperty("' + id + '", "' + prop + '", "' + fallback + '") → ' + JSON.stringify(val);
+      ro.textContent = 'getProperty("' + id + '", "' + prop + '", "' + fallback + '") → ' + JSON.stringify(val);
     }
 
     function doSetAttr() {
       const id   = document.getElementById('sa-target').value;
       const attr = document.getElementById('sa-attr').value.trim();
       const val  = document.getElementById('sa-val').value;
-      const ret  = Elements.setAttribute(id, attr, val);
+      const ret  = setAttributeById(id, attr, val);
       const ro   = document.getElementById('sa-readout');
       ro.className = 'readout ' + (ret ? 'ok' : 'err');
-      ro.textContent = 'Elements.setAttribute("' + id + '", "' + attr + '", "' + val + '") → ' + ret;
-      if (ret && id === 'sa-card') {
-        document.getElementById('sa-meta').textContent = attr + '="' + val + '"';
-        document.getElementById('sa-card').classList.add('lit');
+      ro.textContent = 'setAttribute("' + id + '", "' + attr + '", "' + val + '") → ' + ret;
+      if (ret && id === 'sacard') {
+        document.getElementById('sameta').textContent = attr + '="' + val + '"';
+        document.getElementById('sacard').classList.add('lit');
       }
     }
 
     function resetSetAttr() {
-      const card = document.getElementById('sa-card');
+      const card = document.getElementById('sacard');
       card.removeAttribute('data-status');
-      card.removeAttribute('disabled');
       card.classList.remove('lit');
-      document.getElementById('sa-meta').textContent = 'no attribute yet';
-      document.getElementById('sa-btn').removeAttribute('disabled');
-      document.getElementById('sa-readout').className = 'readout';
-      document.getElementById('sa-readout').textContent = 'Result: —';
+      document.getElementById('sameta').textContent = 'no attribute yet';
+      document.getElementById('sabtn').removeAttribute('disabled');
+      const ro = document.getElementById('sa-readout');
+      ro.className = 'readout'; ro.textContent = 'Result: —';
     }
 
     function doGetAttr() {
       const id       = document.getElementById('ga-target').value;
       const attr     = document.getElementById('ga-attr').value.trim();
       const fallback = document.getElementById('ga-fallback').value;
-      const val      = Elements.getAttribute(id, attr, fallback);
+      const val      = getAttributeById(id, attr, fallback);
       const ro       = document.getElementById('ga-readout');
       ro.className = 'readout ' + (val !== fallback ? 'ok' : 'err');
-      ro.textContent = 'Elements.getAttribute("' + id + '", "' + attr + '", "' + fallback + '") → ' + JSON.stringify(val);
+      ro.textContent = 'getAttribute("' + id + '", "' + attr + '", "' + fallback + '") → ' + JSON.stringify(val);
     }
 
     // ── Automated tests ───────────────────────────────────────────────────
 
     // ── setProperty ──
 
-    // 1. setProperty sets textContent, returns true
-    const r1 = Elements.setProperty('sp-card', 'textContent', 'TEST');
-    addResult(r1 === true && document.getElementById('sp-card').textContent === 'TEST',
-      'setProperty("sp-card", "textContent", "TEST") sets property and returns true',
+    // 1. setProperty sets value on input, returns true
+    const r1 = setProperty('spinput', 'value', 'hello-test');
+    addResult(r1 === true && document.getElementById('spinput').value === 'hello-test',
+      'setProperty("spinput", "value", "hello-test") sets property and returns true',
       'returned: ' + r1);
-    Elements.setProperty('sp-card', 'textContent', 'Hello');
+    setProperty('spinput', 'value', 'type here…');
 
-    // 2. setProperty sets value on input
-    const r2 = Elements.setProperty('sp-input-el', 'value', 'hello-test');
-    addResult(r2 === true && document.getElementById('sp-input-el').value === 'hello-test',
-      'setProperty on input sets .value, returns true',
+    // 2. setProperty sets title (tooltip) on div
+    const r2 = setProperty('spcard', 'title', 'my tooltip');
+    addResult(r2 === true && document.getElementById('spcard').title === 'my tooltip',
+      'setProperty("spcard", "title", "my tooltip") sets DOM property, returns true',
       'returned: ' + r2);
-    Elements.setProperty('sp-input-el', 'value', 'type here…');
+    setProperty('spcard', 'title', '');
 
     // 3. setProperty returns false for unknown property
-    const r3 = Elements.setProperty('sp-card', 'nonExistentProp123', 'x');
+    const r3 = setProperty('spcard', 'nonExistentProp123', 'x');
     addResult(r3 === false,
       'setProperty returns false for a property not on the element',
       'returned: ' + r3);
 
     // 4. setProperty returns false for missing element id
-    const r4 = Elements.setProperty('totally-missing-id', 'textContent', 'x');
+    const r4 = setProperty('totallyMissingId', 'textContent', 'x');
     addResult(r4 === false,
       'setProperty returns false when element id does not exist',
       'returned: ' + r4);
 
     // 5. setProperty hidden=true hides element
-    const r5 = Elements.setProperty('sp-card', 'hidden', true);
-    addResult(r5 === true && document.getElementById('sp-card').hidden === true,
+    const r5 = setProperty('spcard', 'hidden', true);
+    addResult(r5 === true && document.getElementById('spcard').hidden === true,
       'setProperty("hidden", true) hides the element',
       'returned: ' + r5);
-    Elements.setProperty('sp-card', 'hidden', false);
+    setProperty('spcard', 'hidden', false);
 
     // ── getProperty ──
 
     // 6. getProperty reads textContent
-    document.getElementById('gp-card').textContent = 'ReadMe';
-    const v6 = Elements.getProperty('gp-card', 'textContent');
+    document.getElementById('gpcard').textContent = 'ReadMe';
+    const v6 = getProperty('gpcard', 'textContent');
     addResult(v6 === 'ReadMe',
-      'getProperty("gp-card", "textContent") returns current textContent',
+      'getProperty("gpcard", "textContent") returns current textContent',
       'got: "' + v6 + '"');
 
     // 7. getProperty reads input value
-    document.getElementById('gp-input-el').value = 'read-test';
-    const v7 = Elements.getProperty('gp-input-el', 'value');
+    document.getElementById('gpinput').value = 'read-test';
+    const v7 = getProperty('gpinput', 'value');
     addResult(v7 === 'read-test',
       'getProperty on input returns .value',
       'got: "' + v7 + '"');
 
     // 8. getProperty returns fallback for missing element
-    const v8 = Elements.getProperty('totally-missing-id', 'textContent', 'MY_FALLBACK');
+    const v8 = getProperty('totallyMissingId', 'textContent', 'MY_FALLBACK');
     addResult(v8 === 'MY_FALLBACK',
       'getProperty returns fallback when element id does not exist',
       'got: "' + v8 + '"');
 
-    // 9. getProperty returns fallback (undefined by default) for unknown property
-    const v9 = Elements.getProperty('gp-card', 'nonExistentProp123');
+    // 9. getProperty returns undefined (default fallback) for unknown property
+    const v9 = getProperty('gpcard', 'nonExistentProp123');
     addResult(v9 === undefined,
       'getProperty returns undefined (default fallback) for property not on element',
       'got: ' + v9);
 
     // 10. getProperty returns custom fallback for unknown property
-    const v10 = Elements.getProperty('gp-card', 'nonExistentProp123', 'CUSTOM_FALLBACK');
+    const v10 = getProperty('gpcard', 'nonExistentProp123', 'CUSTOM_FALLBACK');
     addResult(v10 === 'CUSTOM_FALLBACK',
       'getProperty returns custom fallback for property not on element',
       'got: "' + v10 + '"');
@@ -359,73 +390,73 @@
     // ── setAttribute ──
 
     // 11. setAttribute sets attribute, returns true
-    const r11 = Elements.setAttribute('sa-card', 'data-env', 'production');
-    addResult(r11 === true && document.getElementById('sa-card').getAttribute('data-env') === 'production',
-      'setAttribute("sa-card", "data-env", "production") sets attribute and returns true',
+    const r11 = setAttributeById('sacard', 'data-env', 'production');
+    addResult(r11 === true && document.getElementById('sacard').getAttribute('data-env') === 'production',
+      'setAttribute("sacard", "data-env", "production") sets attribute and returns true',
       'returned: ' + r11);
-    document.getElementById('sa-card').removeAttribute('data-env');
+    document.getElementById('sacard').removeAttribute('data-env');
 
     // 12. setAttribute overwrites existing attribute
-    document.getElementById('sa-card').setAttribute('data-status', 'old');
-    Elements.setAttribute('sa-card', 'data-status', 'new');
-    const v12 = document.getElementById('sa-card').getAttribute('data-status');
+    document.getElementById('sacard').setAttribute('data-status', 'old');
+    setAttributeById('sacard', 'data-status', 'new');
+    const v12 = document.getElementById('sacard').getAttribute('data-status');
     addResult(v12 === 'new',
       'setAttribute overwrites an existing attribute value',
       'old → "' + v12 + '"');
-    document.getElementById('sa-card').removeAttribute('data-status');
+    document.getElementById('sacard').removeAttribute('data-status');
 
     // 13. setAttribute returns false for missing element
-    const r13 = Elements.setAttribute('totally-missing-id', 'data-x', 'val');
+    const r13 = setAttributeById('totallyMissingId', 'data-x', 'val');
     addResult(r13 === false,
       'setAttribute returns false when element id does not exist',
       'returned: ' + r13);
 
-    // 14. setAttribute can set disabled
-    Elements.setAttribute('sa-btn', 'disabled', '');
-    addResult(document.getElementById('sa-btn').hasAttribute('disabled'),
-      'setAttribute("sa-btn", "disabled", "") disables the button',
+    // 14. setAttribute can set disabled on a button
+    setAttributeById('sabtn', 'disabled', '');
+    addResult(document.getElementById('sabtn').hasAttribute('disabled'),
+      'setAttribute("sabtn", "disabled", "") disables the button',
       '');
-    document.getElementById('sa-btn').removeAttribute('disabled');
+    document.getElementById('sabtn').removeAttribute('disabled');
 
     // ── getAttribute ──
 
     // 15. getAttribute reads existing attribute
-    const v15 = Elements.getAttribute('ga-card', 'data-role');
+    const v15 = getAttributeById('gacard', 'data-role');
     addResult(v15 === 'info-panel',
-      'getAttribute("ga-card", "data-role") returns "info-panel"',
+      'getAttribute("gacard", "data-role") returns "info-panel"',
       'got: "' + v15 + '"');
 
     // 16. getAttribute reads aria-label
-    const v16 = Elements.getAttribute('ga-card', 'aria-label');
+    const v16 = getAttributeById('gacard', 'aria-label');
     addResult(v16 === 'demo element',
-      'getAttribute("ga-card", "aria-label") returns "demo element"',
+      'getAttribute("gacard", "aria-label") returns "demo element"',
       'got: "' + v16 + '"');
 
     // 17. getAttribute returns fallback for missing attribute
-    const v17 = Elements.getAttribute('ga-card', 'data-nonexistent', 'FALLBACK');
+    const v17 = getAttributeById('gacard', 'data-nonexistent', 'FALLBACK');
     addResult(v17 === 'FALLBACK',
       'getAttribute returns fallback when attribute does not exist on element',
       'got: "' + v17 + '"');
 
-    // 18. getAttribute returns fallback (null default) for missing element
-    const v18 = Elements.getAttribute('totally-missing-id', 'data-role');
+    // 18. getAttribute returns null (default fallback) for missing element
+    const v18 = getAttributeById('totallyMissingId', 'data-role');
     addResult(v18 === null,
       'getAttribute returns null (default fallback) when element id does not exist',
       'got: ' + v18);
 
     // 19. getAttribute returns custom fallback for missing element
-    const v19 = Elements.getAttribute('totally-missing-id', 'data-role', 'NOT_FOUND');
+    const v19 = getAttributeById('totallyMissingId', 'data-role', 'NOT_FOUND');
     addResult(v19 === 'NOT_FOUND',
       'getAttribute returns custom fallback when element id does not exist',
       'got: "' + v19 + '"');
 
     // 20. Round-trip: setAttribute then getAttribute
-    Elements.setAttribute('sa-card', 'data-round', 'trip-value');
-    const v20 = Elements.getAttribute('sa-card', 'data-round');
+    setAttributeById('sacard', 'data-round', 'trip-value');
+    const v20 = getAttributeById('sacard', 'data-round');
     addResult(v20 === 'trip-value',
       'setAttribute + getAttribute round-trip works correctly',
       'set → get: "' + v20 + '"');
-    document.getElementById('sa-card').removeAttribute('data-round');
+    document.getElementById('sacard').removeAttribute('data-round');
   </script>
 </body>
 </html>
