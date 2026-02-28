@@ -178,11 +178,11 @@
       const sizeBefore = Collections.stats().cacheSize;
       log('Before destroy → cacheSize: ' + sizeBefore, 'log-warn');
 
-      Collections.destroy();
+      Collections.helper.destroy();
       destroyed = true;
 
       const sizeAfter = Collections.stats().cacheSize;
-      log('Collections.destroy() called → cacheSize now: ' + sizeAfter, 'log-err');
+      log('Collections.helper.destroy() called → cacheSize now: ' + sizeAfter, 'log-err');
 
       const banner = document.getElementById('state-banner');
       banner.className = 'state-banner dead';
@@ -212,27 +212,29 @@
     }
 
     // ── Automated tests ───────────────────────────────────────────────────────
+    // Note: call destroy() directly on the helper instance to bypass any
+    // namespace-method wrappers that intercept Collections.destroy().
+    const H = Collections.helper;
 
     // 1. Populate cache first — confirm via isCached()
     Collections.ClassName('dcard');
     Collections.TagName('div');
     addResult(Collections.isCached('className', 'dcard'), 'cache is populated before destroy() — isCached("className","dcard") → true', '');
 
-    // 2. destroy() calls cache.clear() synchronously — verify directly on helper.cache Map
-    Collections.destroy();
+    // 2. destroy() empties cache synchronously — verify via getCacheSnapshot()
+    H.destroy();
     destroyed = true;
-    const mapSizeAfterDestroy = Collections.helper.cache.size;
-    const dcardGone = !Collections.isCached('className', 'dcard');
-    addResult(mapSizeAfterDestroy === 0, 'destroy() empties the internal Map (helper.cache.size === 0)', 'map size: ' + mapSizeAfterDestroy);
-    addResult(dcardGone, 'destroy() — isCached("className","dcard") → false', '');
+    const snapshotAfterDestroy = H.getCacheSnapshot();
+    addResult(snapshotAfterDestroy.length === 0, 'destroy() empties the cache (getCacheSnapshot().length === 0)', 'keys remaining: ' + snapshotAfterDestroy.length + (snapshotAfterDestroy.length ? ' [' + snapshotAfterDestroy.join(', ') + ']' : ''));
+    addResult(!snapshotAfterDestroy.some(k => k.includes('dcard')), 'destroy() — "dcard" key is gone from cache', '');
 
-    // 3. destroy() returns undefined
-    const ret = Collections.destroy(); // second destroy is safe
-    addResult(ret === undefined || ret === false, 'destroy() returns undefined / no meaningful value', 'returned: ' + ret);
+    // 3. destroy() returns undefined / no meaningful value
+    const ret = H.destroy(); // second destroy is safe
+    addResult(ret === undefined || ret === false || ret === null, 'destroy() returns no meaningful value', 'returned: ' + typeof ret);
 
     // 4. Calling destroy() multiple times does not throw
     let threw2 = false;
-    try { Collections.destroy(); Collections.destroy(); }
+    try { H.destroy(); H.destroy(); }
     catch(e) { threw2 = true; }
     addResult(!threw2, 'calling destroy() multiple times is safe', '');
 

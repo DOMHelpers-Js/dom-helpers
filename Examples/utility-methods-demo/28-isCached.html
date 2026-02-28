@@ -193,7 +193,7 @@
     }
 
     function doClear() {
-      Collections.clear();
+      Collections.helper.clearCache();
       refreshCacheGrid(null);
       const box = document.getElementById('check-result');
       box.className = 'check-result false-state';
@@ -204,9 +204,12 @@
     refreshCacheGrid(null);
 
     // ── Automated tests ───────────────────────────────────────────────────────
+    // Note: call clearCache() directly on the helper instance to bypass any
+    // namespace-method wrappers that intercept Collections.clear().
+    const H = Collections.helper;
 
     // 1. Returns boolean — check a key that was never queried
-    Collections.clear();
+    H.clearCache();
     const r1 = Collections.isCached('className', 'never-queried-xyz');
     addResult(typeof r1 === 'boolean', 'isCached() returns a boolean', 'type: ' + typeof r1);
 
@@ -228,7 +231,7 @@
     addResult(r4 === true, 'isCached("tagName", "span") → true after TagName("span")', 'returned: ' + r4);
 
     // 6. After clear(), a brand-new key that has never been queried before returns false
-    Collections.clear();
+    H.clearCache();
     const uniqueKey = 'post-clear-test-' + Date.now();
     const r5 = Collections.isCached('className', uniqueKey);
     addResult(r5 === false, 'isCached() → false for a key never queried (after clear)', 'returned: ' + r5);

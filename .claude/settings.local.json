@@ -9,7 +9,8 @@
       "Bash(npm run build:prod:*)",
       "Bash(npm run build:dev:*)",
       "Bash(npm pack:*)",
-      "Bash(npx terser \"src/04_reactive/dh-reactive-combined.js\" --compress \"pure_getters=true,unsafe=true,unsafe_comps=true,drop_console=false,drop_debugger=true,passes=2\" --mangle \"properties=false\" --output \"src/04_reactive/dh-reactive-combined.min.js\" --source-map \"url=''dh-reactive-combined.min.js.map''\")"
+      "Bash(npx terser \"src/04_reactive/dh-reactive-combined.js\" --compress \"pure_getters=true,unsafe=true,unsafe_comps=true,drop_console=false,drop_debugger=true,passes=2\" --mangle \"properties=false\" --output \"src/04_reactive/dh-reactive-combined.min.js\" --source-map \"url=''dh-reactive-combined.min.js.map''\")",
+      "Bash(curl -s \"https://cdn.jsdelivr.net/npm/dom-helpers-js@2.4.3/dist/dom-helpers.min.js\")"
     ]
   }
 }

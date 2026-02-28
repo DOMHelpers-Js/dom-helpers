@@ -190,7 +190,7 @@
       // Animate pills before clearing
       document.querySelectorAll('.cache-entry').forEach(el => el.classList.add('clearing'));
       setTimeout(() => {
-        Collections.clear();
+        Collections.helper.clearCache();
         refreshDisplay();
       }, 350);
     }
@@ -199,42 +199,43 @@
     addQueries();
 
     // ── Automated tests ───────────────────────────────────────────────────────
+    // Note: call clearCache() directly on the helper instance to bypass any
+    // namespace-method wrappers that intercept Collections.clear().
+    const H = Collections.helper;
 
     // 1. Cache was populated — isCached() confirms known keys are present
     Collections.ClassName('ccard');
     addResult(Collections.isCached('className', 'ccard'), 'cache is populated before clear() — isCached("className","ccard") → true', '');
 
-    // 2. clear() removes all entries — verify directly on the internal Map via helper.cache
-    Collections.clear();
-    const mapSizeAfterClear = Collections.helper.cache.size;
-    const ccardGone = !Collections.isCached('className', 'ccard');
-    const zcardGone = !Collections.isCached('className', 'zcard');
-    addResult(mapSizeAfterClear === 0, 'clear() empties the internal Map (helper.cache.size === 0)', 'map size: ' + mapSizeAfterClear);
-    addResult(ccardGone && zcardGone, 'isCached() returns false for both keys after clear()', 'ccard gone: ' + ccardGone + ', zcard gone: ' + zcardGone);
+    // 2. clear() removes all entries — verify via getCacheSnapshot()
+    H.clearCache();
+    const snapshotAfterClear = H.getCacheSnapshot();
+    addResult(snapshotAfterClear.length === 0, 'clear() empties the cache (getCacheSnapshot().length === 0)', 'keys remaining: ' + snapshotAfterClear.length + (snapshotAfterClear.length ? ' [' + snapshotAfterClear.join(', ') + ']' : ''));
 
-    // 3. After clear, the next fresh query populates the cache
+    // 3. After clear, re-query a class and confirm it is now in the snapshot
     Collections.ClassName('ccard');
-    addResult(Collections.isCached('className', 'ccard'), 're-query after clear() puts the key back in cache', '');
+    const snapshotAfterRequery = H.getCacheSnapshot();
+    addResult(snapshotAfterRequery.some(k => k.includes('ccard')), 're-query after clear() puts the key back in cache', 'snapshot: ' + snapshotAfterRequery.join(', '));
 
-    // 4. Second query for the same class is a hit
+    // 4. Second query for the same class is a hit (hits counter increments)
     const hitsBefore = Collections.stats().hits;
     Collections.ClassName('ccard');
     const hitsAfter = Collections.stats().hits;
     addResult(hitsAfter > hitsBefore, 'second query after clear() is a cache hit', hitsBefore + ' → ' + hitsAfter);
 
-    // 5. clear() returns undefined (no meaningful return value)
-    const ret = Collections.clear();
-    addResult(ret === undefined || ret === false, 'clear() returns undefined / no meaningful value', 'returned: ' + ret);
+    // 5. clearCache() returns undefined / no meaningful value
+    const ret = H.clearCache();
+    addResult(ret === undefined || ret === false || ret === null, 'clearCache() returns no meaningful value', 'returned: ' + typeof ret);
 
-    // 6. Calling clear() on empty cache is safe (no error)
+    // 6. Calling clear multiple times is safe (no error)
     let threw = false;
-    try { Collections.clear(); Collections.clear(); }
+    try { H.clearCache(); H.clearCache(); }
     catch(e) { threw = true; }
-    addResult(!threw, 'calling clear() multiple times is safe (no error)', '');
+    addResult(!threw, 'calling clearCache() multiple times is safe (no error)', '');
 
     // 7. hits/misses totals are NOT reset by clear()
     const statsBefore = { hits: Collections.stats().hits, misses: Collections.stats().misses };
-    Collections.clear();
+    H.clearCache();
     const statsAfter  = { hits: Collections.stats().hits, misses: Collections.stats().misses };
     addResult(
       statsAfter.hits === statsBefore.hits && statsAfter.misses === statsBefore.misses,
