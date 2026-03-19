@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Index Selection v2 Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .test-section {
+      margin: 30px 0;
+      padding: 20px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background: #f9f9f9;
+    }
+
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      cursor: pointer;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: white;
+    }
+
+    .multi {
+      padding: 15px;
+      margin: 10px 0;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+      background: white;
+    }
+
+    .multi.highlight {
+      border-color: orange;
+      box-shadow: 0 0 10px rgba(255, 165, 0, 0.5);
+    }
+
+    .multi.active {
+      background: #fffacd;
+    }
+
+    #status {
+      padding: 10px;
+      margin: 10px 0;
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Index Selection Enhancement v2.0</h1>
+  <p><strong>New Feature:</strong> Individual element access (boxes[0], boxes[1]) now returns enhanced elements with
+    .update() method!</p>
+
+  <div id="status">Status: Ready</div>
+
+  <!-- Test 1: Individual Element Access -->
+  <div class="test-section">
+    <h2>Test 1: Individual Element Access (boxes[0].update())</h2>
+    <div class="multi">Multi Box 1</div>
+    <div class="multi">Multi Box 2</div>
+    <div class="multi">Multi Box 3</div>
+    <div class="multi">Multi Box 4</div>
+    <button onclick="testIndividualAccess()">Test boxes[0].update()</button>
+  </div>
+
+  <!-- Test 2: Index-Based Collection Update -->
+  <div class="test-section">
+    <h2>Test 2: Collection Update with Indices</h2>
+    <button class="btn-group">Button 1</button>
+    <button class="btn-group">Button 2</button>
+    <button class="btn-group">Button 3</button>
+    <button class="btn-group">Button 4</button>
+    <br>
+    <button onclick="testIndexUpdate()">Test Collection Index Updates</button>
+  </div>
+
+  <!-- Test 3: Negative Indices -->
+  <div class="test-section">
+    <h2>Test 3: Negative Index Access</h2>
+    <div class="item">Item 1</div>
+    <div class="item">Item 2</div>
+    <div class="item">Item 3</div>
+    <div class="item">Item 4</div>
+    <button onclick="testNegativeIndex()">Test boxes[-1] and boxes[-2]</button>
+  </div>
+
+  <!-- Test 4: Mixed Updates -->
+  <div class="test-section">
+    <h2>Test 4: Mixed Bulk + Index Updates</h2>
+    <button class="mixed">Mixed 1</button>
+    <button class="mixed">Mixed 2</button>
+    <button class="mixed">Mixed 3</button>
+    <button onclick="testMixed()">Test Mixed Updates</button>
+  </div>
+   <script src="../../src/Core/01_dh-core.js"></script>
+ <script src="../../src/Enhancers/bundled-enhancers/enhancers.js"></script>
+  
+  <script>
+    // Test 1: Individual Element Access (YOUR USE CASE)
+    function testIndividualAccess() {
+      console.log('=== Test 1: Individual Element Access ===');
+
+      const boxes = Selector.queryAll(".multi");
+      console.log('Boxes collection:', boxes);
+      console.log('boxes[0]:', boxes[0]);
+      console.log('boxes[0] has update?', typeof boxes[0].update === 'function');
+
+      // This is your exact use case
+      boxes[0].update({
+        textContent: "Multi Box Updated via [0]",
+        style: { color: "white", backgroundColor: "purple", padding: "20px" },
+        classList: { add: ["highlight"] },
+        onclick: function () {
+          this.classList.toggle("active");
+          Elements.status.update({
+            textContent: `${this.textContent} clicked!`,
+            style: { backgroundColor: '#c8e6c9' }
+          });
+        }
+      });
+
+      // Also test second element
+      boxes[1].update({
+        textContent: "Second Box Updated via [1]",
+        style: { color: "white", backgroundColor: "blue", padding: "20px" },
+        onclick: function () {
+          this.classList.toggle("active");
+          Elements.status.update({
+            textContent: `${this.textContent} clicked!`,
+            style: { backgroundColor: '#fff9c4' }
+          });
+        }
+      });
+
+      // Test last element with negative index
+      boxes.at(-1).update({
+        textContent: "Last Box via at(-1)",
+        style: { color: "white", backgroundColor: "green", padding: "20px" }
+      });
+
+      console.log('✓ Test 1 completed - Try clicking the boxes!');
+    }
+
+    // Test 2: Collection Update with Indices
+    function testIndexUpdate() {
+      console.log('=== Test 2: Index-Based Collection Update ===');
+
+      const buttons = Collections.ClassName['btn-group'];
+
+      buttons.update({
+        [0]: {
+          textContent: 'First Button',
+          style: {
+            backgroundColor: 'red',
+            color: 'white',
+            padding: '15px 30px',
+            border: 'none',
+            borderRadius: '5px'
+          }
+        },
+        [1]: {
+          textContent: 'Second Button',
+          style: {
+            backgroundColor: 'blue',
+            color: 'white',
+            padding: '15px 30px'
+          }
+        },
+        [2]: {
+          textContent: 'Third Button',
+          style: {
+            backgroundColor: 'green',
+            color: 'white',
+            padding: '15px 30px'
+          }
+        },
+        [-1]: {
+          textContent: 'Last Button',
+          style: {
+            backgroundColor: 'purple',
+            color: 'white',
+            padding: '15px 30px'
+          }
+        }
+      });
+
+      console.log('✓ Test 2 completed');
+    }
+
+    // Test 3: Negative Index Access
+    function testNegativeIndex() {
+      console.log('=== Test 3: Negative Index Access ===');
+
+      const items = Selector.queryAll('.item');
+
+      // Access last element with negative index
+      const lastItem = items.at(-1);
+      console.log('Last item via at(-1):', lastItem);
+
+      lastItem.update({
+        textContent: 'Last Item (via at(-1))',
+        style: {
+          backgroundColor: '#e1bee7',
+          padding: '15px',
+          fontWeight: 'bold'
+        }
+      });
+
+      // Access second to last
+      const secondLast = items.at(-2);
+      secondLast.update({
+        textContent: 'Second to Last (via at(-2))',
+        style: {
+          backgroundColor: '#b2dfdb',
+          padding: '15px',
+          fontStyle: 'italic'
+        }
+      });
+
+      console.log('✓ Test 3 completed');
+    }
+
+    // Test 4: Mixed Updates
+    function testMixed() {
+      console.log('=== Test 4: Mixed Updates ===');
+
+      const buttons = Collections.ClassName.mixed;
+
+      buttons.update({
+        // Bulk updates for ALL elements
+        classList: { add: 'btn' },
+        style: {
+          cursor: 'pointer',
+          fontSize: '16px',
+          border: '2px solid #ddd'
+        },
+
+        // Index-specific updates
+        [0]: {
+          textContent: 'First',
+          style: {
+            backgroundColor: '#ff5722',
+            color: 'white',
+            padding: '12px 24px'
+          }
+        },
+        [1]: {
+          textContent: 'Second',
+          style: {
+            backgroundColor: '#2196f3',
+            color: 'white',
+            padding: '12px 24px'
+          }
+        },
+        [-1]: {
+          textContent: 'Last',
+          style: {
+            backgroundColor: '#4caf50',
+            color: 'white',
+            padding: '12px 24px'
+          }
+        }
+      });
+
+      console.log('✓ Test 4 completed');
+    }
+
+    // Auto-test on load
+    window.addEventListener('load', () => {
+      console.log('=== Index Selection v2.0 Tests ===');
+      console.log('IndexSelection available:', typeof IndexSelection !== 'undefined');
+      console.log('IndexSelection version:', IndexSelection.version);
+
+      // Test that boxes[0] returns enhanced element
+      const boxes = Selector.queryAll(".multi");
+      console.log('boxes[0] has update method:', typeof boxes[0].update === 'function');
+      console.log('boxes.at(-1) has update method:', typeof boxes.at(-1).update === 'function');
+
+      console.log('\nReady! Click the test buttons.');
+    });
+  </script>
+</body>
+
+</html>

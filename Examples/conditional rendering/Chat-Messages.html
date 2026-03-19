@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    .card-container { display: flex; gap: 10px; flex-wrap: wrap; }
+    .card { 
+      padding: 20px; 
+      border-radius: 8px; 
+      min-width: 150px;
+      transition: all 0.3s;
+    }
+    .controls { margin-bottom: 20px; }
+    button { 
+      padding: 10px 20px; 
+      margin: 5px; 
+      cursor: pointer; 
+      border: none;
+      border-radius: 5px;
+      background: #1976d2;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <h2>Dashboard Status</h2>
+    <button onclick="setStatus('normal')">Normal</button>
+    <button onclick="setStatus('alert')">Alert</button>
+    <button onclick="setStatus('critical')">Critical</button>
+  </div>
+
+  <div class="card-container">
+    <div class="card">Header</div>
+    <div class="card">Metric 1</div>
+    <div class="card">Metric 2</div>
+    <div class="card">Metric 3</div>
+    <div class="card">Footer</div>
+  </div>
+
+<script src="../../src/DOMHelpers/05_dh-conditions.js"></script>
+   
+  <script>
+    function setStatus(status) {
+      // CHANGED: Use whenStateCollection instead of apply
+      Conditions.whenState(
+        status,
+        {
+          'normal': {
+            // Shared for all cards
+            style: { 
+              background: '#e8f5e9',
+              border: '2px solid #4caf50'
+            },
+            
+            // Header
+            0: {
+              style: {
+                background: '#4caf50',
+                color: 'white',
+                fontSize: '24px',
+                fontWeight: 'bold',
+                minWidth: '100%'
+              },
+              textContent: '✅ System Normal'
+            },
+            
+            // Metrics stay default
+            
+            // Footer
+            '-1': {
+              style: {
+                background: '#c8e6c9',
+                fontStyle: 'italic',
+                minWidth: '100%',
+                textAlign: 'center'
+              },
+              textContent: '🕐 Last updated: ' + new Date().toLocaleTimeString()
+            }
+          },
+          
+          'alert': {
+            style: { 
+              background: '#fff3e0',
+              border: '2px solid #ff9800'
+            },
+            
+            0: {
+              style: {
+                background: '#ff9800',
+                color: 'white',
+                fontSize: '24px',
+                fontWeight: 'bold',
+                minWidth: '100%'
+              },
+              textContent: '⚠️ System Alert'
+            },
+            
+            // Highlight middle card
+            2: {
+              style: {
+                background: '#ffe0b2',
+                border: '3px solid #f57c00',
+                transform: 'scale(1.05)'
+              }
+            },
+            
+            '-1': {
+              style: {
+                background: '#ffcc80',
+                minWidth: '100%',
+                textAlign: 'center'
+              },
+              textContent: '⚡ Action may be required'
+            }
+          },
+          
+          'critical': {
+            style: { 
+              background: '#ffebee',
+              border: '3px solid #f44336',
+              animation: 'pulse 1s infinite'
+            },
+            
+            0: {
+              style: {
+                background: '#f44336',
+                color: 'white',
+                fontSize: '24px',
+                fontWeight: 'bold',
+                minWidth: '100%'
+              },
+              textContent: '🚨 CRITICAL ALERT'
+            },
+            
+            // All metrics highlighted
+            1: {
+              style: {
+                background: '#ef5350',
+                color: 'white',
+                fontWeight: 'bold'
+              }
+            },
+            2: {
+              style: {
+                background: '#ef5350',
+                color: 'white',
+                fontWeight: 'bold'
+              }
+            },
+            3: {
+              style: {
+                background: '#ef5350',
+                color: 'white',
+                fontWeight: 'bold'
+              }
+            },
+            
+            '-1': {
+              style: {
+                background: '#c62828',
+                color: 'white',
+                minWidth: '100%',
+                textAlign: 'center',
+                fontWeight: 'bold'
+              },
+              textContent: '⚡ IMMEDIATE ACTION REQUIRED'
+            }
+          }
+        },
+        '.card'
+      );
+    }
+    
+    // Set initial state
+    setStatus('normal');
+  </script>
+</body>
+</html>

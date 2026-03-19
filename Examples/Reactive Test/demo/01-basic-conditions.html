@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Basic Conditions - Conditions.js Demo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header class="demo-header">
+      <h1>🎯 Basic Conditions</h1>
+      <a href="index.html" class="back-button">← Back to Demos</a>
+    </header>
+
+    <section>
+      <h2>Understanding Condition Matching</h2>
+      <p>Conditions.js supports multiple types of condition matching patterns. Explore each type below with interactive examples.</p>
+
+      <!-- Boolean Conditions -->
+      <div class="interactive-demo">
+        <h3>1. Boolean Conditions</h3>
+        <div class="demo-description">
+          Match <code>true</code>, <code>false</code>, <code>truthy</code>, or <code>falsy</code> values.
+        </div>
+        
+        <div class="demo-controls">
+          <button class="primary" onclick="setBoolean(true)">Set True</button>
+          <button class="secondary" onclick="setBoolean(false)">Set False</button>
+          <button class="secondary" onclick="setBoolean('hello')">Set Truthy ('hello')</button>
+          <button class="secondary" onclick="setBoolean('')">Set Falsy ('')</button>
+          <button class="secondary" onclick="setBoolean(null)">Set Null</button>
+        </div>
+        
+        <div id="boolean-output" class="demo-output">Click a button to test</div>
+        
+        <div class="code-display">
+<span class="keyword">Conditions</span>.apply(value, {
+  <span class="string">'true'</span>: { textContent: <span class="string">'✓ Value is true'</span>, style: { color: <span class="string">'green'</span> } },
+  <span class="string">'false'</span>: { textContent: <span class="string">'✗ Value is false'</span>, style: { color: <span class="string">'red'</span> } },
+  <span class="string">'truthy'</span>: { textContent: <span class="string">'Value is truthy'</span>, style: { color: <span class="string">'blue'</span> } },
+  <span class="string">'falsy'</span>: { textContent: <span class="string">'Value is falsy'</span>, style: { color: <span class="string">'gray'</span> } }
+}, <span class="string">'#boolean-output'</span>);
+        </div>
+      </div>
+
+      <!-- String Matching -->
+      <div class="interactive-demo">
+        <h3>2. String Matching</h3>
+        <div class="demo-description">
+          Match exact strings, check if string includes/starts with/ends with specific text.
+        </div>
+        
+        <div class="demo-controls">
+          <input type="text" id="string-input" placeholder="Enter text..." value="hello world">
+          <button class="primary" onclick="testString()">Test String</button>
+        </div>
+        
+        <div id="string-output" class="demo-output">Enter text and click test</div>
+        
+        <div class="code-display">
+<span class="keyword">Conditions</span>.apply(value, {
+  <span class="string">'"hello world"'</span>: { textContent: <span class="string">'Exact match: hello world'</span> },
+  <span class="string">'includes:world'</span>: { textContent: <span class="string">'Contains "world"'</span> },
+  <span class="string">'startsWith:hello'</span>: { textContent: <span class="string">'Starts with "hello"'</span> },
+  <span class="string">'endsWith:world'</span>: { textContent: <span class="string">'Ends with "world"'</span> }
+}, <span class="string">'#string-output'</span>);
+        </div>
+      </div>
+
+      <!-- Numeric Conditions -->
+      <div class="interactive-demo">
+        <h3>3. Numeric Comparisons</h3>
+        <div class="demo-description">
+          Compare numbers using exact values, ranges, or comparison operators (>, <, >=, <=).
+        </div>
+        
+        <div class="demo-controls">
+          <label>Number:</label>
+          <input type="number" id="number-input" value="50" min="-100" max="200">
+          <button class="primary" onclick="testNumber()">Test Number</button>
+        </div>
+        
+        <div id="number-output" class="demo-output">Adjust number and click test</div>
+        
+        <div class="code-display">
+<span class="keyword">Conditions</span>.apply(value, {
+  <span class="string">'0'</span>: { textContent: <span class="string">'Zero'</span> },
+  <span class="string">'>100'</span>: { textContent: <span class="string">'Greater than 100'</span>, style: { color: <span class="string">'green'</span> } },
+  <span class="string">'50-100'</span>: { textContent: <span class="string">'Between 50 and 100'</span>, style: { color: <span class="string">'blue'</span> } },
+  <span class="string">'<50'</span>: { textContent: <span class="string">'Less than 50'</span>, style: { color: <span class="string">'orange'</span> } },
+  <span class="string">'<0'</span>: { textContent: <span class="string">'Negative'</span>, style: { color: <span class="string">'red'</span> } }
+}, <span class="string">'#number-output'</span>);
+        </div>
+      </div>
+
+      <!-- Regex Matching -->
+      <div class="interactive-demo">
+        <h3>4. Regular Expression Matching</h3>
+        <div class="demo-description">
+          Use regex patterns for advanced string matching. Patterns start with <code>/</code> and can include flags.
+        </div>
+        
+        <div class="demo-controls">
+          <input type="text" id="regex-input" placeholder="Try: test@example.com" value="">
+          <button class="primary" onclick="testRegex()">Test Pattern</button>
+        </div>
+        
+        <div id="regex-output" class="demo-output">Try entering an email address</div>
+        
+        <div class="code-display">
+<span class="keyword">Conditions</span>.apply(value, {
+  <span class="string">'/^[^@]+@[^@]+\\.[^@]+$/'</span>: { 
+    textContent: <span class="string">'✓ Valid email format'</span>, 
+    style: { color: <span class="string">'green'</span> } 
+  },
+  <span class="string">'/^\\d+$/'</span>: { 
+    textContent: <span class="string">'Numbers only'</span>, 
+    style: { color: <span class="string">'blue'</span> } 
+  },
+  <span class="string">'/hello/i'</span>: { 
+    textContent: <span class="string">'Contains "hello" (case insensitive)'</span>,
+    style: { color: <span class="string">'purple'</span> } 
+  }
+}, <span class="string">'#regex-output'</span>);
+        </div>
+      </div>
+
+      <!-- Empty/Null/Undefined -->
+      <div class="interactive-demo">
+        <h3>5. Empty, Null, and Undefined Checks</h3>
+        <div class="demo-description">
+          Special matchers for checking empty values, null, and undefined.
+        </div>
+        
+        <div class="demo-controls">
+          <select id="special-select" onchange="testSpecial()">
+            <option value="">Empty String</option>
+            <option value="null">Null</option>
+            <option value="undefined">Undefined</option>
+            <option value="array">Empty Array</option>
+            <option value="text">Has Text</option>
+          </select>
+        </div>
+        
+        <div id="special-output" class="demo-output">Select a value type</div>
+        
+        <div class="code-display">
+<span class="keyword">Conditions</span>.apply(value, {
+  <span class="string">'empty'</span>: { textContent: <span class="string">'Value is empty'</span>, style: { color: <span class="string">'gray'</span> } },
+  <span class="string">'null'</span>: { textContent: <span class="string">'Value is null'</span>, style: { color: <span class="string">'orange'</span> } },
+  <span class="string">'undefined'</span>: { textContent: <span class="string">'Value is undefined'</span>, style: { color: <span class="string">'red'</span> } },
+  <span class="string">'truthy'</span>: { textContent: <span class="string">'✓ Value exists'</span>, style: { color: <span class="string">'green'</span> } }
+}, <span class="string">'#special-output'</span>);
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>Explore more: <a href="02-property-handlers.html">Property Handlers →</a></p>
+    </footer>
+  </div>
+
+  <script src="../dom-helpers.bundle.js"></script>
+  <script src="../dom-helpers.reactive.bundle.js"></script>
+  <script src="../conditions.js"></script>
+  
+  <script>
+    // Boolean Demo
+    function setBoolean(value) {
+      Conditions.apply(value, {
+        'true': { 
+          textContent: '✓ Value is true', 
+          style: { color: 'green', fontWeight: 'bold' } 
+        },
+        'false': { 
+          textContent: '✗ Value is false', 
+          style: { color: 'red', fontWeight: 'bold' } 
+        },
+        'truthy': { 
+          textContent: `Value is truthy: "${value}"`, 
+          style: { color: 'blue', fontWeight: 'bold' } 
+        },
+        'falsy': { 
+          textContent: `Value is falsy: ${value === '' ? '(empty string)' : value}`, 
+          style: { color: 'gray', fontWeight: 'bold' } 
+        }
+      }, '#boolean-output');
+    }
+
+    // String Demo
+    function testString() {
+      const value = document.getElementById('string-input').value;
+      
+      Conditions.apply(value, {
+        '"hello world"': { 
+          textContent: '✓ Exact match: "hello world"', 
+          style: { color: 'green' } 
+        },
+        'includes:world': { 
+          textContent: '✓ Contains "world"', 
+          style: { color: 'blue' } 
+        },
+        'startsWith:hello': { 
+          textContent: '✓ Starts with "hello"', 
+          style: { color: 'purple' } 
+        },
+        'endsWith:world': { 
+          textContent: '✓ Ends with "world"', 
+          style: { color: 'orange' } 
+        },
+        'truthy': { 
+          textContent: `No match found for: "${value}"`, 
+          style: { color: 'gray' } 
+        }
+      }, '#string-output');
+    }
+
+    // Number Demo
+    function testNumber() {
+      const value = parseFloat(document.getElementById('number-input').value);
+      
+      Conditions.apply(value, {
+        '0': { 
+          textContent: '🎯 Exactly Zero', 
+          style: { color: 'black' } 
+        },
+        '>100': { 
+          textContent: '🔥 Greater than 100!', 
+          style: { color: 'green', fontWeight: 'bold' } 
+        },
+        '50-100': { 
+          textContent: '📊 Between 50 and 100', 
+          style: { color: 'blue' } 
+        },
+        '0-50': { 
+          textContent: '📉 Between 0 and 50', 
+          style: { color: 'orange' } 
+        },
+        '<0': { 
+          textContent: '❄️ Negative number', 
+          style: { color: 'red' } 
+        }
+      }, '#number-output');
+    }
+
+    // Regex Demo
+    function testRegex() {
+      const value = document.getElementById('regex-input').value;
+      
+      Conditions.apply(value, {
+        '/^[^@]+@[^@]+\\.[^@]+$/': { 
+          textContent: '✓ Valid email format', 
+          style: { color: 'green', fontWeight: 'bold' } 
+        },
+        '/^\\d+$/': { 
+          textContent: '🔢 Numbers only', 
+          style: { color: 'blue' } 
+        },
+        '/hello/i': { 
+          textContent: '👋 Contains "hello" (case insensitive)', 
+          style: { color: 'purple' } 
+        },
+        'truthy': { 
+          textContent: `No pattern matched for: "${value}"`, 
+          style: { color: 'gray' } 
+        }
+      }, '#regex-output');
+    }
+
+    // Special Values Demo
+    function testSpecial() {
+      const select = document.getElementById('special-select');
+      let value;
+      
+      switch(select.value) {
+        case '': value = ''; break;
+        case 'null': value = null; break;
+        case 'undefined': value = undefined; break;
+        case 'array': value = []; break;
+        case 'text': value = 'Some text'; break;
+      }
+      
+      Conditions.apply(value, {
+        'empty': { 
+          textContent: '⚪ Value is empty', 
+          style: { color: 'gray' } 
+        },
+        'null': { 
+          textContent: '⚠️ Value is null', 
+          style: { color: 'orange', fontWeight: 'bold' } 
+        },
+        'undefined': { 
+          textContent: '❌ Value is undefined', 
+          style: { color: 'red', fontWeight: 'bold' } 
+        },
+        'truthy': { 
+          textContent: '✓ Value exists and is not empty', 
+          style: { color: 'green', fontWeight: 'bold' } 
+        }
+      }, '#special-output');
+    }
+
+    // Initialize
+    testSpecial();
+  </script>
+</body>
+</html>

@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elements Methods Test - DOM Helpers</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .test-section h2 {
+            color: #667eea;
+            margin-top: 0;
+        }
+
+        .test-result {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        .test-result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .test-result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .test-result.info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        #test-element {
+            padding: 15px;
+            margin: 10px 0;
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 6px;
+        }
+
+        .dynamic-element {
+            padding: 10px;
+            margin: 5px;
+            background: #cfe2ff;
+            border: 1px solid #0d6efd;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .stats-box {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+
+        .stats-box h3 {
+            margin-top: 0;
+            color: #0056b3;
+        }
+
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🧪 Elements Methods Test Suite</h1>
+        <p class="subtitle">Testing Elements.get(), exists(), isCached(), getMultiple(), destructure(), getRequired(),
+            waitFor()</p>
+
+        <!-- Test Elements -->
+        <div id="test-element">Test Element with ID</div>
+        <div id="element-1" class="dynamic-element">Element 1</div>
+        <div id="element-2" class="dynamic-element">Element 2</div>
+        <div id="element-3" class="dynamic-element">Element 3</div>
+
+        <!-- Test Controls -->
+        <div class="test-section">
+            <h2>Test Controls</h2>
+            <button onclick="runAllTests()">Run All Tests</button>
+            <button onclick="clearResults()">Clear Results</button>
+            <button onclick="showStats()">Show Statistics</button>
+        </div>
+
+        <!-- Test Results Container -->
+        <div id="results"></div>
+
+        <!-- Statistics -->
+        <div id="stats-container"></div>
+    </div>
+
+    <!-- Load DOM Helpers Library -->
+    <script src="../../src/Core/01_dom-helpers.js"></script>
+  <script src="../../src/Core/02_dh-bulk-property-updaters.js"></script>
+  <script src="../../src/Core/03_dh-collection-shortcuts.js"></script>
+  <script src="../../src/Core/04_dh-global-query.js"></script>
+  <script src="../../src/Core/05_dh-indexed-collection-updates.js"></script>
+  <script src="../../src/Core/06_dh-index-selection.js"></script>
+  <script src="../../src/Core/07_dh-global-collection-indexed-updates.js"></script>
+  <script src="../../src/Core/08_dh-conditional-rendering.js"></script>
+  <script src="../../src/Core/09_dh-conditions-default.js"></script>
+  <script src="../../src/Core/10_dh-selector-update-patch.js"></script>
+  <script src="../../src/Core/11_dh-bulk-properties-updater-global-query.js"></script>
+
+
+    <script>
+
+        Elements.destructure = (...ids) => {
+            const obj = {};
+            ids.forEach(id => {
+                obj[id] = document.getElementById(id);
+            });
+            return obj;
+        };
+
+        // Test utilities
+        const resultsContainer = document.getElementById('results');
+        let testsPassed = 0;
+        let testsFailed = 0;
+
+        function logResult(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.textContent = message;
+            resultsContainer.appendChild(div);
+
+            if (type === 'success') testsPassed++;
+            if (type === 'error') testsFailed++;
+
+            // Auto-scroll to bottom
+            resultsContainer.scrollTop = resultsContainer.scrollHeight;
+        }
+
+        function clearResults() {
+            resultsContainer.innerHTML = '';
+            testsPassed = 0;
+            testsFailed = 0;
+            document.getElementById('stats-container').innerHTML = '';
+        }
+
+        function showStats() {
+            const stats = Elements.stats();
+            const statsContainer = document.getElementById('stats-container');
+            statsContainer.innerHTML = `
+                <div class="stats-box">
+                    <h3>📊 Elements Helper Statistics</h3>
+                    <pre>${JSON.stringify(stats, null, 2)}</pre>
+                    <p><strong>Tests Passed:</strong> ${testsPassed}</p>
+                    <p><strong>Tests Failed:</strong> ${testsFailed}</p>
+                    <p><strong>Success Rate:</strong> ${((testsPassed / (testsPassed + testsFailed)) * 100).toFixed(2)}%</p>
+                </div>
+            `;
+        }
+
+        // Test 1: Elements.get() with fallback
+        function testElementsGet() {
+            logResult('=== Test 1: Elements.get() with fallback ===', 'info');
+
+            try {
+                // Test getting existing element
+                const element = Elements.get('test-element', null);
+                if (element && element.id === 'test-element') {
+                    logResult('✓ Elements.get("test-element") returned correct element', 'success');
+                } else {
+                    logResult('✗ Elements.get("test-element") failed to return element', 'error');
+                }
+
+                // Test with fallback for non-existent element
+                const fallbackValue = 'FALLBACK';
+                const result = Elements.get('non-existent-id', fallbackValue);
+                if (result === fallbackValue) {
+                    logResult('✓ Elements.get() returned fallback for non-existent element', 'success');
+                } else {
+                    logResult('✗ Elements.get() did not return fallback correctly', 'error');
+                }
+
+                // Test default fallback (null)
+                const nullResult = Elements.get('another-non-existent');
+                if (nullResult === null) {
+                    logResult('✓ Elements.get() returned null (default fallback) for non-existent element', 'success');
+                } else {
+                    logResult('✗ Elements.get() did not return null as default fallback', 'error');
+                }
+            } catch (error) {
+                logResult(`✗ Elements.get() threw error: ${error.message}`, 'error');
+            }
+        }
+
+        // Test 2: Elements.exists()
+        function testElementsExists() {
+            logResult('=== Test 2: Elements.exists() ===', 'info');
+
+            try {
+                // Test with existing element
+                const exists = Elements.exists('test-element');
+                if (exists === true) {
+                    logResult('✓ Elements.exists("test-element") returned true', 'success');
+                } else {
+                    logResult('✗ Elements.exists("test-element") returned false incorrectly', 'error');
+                }
+
+                // Test with non-existent element
+                const notExists = Elements.exists('totally-fake-id');
+                if (notExists === false) {
+                    logResult('✓ Elements.exists("totally-fake-id") returned false', 'success');
+                } else {
+                    logResult('✗ Elements.exists("totally-fake-id") returned true incorrectly', 'error');
+                }
+            } catch (error) {
+                logResult(`✗ Elements.exists() threw error: ${error.message}`, 'error');
+            }
+        }
+
+        // Test 3: Elements.isCached()
+        function testElementsIsCached() {
+            logResult('=== Test 3: Elements.isCached() ===', 'info');
+
+            try {
+                // Clear cache first
+                Elements.clear();
+
+                // Check if element is cached (should be false)
+                const notCached = Elements.isCached('element-1');
+                if (notCached === false) {
+                    logResult('✓ Elements.isCached("element-1") returned false before access', 'success');
+                } else {
+                    logResult('✗ Elements.isCached("element-1") returned true incorrectly', 'error');
+                }
+
+                // Access element to cache it
+                const el = Elements['element-1'];
+
+                // Check if now cached
+                const isCached = Elements.isCached('element-1');
+                if (isCached === true) {
+                    logResult('✓ Elements.isCached("element-1") returned true after access', 'success');
+                } else {
+                    logResult('✗ Elements.isCached("element-1") returned false after access', 'error');
+                }
+            } catch (error) {
+                logResult(`✗ Elements.isCached() threw error: ${error.message}`, 'error');
+            }
+        }
+
+        // Test 4: Elements.getMultiple()
+        function testElementsGetMultiple() {
+            logResult('=== Test 4: Elements.getMultiple() ===', 'info');
+
+            try {
+                const result = Elements.getMultiple('element-1', 'element-2', 'element-3');
+
+                // Check if result is an object
+                if (typeof result === 'object' && result !== null) {
+                    logResult('✓ Elements.getMultiple() returned an object', 'success');
+                } else {
+                    logResult('✗ Elements.getMultiple() did not return an object', 'error');
+                    return;
+                }
+
+                // Check if all elements are present
+                if (result['element-1'] && result['element-1'].id === 'element-1') {
+                    logResult('✓ Elements.getMultiple() included element-1', 'success');
+                } else {
+                    logResult('✗ Elements.getMultiple() missing element-1', 'error');
+                }
+
+                if (result['element-2'] && result['element-2'].id === 'element-2') {
+                    logResult('✓ Elements.getMultiple() included element-2', 'success');
+                } else {
+                    logResult('✗ Elements.getMultiple() missing element-2', 'error');
+                }
+
+                if (result['element-3'] && result['element-3'].id === 'element-3') {
+                    logResult('✓ Elements.getMultiple() included element-3', 'success');
+                } else {
+                    logResult('✗ Elements.getMultiple() missing element-3', 'error');
+                }
+
+                // Test with non-existent element
+                const mixedResult = Elements.getMultiple('element-1', 'fake-id', 'element-2');
+                if (mixedResult['fake-id'] === null) {
+                    logResult('✓ Elements.getMultiple() handled non-existent element (null)', 'success');
+                } else {
+                    logResult('✗ Elements.getMultiple() did not handle non-existent element', 'error');
+                }
+            } catch (error) {
+                logResult(`✗ Elements.getMultiple() threw error: ${error.message}`, 'error');
+            }
+        }
+
+        // Test 5: Elements.destructure()
+        function testElementsDestructure() {
+            logResult('=== Test 5: Elements.destructure() ===', 'info');
+
+            try {
+                const result = Elements.destructure('element-1', 'element-2', 'element-3');
+
+                // Check if result is an object
+                if (typeof result === 'object' && result !== null) {
+                    logResult('✓ Elements.destructure() returned an object', 'success');
+                } else {
+                    logResult('✗ Elements.destructure() did not return an object', 'error');
+                    return;
+                }
+
+                // Check if all elements are present
+                if (result['element-1'] && result['element-1'].id === 'element-1') {
+                    logResult('✓ Elements.destructure() included element-1', 'success');
+                } else {
+                    logResult('✗ Elements.destructure() missing element-1', 'error');
+                }
+
+                if (result['element-2'] && result['element-2'].id === 'element-2') {
+                    logResult('✓ Elements.destructure() included element-2', 'success');
+                } else {
+                    logResult('✗ Elements.destructure() missing element-2', 'error');
+                }
+
+                // Test destructuring with non-existent element
+                const mixedResult = Elements.destructure('element-1', 'fake-id');
+                if (mixedResult['fake-id'] === null) {
+                    logResult('✓ Elements.destructure() set null for non-existent element', 'success');
+                } else {
+                    logResult('✗ Elements.destructure() did not handle non-existent element', 'error');
+                }
+            } catch (error) {
+                logResult(`✗ Elements.destructure() threw error: ${error.message}`, 'error');
+            }
+        }
+
+        // Test 6: Elements.getRequired()
+        function testElementsGetRequired() {
+            logResult('=== Test 6: Elements.getRequired() ===', 'info');
+
+            try {
+                // Test with all existing elements
+                const result = Elements.getRequired('element-1', 'element-2');
+                if (result['element-1'] && result['element-2']) {
+                    logResult('✓ Elements.getRequired() returned all elements when they exist', 'success');
+                } else {
+                    logResult('✗ Elements.getRequired() failed with existing elements', 'error');
+                }
+            } catch (error) {
+                logResult(`✗ Elements.getRequired() threw unexpected error: ${error.message}`, 'error');
+            }
+
+            try {
+                // Test with non-existent element (should throw)
+                Elements.getRequired('element-1', 'fake-id', 'element-2');
+                logResult('✗ Elements.getRequired() did not throw error for missing element', 'error');
+            } catch (error) {
+                if (error.message.includes('fake-id')) {
+                    logResult('✓ Elements.getRequired() threw error for missing element', 'success');
+                } else {
+                    logResult('✗ Elements.getRequired() threw wrong error', 'error');
+                }
+            }
+        }
+
+        // Test 7: Elements.waitFor() - Async test
+        async function testElementsWaitFor() {
+            logResult('=== Test 7: Elements.waitFor() (async) ===', 'info');
+
+            try {
+                // Test with existing elements
+                const result = await Elements.waitFor('element-1', 'element-2');
+                if (result['element-1'] && result['element-2']) {
+                    logResult('✓ Elements.waitFor() returned elements that already exist', 'success');
+                } else {
+                    logResult('✗ Elements.waitFor() failed with existing elements', 'error');
+                }
+            } catch (error) {
+                logResult(`✗ Elements.waitFor() threw error: ${error.message}`, 'error');
+            }
+
+            // Test with dynamically added element
+            try {
+                logResult('Creating dynamic element after 1 second...', 'info');
+
+                // Create element after delay
+                setTimeout(() => {
+                    const newEl = document.createElement('div');
+                    newEl.id = 'dynamic-test-element';
+                    newEl.textContent = 'Dynamically Added';
+                    newEl.className = 'dynamic-element';
+                    document.body.appendChild(newEl);
+                }, 1000);
+
+                // Wait for the element
+                const result = await Elements.waitFor('dynamic-test-element');
+                if (result['dynamic-test-element']) {
+                    logResult('✓ Elements.waitFor() successfully waited for dynamic element', 'success');
+                } else {
+                    logResult('✗ Elements.waitFor() did not return dynamic element', 'error');
+                }
+            } catch (error) {
+                logResult(`✗ Elements.waitFor() failed waiting for dynamic element: ${error.message}`, 'error');
+            }
+
+            // Test timeout
+            try {
+                logResult('Testing timeout with non-existent element (should timeout)...', 'info');
+                await Elements.waitFor('will-never-exist');
+                logResult('✗ Elements.waitFor() did not timeout for non-existent element', 'error');
+            } catch (error) {
+                if (error.message.includes('Timeout')) {
+                    logResult('✓ Elements.waitFor() correctly timed out', 'success');
+                } else {
+                    logResult('✗ Elements.waitFor() threw wrong error', 'error');
+                }
+            }
+        }
+
+        // Run all tests
+        async function runAllTests() {
+            clearResults();
+            logResult('🚀 Starting comprehensive Elements methods test suite...', 'info');
+            logResult('', 'info');
+
+            testElementsGet();
+            testElementsExists();
+            testElementsIsCached();
+            testElementsGetMultiple();
+            testElementsDestructure();
+            testElementsGetRequired();
+            await testElementsWaitFor();
+
+            logResult('', 'info');
+            logResult('✅ All tests completed!', 'info');
+            showStats();
+        }
+
+        // Auto-run tests on page load
+        window.addEventListener('load', () => {
+            setTimeout(runAllTests, 500);
+        });
+    </script>
+</body>
+
+</html>

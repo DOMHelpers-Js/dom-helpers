@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conditions.js v4.0.0 - Comprehensive Test Suite</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      padding: 30px;
+    }
+    
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 2em;
+    }
+    
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 1.1em;
+    }
+    
+    .test-section {
+      margin-bottom: 40px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+    }
+    
+    .test-section h2 {
+      color: #667eea;
+      margin-bottom: 15px;
+      font-size: 1.5em;
+    }
+    
+    .test-item {
+      margin: 15px 0;
+      padding: 15px;
+      background: white;
+      border-radius: 6px;
+      border: 2px solid #e0e0e0;
+    }
+    
+    .test-item.pass {
+      border-color: #4caf50;
+      background: #f1f8f4;
+    }
+    
+    .test-item.fail {
+      border-color: #f44336;
+      background: #fef1f0;
+    }
+    
+    .test-name {
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .test-result {
+      font-size: 0.9em;
+      color: #666;
+    }
+    
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.85em;
+      font-weight: 600;
+    }
+    
+    .status-pass {
+      background: #4caf50;
+      color: white;
+    }
+    
+    .status-fail {
+      background: #f44336;
+      color: white;
+    }
+    
+    .status-pending {
+      background: #ff9800;
+      color: white;
+    }
+    
+    .test-element {
+      padding: 10px;
+      margin: 10px 0;
+      border: 2px dashed #ccc;
+      border-radius: 4px;
+      min-height: 40px;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+    
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1em;
+      transition: all 0.3s;
+    }
+    
+    button.primary {
+      background: #667eea;
+      color: white;
+    }
+    
+    button.primary:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    
+    button.secondary {
+      background: #e0e0e0;
+      color: #333;
+    }
+    
+    button.secondary:hover {
+      background: #d0d0d0;
+    }
+    
+    .summary {
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+    
+    .summary h3 {
+      margin-bottom: 10px;
+    }
+    
+    .summary-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+    
+    .stat-box {
+      background: rgba(255,255,255,0.2);
+      padding: 15px;
+      border-radius: 6px;
+      text-align: center;
+    }
+    
+    .stat-number {
+      font-size: 2em;
+      font-weight: bold;
+    }
+    
+    .stat-label {
+      font-size: 0.9em;
+      opacity: 0.9;
+    }
+    
+    .console-output {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 15px;
+      border-radius: 6px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 15px;
+    }
+    
+    .console-line {
+      margin: 2px 0;
+    }
+    
+    .console-info { color: #4fc3f7; }
+    .console-success { color: #66bb6a; }
+    .console-error { color: #ef5350; }
+    .console-warn { color: #ffa726; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 Conditions.js v4.0.0</h1>
+    <p class="subtitle">Comprehensive Test Suite - All Features & Integration Tests</p>
+    
+    <div class="summary" id="summary">
+      <h3>Test Summary</h3>
+      <div class="summary-stats">
+        <div class="stat-box">
+          <div class="stat-number" id="totalTests">0</div>
+          <div class="stat-label">Total Tests</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number" id="passedTests">0</div>
+          <div class="stat-label">Passed</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number" id="failedTests">0</div>
+          <div class="stat-label">Failed</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number" id="successRate">0%</div>
+          <div class="stat-label">Success Rate</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="controls">
+      <button class="primary" onclick="runAllTests()">▶️ Run All Tests</button>
+      <button class="secondary" onclick="clearResults()">🔄 Clear Results</button>
+      <button class="secondary" onclick="toggleConsole()">📋 Toggle Console</button>
+    </div>
+    
+    <div class="console-output" id="console" style="display: none;"></div>
+    
+    <!-- Test Sections -->
+    <div id="testResults"></div>
+  </div>
+
+  <!-- Load Dependencies -->
+  <script src="dom-helpers.bundle.js"></script>
+  <script src="dom-helpers.reactive.bundle.js"></script>
+  <script src="conditions.js"></script>
+
+  <script>
+    // Test Framework
+    const tests = [];
+    let passCount = 0;
+    let failCount = 0;
+    
+    function log(message, type = 'info') {
+      const console = document.getElementById('console');
+      const line = document.createElement('div');
+      line.className = `console-line console-${type}`;
+      line.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      console.appendChild(line);
+      console.scrollTop = console.scrollHeight;
+    }
+    
+    function toggleConsole() {
+      const console = document.getElementById('console');
+      console.style.display = console.style.display === 'none' ? 'block' : 'none';
+    }
+    
+    function assert(condition, message) {
+      if (!condition) {
+        throw new Error(message || 'Assertion failed');
+      }
+    }
+    
+    function assertEquals(actual, expected, message) {
+      if (actual !== expected) {
+        throw new Error(`${message || 'Values not equal'}: expected ${expected}, got ${actual}`);
+      }
+    }
+    
+    function addTest(name, fn, category = 'General') {
+      tests.push({ name, fn, category });
+    }
+    
+    async function runTest(test) {
+      const testEl = document.createElement('div');
+      testEl.className = 'test-item';
+      testEl.innerHTML = `
+        <div class="test-name">
+          <span class="status-badge status-pending">RUNNING</span>
+          ${test.name}
+        </div>
+        <div class="test-result" id="result-${tests.indexOf(test)}">Testing...</div>
+      `;
+      
+      const category = document.querySelector(`[data-category="${test.category}"]`);
+      category.appendChild(testEl);
+      
+      try {
+        await test.fn();
+        testEl.className = 'test-item pass';
+        testEl.querySelector('.status-badge').className = 'status-badge status-pass';
+        testEl.querySelector('.status-badge').textContent = 'PASS';
+        testEl.querySelector('.test-result').textContent = '✓ Test passed successfully';
+        passCount++;
+        log(`✓ ${test.name}`, 'success');
+        return true;
+      } catch (error) {
+        testEl.className = 'test-item fail';
+        testEl.querySelector('.status-badge').className = 'status-badge status-fail';
+        testEl.querySelector('.status-badge').textContent = 'FAIL';
+        testEl.querySelector('.test-result').textContent = `✗ ${error.message}`;
+        failCount++;
+        log(`✗ ${test.name}: ${error.message}`, 'error');
+        return false;
+      }
+    }
+    
+    function updateSummary() {
+      document.getElementById('totalTests').textContent = tests.length;
+      document.getElementById('passedTests').textContent = passCount;
+      document.getElementById('failedTests').textContent = failCount;
+      const rate = tests.length > 0 ? Math.round((passCount / tests.length) * 100) : 0;
+      document.getElementById('successRate').textContent = `${rate}%`;
+    }
+    
+    async function runAllTests() {
+      log('Starting test suite...', 'info');
+      passCount = 0;
+      failCount = 0;
+      
+      const resultsDiv = document.getElementById('testResults');
+      resultsDiv.innerHTML = '';
+      
+      // Group tests by category
+      const categories = [...new Set(tests.map(t => t.category))];
+      categories.forEach(cat => {
+        const section = document.createElement('div');
+        section.className = 'test-section';
+        section.innerHTML = `<h2>${cat}</h2>`;
+        section.setAttribute('data-category', cat);
+        resultsDiv.appendChild(section);
+      });
+      
+      for (const test of tests) {
+        await runTest(test);
+        await new Promise(resolve => setTimeout(resolve, 50)); // Small delay for visual effect
+      }
+      
+      updateSummary();
+      log(`Test suite completed: ${passCount} passed, ${failCount} failed`, 'info');
+    }
+    
+    function clearResults() {
+      document.getElementById('testResults').innerHTML = '';
+      document.getElementById('console').innerHTML = '';
+      passCount = 0;
+      failCount = 0;
+      updateSummary();
+      log('Results cleared', 'info');
+    }
+    
+    // ========================================================================
+    // TEST DEFINITIONS
+    // ========================================================================
+    
+    // CATEGORY: Boolean Conditions
+    addTest('Boolean: true condition', () => {
+      const el = document.createElement('div');
+      Conditions.apply(true, {
+        'true': { textContent: 'Is True' }
+      }, el);
+      assertEquals(el.textContent, 'Is True', 'Should match true condition');
+    }, 'Boolean Conditions');
+    
+    addTest('Boolean: false condition', () => {
+      const el = document.createElement('div');
+      Conditions.apply(false, {
+        'false': { textContent: 'Is False' }
+      }, el);
+      assertEquals(el.textContent, 'Is False', 'Should match false condition');
+    }, 'Boolean Conditions');
+    
+    addTest('Boolean: truthy condition', () => {
+      const el = document.createElement('div');
+      Conditions.apply('hello', {
+        'truthy': { textContent: 'Is Truthy' }
+      }, el);
+      assertEquals(el.textContent, 'Is Truthy', 'Should match truthy condition');
+    }, 'Boolean Conditions');
+    
+    addTest('Boolean: falsy condition', () => {
+      const el = document.createElement('div');
+      Conditions.apply('', {
+        'falsy': { textContent: 'Is Falsy' }
+      }, el);
+      assertEquals(el.textContent, 'Is Falsy', 'Should match falsy condition');
+    }, 'Boolean Conditions');
+    
+    // CATEGORY: Null/Undefined/Empty Checks
+    addTest('Null check', () => {
+      const el = document.createElement('div');
+      Conditions.apply(null, {
+        'null': { textContent: 'Is Null' }
+      }, el);
+      assertEquals(el.textContent, 'Is Null', 'Should match null condition');
+    }, 'Null/Undefined/Empty');
+    
+    addTest('Undefined check', () => {
+      const el = document.createElement('div');
+      Conditions.apply(undefined, {
+        'undefined': { textContent: 'Is Undefined' }
+      }, el);
+      assertEquals(el.textContent, 'Is Undefined', 'Should match undefined condition');
+    }, 'Null/Undefined/Empty');
+    
+    addTest('Empty string check', () => {
+      const el = document.createElement('div');
+      Conditions.apply('', {
+        'empty': { textContent: 'Is Empty' }
+      }, el);
+      assertEquals(el.textContent, 'Is Empty', 'Should match empty condition');
+    }, 'Null/Undefined/Empty');
+    
+    addTest('Empty array check', () => {
+      const el = document.createElement('div');
+      Conditions.apply([], {
+        'empty': { textContent: 'Is Empty Array' }
+      }, el);
+      assertEquals(el.textContent, 'Is Empty Array', 'Should match empty array');
+    }, 'Null/Undefined/Empty');
+    
+    // CATEGORY: String Matching
+    addTest('Quoted string match', () => {
+      const el = document.createElement('div');
+      Conditions.apply('hello', {
+        '"hello"': { textContent: 'Matched' }
+      }, el);
+      assertEquals(el.textContent, 'Matched', 'Should match quoted string');
+    }, 'String Matching');
+    
+    addTest('String includes pattern', () => {
+      const el = document.createElement('div');
+      Conditions.apply('hello world', {
+        'includes:world': { textContent: 'Contains World' }
+      }, el);
+      assertEquals(el.textContent, 'Contains World', 'Should match includes pattern');
+    }, 'String Matching');
+    
+    addTest('String startsWith pattern', () => {
+      const el = document.createElement('div');
+      Conditions.apply('hello world', {
+        'startsWith:hello': { textContent: 'Starts with Hello' }
+      }, el);
+      assertEquals(el.textContent, 'Starts with Hello', 'Should match startsWith pattern');
+    }, 'String Matching');
+    
+    addTest('String endsWith pattern', () => {
+      const el = document.createElement('div');
+      Conditions.apply('hello world', {
+        'endsWith:world': { textContent: 'Ends with World' }
+      }, el);
+      assertEquals(el.textContent, 'Ends with World', 'Should match endsWith pattern');
+    }, 'String Matching');
+    
+    // CATEGORY: Regex Matching
+    addTest('Regex: email pattern', () => {
+      const el = document.createElement('div');
+      Conditions.apply('test@example.com', {
+        '/^[^@]+@[^@]+\\.[^@]+$/': { textContent: 'Valid Email' }
+      }, el);
+      assertEquals(el.textContent, 'Valid Email', 'Should match email regex');
+    }, 'Regex Matching');
+    
+    addTest('Regex: with flags', () => {
+      const el = document.createElement('div');
+      Conditions.apply('HELLO', {
+        '/hello/i': { textContent: 'Case Insensitive Match' }
+      }, el);
+      assertEquals(el.textContent, 'Case Insensitive Match', 'Should match with ignore case flag');
+    }, 'Regex Matching');
+    
+    // CATEGORY: Numeric Comparisons
+    addTest('Numeric: exact match', () => {
+      const el = document.createElement('div');
+      Conditions.apply(42, {
+        '42': { textContent: 'Is 42' }
+      }, el);
+      assertEquals(el.textContent, 'Is 42', 'Should match exact number');
+    }, 'Numeric Comparisons');
+    
+    addTest('Numeric: range (inclusive)', () => {
+      const el = document.createElement('div');
+      Conditions.apply(5, {
+        '1-10': { textContent: 'In Range' }
+      }, el);
+      assertEquals(el.textContent, 'In Range', 'Should match numeric range');
+    }, 'Numeric Comparisons');
+    
+    addTest('Numeric: greater than', () => {
+      const el = document.createElement('div');
+      Conditions.apply(15, {
+        '>10': { textContent: 'Greater than 10' }
+      }, el);
+      assertEquals(el.textContent, 'Greater than 10', 'Should match > operator');
+    }, 'Numeric Comparisons');
+    
+    addTest('Numeric: less than', () => {
+      const el = document.createElement('div');
+      Conditions.apply(5, {
+        '<10': { textContent: 'Less than 10' }
+      }, el);
+      assertEquals(el.textContent, 'Less than 10', 'Should match < operator');
+    }, 'Numeric Comparisons');
+    
+    addTest('Numeric: greater than or equal', () => {
+      const el = document.createElement('div');
+      Conditions.apply(10, {
+        '>=10': { textContent: 'GTE 10' }
+      }, el);
+      assertEquals(el.textContent, 'GTE 10', 'Should match >= operator');
+    }, 'Numeric Comparisons');
+    
+    addTest('Numeric: less than or equal', () => {
+      const el = document.createElement('div');
+      Conditions.apply(10, {
+        '<=10': { textContent: 'LTE 10' }
+      }, el);
+      assertEquals(el.textContent, 'LTE 10', 'Should match <= operator');
+    }, 'Numeric Comparisons');
+    
+    // CATEGORY: Property Handlers - Style
+    addTest('Style: object application', () => {
+      const el = document.createElement('div');
+      Conditions.apply('test', {
+        'test': { 
+          style: { 
+            color: 'red', 
+            fontSize: '20px' 
+          } 
+        }
+      }, el);
+      assertEquals(el.style.color, 'red', 'Should apply color style');
+      assertEquals(el.style.fontSize, '20px', 'Should apply fontSize style');
+    }, 'Property Handlers - Style');
+    
+    // CATEGORY: Property Handlers - classList
+    addTest('classList: add single class', () => {
+      const el = document.createElement('div');
+      Conditions.apply('test', {
+        'test': { 
+          classList: { add: 'active' }
+        }
+      }, el);
+      assert(el.classList.contains('active'), 'Should add active class');
+    }, 'Property Handlers - classList');
+    
+    addTest('classList: add multiple classes', () => {
+      const el = document.createElement('div');
+      Conditions.apply('test', {
+        'test': { 
+          classList: { add: ['class1', 'class2'] }
+        }
+      }, el);
+      assert(el.classList.contains('class1') && el.classList.contains('class2'), 'Should add multiple classes');
+    }, 'Property Handlers - classList');
+    
+    addTest('classList: remove class', () => {
+      const el = document.createElement('div');
+      el.className = 'old-class';
+      Conditions.apply('test', {
+        'test': { 
+          classList: { remove: 'old-class' }
+        }
+      }, el);
+      assert(!el.classList.contains('old-class'), 'Should remove class');
+    }, 'Property Handlers - classList');
+    
+    addTest('classList: toggle class', () => {
+      const el = document.createElement('div');
+      Conditions.apply('test', {
+        'test': { 
+          classList: { toggle: 'toggled' }
+        }
+      }, el);
+      assert(el.classList.contains('toggled'), 'Should toggle class on');
+    }, 'Property Handlers - classList');
+    
+    addTest('classList: replace class', () => {
+      const el = document.createElement('div');
+      el.className = 'old-class';
+      Conditions.apply('test', {
+        'test': { 
+          classList: { replace: ['old-class', 'new-class'] }
+        }
+      }, el);
+      assert(!el.classList.contains('old-class') && el.classList.contains('new-class'), 'Should replace class');
+    }, 'Property Handlers - classList');
+    
+    addTest('classList: array replacement', () => {
+      const el = document.createElement('div');
+      Conditions.apply('test', {
+        'test': { 
+          classList: ['new1', 'new2']
+        }
+      }, el);
+      assertEquals(el.className, 'new1 new2', 'Should replace with array of classes');
+    }, 'Property Handlers - classList');
+    
+    // CATEGORY: Property Handlers - Attributes
+    addTest('setAttribute: object form', () => {
+      const el = document.createElement('div');
+      Conditions.apply('test', {
+        'test': { 
+          setAttribute: { 
+            'data-test': 'value',
+            'aria-label': 'Test Label'
+          }
+        }
+      }, el);
+      assertEquals(el.getAttribute('data-test'), 'value', 'Should set data-test attribute');
+      assertEquals(el.getAttribute('aria-label'), 'Test Label', 'Should set aria-label attribute');
+    }, 'Property Handlers - Attributes');
+    
+    addTest('setAttribute: remove with null', () => {
+      const el = document.createElement('div');
+      el.setAttribute('data-old', 'value');
+      Conditions.apply('test', {
+        'test': { 
+          setAttribute: { 'data-old': null }
+        }
+      }, el);
+      assert(!el.hasAttribute('data-old'), 'Should remove attribute with null value');
+    }, 'Property Handlers - Attributes');
+    
+    addTest('removeAttribute: single', () => {
+      const el = document.createElement('div');
+      el.setAttribute('data-remove', 'value');
+      Conditions.apply('test', {
+        'test': { 
+          removeAttribute: 'data-remove'
+        }
+      }, el);
+      assert(!el.hasAttribute('data-remove'), 'Should remove single attribute');
+    }, 'Property Handlers - Attributes');
+    
+    addTest('removeAttribute: array', () => {
+      const el = document.createElement('div');
+      el.setAttribute('attr1', 'val1');
+      el.setAttribute('attr2', 'val2');
+      Conditions.apply('test', {
+        'test': { 
+          removeAttribute: ['attr1', 'attr2']
+        }
+      }, el);
+      assert(!el.hasAttribute('attr1') && !el.hasAttribute('attr2'), 'Should remove multiple attributes');
+    }, 'Property Handlers - Attributes');
+    
+    // CATEGORY: Property Handlers - Dataset
+    addTest('dataset: object application', () => {
+      const el = document.createElement('div');
+      Conditions.apply('test', {
+        'test': { 
+          dataset: { 
+            userId: '123',
+            userName: 'John'
+          }
+        }
+      }, el);
+      assertEquals(el.dataset.userId, '123', 'Should set userId dataset');
+      assertEquals(el.dataset.userName, 'John', 'Should set userName dataset');
+    }, 'Property Handlers - Dataset');
+    
+    // CATEGORY: Property Handlers - Events
+    addTest('addEventListener: object form', () => {
+      const el = document.createElement('button');
+      let clicked = false;
+      Conditions.apply('test', {
+        'test': { 
+          addEventListener: { 
+            click: () => { clicked = true; }
+          }
+        }
+      }, el);
+      el.click();
+      assert(clicked, 'Should attach event listener');
+    }, 'Property Handlers - Events');
+    
+    addTest('addEventListener: with options', () => {
+      const el = document.createElement('button');
+      let clicked = false;
+      Conditions.apply('test', {
+        'test': { 
+          addEventListener: { 
+            click: {
+              handler: () => { clicked = true; },
+              options: { once: true }
+            }
+          }
+        }
+      }, el);
+      el.click();
+      el.click();
+      assert(clicked, 'Should attach event with options');
+    }, 'Property Handlers - Events');
+    
+    addTest('Event property: onclick', () => {
+      const el = document.createElement('button');
+      let clicked = false;
+      Conditions.apply('test', {
+        'test': { 
+          onclick: () => { clicked = true; }
+        }
+      }, el);
+      el.click();
+      assert(clicked, 'Should set onclick property');
+    }, 'Property Handlers - Events');
+    
+    // CATEGORY: Property Handlers - Native Properties
+    addTest('Native property: textContent', () => {
+      const el = document.createElement('div');
+      Conditions.apply('test', {
+        'test': { textContent: 'Hello World' }
+      }, el);
+      assertEquals(el.textContent, 'Hello World', 'Should set textContent');
+    }, 'Property Handlers - Native Properties');
+    
+    addTest('Native property: value (input)', () => {
+      const el = document.createElement('input');
+      Conditions.apply('test', {
+        'test': { value: 'Input Value' }
+      }, el);
+      assertEquals(el.value, 'Input Value', 'Should set input value');
+    }, 'Property Handlers - Native Properties');
+    
+    addTest('Native property: disabled', () => {
+      const el = document.createElement('button');
+      Conditions.apply('test', {
+        'test': { disabled: true }
+      }, el);
+      assert(el.disabled, 'Should set disabled property');
+    }, 'Property Handlers - Native Properties');
+    
+    addTest('Native property: checked', () => {
+      const el = document.createElement('input');
+      el.type = 'checkbox';
+      Conditions.apply('test', {
+        'test': { checked: true }
+      }, el);
+      assert(el.checked, 'Should set checked property');
+    }, 'Property Handlers - Native Properties');
+    
+    // CATEGORY: Selector Types
+    addTest('Selector: element instance', () => {
+      const el = document.createElement('div');
+      document.body.appendChild(el);
+      Conditions.apply('test', {
+        'test': { textContent: 'Direct Element' }
+      }, el);
+      assertEquals(el.textContent, 'Direct Element', 'Should work with element instance');
+      document.body.removeChild(el);
+    }, 'Selector Types');
+    
+    addTest('Selector: ID string', () => {
+      const el = document.createElement('div');
+      el.id = 'test-id-selector';
+      document.body.appendChild(el);
+      Conditions.apply('test', {
+        'test': { textContent: 'ID Selector' }
+      }, '#test-id-selector');
+      assertEquals(el.textContent, 'ID Selector', 'Should work with ID selector');
+      document.body.removeChild(el);
+    }, 'Selector Types');
+    
+    addTest('Selector: class string', () => {
+      const el = document.createElement('div');
+      el.className = 'test-class-selector';
+      document.body.appendChild(el);
+      Conditions.apply('test', {
+        'test': { textContent: 'Class Selector' }
+      }, '.test-class-selector');
+      assertEquals(el.textContent, 'Class Selector', 'Should work with class selector');
+      document.body.removeChild(el);
+    }, 'Selector Types');
+    
+    addTest('Selector: array of elements', () => {
+      const el1 = document.createElement('div');
+      const el2 = document.createElement('div');
+      Conditions.apply('test', {
+        'test': { textContent: 'Array Selector' }
+      }, [el1, el2]);
+      assert(el1.textContent === 'Array Selector' && el2.textContent === 'Array Selector', 'Should work with array of elements');
+    }, 'Selector Types');
+    
+    // CATEGORY: Integration - DOM Helpers
+    addTest('Integration: Elements helper', () => {
+      if (!window.Elements) {
+        throw new Error('Elements helper not available');
+      }
+      assert(typeof Elements.whenState === 'function', 'Should integrate with Elements');
+      assert(typeof Elements.whenApply === 'function', 'Should add whenApply method');
+      assert(typeof Elements.whenWatch === 'function', 'Should add whenWatch method');
+    }, 'Integration - DOM Helpers');
+    
+    addTest('Integration: Collections helper', () => {
+      if (!window.Collections) {
+        throw new Error('Collections helper not available');
+      }
+      assert(typeof Collections.whenState === 'function', 'Should integrate with Collections');
+      assert(typeof Collections.whenApply === 'function', 'Should add whenApply method');
+      assert(typeof Collections.whenWatch === 'function', 'Should add whenWatch method');
+    }, 'Integration - DOM Helpers');
+    
+    addTest('Integration: Selector helper', () => {
+      if (!window.Selector) {
+        throw new Error('Selector helper not available');
+      }
+      assert(typeof Selector.whenState === 'function', 'Should integrate with Selector');
+      assert(typeof Selector.whenApply === 'function', 'Should add whenApply method');
+      assert(typeof Selector.whenWatch === 'function', 'Should add whenWatch method');
+    }, 'Integration - DOM Helpers');
+    
+    // CATEGORY: Integration - Reactive State
+    addTest('Integration: ReactiveUtils available', () => {
+      if (!window.ReactiveUtils) {
+        throw new Error('ReactiveUtils not available');
+      }
+      assert(typeof ReactiveUtils.state === 'function', 'Should have state method');
+      assert(typeof ReactiveUtils.effect === 'function', 'Should have effect method');
+    }, 'Integration - Reactive State');
+    
+    addTest('Reactive: whenState with reactive state', async () => {
+      if (!window.ReactiveUtils) {
+        throw new Error('ReactiveUtils not available');
+      }
+      
+      const el = document.createElement('div');
+      document.body.appendChild(el);
+      
+      const state = ReactiveUtils.state({ status: 'pending' });
+      
+      Conditions.whenState(
+        () => state.status,
+        {
+          'pending': { textContent: 'Loading...' },
+          'success': { textContent: 'Success!' },
+          'error': { textContent: 'Error!' }
+        },
+        el
+      );
+      
+      assertEquals(el.textContent, 'Loading...', 'Should show initial state');
+      
+      // Change state
+      state.status = 'success';
+      await new Promise(resolve => setTimeout(resolve, 10));
+      
+      assertEquals(el.textContent, 'Success!', 'Should update reactively');
+      
+      document.body.removeChild(el);
+    }, 'Integration - Reactive State');
+    
+    // CATEGORY: API Methods
+    addTest('API: Conditions.apply exists', () => {
+      assert(typeof Conditions.apply === 'function', 'Should have apply method');
+    }, 'API Methods');
+    
+    addTest('API: Conditions.whenState exists', () => {
+      assert(typeof Conditions.whenState === 'function', 'Should have whenState method');
+    }, 'API Methods');
+    
+    addTest('API: Conditions.watch exists', () => {
+      assert(typeof Conditions.watch === 'function', 'Should have watch method');
+    }, 'API Methods');
+    
+    addTest('API: Conditions.batch exists', () => {
+      assert(typeof Conditions.batch === 'function', 'Should have batch method');
+    }, 'API Methods');
+    
+    addTest('API: Conditions.registerMatcher exists', () => {
+      assert(typeof Conditions.registerMatcher === 'function', 'Should have registerMatcher method');
+    }, 'API Methods');
+    
+    addTest('API: Conditions.registerHandler exists', () => {
+      assert(typeof Conditions.registerHandler === 'function', 'Should have registerHandler method');
+    }, 'API Methods');
+    
+    addTest('API: Conditions.getMatchers exists', () => {
+      assert(typeof Conditions.getMatchers === 'function', 'Should have getMatchers method');
+      const matchers = Conditions.getMatchers();
+      assert(Array.isArray(matchers) && matchers.length > 0, 'Should return array of matcher names');
+    }, 'API Methods');
+    
+    addTest('API: Conditions.getHandlers exists', () => {
+      assert(typeof Conditions.getHandlers === 'function', 'Should have getHandlers method');
+      const handlers = Conditions.getHandlers();
+      assert(Array.isArray(handlers) && handlers.length > 0, 'Should return array of handler names');
+    }, 'API Methods');
+    
+    addTest('API: Conditions.hasReactivity getter', () => {
+      assert(typeof Conditions.hasReactivity === 'boolean', 'Should have hasReactivity getter');
+    }, 'API Methods');
+    
+    addTest('API: Conditions.mode getter', () => {
+      assert(typeof Conditions.mode === 'string', 'Should have mode getter');
+      assert(['reactive', 'static'].includes(Conditions.mode), 'Mode should be reactive or static');
+    }, 'API Methods');
+    
+    // CATEGORY: Extensibility
+    addTest('Extensibility: Register custom matcher', () => {
+      Conditions.registerMatcher('customTest', {
+        test: (condition) => condition === 'custom',
+        match: (value) => value === 'custom-value'
+      });
+      
+      const el = document.createElement('div');
+      Conditions.apply('custom-value', {
+        'custom': { textContent: 'Custom Matched!' }
+      }, el);
+      
+      assertEquals(el.textContent, 'Custom Matched!', 'Should use custom matcher');
+    }, 'Extensibility');
+    
+    addTest('Extensibility: Register custom handler', () => {
+      Conditions.registerHandler('customProperty', {
+        test: (key) => key === 'customProp',
+        apply: (element, val) => {
+          element.dataset.custom = val;
+        }
+      });
+      
+      const el = document.createElement('div');
+      Conditions.apply('test', {
+        'test': { customProp: 'custom-value' }
+      }, el);
+      
+      assertEquals(el.dataset.custom, 'custom-value', 'Should use custom handler');
+    }, 'Extensibility');
+    
+    // CATEGORY: Edge Cases
+    addTest('Edge case: Multiple elements with same class', () => {
+      const el1 = document.createElement('div');
+      const el2 = document.createElement('div');
+      el1.className = 'multi-test';
+      el2.className = 'multi-test';
+      document.body.appendChild(el1);
+      document.body.appendChild(el2);
+      
+      Conditions.apply('test', {
+        'test': { textContent: 'Multiple' }
+      }, '.multi-test');
+      
+      assert(el1.textContent === 'Multiple' && el2.textContent === 'Multiple', 'Should apply to all matching elements');
+      
+      document.body.removeChild(el1);
+      document.body.removeChild(el2);
+    }, 'Edge Cases');
+    
+    addTest('Edge case: Condition priority (first match wins)', () => {
+      const el = document.createElement('div');
+      Conditions.apply(5, {
+        '1-10': { textContent: 'Range' },
+        '5': { textContent: 'Exact' },
+        '>0': { textContent: 'Greater' }
+      }, el);
+      
+      assertEquals(el.textContent, 'Range', 'Should use first matching condition');
+    }, 'Edge Cases');
+    
+    addTest('Edge case: Invalid selector', () => {
+      // Should not throw, just warn
+      try {
+        Conditions.apply('test', {
+          'test': { textContent: 'Test' }
+        }, '#nonexistent-element');
+        assert(true, 'Should handle invalid selector gracefully');
+      } catch (e) {
+        throw new Error('Should not throw on invalid selector');
+      }
+    }, 'Edge Cases');
+    
+    addTest('Edge case: Complex nested style object', () => {
+      const el = document.createElement('div');
+      Conditions.apply('test', {
+        'test': { 
+          style: { 
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            border: '2px solid rgba(0,0,0,0.1)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+          } 
+        }
+      }, el);
+      
+      assert(el.style.background.includes('linear-gradient'), 'Should apply complex styles');
+    }, 'Edge Cases');
+    
+    // CATEGORY: Performance
+    addTest('Performance: Batch updates', () => {
+      const elements = [];
+      for (let i = 0; i < 100; i++) {
+        const el = document.createElement('div');
+        elements.push(el);
+      }
+      
+      const start = performance.now();
+      
+      Conditions.batch(() => {
+        elements.forEach(el => {
+          Conditions.apply('test', {
+            'test': { textContent: 'Batched' }
+          }, el);
+        });
+      });
+      
+      const duration = performance.now() - start;
+      
+      assert(duration < 100, 'Batch should complete quickly');
+      assert(elements.every(el => el.textContent === 'Batched'), 'All elements should be updated');
+    }, 'Performance');
+    
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      updateSummary();
+      log('Test suite ready. Click "Run All Tests" to start.', 'info');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced DOM Helpers Features Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+        }
+        
+        .test-button {
+            background: #28a745;
+        }
+        
+        .test-button:hover {
+            background: #1e7e34;
+        }
+        
+        .demo-element {
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+        
+        .highlight {
+            background: #fff3cd !important;
+            border-color: #ffeaa7 !important;
+        }
+        
+        .success {
+            background: #d4edda !important;
+            border-color: #c3e6cb !important;
+        }
+        
+        .info {
+            background: #d1ecf1 !important;
+            border-color: #bee5eb !important;
+        }
+        
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .code {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+        
+        .feature-demo {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .feature-demo {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Enhanced DOM Helpers Features Test</h1>
+        <p>This page demonstrates the three new enhanced features:</p>
+        <ul>
+            <li><strong>e.target.update({})</strong> - Direct updates from event.target</li>
+            <li><strong>this.update({})</strong> - Updates using 'this' context in regular functions</li>
+            <li><strong>Multiple Event Binding</strong> - Bind multiple events in one call</li>
+        </ul>
+    </div>
+
+    <!-- Feature 1: e.target.update() Support -->
+    <div class="container">
+        <div class="test-section">
+            <h3>🎯 Feature 1: e.target.update({}) Support</h3>
+            <p>Click these buttons to see <code>e.target.update()</code> in action:</p>
+            
+            <button id="etarget-btn1">Click me - Change Text</button>
+            <button id="etarget-btn2">Click me - Change Style</button>
+            <button id="etarget-btn3">Click me - Add Classes</button>
+            
+            <div class="code">
+// Example code:
+Elements.btn.update({
+  addEventListener: {
+    click: (e) => {
+      e.target.update({ textContent: "Clicked!" });
+    }
+  }
+});
+            </div>
+        </div>
+    </div>
+
+    <!-- Feature 2: this.update() Support -->
+    <div class="container">
+        <div class="test-section">
+            <h3>🎯 Feature 2: this.update({}) Support</h3>
+            <p>These buttons use regular functions (not arrow functions) to demonstrate <code>this.update()</code>:</p>
+            
+            <button id="this-btn1">Hover me - this.update()</button>
+            <button id="this-btn2">Focus me - this.update()</button>
+            <button id="this-btn3">Double-click me</button>
+            
+            <div class="code">
+// Example code:
+Elements.btn.update({
+  addEventListener: {
+    mouseover: function() {
+      this.update({ style: { backgroundColor: "red" } });
+    }
+  }
+});
+            </div>
+        </div>
+    </div>
+
+    <!-- Feature 3: Multiple Event Binding -->
+    <div class="container">
+        <div class="test-section">
+            <h3>🎯 Feature 3: Multiple Event Binding in One Call</h3>
+            <p>These elements demonstrate binding multiple events in a single update() call:</p>
+            
+            <div class="feature-demo">
+                <div>
+                    <button id="multi-btn1" class="test-button">Multi-Event Button</button>
+                    <p>Try: click, hover, focus, blur</p>
+                </div>
+                <div>
+                    <div id="multi-div1" class="demo-element">Interactive Div</div>
+                    <p>Try: click, mouseenter, mouseleave</p>
+                </div>
+            </div>
+            
+            <div class="code">
+// Example code:
+Elements.btn.update({
+  addEventListener: {
+    click: (e) => e.target.update({ textContent: "Clicked!" }),
+    mouseover: (e) => e.target.update({ style: { backgroundColor: "lightblue" } }),
+    mouseout: function() { this.update({ style: { backgroundColor: "" } }); }
+  }
+});
+            </div>
+        </div>
+    </div>
+
+    <!-- Collections Test -->
+    <div class="container">
+        <div class="test-section">
+            <h3>📦 Collections Helper Test</h3>
+            <p>Testing enhanced features with Collections:</p>
+            
+            <button class="collection-test">Collection Button 1</button>
+            <button class="collection-test">Collection Button 2</button>
+            <button class="collection-test">Collection Button 3</button>
+            
+            <div class="code">
+// Example code:
+Collections.ClassName.collectionTest.update({
+  addEventListener: {
+    click: (e) => e.target.update({ textContent: "Collection Clicked!" }),
+    mouseover: function() { this.update({ classList: { add: "highlight" } }); },
+    mouseout: function() { this.update({ classList: { remove: "highlight" } }); }
+  }
+});
+            </div>
+        </div>
+    </div>
+
+    <!-- Selector Test -->
+    <div class="container">
+        <div class="test-section">
+            <h3>🔍 Selector Helper Test</h3>
+            <p>Testing enhanced features with Selector:</p>
+            
+            <div class="selector-test">Selector Test Div 1</div>
+            <div class="selector-test">Selector Test Div 2</div>
+            <div class="selector-test">Selector Test Div 3</div>
+            
+            <div class="code">
+// Example code:
+Selector.queryAll('.selector-test').update({
+  addEventListener: {
+    click: (e) => e.target.update({ classList: { toggle: "success" } }),
+    dblclick: function() { this.update({ textContent: "Double-clicked!" }); }
+  }
+});
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Example -->
+    <div class="container">
+        <div class="test-section">
+            <h3>🔥 Advanced Example: All Features Combined</h3>
+            <p>This example combines all three features in a complex interaction:</p>
+            
+            <div id="advanced-demo" class="demo-element">
+                <h4>Advanced Interactive Element</h4>
+                <p>Try different interactions: click, right-click, hover, keyboard events</p>
+                <button id="reset-advanced">Reset</button>
+            </div>
+            
+            <div class="code">
+// Complex example with all features:
+Elements.advancedDemo.update({
+  addEventListener: {
+    click: (e) => {
+      e.target.update({ 
+        classList: { add: "info" },
+        innerHTML: "&lt;h4&gt;Clicked!&lt;/h4&gt;&lt;p&gt;Used e.target.update()&lt;/p&gt;"
+      });
+    },
+    contextmenu: function(e) {
+      e.preventDefault();
+      this.update({ 
+        classList: { add: "highlight" },
+        innerHTML: "&lt;h4&gt;Right-clicked!&lt;/h4&gt;&lt;p&gt;Used this.update()&lt;/p&gt;"
+      });
+    },
+    mouseenter: (e) => e.target.update({ style: { transform: "scale(1.05)" } }),
+    mouseleave: function() { this.update({ style: { transform: "scale(1)" } }); },
+    keydown: (e) => {
+      if (e.key === 'Enter') {
+        e.target.update({ classList: { add: "success" } });
+      }
+    }
+  },
+  tabIndex: 0
+});
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Log -->
+    <div class="container">
+        <div class="test-section">
+            <h3>📋 Event Log</h3>
+            <div id="event-log" class="log">
+                <div>Event log will appear here...</div>
+            </div>
+            <button id="clear-log">Clear Log</button>
+        </div>
+    </div>
+
+    <!-- Load the DOM Helpers library -->
+ <script src="../../src/Core/01_dom-helpers.js"></script>
+  <script src="../../src/Core/02_dh-bulk-property-updaters.js"></script>
+  <script src="../../src/Core/03_dh-collection-shortcuts.js"></script>
+  <script src="../../src/Core/04_dh-global-query.js"></script>
+  <script src="../../src/Core/05_dh-indexed-collection-updates.js"></script>
+  <script src="../../src/Core/06_dh-index-selection.js"></script>
+  <script src="../../src/Core/07_dh-global-collection-indexed-updates.js"></script>
+  <script src="../../src/Core/08_dh-conditional-rendering.js"></script>
+  <script src="../../src/Core/09_dh-conditions-default.js"></script>
+  <script src="../../src/Core/10_dh-selector-update-patch.js"></script>
+  <script src="../../src/Core/11_dh-bulk-properties-updater-global-query.js"></script>
+    
+    <script>
+        // Utility function to log events
+        function logEvent(message) {
+            const log = document.getElementById('event-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.textContent = `[${timestamp}] ${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Feature 1: e.target.update() Support
+        Elements['etarget-btn1'].update({
+            addEventListener: {
+                click: (e) => {
+                    e.target.update({ 
+                        textContent: "Text Changed via e.target.update()!",
+                        style: { backgroundColor: "#28a745" }
+                    });
+                    logEvent("Button 1: Used e.target.update() to change text and style");
+                }
+            }
+        });
+
+        Elements['etarget-btn2'].update({
+            addEventListener: {
+                click: (e) => {
+                    e.target.update({ 
+                        style: { 
+                            backgroundColor: "#dc3545",
+                            color: "white",
+                            transform: "rotate(5deg)"
+                        }
+                    });
+                    logEvent("Button 2: Used e.target.update() to change style");
+                }
+            }
+        });
+
+        Elements['etarget-btn3'].update({
+            addEventListener: {
+                click: (e) => {
+                    e.target.update({ 
+                        classList: { add: ["highlight", "success"] },
+                        textContent: "Classes Added!"
+                    });
+                    logEvent("Button 3: Used e.target.update() to add classes");
+                }
+            }
+        });
+
+        // Feature 2: this.update() Support (using regular functions, not arrow functions)
+        Elements['this-btn1'].update({
+            addEventListener: {
+                mouseover: function() {
+                    this.update({ 
+                        style: { backgroundColor: "#ffc107", color: "#212529" },
+                        textContent: "Hovered! (this.update)"
+                    });
+                    logEvent("Button 1: Used this.update() on mouseover");
+                },
+                mouseout: function() {
+                    this.update({ 
+                        style: { backgroundColor: "#007bff", color: "white" },
+                        textContent: "Hover me - this.update()"
+                    });
+                }
+            }
+        });
+
+        Elements['this-btn2'].update({
+            addEventListener: {
+                focus: function() {
+                    this.update({ 
+                        classList: { add: "info" },
+                        textContent: "Focused! (this.update)"
+                    });
+                    logEvent("Button 2: Used this.update() on focus");
+                },
+                blur: function() {
+                    this.update({ 
+                        classList: { remove: "info" },
+                        textContent: "Focus me - this.update()"
+                    });
+                }
+            }
+        });
+
+        Elements['this-btn3'].update({
+            addEventListener: {
+                dblclick: function() {
+                    this.update({ 
+                        style: { 
+                            backgroundColor: "#6f42c1",
+                            transform: "scale(1.1)"
+                        },
+                        textContent: "Double-clicked! (this.update)"
+                    });
+                    logEvent("Button 3: Used this.update() on double-click");
+                    
+                    // Reset after 2 seconds
+                    setTimeout(() => {
+                        this.update({ 
+                            style: { 
+                                backgroundColor: "#007bff",
+                                transform: "scale(1)"
+                            },
+                            textContent: "Double-click me"
+                        });
+                    }, 2000);
+                }
+            }
+        });
+
+        // Feature 3: Multiple Event Binding in One Call
+        Elements['multi-btn1'].update({
+            addEventListener: {
+                click: (e) => {
+                    e.target.update({ textContent: "Clicked! (multi-event)" });
+                    logEvent("Multi-Button: Clicked event fired");
+                },
+                mouseover: (e) => {
+                    e.target.update({ 
+                        style: { backgroundColor: "#17a2b8" },
+                        title: "Hovering over multi-event button"
+                    });
+                    logEvent("Multi-Button: Mouseover event fired");
+                },
+                mouseout: function() {
+                    this.update({ 
+                        style: { backgroundColor: "#28a745" },
+                        textContent: "Multi-Event Button"
+                    });
+                },
+                focus: (e) => {
+                    e.target.update({ classList: { add: "highlight" } });
+                    logEvent("Multi-Button: Focus event fired");
+                },
+                blur: function() {
+                    this.update({ classList: { remove: "highlight" } });
+                }
+            }
+        });
+
+        Elements['multi-div1'].update({
+            addEventListener: {
+                click: (e) => {
+                    e.target.update({ 
+                        innerHTML: "<strong>Clicked!</strong> (e.target.update)",
+                        classList: { add: "success" }
+                    });
+                    logEvent("Multi-Div: Clicked event fired");
+                },
+                mouseenter: function() {
+                    this.update({ 
+                        style: { 
+                            backgroundColor: "#e9ecef",
+                            cursor: "pointer"
+                        }
+                    });
+                    logEvent("Multi-Div: Mouse entered");
+                },
+                mouseleave: function() {
+                    this.update({ 
+                        style: { 
+                            backgroundColor: "#f8f9fa",
+                            cursor: "default"
+                        },
+                        innerHTML: "Interactive Div",
+                        classList: { remove: "success" }
+                    });
+                }
+            }
+        });
+
+        // Collections Test
+        Collections.ClassName['collection-test'].update({
+            addEventListener: {
+                click: (e) => {
+                    e.target.update({ 
+                        textContent: "Collection Clicked! (e.target.update)",
+                        style: { backgroundColor: "#fd7e14" }
+                    });
+                    logEvent(`Collection: Button "${e.target.textContent}" clicked`);
+                },
+                mouseover: function() {
+                    this.update({ classList: { add: "highlight" } });
+                },
+                mouseout: function() {
+                    this.update({ 
+                        classList: { remove: "highlight" },
+                        style: { backgroundColor: "#007bff" },
+                        textContent: this.textContent.includes("Collection Clicked") ? 
+                            this.textContent : 
+                            this.textContent.replace("Collection Button", "Collection Button")
+                    });
+                }
+            }
+        });
+
+        // Selector Test
+        Selector.queryAll('.selector-test').update({
+            addEventListener: {
+                click: (e) => {
+                    e.target.update({ 
+                        classList: { toggle: "success" },
+                        style: { fontWeight: "bold" }
+                    });
+                    logEvent(`Selector: Div "${e.target.textContent}" clicked`);
+                },
+                dblclick: function() {
+                    this.update({ 
+                        textContent: "Double-clicked! (this.update)",
+                        classList: { add: "info" }
+                    });
+                    logEvent("Selector: Div double-clicked");
+                    
+                    // Reset after 3 seconds
+                    setTimeout(() => {
+                        const originalText = this.textContent.includes("1") ? "Selector Test Div 1" :
+                                           this.textContent.includes("2") ? "Selector Test Div 2" :
+                                           "Selector Test Div 3";
+                        this.update({ 
+                            textContent: originalText,
+                            classList: { remove: ["info", "success"] },
+                            style: { fontWeight: "normal" }
+                        });
+                    }, 3000);
+                }
+            }
+        });
+
+        // Advanced Example
+        Elements['advanced-demo'].update({
+            addEventListener: {
+                click: (e) => {
+                    e.target.update({ 
+                        classList: { add: "info" },
+                        innerHTML: "<h4>Clicked!</h4><p>Used e.target.update() - Click reset to try other events</p>"
+                    });
+                    logEvent("Advanced: Clicked (e.target.update used)");
+                },
+                contextmenu: function(e) {
+                    e.preventDefault();
+                    this.update({ 
+                        classList: { add: "highlight" },
+                        innerHTML: "<h4>Right-clicked!</h4><p>Used this.update() - Try other interactions</p>"
+                    });
+                    logEvent("Advanced: Right-clicked (this.update used)");
+                },
+                mouseenter: (e) => {
+                    e.target.update({ style: { transform: "scale(1.05)" } });
+                },
+                mouseleave: function() {
+                    this.update({ style: { transform: "scale(1)" } });
+                },
+                keydown: (e) => {
+                    if (e.key === 'Enter') {
+                        e.target.update({ 
+                            classList: { add: "success" },
+                            innerHTML: "<h4>Enter Key Pressed!</h4><p>Keyboard event with e.target.update()</p>"
+                        });
+                        logEvent("Advanced: Enter key pressed");
+                    }
+                }
+            },
+            tabIndex: 0
+        });
+
+        // Reset button for advanced demo
+        Elements['reset-advanced'].update({
+            addEventListener: {
+                click: () => {
+                    Elements['advanced-demo'].update({
+                        classList: { remove: ["info", "highlight", "success"] },
+                        innerHTML: "<h4>Advanced Interactive Element</h4><p>Try different interactions: click, right-click, hover, keyboard events</p><button id='reset-advanced'>Reset</button>",
+                        style: { transform: "scale(1)" }
+                    });
+                    
+                    // Re-bind the reset button since we replaced the innerHTML
+                    setTimeout(() => {
+                        Elements['reset-advanced'].update({
+                            addEventListener: {
+                                click: arguments.callee // Reference to this same function
+                            }
+                        });
+                    }, 100);
+                    
+                    logEvent("Advanced: Demo reset");
+                }
+            }
+        });
+
+        // Clear log button
+        Elements['clear-log'].update({
+            addEventListener: {
+                click: () => {
+                    document.getElementById('event-log').innerHTML = '<div>Event log cleared...</div>';
+                    logEvent("Log cleared");
+                }
+            }
+        });
+
+        // Initial log message
+        logEvent("Enhanced DOM Helpers test page loaded successfully!");
+        logEvent("All three new features are active: e.target.update(), this.update(), and multiple event binding");
+    </script>
+</body>
+</html>

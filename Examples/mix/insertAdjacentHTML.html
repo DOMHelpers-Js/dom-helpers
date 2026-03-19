@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>insertAdjacentHTML test</title>
+  <style>
+    .dynamic {
+      color: white;
+      background: teal;
+      padding: 8px;
+      margin-top: 10px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <!-- Load your local library -->
+ <script src="../../src/Core/01_dom-helpers.js"></script>
+  <script src="../../src/Core/02_dh-bulk-property-updaters.js"></script>
+  <script src="../../src/Core/03_dh-collection-shortcuts.js"></script>
+  <script src="../../src/Core/04_dh-global-query.js"></script>
+  <script src="../../src/Core/05_dh-indexed-collection-updates.js"></script>
+  <script src="../../src/Core/06_dh-index-selection.js"></script>
+  <script src="../../src/Core/07_dh-global-collection-indexed-updates.js"></script>
+  <script src="../../src/Core/08_dh-conditional-rendering.js"></script>
+  <script src="../../src/Core/09_dh-conditions-default.js"></script>
+  <script src="../../src/Core/10_dh-selector-update-patch.js"></script>
+  <script src="../../src/Core/11_dh-bulk-properties-updater-global-query.js"></script>
+ 
+  <script>
+    // Setup UI with button + container
+    Elements.app.update({
+      innerHTML: `
+        <button id="addBtn">Add Paragraph</button>
+        <div id="container"></div>
+      `
+    });
+
+    let counter = 1;
+
+    Elements.addBtn.update({
+      onclick: () => {
+        // Append paragraph inside container without replacing content
+        Elements.container.insertAdjacentHTML(
+          "beforeend",  // position (append at the end of container)
+          `<p id="para${counter}" class="dynamic">
+             This is paragraph #${counter}, added with <code>insertAdjacentHTML</code>.
+           </p>`
+        );
+        counter++;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Conditions Library Demo</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .status-box { 
+      padding: 20px; 
+      margin: 10px 0; 
+      border-radius: 5px;
+      transition: all 0.3s;
+    }
+    button { 
+      padding: 10px 20px; 
+      margin: 5px; 
+      cursor: pointer;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Conditions Library Demo</h1>
+  
+  <div id="status" class="status-box">Status: Unknown</div>
+  
+  <div>
+    <button onclick="setStatus('online')">Set Online</button>
+    <button onclick="setStatus('offline')">Set Offline</button>
+    <button onclick="setStatus('busy')">Set Busy</button>
+  </div>
+
+  <!-- Include the Conditions library -->
+  <script src="conditions.js"></script>
+
+  <script>
+    // Simple state variable
+    let currentStatus = 'offline';
+
+    // Define conditions and their configurations
+    const statusConditions = {
+      'online': {
+        textContent: '🟢 Status: Online',
+        style: {
+          backgroundColor: '#d4edda',
+          color: '#155724',
+          border: '2px solid #28a745'
+        }
+      },
+      'offline': {
+        textContent: '⚫ Status: Offline',
+        style: {
+          backgroundColor: '#e2e3e5',
+          color: '#383d41',
+          border: '2px solid #6c757d'
+        }
+      },
+      'busy': {
+        textContent: '🔴 Status: Busy',
+        style: {
+          backgroundColor: '#f8d7da',
+          color: '#721c24',
+          border: '2px solid #dc3545'
+        }
+      }
+    };
+
+    // Function to update status
+    function setStatus(newStatus) {
+      currentStatus = newStatus;
+      
+      // Apply conditions manually
+      Conditions.apply(
+        currentStatus,
+        statusConditions,
+        '#status'
+      );
+    }
+
+    // Initialize with offline status
+    setStatus('offline');
+  </script>
+
+</body>
+</html>

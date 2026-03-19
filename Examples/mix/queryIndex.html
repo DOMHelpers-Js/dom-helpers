@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Index Selection Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .test-section {
+      margin: 30px 0;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+    .list-item {
+      padding: 10px;
+      margin: 5px 0;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Index Selection Enhancement Test</h1>
+
+  <!-- Test Section 1: ClassName -->
+  <div class="test-section">
+    <h2>Test 1: Collections.ClassName</h2>
+    <button class="test-btn">Button 1</button>
+    <button class="test-btn">Button 2</button>
+    <button class="test-btn">Button 3</button>
+    <button class="test-btn">Button 4</button>
+    <button class="test-btn">Button 5</button>
+    <br>
+    <button onclick="testClassName()">Apply Index Updates</button>
+  </div>
+
+  <!-- Test Section 2: TagName -->
+  <div class="test-section">
+    <h2>Test 2: Collections.TagName</h2>
+    <p>Paragraph 1</p>
+    <p>Paragraph 2</p>
+    <p>Paragraph 3</p>
+    <button onclick="testTagName()">Apply Index Updates</button>
+  </div>
+
+  <!-- Test Section 3: Selector.queryAll -->
+  <div class="test-section">
+    <h2>Test 3: Selector.queryAll</h2>
+    <div class="list-item">Item 1</div>
+    <div class="list-item">Item 2</div>
+    <div class="list-item">Item 3</div>
+    <div class="list-item">Item 4</div>
+    <button onclick="testSelector()">Apply Index Updates</button>
+  </div>
+
+  <!-- Test Section 4: Mixed Updates -->
+  <div class="test-section">
+    <h2>Test 4: Mixed Bulk + Index Updates</h2>
+    <button class="mixed-btn">Mixed 1</button>
+    <button class="mixed-btn">Mixed 2</button>
+    <button class="mixed-btn">Mixed 3</button>
+    <button onclick="testMixed()">Apply Mixed Updates</button>
+  </div>
+  <script src="../../modular/core/elements.js"></script>
+  <script src="../../modular/core/collections.js"></script>
+  <script src="../../modular/core/selector.js"></script>
+  <script src="../../modular/enhancers/core-update-engine.js"></script>
+  <script src="../../modular/enhancers/query-enhancements.js"></script>
+  <script src="../../modular/enhancers/collection-shortcuts.js"></script>
+  <script src="../../modular/enhancers/array-based-updates.js"></script>
+
+
+
+  <script>
+    // Test 1: Collections.ClassName
+    function testClassName() {
+      const buttons = Collections.ClassName['test-btn'];
+      
+      console.log('Testing Collections.ClassName...');
+      console.log('Collection:', buttons);
+      console.log('Has update method:', typeof buttons.update === 'function');
+      console.log('Is enhanced:', IndexSelection.isEnhanced(buttons));
+      
+      buttons.update({
+        [0]: {
+          textContent: 'FIRST',
+          style: {
+            backgroundColor: 'red',
+            color: 'white',
+            padding: '15px 30px',
+            border: 'none',
+            borderRadius: '5px'
+          }
+        },
+        [1]: {
+          textContent: 'SECOND',
+          style: {
+            backgroundColor: 'blue',
+            color: 'white',
+            padding: '15px 30px'
+          }
+        },
+        [2]: {
+          textContent: 'THIRD',
+          style: {
+            backgroundColor: 'green',
+            color: 'white',
+            padding: '15px 30px'
+          }
+        },
+        [-1]: {
+          textContent: 'LAST',
+          style: {
+            backgroundColor: 'purple',
+            color: 'white',
+            padding: '15px 30px'
+          }
+        }
+      });
+      
+      console.log('✓ Test 1 completed');
+    }
+
+    // Test 2: Collections.TagName
+    function testTagName() {
+      const paragraphs = Collections.TagName.p;
+      
+      console.log('Testing Collections.TagName...');
+      
+      paragraphs.update({
+        [0]: { 
+          textContent: 'First paragraph updated!', 
+          style: { 
+            fontSize: '20px', 
+            color: 'red',
+            fontWeight: 'bold'
+          } 
+        },
+        [1]: { 
+          textContent: 'Second paragraph updated!', 
+          style: { 
+            fontSize: '18px', 
+            color: 'blue'
+          } 
+        },
+        [-1]: { 
+          textContent: 'Last paragraph updated!', 
+          style: { 
+            fontSize: '16px', 
+            color: 'green',
+            fontStyle: 'italic'
+          } 
+        }
+      });
+      
+      console.log('✓ Test 2 completed');
+    }
+
+    // Test 3: Selector.queryAll
+    function testSelector() {
+      const items = Selector.queryAll('.list-item');
+      
+      console.log('Testing Selector.queryAll...');
+      
+      items.update({
+        [0]: { 
+          textContent: 'First Item - Updated',
+          style: {
+            backgroundColor: '#ffebee',
+            fontWeight: 'bold',
+            padding: '15px'
+          }
+        },
+        [1]: { 
+          textContent: 'Second Item - Updated',
+          style: {
+            backgroundColor: '#e3f2fd',
+            padding: '15px'
+          }
+        },
+        [-1]: { 
+          textContent: 'Last Item - Updated',
+          style: {
+            backgroundColor: '#e8f5e9',
+            fontWeight: 'bold',
+            padding: '15px'
+          }
+        }
+      });
+      
+      console.log('✓ Test 3 completed');
+    }
+
+    // Test 4: Mixed Updates
+    function testMixed() {
+      const buttons = Collections.ClassName['mixed-btn'];
+      
+      console.log('Testing mixed bulk + index updates...');
+      
+      buttons.update({
+        // Bulk update for all buttons
+        classList: { add: 'btn' },
+        style: { 
+          cursor: 'pointer',
+          fontSize: '16px',
+          fontFamily: 'Arial, sans-serif'
+        },
+        
+        // Index-specific updates
+        [0]: { 
+          textContent: 'First Mixed', 
+          style: { 
+            backgroundColor: '#ff5722',
+            color: 'white',
+            padding: '12px 24px'
+          } 
+        },
+        [1]: { 
+          textContent: 'Second Mixed', 
+          style: { 
+            backgroundColor: '#2196f3',
+            color: 'white',
+            padding: '12px 24px'
+          } 
+        },
+        [-1]: { 
+          textContent: 'Last Mixed', 
+          style: { 
+            backgroundColor: '#4caf50',
+            color: 'white',
+            padding: '12px 24px'
+          } 
+        }
+      });
+      
+      console.log('✓ Test 4 completed');
+    }
+
+    // Auto-test on load
+    window.addEventListener('load', () => {
+      console.log('=== Index Selection Tests ===');
+      console.log('Collections available:', typeof Collections !== 'undefined');
+      console.log('Selector available:', typeof Selector !== 'undefined');
+      console.log('IndexSelection available:', typeof IndexSelection !== 'undefined');
+      console.log('IndexSelection version:', IndexSelection.version);
+      console.log('');
+      console.log('Click the buttons to run tests!');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Index Selection Demo</title>
+ 
+  <script src="../elements.js"></script>
+  <script src="../collections.js"></script>
+  <script src="../selector.js"></script>
+ 
+  <!-- MODULAR ENHANCERS -->
+
+  <script src="01_dh-bulk-property-updaters.js"></script>
+  <script src="02_dh-collection-shortcuts.js"></script>
+
+  
+  <script src="05_dh-index-selection.js"></script>
+
+  <script src="07_dh-bulk-properties-updater-global-query.js"></script>
+  <script src="08_dh-selector-update-patch.js"></script>
+  <script src="09_dh-idShortcut.js"></script>
+  <script src="10_dh-array-based-updates.js"></script>
+  
+</head>
+<body>
+  <button class="btn">Button 1</button>
+  <button class="btn">Button 2</button>
+  <button class="btn">Button 3</button>
+  <button class="btn">Button 4</button>
+  <button class="btn">Button 5</button>
+
+  <script>
+// Example script demonstrating index selection
+
+    // Access by index
+    console.log('First button:', ClassName.btn[0]);
+    console.log('Second button:', ClassName.btn[1]);
+    console.log('Third button:', ClassName.btn[2]);
+    console.log('Last button:', ClassName.btn[-1]);  // Negative index!
+
+    // Update specific buttons by index
+    ClassName.btn[0].update({
+      textContent: 'First Button',
+      style: {
+        backgroundColor: 'red',
+        color: 'white',
+        padding: '10px 20px'
+      }
+    });
+
+    ClassName.btn[1].update({
+      textContent: 'Second Button',
+      style: {
+        backgroundColor: 'blue',
+        color: 'white',
+        padding: '10px 20px'
+      }
+    });
+
+    ClassName.btn[-1].update({
+      textContent: 'Last Button',
+      style: {
+        backgroundColor: 'green',
+        color: 'white',
+        padding: '10px 20px'
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOM Helpers - Bulk Property Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+
+    .card {
+      border: 1px solid #ddd;
+      padding: 20px;
+      margin: 10px 0;
+      border-radius: 8px;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      cursor: pointer;
+    }
+
+    .item {
+      padding: 10px;
+      margin: 5px 0;
+      background: #f0f0f0;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1 id="pageTitle">Original Title</h1>
+  <p id="subtitle">Original subtitle</p>
+
+  <div class="card" id="userCard">
+    <h2 id="cardTitle">User Info</h2>
+    <p id="userName">John Doe</p>
+    <p id="userEmail">john@example.com</p>
+  </div>
+
+  <div>
+    <button id="btn1">Button 1</button>
+    <button id="btn2">Button 2</button>
+    <button id="btn3">Button 3</button>
+  </div>
+
+  <h3>Items (Collection Demo)</h3>
+  <div class="item">Item 1</div>
+  <div class="item">Item 2</div>
+  <div class="item">Item 3</div>
+
+  <hr>
+
+  <button onclick="demo1()">Demo 1: Simple Text Updates</button>
+  <button onclick="demo2()">Demo 2: Style Updates</button>
+  <button onclick="demo3()">Demo 3: Dataset & Attributes</button>
+  <button onclick="demo4()">Demo 4: Classes</button>
+  <button onclick="demo5()">Demo 5: Chaining</button>
+  <button onclick="demo6()">Demo 6: Collections</button>
+  <button onclick="demo7()">Demo 7: Selector.queryAll</button>
+  <button onclick="reset()">Reset</button>
+
+ 
+ <script src="../../src/Core/01_dh-core.js"></script>
+ <script src="../../src/Enhancers/bundled-enhancers/enhancers.js"></script>
+  <script>
+    // Demo 1: Simple text and value updates
+    function demo1() {
+      Elements
+        .textContent({
+          'pageTitle': '🎉 Updated Title!',
+          'subtitle': 'This subtitle was changed via Elements.textContent()',
+          'cardTitle': 'Updated Card Title',
+          'userName': 'Jane Smith',
+          'userEmail': 'jane@example.com'
+        });
+    }
+
+    // Demo 2: Style updates
+    function demo2() {
+      Elements
+        .style({
+          'pageTitle': {
+            color: 'blue',
+            fontSize: '36px',
+            textAlign: 'center'
+          },
+          'subtitle': {
+            color: '#666',
+            fontSize: '18px',
+            fontStyle: 'italic'
+          },
+          'userCard': {
+            backgroundColor: '#e3f2fd',
+            border: '2px solid #2196f3'
+          }
+        });
+    }
+
+    // Demo 3: Dataset and attributes
+    function demo3() {
+      Elements
+        .dataset({
+          'userCard': {
+            userId: '123',
+            userName: 'Jane Smith',
+            role: 'admin',
+            active: 'true'
+          }
+        })
+
+        .attrs({
+          'userCard': {
+            'data-status': 'updated',
+            'aria-label': 'User information card'
+          }
+        });
+
+      // Show dataset in console
+      console.log('User Card Dataset:', Elements.userCard.dataset);
+      alert('Check console for dataset values!');
+    }
+
+    // Demo 4: Classes manipulation
+    function demo4() {
+      Elements
+        .classes({
+          'btn1': {
+            add: ['highlight', 'active']
+          },
+          'btn2': {
+            add: 'active',
+            remove: 'inactive'
+          },
+          'btn3': {
+            toggle: 'active'
+          }
+        })
+
+        // Add some styles to make classes visible
+        .style({
+          'btn1': { backgroundColor: '#4caf50', color: 'white' },
+          'btn2': { backgroundColor: '#2196f3', color: 'white' },
+          'btn3': { backgroundColor: '#ff9800', color: 'white' }
+        })
+    }
+
+    // Demo 5: Chaining multiple operations
+    function demo5() {
+      Elements
+        .textContent({
+          'pageTitle': '⛓️ Chained Updates!',
+          'subtitle': 'Multiple operations in one chain'
+        })
+        .style({
+          'pageTitle': {
+            color: 'purple',
+            fontSize: '32px',
+            textTransform: 'uppercase'
+          }
+        })
+        .dataset({
+          'pageTitle': {
+            operation: 'chained',
+            timestamp: Date.now().toString()
+          }
+        })
+        .disabled({
+          'btn1': true,
+          'btn2': true
+        });
+
+      alert('Multiple updates chained together! Button 1 & 2 are now disabled.');
+    }
+
+    // Demo 6: Collections (index-based updates)
+    function demo6() {
+      const items = ClassName.item;
+
+      // Update by index
+
+      items
+        .textContent({
+          0: '✨ First item updated',
+          1: '🎨 Second item updated',
+          2: '🚀 Third item updated'
+        })
+
+        .style({
+          0: { backgroundColor: '#ffeb3b', padding: '15px', fontWeight: 'bold' },
+          1: { backgroundColor: '#8bc34a', padding: '15px', color: 'white' },
+          2: { backgroundColor: '#f44336', padding: '15px', color: 'white' }
+        })
+
+        .dataset({
+          0: { itemId: '1', position: 'first' },
+          1: { itemId: '2', position: 'second' },
+          2: { itemId: '3', position: 'third' }
+        })
+    }
+
+    // Demo 7: Selector.queryAll (using Selector with bulk property patch)
+    function demo7() {
+      const items = querySelectorAll('.item');
+      // or "const items = querySelectorAll('.item');"
+      items
+        .textContent({
+          0: '✨ First item updated (Selector)',
+          1: '🎨 Second item updated (Selector)',
+          2: '🚀 Third item updated (Selector)'
+        })
+
+        .style({
+          0: { backgroundColor: '#ffeb3b', padding: '15px', fontWeight: 'bold' },
+          1: { backgroundColor: '#8bc34a', padding: '15px', color: 'white' },
+          2: { backgroundColor: '#f44336', padding: '15px', color: 'white' }
+        })
+
+        .dataset({
+          0: { itemId: '1', position: 'first' },
+          1: { itemId: '2', position: 'second' },
+          2: { itemId: '3', position: 'third' }
+        })
+
+        .classes({
+          0: { add: 'highlight' },
+          1: { remove: 'hidden' },
+          2: { toggle: 'active' }
+        })
+    }
+
+
+    // Reset everything
+    function reset() {
+      Elements
+        .textContent({
+          'pageTitle': 'Original Title',
+          'subtitle': 'Original subtitle',
+          'cardTitle': 'User Info',
+          'userName': 'John Doe',
+          'userEmail': 'john@example.com'
+        })
+
+        .style({
+          'pageTitle': { color: '', fontSize: '', textAlign: '', textTransform: '' },
+          'subtitle': { color: '', fontSize: '', fontStyle: '' },
+          'userCard': { backgroundColor: '', border: '' },
+          'btn1': { backgroundColor: '', color: '' },
+          'btn2': { backgroundColor: '', color: '' },
+          'btn3': { backgroundColor: '', color: '' }
+        })
+
+        .disabled({
+          'btn1': false,
+          'btn2': false
+        });
+
+      const items = Collections.ClassName.item;
+      items
+        .textContent({
+          0: 'Item 1',
+          1: 'Item 2',
+          2: 'Item 3'
+        })
+
+        .style({
+          0: { backgroundColor: '', padding: '', fontWeight: '', color: '' },
+          1: { backgroundColor: '', padding: '', color: '' },
+          2: { backgroundColor: '', padding: '', color: '' }
+        });
+
+      location.reload(); // Full reset
+    }
+
+    // Log available methods on page load
+    console.log('Available Elements methods:', Object.keys(Elements).filter(k => typeof Elements[k] === 'function'));
+  </script>
+
+</body>
+
+</html>

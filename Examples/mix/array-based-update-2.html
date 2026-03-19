@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bulk Array Updates - All Syntaxes</title>
+  <style>
+    .card {
+      border: 1px solid #ddd;
+      padding: 20px;
+      margin: 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">Card 1</div>
+  <div class="card">Card 2</div>
+  <div class="card">Card 3</div>
+
+ <script src="../../src/Core/01_dh-core.js"></script>
+ <script src="../../src/Enhancers/bundled-enhancers/enhancers.js"></script>
+  
+  <script>
+    const cards = Selector.queryAll('.card');
+    
+    // Test 1: Index object syntax
+    console.log('Test 1: Using index object syntax');
+    cards.textContent({
+      0: "First Card",
+      1: "Second Card",
+      2: "Third Card"
+    });
+    
+    // Test 2: Style with index object
+    console.log('Test 2: Styling with index object');
+    cards.style({
+      0: { backgroundColor: '#ffebee', color: '#c62828', padding: '30px' },
+      1: { backgroundColor: '#e8f5e9', color: '#2e7d32', padding: '30px' },
+      2: { backgroundColor: '#e3f2fd', color: '#1565c0', padding: '30px' }
+    });
+    
+    // Test 3: Original array syntax still works
+    setTimeout(() => {
+      console.log('Test 3: Using original array syntax');
+      cards.update({
+        textContent: ['Updated First', 'Updated Second', 'Updated Third']
+      });
+    }, 2000);
+    
+    console.log('All tests running!');
+  </script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bulk Array Updates Test</title>
+  <style>
+    .card {
+      border: 1px solid #ddd;
+      padding: 20px;
+      margin: 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">Original Card 1</div>
+  <div class="card">Original Card 2</div>
+  <div class="card">Original Card 3</div>
+
+ <script src="../../src/Core/01_dh-core.js"></script>
+ <script src="../../src/Enhancers/bundled-enhancers/enhancers.js"></script>
+
+  <script>
+    console.log('Starting bulk update test...');
+    
+    const cards = querySelectorAll('.card');
+    console.log('Found cards:', cards.length);
+    console.log('Collection has bulk support?', cards._hasBulkArraySupport);
+    console.log('Collection update type:', typeof cards.update);
+    
+
+
+    cards.update({
+    textContent: ['First Card', 'Second Card', 'Third Card'],
+      style: {
+        backgroundColor: ['#ffebee', '#e8f5e9', '#e3f2fd'],
+        color: ['#c62828', '#2e7d32', '#1565c0'],
+        fontWeight: 'bold',
+        padding: ['30px']
+      }
+    });
+    
+    console.log('Cards updated!');
+    
+    // Verify updates
+    setTimeout(() => {
+      cards.forEach((card, i) => {
+        console.log(`Card ${i} final state:`, {
+          text: card.textContent,
+          bgColor: card.style.backgroundColor,
+          color: card.style.color,
+          fontWeight: card.style.fontWeight
+        });
+      });
+    }, 100);
+  </script>
+</body>
+</html>

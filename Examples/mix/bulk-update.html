@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Update Example</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 100px;
+      background-color: #f9f9f9;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    p {
+      color: #555;
+      font-size: 18px;
+      transition: all 0.3s ease;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #007bff;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1 id="title">Hello World!</h1>
+  <p id="description">This is a simple paragraph that you can update dynamically.</p>
+  <button id="actionBtn">Click Me</button>
+
+ <script src="../../src/Core/01_dh-core.js"></script>
+ <script src="../../src/Enhancers/bundled-enhancers/enhancers.js"></script>
+
+
+  <script>
+
+    Elements.update({
+
+      actionBtn: {
+        addEventListener: ['click', () => {
+
+          Elements.update({
+            title: {
+              textContent: 'Title Updated!',
+              style: { color: 'red', fontSize: '24px' }
+            },
+
+            description: {
+              textContent: 'The paragraph has been updated with new content.',
+              style: { color: 'orange', fontWeight: 'bold' }
+            },
+
+            actionBtn: { textContent: 'Updated! Click Again' }
+          });
+        }
+        ]
+      }
+    });
+
+
+
+
+  </script>
+
+</body>
+
+</html>

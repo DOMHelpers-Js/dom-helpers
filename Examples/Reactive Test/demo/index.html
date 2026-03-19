@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conditions.js - Interactive Demos</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header class="hero">
+      <h1>🎯 Conditions.js v4.0.0</h1>
+      <p class="subtitle">Declarative Conditional DOM Manipulation Library</p>
+      <div class="badges">
+        <span class="badge">Declarative</span>
+        <span class="badge">Reactive</span>
+        <span class="badge">Extensible</span>
+        <span class="badge">Production Ready</span>
+      </div>
+    </header>
+
+    <section class="intro">
+      <h2>What is Conditions.js?</h2>
+      <p>A powerful, declarative library for conditional DOM manipulation that eliminates repetitive if/else logic. Write clean, maintainable code with automatic reactivity support and full DOM property compatibility.</p>
+      
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🎨</div>
+          <h3>Declarative Syntax</h3>
+          <p>Map conditions to DOM changes with simple objects</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3>Reactive State</h3>
+          <p>Automatic UI updates when state changes</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔧</div>
+          <h3>Extensible</h3>
+          <p>Add custom matchers and property handlers</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📦</div>
+          <h3>Full DOM Support</h3>
+          <p>Works with all native DOM properties</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="demos-section">
+      <h2>Interactive Demos</h2>
+      <div class="demo-cards">
+        <a href="01-basic-conditions.html" class="demo-card">
+          <div class="demo-icon">🎯</div>
+          <h3>Basic Conditions</h3>
+          <p>Learn the fundamentals of condition matching including boolean, string, numeric, and regex patterns.</p>
+          <div class="demo-tags">
+            <span class="tag">Boolean</span>
+            <span class="tag">String</span>
+            <span class="tag">Numeric</span>
+            <span class="tag">Regex</span>
+          </div>
+        </a>
+
+        <a href="02-property-handlers.html" class="demo-card">
+          <div class="demo-icon">🎨</div>
+          <h3>Property Handlers</h3>
+          <p>Explore powerful property handlers for styles, classes, attributes, events, and more.</p>
+          <div class="demo-tags">
+            <span class="tag">Style</span>
+            <span class="tag">Classes</span>
+            <span class="tag">Events</span>
+            <span class="tag">Attributes</span>
+          </div>
+        </a>
+
+        <a href="03-reactive-state.html" class="demo-card">
+          <div class="demo-icon">⚡</div>
+          <h3>Reactive State</h3>
+          <p>Build reactive UIs that automatically update when state changes with integrated reactivity.</p>
+          <div class="demo-tags">
+            <span class="tag">State</span>
+            <span class="tag">Auto-update</span>
+            <span class="tag">Reactive</span>
+          </div>
+        </a>
+
+        <a href="04-advanced-patterns.html" class="demo-card">
+          <div class="demo-icon">🚀</div>
+          <h3>Advanced Patterns</h3>
+          <p>Discover advanced usage patterns, custom matchers, extensibility, and best practices.</p>
+          <div class="demo-tags">
+            <span class="tag">Custom</span>
+            <span class="tag">Extensible</span>
+            <span class="tag">Performance</span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <section class="quick-start">
+      <h2>Quick Start</h2>
+      <div class="code-example">
+        <pre><code>// Import the library
+&lt;script src="dom-helpers.bundle.js"&gt;&lt;/script&gt;
+&lt;script src="dom-helpers.reactive.bundle.js"&gt;&lt;/script&gt;
+&lt;script src="conditions.js"&gt;&lt;/script&gt;
+
+// Basic usage
+const status = 'success';
+
+Conditions.apply(status, {
+  'success': { 
+    textContent: '✓ Operation successful!',
+    style: { color: 'green' }
+  },
+  'error': { 
+    textContent: '✗ Operation failed',
+    style: { color: 'red' }
+  }
+}, '#status-element');
+
+// With reactive state
+const state = ReactiveUtils.state({ count: 0 });
+
+Conditions.whenState(
+  () => state.count,
+  {
+    '0': { textContent: 'Zero' },
+    '>0': { textContent: 'Positive' },
+    '<0': { textContent: 'Negative' }
+  },
+  '#counter'
+);</code></pre>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>Made with ❤️ for declarative DOM manipulation</p>
+      <p class="footer-links">
+        <a href="../conditions.js">View Source</a> •
+        <a href="../test-conditions-comprehensive.html">Run Tests</a>
+      </p>
+    </footer>
+  </div>
+</body>
+</html>

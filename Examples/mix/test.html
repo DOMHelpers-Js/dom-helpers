@@ -1,0 +1,204 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Negative Index Test</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .box { padding: 10px; margin: 5px; border: 2px solid #ccc; cursor: pointer; }
+    .highlight { background-color: yellow; }
+    .active { transform: scale(1.05); background-color: lightgreen; }
+    button { margin: 10px 5px; padding: 10px 20px; font-size: 14px; }
+    #results { margin-top: 20px; padding: 10px; background: #f0f0f0; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+  <h2>Negative Index & at() Method Test</h2>
+
+  <div class="multi box">Box 1</div>
+  <div class="multi box">Box 2</div>
+  <div class="multi box">Box 3</div>
+  <div class="multi box">Box 4</div>
+  <div class="multi box">Box 5</div>
+
+  <div>
+    <button onclick="testPositiveIndex()">Test Positive Index [0]</button>
+    <button onclick="testNegativeIndex()">Test Negative Index at(-1)</button>
+    <button onclick="testNegativeIndex2()">Test Negative Index [-2]</button>
+    <button onclick="testIndexSelectionAPI()">Test IndexSelection.at()</button>
+    <button onclick="testBulkUpdate()">Test Bulk Update</button>
+  </div>
+
+  <div id="results"></div>
+
+  <!-- Load modular library -->
+  <script src="../../modular/core/elements.js"></script>
+  <script src="../../modular/core/collections.js"></script>
+  <script src="../../modular/core/selector.js"></script>
+  <script src="../../modular/enhancers/core-update-engine.js"></script>
+  <script src="../../modular/enhancers/query-enhancements.js"></script>
+  <script src="../../modular/enhancers/collection-shortcuts.js"></script>
+  <script src="../../modular/enhancers/array-based-updates.js"></script>
+  
+  <script>
+    const log = (message) => {
+      const results = document.getElementById('results');
+      results.innerHTML += `<div>${message}</div>`;
+      console.log(message);
+    };
+
+    // Clear log
+    document.getElementById('results').innerHTML = '<strong>Test Results:</strong><br>';
+
+    // Test 1: Positive index
+    function testPositiveIndex() {
+      log('<br><strong>Test 1: Positive Index [0]</strong>');
+      try {
+        const items = Selector.queryAll('.multi');
+        log(`Collection length: ${items.length}`);
+        
+        const firstItem = items[0];
+        log(`Got first item: ${firstItem ? 'YES' : 'NO'}`);
+        log(`Has .update() method: ${typeof firstItem.update === 'function' ? 'YES' : 'NO'}`);
+        
+        if (firstItem && typeof firstItem.update === 'function') {
+          firstItem.update({ 
+            style: { backgroundColor: 'lightblue', color: 'darkblue' },
+            textContent: 'First Item Updated!'
+          });
+          log('✓ Update successful!');
+        } else {
+          log('✗ FAILED: No update method');
+        }
+      } catch (error) {
+        log(`✗ ERROR: ${error.message}`);
+      }
+    }
+
+    // Test 2: Negative index using at()
+    function testNegativeIndex() {
+      log('<br><strong>Test 2: Negative Index at(-1)</strong>');
+      try {
+        const items = Selector.queryAll('.multi');
+        log(`Collection length: ${items.length}`);
+        log(`Collection has .at() method: ${typeof items.at === 'function' ? 'YES' : 'NO'}`);
+        
+        const lastItem = items.at(-1);
+        log(`Got last item: ${lastItem ? 'YES' : 'NO'}`);
+        log(`Last item has .update() method: ${typeof lastItem?.update === 'function' ? 'YES' : 'NO'}`);
+        
+        if (lastItem && typeof lastItem.update === 'function') {
+          lastItem.update({ 
+            style: { backgroundColor: 'lightcoral', color: 'darkred' },
+            textContent: 'Last Item Updated!'
+          });
+          log('✓ Update successful!');
+        } else {
+          log('✗ FAILED: No update method on lastItem');
+        }
+      } catch (error) {
+        log(`✗ ERROR: ${error.message}`);
+      }
+    }
+
+    // Test 3: Negative index at(-2)
+    function testNegativeIndex2() {
+      log('<br><strong>Test 3: Negative Index at(-2)</strong>');
+      try {
+        const items = Selector.queryAll('.multi');
+        const secondLast = items.at(-2);
+        log(`Got second-last item: ${secondLast ? 'YES' : 'NO'}`);
+        log(`Has .update() method: ${typeof secondLast?.update === 'function' ? 'YES' : 'NO'}`);
+        
+        if (secondLast && typeof secondLast.update === 'function') {
+          secondLast.update({ 
+            style: { backgroundColor: 'lightgreen', color: 'darkgreen' },
+            textContent: 'Second-Last Updated!'
+          });
+          log('✓ Update successful!');
+        } else {
+          log('✗ FAILED: No update method');
+        }
+      } catch (error) {
+        log(`✗ ERROR: ${error.message}`);
+      }
+    }
+
+    // Test 4: IndexSelection API
+    function testIndexSelectionAPI() {
+      log('<br><strong>Test 4: IndexSelection.at() API</strong>');
+      try {
+        log(`IndexSelection available: ${typeof IndexSelection !== 'undefined' ? 'YES' : 'NO'}`);
+        
+        if (typeof IndexSelection === 'undefined') {
+          log('✗ FAILED: IndexSelection not defined');
+          return;
+        }
+
+        const items = Selector.queryAll('.multi');
+        const thirdItem = IndexSelection.at(items, 2);
+        log(`Got third item via IndexSelection.at(items, 2): ${thirdItem ? 'YES' : 'NO'}`);
+        log(`Has .update() method: ${typeof thirdItem?.update === 'function' ? 'YES' : 'NO'}`);
+        
+        if (thirdItem && typeof thirdItem.update === 'function') {
+          thirdItem.update({ 
+            style: { backgroundColor: 'lightyellow', color: 'darkorange' },
+            textContent: 'Third Item (via IndexSelection)!'
+          });
+          log('✓ Update successful!');
+        } else {
+          log('✗ FAILED: No update method');
+        }
+
+        // Also test negative index via IndexSelection
+        const lastViaAPI = IndexSelection.at(items, -1);
+        log(`Got last item via IndexSelection.at(items, -1): ${lastViaAPI ? 'YES' : 'NO'}`);
+        log(`Has .update() method: ${typeof lastViaAPI?.update === 'function' ? 'YES' : 'NO'}`);
+        
+      } catch (error) {
+        log(`✗ ERROR: ${error.message}`);
+      }
+    }
+
+    // Test 5: Bulk update (for comparison)
+    function testBulkUpdate() {
+      log('<br><strong>Test 5: Bulk Update All Items</strong>');
+      try {
+        const items = Selector.queryAll('.multi');
+        items.update({
+          style: { backgroundColor: 'lavender', color: 'purple' },
+          classList: { add: 'highlight' }
+        });
+        log('✓ Bulk update successful!');
+      } catch (error) {
+        log(`✗ ERROR: ${error.message}`);
+      }
+    }
+
+    // Auto-run diagnostic on page load
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        log('<br><strong>=== AUTO-DIAGNOSTIC ===</strong>');
+        log(`CoreUpdateEngine: ${typeof CoreUpdateEngine !== 'undefined' ? '✓' : '✗'}`);
+        log(`IndexSelection: ${typeof IndexSelection !== 'undefined' ? '✓' : '✗'}`);
+        log(`Selector.queryAll: ${typeof Selector?.queryAll === 'function' ? '✓' : '✗'}`);
+        
+        const items = Selector.queryAll('.multi');
+        log(`Collection type: ${items?.constructor?.name || 'unknown'}`);
+        log(`Collection.length: ${items?.length || 0}`);
+        log(`Collection has .update(): ${typeof items?.update === 'function' ? '✓' : '✗'}`);
+        log(`Collection has .at(): ${typeof items?.at === 'function' ? '✓' : '✗'}`);
+        log(`Collection[0] has .update(): ${typeof items?.[0]?.update === 'function' ? '✓' : '✗'}`);
+        
+        if (typeof items?.at === 'function') {
+          const lastItem = items.at(-1);
+          log(`at(-1) returns element: ${lastItem ? '✓' : '✗'}`);
+          log(`at(-1).update() exists: ${typeof lastItem?.update === 'function' ? '✓' : '✗'}`);
+        }
+        
+        log('<br><em>Click buttons above to run tests</em>');
+      }, 100);
+    });
+  </script>
+</body>
+</html>

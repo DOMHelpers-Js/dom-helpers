@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    #title.active {
+        font-weight: bold;
+    }
+
+    button {
+        padding: 10px 20px;
+        margin: 5px;
+        cursor: pointer;
+    }
+</style>
+
+<body>
+
+    <h1 id="titles">Original Title</h1>
+    <button id="submitBtn" onclick="changeText()" >Submit</button>
+
+  <script src="../../src/Core/01_dh-core.js"></script>
+ <script src="../../src/Enhancers/bundled-enhancers/enhancers.js"></script>
+
+    <script>
+        function changeText() {
+            Elements
+                .textContent({ titles: "New Title" })
+                .style({
+                    titles: { color: "red", fontSize: "24px" },
+                    submitBtn: {
+                        fontSize: "18px",
+                        borderRadius: "5px",
+                        padding: "10px 20px",
+                        backgroundColor: "lightgrey",
+                    }
+                })
+                .classes({ titles: { add: ["active"] } })
+                .disabled({ submitBtn: true });
+        }
+
+        Elements.style({
+            submitBtn: {
+                backgroundColor: "#4CAF50",
+                color: "white",
+                border: "none"
+            }
+        });
+    </script>
+</body>
+

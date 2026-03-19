@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>DOM Helpers Test - onclick</title>
+    <style>
+      .highlight {
+        background-color: yellow;
+      }
+
+      .fancy {
+        border: 2px solid #333;
+        border-radius: 5px;
+      }
+
+      .active {
+        transform: scale(1.1);
+      }
+    </style>
+  </head>
+
+  <body>
+    <h2>DOM Helpers Button Test (onclick)</h2>
+
+    <button id="myBtn">Click Me</button>
+    <p id="status">Button not clicked yet.</p>
+
+    <script src="../../src/Core/03_combined/01_dom-helpers.js"></script>
+ 
+    <script>
+      Elements.myBtn.update({
+        textContent: "Enhanced Button",
+        style: {
+          color: "white",
+          backgroundColor: "blue",
+          padding: "10px",
+        },
+        classList: { add: ["fancy", "highlight"] },
+        onclick: () => {
+          // Toggle active class and update status
+          Elements.myBtn.update({
+            classList: { toggle: "active" },
+          });
+
+          Elements.status.update({
+            textContent: "Button was clicked using onclick!",
+          });
+        },
+      });
+    </script>
+  </body>
+</html>

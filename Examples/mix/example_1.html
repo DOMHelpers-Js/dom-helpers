@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOM Helpers CDN Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>DOM Helpers CDN Demo</h1>
+    
+    <button id="primaryBtn" class="btn">Primary Button</button>
+    <button id="secondaryBtn" class="btn">Secondary Button</button>
+    
+    <div id="output"></div>
+
+    <!-- Load DOM Helpers from CDN -->
+   
+  <script src="../../src/modular/elements.js"></script>
+  <script src="../../src/modular/collections.js"></script>
+        <script>
+        // Style the buttons
+        Elements.primaryBtn.update({
+            style: {
+                backgroundColor: '#007bff',
+                color: 'white'
+            },
+            addEventListener: {
+                click: () => {
+                    Elements.output.update({
+                        textContent: 'Primary button clicked!',
+                        style: { color: '#6c757d' }
+                    });
+                }
+            }
+        });
+
+        Elements.secondaryBtn.update({
+            style: {
+                backgroundColor: '#6c757d',
+                color: 'white'
+            },
+            addEventListener: {
+                click: () => {
+                    Elements.output.update({
+                        textContent: 'Secondary button clicked!',
+                        style: { color: '#6c757d' }
+                    });
+                }
+            }
+        });
+
+        // Style all buttons with hover effect
+        Collections.ClassName.btn.update({
+            addEventListener: {
+                mouseenter: (e) => {
+                    e.target.style.transform = 'scale(1.05)';
+                    e.target.style.transition = 'transform 0.2s';
+                },
+                mouseleave: (e) => {
+                    e.target.style.transform = 'scale(1)';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

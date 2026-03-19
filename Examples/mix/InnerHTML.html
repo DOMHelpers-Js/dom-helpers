@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Elements innerHTML test (local build)</title>
+  <style>
+    .dynamic {
+      color: white;
+      background: teal;
+      padding: 8px;
+      margin-top: 10px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <!-- Load your local library -->
+ <script src="../../src/Core/01_dom-helpers.js"></script>
+  <script src="../../src/Core/02_dh-bulk-property-updaters.js"></script>
+  <script src="../../src/Core/03_dh-collection-shortcuts.js"></script>
+  <script src="../../src/Core/04_dh-global-query.js"></script>
+  <script src="../../src/Core/05_dh-indexed-collection-updates.js"></script>
+  <script src="../../src/Core/06_dh-index-selection.js"></script>
+  <script src="../../src/Core/07_dh-global-collection-indexed-updates.js"></script>
+  <script src="../../src/Core/08_dh-conditional-rendering.js"></script>
+  <script src="../../src/Core/09_dh-conditions-default.js"></script>
+  <script src="../../src/Core/10_dh-selector-update-patch.js"></script>
+  <script src="../../src/Core/11_dh-bulk-properties-updater-global-query.js"></script>
+
+  <script>
+    // Create a button + container in the #app root
+    Elements.app.update({
+      innerHTML: `
+        <button id="addBtn">Add Paragraph</button>
+        <div id="container"></div>
+      `
+    });
+
+    // Handle button click
+    Elements.addBtn.update({
+      onclick: () => {
+        Elements.container.update({
+          innerHTML: `
+            <p id="para1" class="dynamic">
+              This is a dynamically added paragraph with an <strong>id</strong> and a <em>class</em>.
+            </p>
+          `
+        });
+      }
+    });
+  </script>
+</body>
+</html>

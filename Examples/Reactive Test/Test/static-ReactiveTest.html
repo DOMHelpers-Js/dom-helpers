@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Conditions Library - Full Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+      background: #f5f5f5;
+    }
+
+    .demo-section {
+      background: white;
+      padding: 30px;
+      margin: 20px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      color: #333;
+      border-bottom: 2px solid #007bff;
+      padding-bottom: 10px;
+    }
+
+    .status-display {
+      padding: 20px;
+      margin: 15px 0;
+      border-radius: 5px;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    button {
+      padding: 12px 24px;
+      margin: 5px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .btn-online {
+      background: #28a745;
+      color: white;
+    }
+
+    .btn-offline {
+      background: #6c757d;
+      color: white;
+    }
+
+    .btn-busy {
+      background: #dc3545;
+      color: white;
+    }
+
+    .btn-away {
+      background: #ffc107;
+      color: #333;
+    }
+
+    code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: "Courier New", monospace;
+    }
+
+    .info {
+      background: #e7f3ff;
+      padding: 15px;
+      border-left: 4px solid #007bff;
+      margin: 15px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>🎯 Conditions Library - Complete Demo</h1>
+
+  <!-- ========================================
+       DEMO 1: STATIC MODE (Manual Updates)
+       ======================================== -->
+  <div class="demo-section">
+    <h2>Demo 1: Static Mode (Manual Apply)</h2>
+    <p>
+      Uses <code>Conditions.apply()</code> - one-time application, manual
+      updates
+    </p>
+
+    <div id="status-static" class="status-display">Status: Unknown</div>
+
+    <div>
+      <button class="btn-online" onclick="setStaticStatus('online')">
+        Online
+      </button>
+      <button class="btn-offline" onclick="setStaticStatus('offline')">
+        Offline
+      </button>
+      <button class="btn-busy" onclick="setStaticStatus('busy')">Busy</button>
+      <button class="btn-away" onclick="setStaticStatus('away')">Away</button>
+    </div>
+  </div>
+
+  <!-- ========================================
+       DEMO 2: REACTIVE MODE (Auto Updates)
+       ======================================== -->
+  <div class="demo-section">
+    <h2>Demo 2: Reactive Mode (Auto Updates)</h2>
+    <p>
+      Uses <code>Conditions.whenState()</code> - automatically updates when
+      state changes
+    </p>
+
+    <div class="info">
+      <strong>ℹ️ Note:</strong> This demo includes a minimal reactive system.
+      In production, you'd use a library like Signals, MobX, or Vue's
+      reactivity.
+    </div>
+
+    <div id="status-reactive" class="status-display">Status: Unknown</div>
+
+    <div>
+      <button class="btn-online" onclick="setReactiveStatus('online')">
+        Online
+      </button>
+      <button class="btn-offline" onclick="setReactiveStatus('offline')">
+        Offline
+      </button>
+      <button class="btn-busy" onclick="setReactiveStatus('busy')">
+        Busy
+      </button>
+      <button class="btn-away" onclick="setReactiveStatus('away')">
+        Away
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================
+       DEMO 3: ADVANCED CONDITIONS
+       ======================================== -->
+  <div class="demo-section">
+    <h2>Demo 3: Advanced Conditions (Numeric, Ranges, Patterns)</h2>
+    <p>Demonstrates various condition matchers</p>
+
+    <div id="counter-display" class="status-display">Count: 0</div>
+
+    <div>
+      <button onclick="updateCounter(-5)">-5</button>
+      <button onclick="updateCounter(-1)">-1</button>
+      <button onclick="setCounter(0)">Reset</button>
+      <button onclick="updateCounter(1)">+1</button>
+      <button onclick="updateCounter(5)">+5</button>
+      <button onclick="setCounter(50)">Set 50</button>
+      <button onclick="setCounter(100)">Set 100</button>
+    </div>
+  </div>
+
+  <!-- Include the Conditions library -->
+  <script src="conditions.js"></script>
+
+  <script src="dom-helpers.reactive.bundle.js"></script>
+
+  <script>
+    // ========================================
+    // DEMO 1: STATIC MODE
+    // ========================================
+
+    let currentStaticStatus = "offline";
+
+    const staticConditions = {
+      online: {
+        textContent: "🟢 ONLINE - All systems operational",
+        style: {
+          backgroundColor: "#d4edda",
+          color: "#155724",
+          border: "3px solid #28a745",
+        },
+      },
+      offline: {
+        textContent: "⚫ OFFLINE - Disconnected",
+        style: {
+          backgroundColor: "#e2e3e5",
+          color: "#383d41",
+          border: "3px solid #6c757d",
+        },
+      },
+      busy: {
+        textContent: "🔴 BUSY - Do not disturb",
+        style: {
+          backgroundColor: "#f8d7da",
+          color: "#721c24",
+          border: "3px solid #dc3545",
+        },
+      },
+      away: {
+        textContent: "🟡 AWAY - Be right back",
+        style: {
+          backgroundColor: "#fff3cd",
+          color: "#856404",
+          border: "3px solid #ffc107",
+        },
+      },
+    };
+
+    function setStaticStatus(status) {
+      currentStaticStatus = status;
+
+      // ⭐ ONE LINE TO UPDATE UI
+      Conditions.apply(
+        currentStaticStatus,
+        staticConditions,
+        "#status-static"
+      );
+    }
+
+    // Initialize
+    setStaticStatus("offline");
+
+    // ========================================
+    // DEMO 2: REACTIVE MODE
+    // ========================================
+
+    // ⭐ CREATE REACTIVE STATE
+    let state = ReactiveUtils.reactive({ status: "online" });
+
+    const reactiveConditions = {
+      online: {
+        textContent: "🟢 ONLINE - Connected",
+        style: {
+          backgroundColor: "#d4edda",
+          color: "#155724",
+          border: "3px solid #28a745",
+          boxShadow: "0 0 20px rgba(40, 167, 69, 0.3)",
+        },
+      },
+      offline: {
+        textContent: "⚫ OFFLINE - No connection",
+        style: {
+          backgroundColor: "#e2e3e5",
+          color: "#383d41",
+          border: "3px solid #6c757d",
+          boxShadow: "none",
+        },
+      },
+      busy: {
+        textContent: "🔴 BUSY - In a meeting",
+        style: {
+          backgroundColor: "#f8d7da",
+          color: "#721c24",
+          border: "3px solid #dc3545",
+          boxShadow: "0 0 20px rgba(220, 53, 69, 0.3)",
+        },
+      },
+      away: {
+        textContent: "🟡 AWAY - Stepped out",
+        style: {
+          backgroundColor: "#fff3cd",
+          color: "#856404",
+          border: "3px solid #ffc107",
+          boxShadow: "0 0 20px rgba(255, 193, 7, 0.3)",
+        },
+      },
+    };
+
+    // ⭐ AUTOMATICALLY UPDATES WHEN state.status CHANGES
+    Conditions.whenState(
+      () => state.status,
+      reactiveConditions,
+      "#status-reactive"
+    );
+
+    function setReactiveStatus(status) {
+      // ⭐ JUST CHANGE THE STATE - UI UPDATES AUTOMATICALLY!
+      state.status = status;
+    }
+
+    // ========================================
+    // DEMO 3: ADVANCED CONDITIONS
+    // ========================================
+
+    let counterState = ReactiveUtils.reactive({ count: 0 });
+
+    const counterConditions = {
+      0: {
+        textContent: "⚪ Count: 0 (Zero)",
+        style: {
+          backgroundColor: "#e9ecef",
+          color: "#495057",
+          border: "3px solid #adb5bd",
+        },
+      },
+      "<0": {
+        textContent: (count) => `❄️ Count: ${count} (Negative)`,
+        style: {
+          backgroundColor: "#cce5ff",
+          color: "#004085",
+          border: "3px solid #007bff",
+        },
+      },
+      "1-10": {
+        textContent: (count) => `🟢 Count: ${count} (Low)`,
+        style: {
+          backgroundColor: "#d4edda",
+          color: "#155724",
+          border: "3px solid #28a745",
+        },
+      },
+      "11-50": {
+        textContent: (count) => `🟡 Count: ${count} (Medium)`,
+        style: {
+          backgroundColor: "#fff3cd",
+          color: "#856404",
+          border: "3px solid #ffc107",
+        },
+      },
+      ">50": {
+        textContent: (count) => `🔴 Count: ${count} (High!)`,
+        style: {
+          backgroundColor: "#f8d7da",
+          color: "#721c24",
+          border: "3px solid #dc3545",
+        },
+      },
+    };
+
+    // Apply with reactive state
+    Conditions.whenState(
+      () => counterState.count,
+      counterConditions,
+      "#counter-display"
+    );
+
+    function setCounter(value) {
+      counterState.count = value;
+    }
+
+    function updateCounter(delta) {
+      counterState.count += delta;
+    }
+
+    // ========================================
+    // INITIALIZATION
+    // ========================================
+
+    console.log("✅ Demo loaded successfully!");
+    console.log("📊 Library mode:", Conditions.mode);
+    console.log("🔄 Has reactivity:", Conditions.hasReactivity);
+  </script>
+</body>
+
+</html>

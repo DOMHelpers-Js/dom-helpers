@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Alternating Styles</title>
+  <script src="../../src/Core/Modular/01_dh-core.js"></script>
+  <script src="../../src/Core/Modular/06_dh-global-collection.js"></script>
+</head>
+<body>
+  <div class="item">Item 1</div>
+  <div class="item">Item 2</div>
+  <div class="item">Item 3</div>
+  <div class="item">Item 4</div>
+  <div class="item">Item 5</div>
+  <div class="item">Item 6</div>
+
+  <script>
+// Example script demonstrating alternating styles based on index
+
+    // Get total count
+    const totalItems = ClassName.item.length;
+
+    // Apply alternating styles using index
+    for (let i = 0; i < totalItems; i++) {
+      if (i % 2 === 0) {
+        // Even indices - Light style
+        ClassName.item[i].update({
+          style: {
+            backgroundColor: '#f8f9fa',
+            color: '#333',
+            padding: '15px',
+            margin: '5px',
+            borderLeft: '4px solid #007bff'
+          },
+          dataset: {
+            row: 'even'
+          }
+        });
+      } else {
+        // Odd indices - Dark style
+        ClassName.item[i].update({
+          style: {
+            backgroundColor: '#e9ecef',
+            color: '#333',
+            padding: '15px',
+            margin: '5px',
+            borderLeft: '4px solid #6c757d'
+          },
+          dataset: {
+            row: 'odd'
+          }
+        });
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Property Handlers - Conditions.js Demo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header class="demo-header">
+      <h1>🎨 Property Handlers</h1>
+      <a href="index.html" class="back-button">← Back to Demos</a>
+    </header>
+
+    <section>
+      <h2>Powerful Property Manipulation</h2>
+      <p>Conditions.js provides specialized handlers for common DOM operations like styles, classes, attributes, and events.</p>
+
+      <!-- Style Handler -->
+      <div class="interactive-demo">
+        <h3>1. Style Handler</h3>
+        <div class="demo-description">
+          Apply multiple CSS styles at once using object notation.
+        </div>
+        
+        <div class="demo-controls">
+          <button class="success" onclick="setStyle('success')">Success Style</button>
+          <button class="error" onclick="setStyle('error')">Error Style</button>
+          <button class="warning" onclick="setStyle('warning')">Warning Style</button>
+          <button class="primary" onclick="setStyle('info')">Info Style</button>
+        </div>
+        
+        <div id="style-output" class="demo-output">Click a button to apply styles</div>
+        
+        <div class="code-display">
+<span class="keyword">Conditions</span>.apply(status, {
+  <span class="string">'success'</span>: { 
+    style: { 
+      color: <span class="string">'#4caf50'</span>, 
+      background: <span class="string">'#f1f8f4'</span>,
+      border: <span class="string">'2px solid #4caf50'</span>,
+      padding: <span class="string">'20px'</span>
+    } 
+  }
+}, <span class="string">'#style-output'</span>);
+        </div>
+      </div>
+
+      <!-- classList Handler -->
+      <div class="interactive-demo">
+        <h3>2. classList Handler</h3>
+        <div class="demo-description">
+          Add, remove, toggle, or replace CSS classes dynamically.
+        </div>
+        
+        <div class="demo-controls">
+          <button class="primary" onclick="addClass()">Add Class</button>
+          <button class="secondary" onclick="removeClass()">Remove Class</button>
+          <button class="secondary" onclick="toggleClass()">Toggle Class</button>
+          <button class="secondary" onclick="replaceClasses()">Replace Classes</button>
+        </div>
+        
+        <div id="class-output" class="demo-output">Current classes: none</div>
+        
+        <div class="code-display">
+<span class="comment">// Add classes</span>
+classList: { add: [<span class="string">'highlight'</span>, <span class="string">'active'</span>] }
+
+<span class="comment">// Remove classes</span>
+classList: { remove: <span class="string">'highlight'</span> }
+
+<span class="comment">// Toggle class</span>
+classList: { toggle: <span class="string">'active'</span> }
+
+<span class="comment">// Replace with array</span>
+classList: [<span class="string">'new-class-1'</span>, <span class="string">'new-class-2'</span>]
+        </div>
+      </div>
+
+      <!-- Attributes Handler -->
+      <div class="interactive-demo">
+        <h3>3. Attributes Handler</h3>
+        <div class="demo-description">
+          Set, update, or remove element attributes including data-* attributes.
+        </div>
+        
+        <div class="demo-controls">
+          <button class="primary" onclick="setAttributes()">Set Attributes</button>
+          <button class="secondary" onclick="updateAttributes()">Update Attributes</button>
+          <button class="secondary" onclick="removeAttributes()">Remove Attributes</button>
+        </div>
+        
+        <div id="attr-output" class="demo-output">No attributes set</div>
+        
+        <div class="code-display">
+<span class="keyword">Conditions</span>.apply(<span class="string">'active'</span>, {
+  <span class="string">'active'</span>: { 
+    setAttribute: { 
+      <span class="string">'data-status'</span>: <span class="string">'active'</span>,
+      <span class="string">'aria-label'</span>: <span class="string">'Active element'</span>,
+      <span class="string">'title'</span>: <span class="string">'This is active'</span>
+    }
+  }
+}, <span class="string">'#attr-output'</span>);
+        </div>
+      </div>
+
+      <!-- Dataset Handler -->
+      <div class="interactive-demo">
+        <h3>4. Dataset Handler</h3>
+        <div class="demo-description">
+          Easily work with data-* attributes using the dataset property.
+        </div>
+        
+        <div class="demo-controls">
+          <input type="text" id="user-id" placeholder="User ID" value="12345">
+          <input type="text" id="user-name" placeholder="Username" value="johndoe">
+          <button class="primary" onclick="setDataset()">Set Dataset</button>
+        </div>
+        
+        <div id="dataset-output" class="demo-output">No dataset values</div>
+        
+        <div class="code-display">
+<span class="keyword">Conditions</span>.apply(<span class="string">'set'</span>, {
+  <span class="string">'set'</span>: { 
+    dataset: { 
+      userId: <span class="string">'12345'</span>,
+      userName: <span class="string">'johndoe'</span>,
+      role: <span class="string">'admin'</span>
+    }
+  }
+}, <span class="string">'#dataset-output'</span>);
+        </div>
+      </div>
+
+      <!-- Event Listeners -->
+      <div class="interactive-demo">
+        <h3>5. Event Listeners</h3>
+        <div class="demo-description">
+          Attach event listeners with optional configurations.
+        </div>
+        
+        <div class="demo-controls">
+          <button class="primary" onclick="attachEvents()">Attach Click Event</button>
+          <button class="secondary" onclick="attachMultipleEvents()">Attach Multiple Events</button>
+          <button id="event-target" class="secondary">Test Click Here</button>
+        </div>
+        
+        <div id="event-output" class="demo-output">No events attached</div>
+        
+        <div class="code-display">
+<span class="keyword">Conditions</span>.apply(<span class="string">'active'</span>, {
+  <span class="string">'active'</span>: { 
+    addEventListener: { 
+      click: <span class="keyword">() =&gt;</span> { 
+        console.log(<span class="string">'Clicked!'</span>); 
+      },
+      mouseenter: {
+        handler: <span class="keyword">() =&gt;</span> { console.log(<span class="string">'Hover!'</span>); },
+        options: { once: <span class="keyword">true</span> }
+      }
+    }
+  }
+}, <span class="string">'#event-target'</span>);
+        </div>
+      </div>
+
+      <!-- Native Properties -->
+      <div class="interactive-demo">
+        <h3>6. Native Properties</h3>
+        <div class="demo-description">
+          Set any native DOM property: textContent, innerHTML, value, disabled, checked, etc.
+        </div>
+        
+        <div class="demo-controls">
+          <label>
+            <input type="checkbox" id="toggle-enabled"> Enable Input
+          </label>
+          <button class="primary" onclick="updateNativeProps()">Update Properties</button>
+        </div>
+        
+        <div class="grid-2" style="margin-top: 20px;">
+          <div>
+            <strong>Text Input:</strong>
+            <input type="text" id="text-prop" placeholder="Text input" style="width: 100%; margin-top: 10px;">
+          </div>
+          <div>
+            <strong>Checkbox:</strong>
+            <label style="display: block; margin-top: 10px;">
+              <input type="checkbox" id="check-prop"> Check me
+            </label>
+          </div>
+        </div>
+        
+        <div class="code-display">
+<span class="keyword">Conditions</span>.apply(enabled, {
+  <span class="string">'true'</span>: { 
+    textContent: <span class="string">'Input is enabled'</span>,
+    value: <span class="string">'You can type here'</span>,
+    disabled: <span class="keyword">false</span>,
+    checked: <span class="keyword">true</span>
+  },
+  <span class="string">'false'</span>: { 
+    textContent: <span class="string">'Input is disabled'</span>,
+    value: <span class="string">''</span>,
+    disabled: <span class="keyword">true</span>,
+    checked: <span class="keyword">false</span>
+  }
+});
+        </div>
+      </div>
+
+      <!-- Combined Example -->
+      <div class="interactive-demo">
+        <h3>7. Combined Handlers</h3>
+        <div class="demo-description">
+          Use multiple handlers together for complex DOM manipulation.
+        </div>
+        
+        <div class="demo-controls">
+          <select id="theme-select" onchange="applyTheme()">
+            <option value="light">Light Theme</option>
+            <option value="dark">Dark Theme</option>
+            <option value="colorful">Colorful Theme</option>
+          </select>
+        </div>
+        
+        <div id="theme-output" class="demo-output">Select a theme</div>
+        
+        <div class="code-display">
+<span class="keyword">Conditions</span>.apply(theme, {
+  <span class="string">'dark'</span>: { 
+    textContent: <span class="string">'🌙 Dark Mode Active'</span>,
+    style: { 
+      background: <span class="string">'#1e1e1e'</span>, 
+      color: <span class="string">'#fff'</span> 
+    },
+    classList: [<span class="string">'dark-theme'</span>],
+    setAttribute: { <span class="string">'data-theme'</span>: <span class="string">'dark'</span> },
+    dataset: { mode: <span class="string">'dark'</span> }
+  }
+});
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>
+        <a href="01-basic-conditions.html">← Basic Conditions</a> •
+        <a href="03-reactive-state.html">Reactive State →</a>
+      </p>
+    </footer>
+  </div>
+
+  <script src="../dom-helpers.bundle.js"></script>
+  <script src="../dom-helpers.reactive.bundle.js"></script>
+  <script src="../conditions.js"></script>
+  
+  <script>
+    // Style Handler Demo
+    function setStyle(status) {
+      Conditions.apply(status, {
+        'success': { 
+          textContent: '✓ Success!',
+          style: { 
+            color: '#4caf50', 
+            background: '#f1f8f4',
+            border: '2px solid #4caf50',
+            fontWeight: 'bold'
+          } 
+        },
+        'error': { 
+          textContent: '✗ Error!',
+          style: { 
+            color: '#f44336', 
+            background: '#fef1f0',
+            border: '2px solid #f44336',
+            fontWeight: 'bold'
+          } 
+        },
+        'warning': { 
+          textContent: '⚠ Warning!',
+          style: { 
+            color: '#ff9800', 
+            background: '#fff8e1',
+            border: '2px solid #ff9800',
+            fontWeight: 'bold'
+          } 
+        },
+        'info': { 
+          textContent: 'ℹ Information',
+          style: { 
+            color: '#2196f3', 
+            background: '#e3f2fd',
+            border: '2px solid #2196f3',
+            fontWeight: 'bold'
+          } 
+        }
+      }, '#style-output');
+    }
+
+    // classList Handler Demos
+    let classState = 'none';
+    
+    function addClass() {
+      classState = 'added';
+      const el = document.getElementById('class-output');
+      el.classList.add('highlight', 'active');
+      el.textContent = `Current classes: ${el.className || 'none'}`;
+      el.style.background = '#fff8e1';
+      el.style.border = '2px solid #ff9800';
+    }
+    
+    function removeClass() {
+      classState = 'removed';
+      const el = document.getElementById('class-output');
+      el.classList.remove('highlight');
+      el.textContent = `Current classes: ${el.className || 'none'}`;
+      el.style.background = 'white';
+      el.style.border = '2px solid #667eea';
+    }
+    
+    function toggleClass() {
+      classState = 'toggled';
+      const el = document.getElementById('class-output');
+      el.classList.toggle('active');
+      el.textContent = `Current classes: ${el.className || 'none'}`;
+    }
+    
+    function replaceClasses() {
+      classState = 'replaced';
+      const el = document.getElementById('class-output');
+      el.className = 'new-class-1 new-class-2';
+      el.textContent = `Current classes: ${el.className}`;
+      el.style.background = '#e3f2fd';
+      el.style.border = '2px solid #2196f3';
+    }
+
+    // Attributes Handler Demos
+    function setAttributes() {
+      const el = document.getElementById('attr-output');
+      Conditions.apply('set', {
+        'set': { 
+          textContent: 'Attributes Set ✓',
+          setAttribute: { 
+            'data-status': 'active',
+            'aria-label': 'Active element',
+            'title': 'This element has attributes'
+          },
+          style: { color: '#4caf50' }
+        }
+      }, el);
+    }
+    
+    function updateAttributes() {
+      const el = document.getElementById('attr-output');
+      Conditions.apply('update', {
+        'update': { 
+          textContent: 'Attributes Updated ✓',
+          setAttribute: { 
+            'data-status': 'updated',
+            'data-timestamp': new Date().toISOString()
+          },
+          style: { color: '#2196f3' }
+        }
+      }, el);
+    }
+    
+    function removeAttributes() {
+      const el = document.getElementById('attr-output');
+      el.removeAttribute('data-status');
+      el.removeAttribute('aria-label');
+      el.removeAttribute('title');
+      el.removeAttribute('data-timestamp');
+      el.textContent = 'Attributes Removed';
+      el.style.color = '#f44336';
+    }
+
+    // Dataset Handler Demo
+    function setDataset() {
+      const userId = document.getElementById('user-id').value;
+      const userName = document.getElementById('user-name').value;
+      
+      Conditions.apply('set', {
+        'set': { 
+          textContent: `Dataset: userId="${userId}", userName="${userName}"`,
+          dataset: { 
+            userId: userId,
+            userName: userName,
+            timestamp: new Date().toISOString()
+          },
+          style: { color: '#667eea', fontWeight: 'bold' }
+        }
+      }, '#dataset-output');
+    }
+
+    // Event Listeners Demos
+    let clickCount = 0;
+    
+    function attachEvents() {
+      const target = document.getElementById('event-target');
+      const output = document.getElementById('event-output');
+      
+      target.onclick = () => {
+        clickCount++;
+        output.textContent = `Button clicked ${clickCount} time(s)!`;
+        output.style.color = '#4caf50';
+      };
+      
+      output.textContent = 'Click event attached! Try the "Test Click Here" button';
+      output.style.color = '#2196f3';
+    }
+    
+    function attachMultipleEvents() {
+      const target = document.getElementById('event-target');
+      const output = document.getElementById('event-output');
+      
+      target.onmouseenter = () => {
+        output.textContent = 'Mouse entered!';
+        output.style.color = '#ff9800';
+      };
+      
+      target.onmouseleave = () => {
+        output.textContent = 'Mouse left!';
+        output.style.color = '#f44336';
+      };
+      
+      output.textContent = 'Multiple events attached! Hover over the "Test Click Here" button';
+      output.style.color = '#667eea';
+    }
+
+    // Native Properties Demo
+    function updateNativeProps() {
+      const enabled = document.getElementById('toggle-enabled').checked;
+      const textInput = document.getElementById('text-prop');
+      const checkbox = document.getElementById('check-prop');
+      
+      Conditions.apply(enabled, {
+        'true': { 
+          disabled: false,
+          value: 'You can type here now!',
+          style: { background: '#f1f8f4', borderColor: '#4caf50' }
+        },
+        'false': { 
+          disabled: true,
+          value: '',
+          style: { background: '#f5f5f5', borderColor: '#ccc' }
+        }
+      }, textInput);
+      
+      Conditions.apply(enabled, {
+        'true': { checked: true },
+        'false': { checked: false }
+      }, checkbox);
+    }
+
+    // Combined Example - Theme
+    function applyTheme() {
+      const theme = document.getElementById('theme-select').value;
+      
+      Conditions.apply(theme, {
+        'light': { 
+          textContent: '☀️ Light Theme Active',
+          style: { 
+            background: '#fff', 
+            color: '#333',
+            border: '2px solid #e0e0e0'
+          },
+          dataset: { theme: 'light' },
+          setAttribute: { 'data-mode': 'light' }
+        },
+        'dark': { 
+          textContent: '🌙 Dark Theme Active',
+          style: { 
+            background: '#1e1e1e', 
+            color: '#fff',
+            border: '2px solid #333'
+          },
+          dataset: { theme: 'dark' },
+          setAttribute: { 'data-mode': 'dark' }
+        },
+        'colorful': { 
+          textContent: '🎨 Colorful Theme Active',
+          style: { 
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
+            color: '#fff',
+            border: '2px solid #667eea'
+          },
+          dataset: { theme: 'colorful' },
+          setAttribute: { 'data-mode': 'colorful' }
+        }
+      }, '#theme-output');
+    }
+
+    // Initialize
+    applyTheme();
+  </script>
+</body>
+</html>

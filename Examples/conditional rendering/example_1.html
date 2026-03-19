@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Static Demo (No ReactiveUtils)</title>
+  <style>
+    .box { padding: 20px; margin: 20px; border: 2px solid #ddd; }
+    .red { background: #ffebee; color: #c62828; }
+    .green { background: #e8f5e9; color: #2e7d32; }
+    .gray { background: #f5f5f5; color: #424242; }
+  </style>
+</head>
+<body>
+  <h1>Static Demo (No Reactive/)</h1>
+  
+  <button onclick="updateColor('red')">Red</button>
+  <button onclick="updateColor('green')">Green</button>
+  <button onclick="updateColor('unknown')">Unknown (default)</button>
+  
+  <div id="box" class="box">Click a button</div>
+
+<script src="../../src/DOMHelpers/05_dh-conditions.js"></script> 
+
+  <script>
+
+    let currentColor = '';
+
+    function updateColor(color) {
+      currentColor = color;
+      
+
+      // Manual update - no Reactive/
+      Conditions.apply(
+        currentColor,
+       
+        {
+          'red': {
+            classList: { add: 'red', remove: ['green', 'gray'] },
+            textContent: '🔴 Red'
+          },
+          'green': {
+            classList: { add: 'green', remove: ['red', 'gray'] },
+            textContent: '🟢 Green'
+          },
+          'default': {
+            classList: { add: 'gray', remove: ['red', 'green'] },
+            textContent: '⚪ Unknown (DEFAULT)'
+          }
+        },
+        '#box'
+      );
+    }
+  </script>
+</body>
+</html>
