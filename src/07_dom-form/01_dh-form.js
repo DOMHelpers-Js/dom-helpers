@@ -579,7 +579,7 @@
     _initProxy() {
       this.Forms = new Proxy(this, {
         get: (target, prop) => {
-          if (typeof prop === 'symbol' || prop.startsWith('_') || typeof target[prop] === 'function') {
+          if (typeof prop === 'symbol' || prop.startsWith('_') || prop === 'helper' || prop === 'addEnhancer' || typeof target[prop] === 'function') {
             return Reflect.get(target, prop);
           }
           return target._getForm(prop);

@@ -1,10 +1,11 @@
 /**
- * DOM Helpers JS - Main Entry Point
- * @version 2.6.0
+ * DOM Helpers JS — Core + SPA Bundle
+ * Full DOM Helpers library plus the SPA Router module.
+ * @version 1.0.0
  * @license MIT
  */
 
-// Import all modules in order
+// DOM Helpers core and all feature modules
 import './01_core/01_dh-core.js';
 import './02_enhancers/01_dh-bulk-property-updaters.js';
 import './02_enhancers/02_dh-collection-shortcuts.js';
@@ -35,28 +36,33 @@ import './04_reactive/07_dh-reactive-storage.js';
 import './04_reactive/08_dh-reactive-namespace-methods.js';
 import './04_reactive/09_dh-reactiveUtils-shortcut.js';
 import './05_storage/01_dh-storage-standalone.js';
+import './06_native-enhance/01_dh-getbyid-enhance.js';
+import './06_native-enhance/02_dh-getElementsBy-enhance.js';
+import './06_native-enhance/03_dh-document-query-enhance.js';
 import './07_dom-form/01_dh-form.js';
+import './10_spa/00_dh-forms-helper-shim.js';
 import './07_dom-form/02_dh-form-enhance.js';
 import './08_animation/01_dh-animation.js';
 import './09_async/01_dh-async.js';
+
+// SPA Router modules
 import './10_spa/01_dh-router.js';
 import './10_spa/02_dh-router-view.js';
 import './10_spa/03_dh-router-link.js';
 import './10_spa/04_dh-router-guards.js';
 
-// Export global APIs (these are set by the modules on window/global)
-export const DOMHelpers = typeof window !== 'undefined' ? window.DOMHelpers : {};
-export const Elements = typeof window !== 'undefined' ? window.Elements : {};
-export const Collections = typeof window !== 'undefined' ? window.Collections : {};
-export const Selector = typeof window !== 'undefined' ? window.Selector : {};
+// Export all global APIs
+export const DOMHelpers   = typeof window !== 'undefined' ? window.DOMHelpers   : {};
+export const Elements     = typeof window !== 'undefined' ? window.Elements     : {};
+export const Collections  = typeof window !== 'undefined' ? window.Collections  : {};
+export const Selector     = typeof window !== 'undefined' ? window.Selector     : {};
 export const createElement = typeof window !== 'undefined' ? window.createElement : {};
 export const ReactiveState = typeof window !== 'undefined' ? window.ReactiveState : {};
 export const ReactiveUtils = typeof window !== 'undefined' ? window.ReactiveUtils : {};
-export const StorageUtils = typeof window !== 'undefined' ? window.StorageUtils : {};
-export const Forms = typeof window !== 'undefined' ? window.Forms : {};
-export const Animation = typeof window !== 'undefined' ? window.Animation : {};
-export const AsyncHelpers = typeof window !== 'undefined' ? window.AsyncHelpers : {};
-export const Router       = typeof window !== 'undefined' ? window.Router       : {};
+export const StorageUtils  = typeof window !== 'undefined' ? window.StorageUtils  : {};
+export const Forms         = typeof window !== 'undefined' ? window.Forms         : {};
+export const Animation     = typeof window !== 'undefined' ? window.Animation     : {};
+export const AsyncHelpers  = typeof window !== 'undefined' ? window.AsyncHelpers  : {};
+export const Router        = typeof window !== 'undefined' ? window.Router        : {};
 
-// Default export
 export default typeof window !== 'undefined' ? window.DOMHelpers : {};

@@ -1,19 +1,19 @@
 {
   "name": "dom-helpers-js",
-  "version": "2.6.0",
+  "version": "2.8.0",
   "description": "High-performance vanilla JavaScript DOM utilities with intelligent caching, reactive state management, and conditional rendering",
-  "main": "dist/dom-helpers.cjs.js",
-  "module": "dist/dom-helpers.esm.js",
-  "browser": "dist/dom-helpers.umd.js",
-  "unpkg": "dist/dom-helpers.min.js",
-  "jsdelivr": "dist/dom-helpers.min.js",
+  "main": "dist/dom-helpers.full-spa.cjs.js",
+  "module": "dist/dom-helpers.full-spa.esm.js",
+  "browser": "dist/dom-helpers.full-spa.umd.js",
+  "unpkg": "dist/dom-helpers.full-spa.min.js",
+  "jsdelivr": "dist/dom-helpers.full-spa.min.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/dom-helpers.esm.js",
-      "require": "./dist/dom-helpers.cjs.js",
-      "browser": "./dist/dom-helpers.umd.js",
-      "default": "./dist/dom-helpers.cjs.js"
+      "import": "./dist/dom-helpers.full-spa.esm.js",
+      "require": "./dist/dom-helpers.full-spa.cjs.js",
+      "browser": "./dist/dom-helpers.full-spa.umd.js",
+      "default": "./dist/dom-helpers.full-spa.cjs.js"
     },
     "./storage": {
       "import": "./dist/dom-helpers.storage.esm.js",
@@ -50,6 +50,36 @@
       "require": "./dist/dom-helpers.native-enhance.cjs.js",
       "browser": "./dist/dom-helpers.native-enhance.umd.js",
       "default": "./dist/dom-helpers.native-enhance.cjs.js"
+    },
+    "./form": {
+      "import": "./dist/dom-helpers.form.esm.js",
+      "require": "./dist/dom-helpers.form.cjs.js",
+      "browser": "./dist/dom-helpers.form.umd.js",
+      "default": "./dist/dom-helpers.form.cjs.js"
+    },
+    "./animation": {
+      "import": "./dist/dom-helpers.animation.esm.js",
+      "require": "./dist/dom-helpers.animation.cjs.js",
+      "browser": "./dist/dom-helpers.animation.umd.js",
+      "default": "./dist/dom-helpers.animation.cjs.js"
+    },
+    "./async": {
+      "import": "./dist/dom-helpers.async.esm.js",
+      "require": "./dist/dom-helpers.async.cjs.js",
+      "browser": "./dist/dom-helpers.async.umd.js",
+      "default": "./dist/dom-helpers.async.cjs.js"
+    },
+    "./spa": {
+      "import": "./dist/dom-helpers.spa.esm.js",
+      "require": "./dist/dom-helpers.spa.cjs.js",
+      "browser": "./dist/dom-helpers.spa.umd.js",
+      "default": "./dist/dom-helpers.spa.cjs.js"
+    },
+    "./full-spa": {
+      "import": "./dist/dom-helpers.full-spa.esm.js",
+      "require": "./dist/dom-helpers.full-spa.cjs.js",
+      "browser": "./dist/dom-helpers.full-spa.umd.js",
+      "default": "./dist/dom-helpers.full-spa.cjs.js"
     }
   },
   "files": [
@@ -91,7 +121,13 @@
     "storage",
     "localstorage",
     "sessionstorage",
-    "auto-save"
+    "auto-save",
+    "spa",
+    "router",
+    "single-page-application",
+    "client-side-routing",
+    "hash-routing",
+    "history-api"
   ],
   "author": "DOMHelpers-Js",
   "license": "MIT",

@@ -44,11 +44,11 @@
   }
 
   document.querySelector = function(selector) {
+    const el = _nativeQS(selector);
     try {
-      return enhanceElement(_nativeQS(selector));
+      return enhanceElement(el);
     } catch (e) {
-      console.error('[dh-document-query] querySelector error:', e.message);
-      return null;
+      return el;
     }
   };
 

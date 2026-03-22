@@ -15,7 +15,8 @@
       "Bash(npm publish:*)",
       "Bash(npm view:*)",
       "Bash(grep -n \"@version\\\\|version:\" \"/c/Users/DELL/Desktop/DOMHelpers Js/src/06_native-enhance/\"*.js)",
-      "Bash(grep -E \"\\\\.\\(md|txt\\)$\")"
+      "Bash(grep -E \"\\\\.\\(md|txt\\)$\")",
+      "Bash(node -e \"const p = require\\(''./package.json''\\); console.log\\(''name:'', p.name\\); console.log\\(''version:'', p.version\\); console.log\\(''main:'', p.main\\); console.log\\(''jsdelivr:'', p.jsdelivr\\); console.log\\(''unpkg:'', p.unpkg\\);\")"
     ]
   }
 }

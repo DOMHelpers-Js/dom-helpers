@@ -673,6 +673,11 @@
   // ============================================================================
 
   function _wrapUpdate(target, coreUpdate) {
+    // Skip if .update is non-writable (already enhanced) or already animation-wrapped
+    if (target.update && target.update._isAnimationUpdate) return;
+    const desc = Object.getOwnPropertyDescriptor(target, 'update');
+    if (desc && desc.writable === false) return;
+
     target.update = function animationUpdate(updates = {}) {
       if (!updates || typeof updates !== 'object') {
         console.warn('[DOM Helpers Animation] .update() requires a plain object');
@@ -716,6 +721,7 @@
 
       return promises.length > 0 ? Promise.all(promises).then(() => target) : target;
     };
+    target.update._isAnimationUpdate = true;
 
     return target;
   }

@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DOM Helpers — Advanced SPA Demo</title>
+  <style>
+    /* ── Reset & base ───────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    code {
+      font-family: 'Fira Code', 'Cascadia Code', monospace;
+      background: rgba(255,255,255,.08);
+      padding: .1em .35em;
+      border-radius: 4px;
+      font-size: .85em;
+    }
+
+    /* ── Layout ─────────────────────────────────────────────────────────── */
+    .shell { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    /* ── Sidebar layout ──────────────────────────────────────────────────── */
+    .app-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      grid-template-rows: auto 1fr;
+      min-height: 100vh;
+    }
+
+    /* ── Sidebar ─────────────────────────────────────────────────────────── */
+    .sidebar {
+      background: #1e293b;
+      border-right: 1px solid #334155;
+      padding: 1.5rem 1rem;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .sidebar-logo {
+      font-weight: 800;
+      font-size: 1.15rem;
+      color: #818cf8;
+      padding: 0 0.5rem 1.25rem;
+      border-bottom: 1px solid #334155;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.3px;
+    }
+
+    .sidebar-section {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #64748b;
+      padding: 0.6rem 0.5rem 0.3rem;
+    }
+
+    .sidebar [data-route] {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.5rem 0.65rem;
+      border-radius: 7px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #94a3b8;
+      cursor: pointer;
+      text-decoration: none;
+      border: none;
+      background: transparent;
+      transition: background 0.12s, color 0.12s;
+      width: 100%;
+      text-align: left;
+    }
+
+    .sidebar [data-route]:hover { background: #334155; color: #e2e8f0; }
+
+    .sidebar [data-route].active {
+      background: rgba(129,140,248,.15);
+      color: #818cf8;
+    }
+
+    /* ── Top bar ─────────────────────────────────────────────────────────── */
+    .topbar {
+      background: #1e293b;
+      border-bottom: 1px solid #334155;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem;
+    }
+
+    .topbar-breadcrumb { font-size: 0.875rem; color: #64748b; }
+    .topbar-breadcrumb strong { color: #e2e8f0; }
+
+    .topbar-user {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.875rem;
+      color: #94a3b8;
+    }
+
+    .avatar-sm {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem;
+    }
+
+    /* ── Outlet ──────────────────────────────────────────────────────────── */
+    #app { padding: 2rem 1.5rem; }
+
+    /* ── Page animation ──────────────────────────────────────────────────── */
+    .page {
+      animation: pageIn 0.2s ease both;
+    }
+
+    @keyframes pageIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Section headings ────────────────────────────────────────────────── */
+    .page-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 0.35rem;
+    }
+
+    .page-lead {
+      color: #64748b;
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    /* ── Stat cards ──────────────────────────────────────────────────────── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 1.1rem;
+    }
+
+    .stat-card .stat-label { font-size: 0.75rem; color: #64748b; margin-bottom: 0.35rem; }
+    .stat-card .stat-value { font-size: 1.6rem; font-weight: 700; color: #818cf8; }
+    .stat-card .stat-delta { font-size: 0.75rem; color: #34d399; margin-top: 0.2rem; }
+
+    /* ── Table ───────────────────────────────────────────────────────────── */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    .data-table th {
+      text-align: left;
+      font-size: 0.72rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: #475569;
+      padding: 0 0.75rem 0.6rem;
+      border-bottom: 1px solid #334155;
+    }
+
+    .data-table td {
+      padding: 0.75rem;
+      border-bottom: 1px solid #1e293b;
+      color: #94a3b8;
+    }
+
+    .data-table tr:hover td { background: rgba(255,255,255,.02); }
+    .data-table td:first-child { color: #e2e8f0; font-weight: 500; }
+
+    /* ── Status badges ───────────────────────────────────────────────────── */
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.15rem 0.55rem;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    .status-active   { background: rgba(52,211,153,.12); color: #34d399; }
+    .status-pending  { background: rgba(251,191,36,.12);  color: #fbbf24; }
+    .status-inactive { background: rgba(100,116,139,.12); color: #64748b; }
+
+    /* ── Buttons ─────────────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.45rem 1rem; border-radius: 7px;
+      font-size: 0.85rem; font-weight: 500;
+      border: none; cursor: pointer; text-decoration: none;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-primary  { background: #4f46e5; color: #fff; }
+    .btn-primary:hover { background: #4338ca; }
+    .btn-indigo   { background: rgba(79,70,229,.18); color: #818cf8; }
+    .btn-indigo:hover { background: rgba(79,70,229,.28); }
+    .btn-danger   { background: rgba(239,68,68,.18); color: #f87171; }
+    .btn-danger:hover { background: rgba(239,68,68,.28); }
+
+    /* ── Form elements ───────────────────────────────────────────────────── */
+    .form-field { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
+    .form-label { font-size: 0.82rem; font-weight: 500; color: #94a3b8; }
+
+    .form-input {
+      background: #1e293b;
+      border: 1.5px solid #334155;
+      border-radius: 7px;
+      color: #e2e8f0;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .form-input:focus { border-color: #818cf8; }
+    .form-input::placeholder { color: #475569; }
+
+    /* ── Login card ──────────────────────────────────────────────────────── */
+    .login-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 2.5rem;
+      max-width: 380px;
+      margin: 4rem auto;
+    }
+
+    .login-card h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.35rem; }
+    .login-card p  { color: #64748b; font-size: 0.875rem; margin-bottom: 1.5rem; }
+
+    /* ── Alert ───────────────────────────────────────────────────────────── */
+    .alert {
+      display: flex; align-items: flex-start; gap: 0.6rem;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+    }
+
+    .alert-error   { background: rgba(239,68,68,.1); color: #f87171; border: 1px solid rgba(239,68,68,.2); }
+    .alert-success { background: rgba(52,211,153,.1); color: #34d399; border: 1px solid rgba(52,211,153,.2); }
+    .alert-info    { background: rgba(129,140,248,.1); color: #818cf8; border: 1px solid rgba(129,140,248,.2); }
+
+    /* ── Loading skeleton ────────────────────────────────────────────────── */
+    .skeleton {
+      background: linear-gradient(90deg, #1e293b 25%, #263348 50%, #1e293b 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 6px;
+      height: 1em;
+      margin-bottom: 0.5rem;
+    }
+
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ── Settings form ───────────────────────────────────────────────────── */
+    .settings-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .settings-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 1.25rem;
+    }
+
+    .settings-card h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.85rem; color: #f1f5f9; }
+
+    .toggle-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #334155;
+      font-size: 0.875rem; color: #94a3b8;
+    }
+
+    .toggle-row:last-child { border-bottom: none; }
+
+    .toggle {
+      position: relative; width: 36px; height: 20px;
+      background: #334155; border-radius: 20px;
+      cursor: pointer; transition: background 0.2s; flex-shrink: 0;
+    }
+
+    .toggle::after {
+      content: ''; position: absolute;
+      top: 3px; left: 3px;
+      width: 14px; height: 14px;
+      background: #fff; border-radius: 50%;
+      transition: transform 0.2s;
+    }
+
+    .toggle.on { background: #4f46e5; }
+    .toggle.on::after { transform: translateX(16px); }
+
+    /* ── 403/404 ─────────────────────────────────────────────────────────── */
+    .error-page {
+      text-align: center; padding: 4rem 2rem;
+    }
+
+    .error-page .code {
+      font-size: 5rem; font-weight: 800; color: #334155; line-height: 1;
+    }
+
+    .error-page h2 { font-size: 1.4rem; color: #94a3b8; margin: 0.75rem 0 0.5rem; }
+    .error-page p  { color: #64748b; margin-bottom: 1.5rem; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!--  APP SHELL                                                              -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+<div class="app-layout">
+
+  <!-- Sidebar (not shown on login page — toggled by onEnter/onLeave) -->
+  <aside class="sidebar" id="sidebar" style="display:none">
+    <div class="sidebar-logo">⬡ AdminPanel</div>
+
+    <div class="sidebar-section">Main</div>
+    <a data-route="/dashboard" data-route-active-class="active">📊 Dashboard</a>
+    <a data-route="/users"     data-route-active-class="active">👥 Users</a>
+    <a data-route="/posts"     data-route-active-class="active">📝 Posts</a>
+
+    <div class="sidebar-section">Account</div>
+    <a data-route="/settings"  data-route-active-class="active">⚙️ Settings</a>
+    <a data-route="/profile"   data-route-active-class="active">👤 My Profile</a>
+    <button data-route="/login" id="logoutBtn" style="margin-top:auto;color:#f87171">🚪 Logout</button>
+  </aside>
+
+  <!-- Main area -->
+  <div>
+    <!-- Top bar (hidden on login) -->
+    <div class="topbar" id="topbar" style="display:none">
+      <div class="topbar-breadcrumb">
+        AdminPanel / <strong id="topbarPage">Dashboard</strong>
+      </div>
+      <div class="topbar-user">
+        <div class="avatar-sm">👩</div>
+        <span id="topbarUser">Alice Martin</span>
+      </div>
+    </div>
+
+    <!-- Router outlet -->
+    <div id="app"></div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!--  VIEWS                                                                  -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+<!-- LOGIN ──────────────────────────────────────────────────────────────── -->
+<template id="view-login">
+  <div class="page">
+    <div class="login-card">
+      <h2>Sign In</h2>
+      <p>Use <code>admin</code> / <code>password</code> to log in.</p>
+
+      <div id="loginAlert" style="display:none"></div>
+
+      <form id="loginForm" onsubmit="return false;">
+        <div class="form-field">
+          <label class="form-label">Username</label>
+          <input class="form-input" id="loginUser" type="text" placeholder="admin" autocomplete="username" />
+        </div>
+        <div class="form-field">
+          <label class="form-label">Password</label>
+          <input class="form-input" id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+
+        <button class="btn btn-primary" id="loginBtn" type="submit" style="width:100%;justify-content:center;margin-top:.5rem">
+          Sign In →
+        </button>
+      </form>
+    </div>
+  </div>
+</template>
+
+<!-- DASHBOARD ──────────────────────────────────────────────────────────── -->
+<template id="view-dashboard">
+  <div class="page">
+    <div class="page-title">Dashboard</div>
+    <div class="page-lead">
+      Overview of your application's key metrics. Data simulates an async API call.
+    </div>
+
+    <!-- Stats: skeleton shown while "loading", replaced by real data -->
+    <div class="stat-grid" id="statGrid">
+      <div class="stat-card"><div class="skeleton" style="width:60px"></div><div class="skeleton" style="width:40px;height:2rem;margin-top:.35rem"></div></div>
+      <div class="stat-card"><div class="skeleton" style="width:60px"></div><div class="skeleton" style="width:40px;height:2rem;margin-top:.35rem"></div></div>
+      <div class="stat-card"><div class="skeleton" style="width:60px"></div><div class="skeleton" style="width:40px;height:2rem;margin-top:.35rem"></div></div>
+      <div class="stat-card"><div class="skeleton" style="width:60px"></div><div class="skeleton" style="width:40px;height:2rem;margin-top:.35rem"></div></div>
+    </div>
+
+    <div class="alert alert-info">
+      ℹ️ This demo uses <code>setTimeout</code> to simulate async data fetching in <code>onEnter</code>.
+    </div>
+  </div>
+</template>
+
+<!-- USERS ──────────────────────────────────────────────────────────────── -->
+<template id="view-users">
+  <div class="page">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+      <div>
+        <div class="page-title">Users</div>
+        <div class="page-lead" style="margin-bottom:0">Manage application users.</div>
+      </div>
+      <button class="btn btn-indigo">+ Invite User</button>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Joined</th>
+        </tr>
+      </thead>
+      <tbody id="usersTableBody">
+        <tr><td colspan="5"><div class="skeleton"></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</template>
+
+<!-- POSTS ──────────────────────────────────────────────────────────────── -->
+<template id="view-posts">
+  <div class="page">
+    <div class="page-title">Posts</div>
+    <div class="page-lead">Content fetched asynchronously and rendered in <code>onEnter</code>.</div>
+
+    <div id="postsContainer" style="display:grid;gap:.75rem">
+      <div class="skeleton" style="height:60px"></div>
+      <div class="skeleton" style="height:60px"></div>
+      <div class="skeleton" style="height:60px"></div>
+    </div>
+  </div>
+</template>
+
+<!-- SETTINGS ───────────────────────────────────────────────────────────── -->
+<template id="view-settings">
+  <div class="page">
+    <div class="page-title">Settings</div>
+    <div class="page-lead">Application preferences and account configuration.</div>
+
+    <div class="settings-grid">
+      <div class="settings-card">
+        <h4>Notifications</h4>
+        <div class="toggle-row">
+          Email notifications
+          <div class="toggle on" data-toggle="email"></div>
+        </div>
+        <div class="toggle-row">
+          Push notifications
+          <div class="toggle" data-toggle="push"></div>
+        </div>
+        <div class="toggle-row">
+          Weekly digest
+          <div class="toggle on" data-toggle="digest"></div>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <h4>Privacy</h4>
+        <div class="toggle-row">
+          Public profile
+          <div class="toggle on" data-toggle="public"></div>
+        </div>
+        <div class="toggle-row">
+          Activity tracking
+          <div class="toggle" data-toggle="track"></div>
+        </div>
+        <div class="toggle-row">
+          Two-factor auth
+          <div class="toggle on" data-toggle="2fa"></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:1.25rem;display:flex;gap:.75rem">
+      <button class="btn btn-primary" id="saveSettingsBtn">Save Changes</button>
+      <div id="settingsFeedback" style="display:none;align-self:center;font-size:.85rem;color:#34d399"></div>
+    </div>
+  </div>
+</template>
+
+<!-- PROFILE ────────────────────────────────────────────────────────────── -->
+<template id="view-profile">
+  <div class="page">
+    <div class="page-title">My Profile</div>
+    <div class="page-lead">Update your personal information.</div>
+
+    <div style="max-width:440px">
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem">
+        <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0">👩</div>
+        <div>
+          <div style="font-weight:600;font-size:1.05rem" id="profileName">Alice Martin</div>
+          <div style="color:#64748b;font-size:.875rem" id="profileEmail">alice@admin.io</div>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label class="form-label">Display Name</label>
+        <input class="form-input" id="profileNameInput" value="Alice Martin" />
+      </div>
+      <div class="form-field">
+        <label class="form-label">Email</label>
+        <input class="form-input" id="profileEmailInput" type="email" value="alice@admin.io" />
+      </div>
+      <div class="form-field">
+        <label class="form-label">Role</label>
+        <input class="form-input" value="Lead Designer" disabled style="opacity:.5;cursor:not-allowed" />
+      </div>
+
+      <button class="btn btn-primary" id="saveProfileBtn">Update Profile</button>
+      <div id="profileFeedback" style="display:none;margin-top:.75rem;font-size:.85rem;color:#34d399"></div>
+    </div>
+  </div>
+</template>
+
+<!-- 403 ────────────────────────────────────────────────────────────────── -->
+<template id="view-403">
+  <div class="page error-page">
+    <div class="code">403</div>
+    <h2>Access Denied</h2>
+    <p>You need to sign in to access this page.</p>
+    <a class="btn btn-primary" data-route="/login">Sign In →</a>
+  </div>
+</template>
+
+<!-- 404 ────────────────────────────────────────────────────────────────── -->
+<template id="view-404">
+  <div class="page error-page">
+    <div class="code">404</div>
+    <h2>Page Not Found</h2>
+    <p>The route <code id="notFoundPath"></code> doesn't exist.</p>
+    <a class="btn btn-indigo" data-route="/dashboard">← Dashboard</a>
+  </div>
+</template>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!--  SCRIPTS                                                                -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<script src="../../dist/dom-helpers.full-spa.min.js"></script>
+
+
+<script>
+  // ── Fake session store (replace with real auth in production) ──────────
+  const session = {
+    user: null,
+
+    login(username, password) {
+      if (username === 'admin' && password === 'password') {
+        this.user = { name: 'Alice Martin', email: 'alice@admin.io', role: 'Lead Designer' };
+        localStorage.setItem('dh-session', JSON.stringify(this.user));
+        return true;
+      }
+      return false;
+    },
+
+    logout() {
+      this.user = null;
+      localStorage.removeItem('dh-session');
+    },
+
+    restore() {
+      const saved = localStorage.getItem('dh-session');
+      if (saved) { try { this.user = JSON.parse(saved); } catch (e) {} }
+    },
+
+    isLoggedIn() { return !!this.user; },
+  };
+
+  session.restore();
+
+  // ── Shell helpers ──────────────────────────────────────────────────────
+  function showShell() {
+    document.getElementById('sidebar').style.display = '';
+    document.getElementById('topbar').style.display  = '';
+    document.getElementById('app').style.padding    = '2rem 1.5rem';
+  }
+
+  function hideShell() {
+    document.getElementById('sidebar').style.display = 'none';
+    document.getElementById('topbar').style.display  = 'none';
+    document.getElementById('app').style.padding    = '0';
+  }
+
+  function setTopbarPage(name) {
+    const el = document.getElementById('topbarPage');
+    if (el) el.textContent = name;
+  }
+
+  // ── Fake API helpers (simulate network latency) ────────────────────────
+  function fakeApiCall(data, delay) {
+    return new Promise(resolve => setTimeout(() => resolve(data), delay || 600));
+  }
+
+  // ── Route definitions ──────────────────────────────────────────────────
+  Router.define([
+
+    // ── Login (public) ────────────────────────────────────────────────
+    {
+      path : '/login',
+      view : '#view-login',
+      title: 'Sign In — AdminPanel',
+
+      onEnter(params, query, onCleanup) {
+        hideShell();
+
+        // If already logged in, redirect straight to dashboard
+        if (session.isLoggedIn()) {
+          Router.go('/dashboard');
+          return;
+        }
+
+        const btn      = document.getElementById('loginBtn');
+        const alertEl  = document.getElementById('loginAlert');
+
+        function showAlert(msg, type) {
+          alertEl.className   = 'alert alert-' + type;
+          alertEl.textContent = msg;
+          alertEl.style.display = '';
+        }
+
+        async function handleLogin() {
+          const user = document.getElementById('loginUser').value.trim();
+          const pass = document.getElementById('loginPass').value;
+
+          if (!user || !pass) { showAlert('Please fill in all fields.', 'error'); return; }
+
+          btn.disabled = true;
+          btn.textContent = 'Signing in…';
+
+          // Simulate async auth request
+          await fakeApiCall(null, 800);
+
+          if (session.login(user, pass)) {
+            Router.go('/dashboard');
+          } else {
+            showAlert('❌ Invalid credentials. Try admin / password.', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Sign In →';
+          }
+        }
+
+        btn.addEventListener('click', handleLogin);
+        onCleanup(() => btn.removeEventListener('click', handleLogin));
+      },
+    },
+
+    // ── Dashboard (protected) ─────────────────────────────────────────
+    {
+      path : '/dashboard',
+      view : '#view-dashboard',
+      title: 'Dashboard — AdminPanel',
+
+      async onEnter(params, query, onCleanup) {
+        showShell();
+        setTopbarPage('Dashboard');
+
+        // Simulate fetching stats from an API
+        const stats = await fakeApiCall([
+          { label: 'Total Users',   value: '1,284', delta: '+12 this week'  },
+          { label: 'Active Today',  value: '347',   delta: '+5% vs yesterday' },
+          { label: 'Revenue',       value: '$9,420', delta: '+8.3% MoM'     },
+          { label: 'Uptime',        value: '99.9%', delta: 'All systems go' },
+        ], 700);
+
+        const grid = document.getElementById('statGrid');
+        if (!grid) return;
+
+        grid.innerHTML = stats.map(s => `
+          <div class="stat-card">
+            <div class="stat-label">${s.label}</div>
+            <div class="stat-value">${s.value}</div>
+            <div class="stat-delta">${s.delta}</div>
+          </div>
+        `).join('');
+      },
+    },
+
+    // ── Users (protected) ─────────────────────────────────────────────
+    {
+      path : '/users',
+      view : '#view-users',
+      title: 'Users — AdminPanel',
+
+      async onEnter(params, query, onCleanup) {
+        showShell();
+        setTopbarPage('Users');
+
+        const users = await fakeApiCall([
+          { name: 'Alice Martin',  email: 'alice@admin.io',   role: 'Designer',  status: 'active',   joined: 'Jan 2023' },
+          { name: 'Bob Chen',      email: 'bob@admin.io',     role: 'Engineer',  status: 'active',   joined: 'Mar 2023' },
+          { name: 'Sara López',    email: 'sara@admin.io',    role: 'PM',        status: 'active',   joined: 'Jun 2023' },
+          { name: 'Mark Davis',    email: 'mark@admin.io',    role: 'Support',   status: 'pending',  joined: 'Nov 2023' },
+          { name: 'Chloe Nguyen',  email: 'chloe@admin.io',   role: 'Analyst',   status: 'inactive', joined: 'Dec 2022' },
+        ], 500);
+
+        const tbody = document.getElementById('usersTableBody');
+        if (!tbody) return;
+
+        tbody.innerHTML = users.map(u => `
+          <tr>
+            <td>${u.name}</td>
+            <td>${u.email}</td>
+            <td>${u.role}</td>
+            <td><span class="status status-${u.status}">${u.status}</span></td>
+            <td>${u.joined}</td>
+          </tr>
+        `).join('');
+      },
+    },
+
+    // ── Posts (protected) ─────────────────────────────────────────────
+    {
+      path : '/posts',
+      view : '#view-posts',
+      title: 'Posts — AdminPanel',
+
+      async onEnter(params, query, onCleanup) {
+        showShell();
+        setTopbarPage('Posts');
+
+        const posts = await fakeApiCall([
+          { title: 'Getting started with DOM Helpers', author: 'Alice',  date: '2026-01-10', status: 'active'   },
+          { title: 'Building SPAs the simple way',     author: 'Bob',    date: '2026-02-05', status: 'active'   },
+          { title: 'Reactive state without a framework', author: 'Sara', date: '2026-02-18', status: 'pending'  },
+          { title: 'Animation module deep-dive',        author: 'Mark',  date: '2026-03-01', status: 'inactive' },
+        ], 550);
+
+        const container = document.getElementById('postsContainer');
+        if (!container) return;
+
+        container.innerHTML = posts.map(p => `
+          <div style="background:#1e293b;border:1px solid #334155;border-radius:9px;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem">
+            <div>
+              <div style="font-weight:600;color:#f1f5f9;font-size:.925rem">${p.title}</div>
+              <div style="font-size:.78rem;color:#64748b;margin-top:.2rem">${p.author} · ${p.date}</div>
+            </div>
+            <span class="status status-${p.status}">${p.status}</span>
+          </div>
+        `).join('');
+      },
+    },
+
+    // ── Settings (protected) ──────────────────────────────────────────
+    {
+      path : '/settings',
+      view : '#view-settings',
+      title: 'Settings — AdminPanel',
+
+      onEnter(params, query, onCleanup) {
+        showShell();
+        setTopbarPage('Settings');
+
+        // Wire toggle clicks
+        function handleToggle(e) {
+          const toggle = e.target.closest('[data-toggle]');
+          if (toggle) toggle.classList.toggle('on');
+        }
+
+        document.addEventListener('click', handleToggle);
+        onCleanup(() => document.removeEventListener('click', handleToggle));
+
+        // Save button
+        const saveBtn  = document.getElementById('saveSettingsBtn');
+        const feedback = document.getElementById('settingsFeedback');
+
+        function handleSave() {
+          feedback.textContent = '✅ Settings saved!';
+          feedback.style.display = '';
+          setTimeout(() => { if (feedback) feedback.style.display = 'none'; }, 2500);
+        }
+
+        saveBtn.addEventListener('click', handleSave);
+        onCleanup(() => saveBtn.removeEventListener('click', handleSave));
+      },
+    },
+
+    // ── Profile (protected) ───────────────────────────────────────────
+    {
+      path : '/profile',
+      view : '#view-profile',
+      title: 'My Profile — AdminPanel',
+
+      onEnter(params, query, onCleanup) {
+        showShell();
+        setTopbarPage('My Profile');
+
+        const saveBtn  = document.getElementById('saveProfileBtn');
+        const feedback = document.getElementById('profileFeedback');
+
+        function handleSave() {
+          const name  = document.getElementById('profileNameInput').value.trim();
+          const email = document.getElementById('profileEmailInput').value.trim();
+
+          if (!name || !email) {
+            feedback.textContent = '⚠️ Name and email are required.';
+            feedback.style.color = '#fbbf24';
+            feedback.style.display = '';
+            return;
+          }
+
+          // Update the header display
+          const topbarUser = document.getElementById('topbarUser');
+          if (topbarUser) topbarUser.textContent = name;
+
+          feedback.textContent = '✅ Profile updated!';
+          feedback.style.color = '#34d399';
+          feedback.style.display = '';
+          setTimeout(() => { if (feedback) feedback.style.display = 'none'; }, 2500);
+        }
+
+        saveBtn.addEventListener('click', handleSave);
+        onCleanup(() => saveBtn.removeEventListener('click', handleSave));
+      },
+    },
+
+    // ── 403 ───────────────────────────────────────────────────────────
+    {
+      path : '/403',
+      view : '#view-403',
+      title: 'Access Denied — AdminPanel',
+      onEnter() { hideShell(); },
+    },
+
+    // ── 404 (catch-all) ───────────────────────────────────────────────
+    {
+      path : '*',
+      view : '#view-404',
+      title: '404 — AdminPanel',
+      onEnter() {
+        const el = document.getElementById('notFoundPath');
+        if (el) el.textContent = window.location.hash || window.location.pathname;
+      },
+    },
+
+  ]);
+
+  // ── Guards ─────────────────────────────────────────────────────────────
+
+  // 1. Auth guard: protect all routes except /login and /403
+  Router.beforeEach(function (to, from, next) {
+    const publicRoutes = ['/login', '/403'];
+    const isPublic = publicRoutes.includes(to.path) || to.path === '*';
+
+    if (!isPublic && !session.isLoggedIn()) {
+      next('/403');
+    } else {
+      next();
+    }
+  });
+
+  // 2. Logging guard (dev mode)
+  Router.enableLogging();
+
+  // 3. Update top bar page name on every navigation
+  Router.afterEach(function (to) {
+    const topbarUser = document.getElementById('topbarUser');
+    if (topbarUser && session.user) topbarUser.textContent = session.user.name;
+  });
+
+  // ── Logout button ──────────────────────────────────────────────────────
+  document.getElementById('logoutBtn').addEventListener('click', function () {
+    session.logout();
+    Router.go('/login');
+  });
+
+  // ── Mount & start ───────────────────────────────────────────────────────
+  Router.mount('#app');
+  Router.start({ mode: 'hash', scrollToTop: true });
+</script>
+
+</body>
+</html>

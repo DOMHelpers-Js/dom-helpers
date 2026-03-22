@@ -1,146 +1,132 @@
-# 🚀 DOM Helpers JS
+# DOM Helpers JS
 
-High-performance vanilla JavaScript DOM utilities with intelligent caching, reactive state management, conditional rendering, animations, and async utilities.
+High-performance vanilla JavaScript DOM utilities with intelligent caching, reactive state management, conditional rendering, animations, async utilities, and a built-in SPA router.
 
 [![npm version](https://img.shields.io/npm/v/dom-helpers-js.svg)](https://www.npmjs.com/package/dom-helpers-js)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![jsDelivr](https://data.jsdelivr.com/v1/package/gh/DOMHelpers-Js/dom-helpers/badge)](https://www.jsdelivr.com/package/gh/DOMHelpers-Js/dom-helpers)
 
-## ✨ Features
+---
 
-- 🎯 **Smart Element Access** - ID, class, and tag-based DOM access with automatic caching
-- 🔄 **Reactive State** - Vue-like reactivity system with computed properties and watchers
-- 🎨 **Chainable Updates** - Fluent API for updating multiple properties at once
-- 🏎️ **High Performance** - Intelligent caching and fine-grained change detection
-- 📦 **Zero Dependencies** - Pure vanilla JavaScript
-- 🌐 **CDN Ready** - Use via npm or drop-in `<script>` tag
-- 🔧 **TypeScript Ready** - Full type definitions included
-- 🔌 **Native Enhance** - Patches `getElementById`, `getElementsBy*`, `querySelector/All` to return enhanced elements automatically
-- 📋 **Form Module** - Non-reactive form handling: values, validation, serialization, enhanced submission *(v2.6.0)*
-- 🎬 **Animation Module** - CSS transition animations: fadeIn/Out, slideUp/Down, transforms, chains, stagger *(v2.6.0)*
-- ⚡ **Async Utilities** - debounce, throttle, sanitize, enhanced fetch, parallelAll, raceWithTimeout *(v2.6.0)*
+## Features
 
-## 📦 Installation
+- **Smart Element Access** — ID, class, tag, and name-based DOM access with automatic caching
+- **Reactive State** — Vue-like reactivity with computed properties, watchers, and stores
+- **Chainable Updates** — Universal `.update()` method for updating any property at once
+- **High Performance** — Intelligent caching, fine-grained change detection, WeakMap tracking
+- **Zero Dependencies** — Pure vanilla JavaScript, no external libraries
+- **Modular** — Load only what you need via individual dist files or the full bundle
+- **CDN Ready** — Drop-in `<script>` tag or npm install
+- **Native Enhance** — Patches `getElementById`, `getElementsBy*`, `querySelector/All` to return enhanced elements
+- **Form Module** — Non-reactive form handling: values, validation, serialization, enhanced submission
+- **Animation Module** — CSS transition animations: fadeIn/Out, slideUp/Down, transforms, chains, stagger
+- **Async Utilities** — debounce, throttle, enhanced fetch, parallelAll, raceWithTimeout, sanitize
+- **SPA Router** — Client-side routing with hash/history mode, guards, transitions, declarative links *(v2.7.0)*
+
+---
+
+## Installation
 
 ### Via npm
 ```bash
 npm install dom-helpers-js
 ```
 
-### Via CDN (jsDelivr) - Standalone Modules!
+### Via CDN — Full Bundle *(recommended)*
 
-**Full Bundle (44.6 KB gzipped) — Everything included:**
-
-```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.6.0/dist/dom-helpers.min.js"></script>
-```
-
-**Mix & Match individual modules:**
+One script tag, everything included:
 
 ```html
-<!-- Core Only (9.6 KB gzipped) - Standalone, smallest -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.6.0/dist/dom-helpers.core.min.js"></script>
+<!-- jsDelivr -->
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.8.0/dist/dom-helpers.full-spa.min.js"></script>
 
-<!-- Enhancers (~8.4 KB) - Requires Core first! -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.6.0/dist/dom-helpers.core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.6.0/dist/dom-helpers.enhancers.min.js"></script>
-
-<!-- Conditions (~7.2 KB) - Requires Core first! -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.6.0/dist/dom-helpers.core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.6.0/dist/dom-helpers.conditions.min.js"></script>
-
-<!-- Reactive (~11.5 KB) - Requires Core first! -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.6.0/dist/dom-helpers.core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.6.0/dist/dom-helpers.reactive.min.js"></script>
-
-<!-- Native Enhance (~2.1 KB) - Requires Core + Enhancers first! -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.6.0/dist/dom-helpers.core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.6.0/dist/dom-helpers.enhancers.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.6.0/dist/dom-helpers.native-enhance.min.js"></script>
+<!-- unpkg -->
+<script src="https://unpkg.com/dom-helpers-js@2.8.0/dist/dom-helpers.full-spa.min.js"></script>
 ```
 
-**⚠️ Important:** Enhancers, Conditions, and Reactive modules require Core to be loaded first. Native Enhance requires both Core and Enhancers. The Form, Animation, and Async modules are included in the full bundle — for source-file usage see [All CDN Links](./ALL-CDN-LINKS.md).
+**Globals exposed:** `Elements`, `Collections`, `Selector`, `createElement`, `ReactiveUtils`, `ReactiveState`, `StorageUtils`, `Forms`, `Animation`, `AsyncHelpers`, `Router`
 
-**📚 [See Standalone Modules Guide](./STANDALONE-MODULES-GUIDE.md)** | **[All CDN Links](./ALL-CDN-LINKS.md)** | **[Native Enhance Guide](./NATIVE-ENHANCE.md)**
+### Via CDN — Individual Modules
 
-### Via unpkg
+Load only what you need. All modules have their own dist file:
+
 ```html
-<script src="https://unpkg.com/dom-helpers-js@2.6.0/dist/dom-helpers.min.js"></script>
-<script src="https://unpkg.com/dom-helpers-js@2.6.0/dist/dom-helpers.core.min.js"></script>
+<!-- 1. Core (required foundation) -->
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.8.0/dist/dom-helpers.core.min.js"></script>
+
+<!-- 2. Enhancers (requires Core) -->
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.8.0/dist/dom-helpers.enhancers.min.js"></script>
+
+<!-- 3. Conditions (requires Core) -->
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.8.0/dist/dom-helpers.conditions.min.js"></script>
+
+<!-- 4. Reactive (requires Core) -->
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.8.0/dist/dom-helpers.reactive.min.js"></script>
+
+<!-- 5. Storage (standalone) -->
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.8.0/dist/dom-helpers.storage.min.js"></script>
+
+<!-- 6. Native Enhance (requires Core + Enhancers) -->
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.8.0/dist/dom-helpers.native-enhance.min.js"></script>
+
+<!-- 7. Form (requires Core) -->
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.8.0/dist/dom-helpers.form.min.js"></script>
+
+<!-- 8. Animation (requires Core) -->
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.8.0/dist/dom-helpers.animation.min.js"></script>
+
+<!-- 9. Async (requires Core) -->
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.8.0/dist/dom-helpers.async.min.js"></script>
+
+<!-- 10. SPA Router (standalone) -->
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.8.0/dist/dom-helpers.spa.min.js"></script>
 ```
 
-## 🎯 Quick Start
+> **Load order matters.** Core must come before any module that requires it. See [ALL-CDN-LINKS.md](./ALL-CDN-LINKS.md) for the full reference and common combinations.
 
-### Modular Loading Examples
+### Via npm / ESM Bundlers
 
-**Core Only (Smallest - 9.6 KB):**
-```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.6.0/dist/dom-helpers.core.min.js"></script>
-<script>
-  Elements.title.update({ textContent: 'Core Only!', style: { color: 'blue' } });
-  Collections.ClassName.items.update({ style: { padding: '10px' } });
-</script>
+```js
+// Full package — all modules
+import { Elements, Collections, ReactiveUtils, StorageUtils, Forms, Animation, AsyncHelpers, Router } from 'dom-helpers-js';
+
+// Sub-path imports — load only what you need
+import { Elements }      from 'dom-helpers-js/core';
+import { ReactiveUtils } from 'dom-helpers-js/reactive';
+import { StorageUtils }  from 'dom-helpers-js/storage';
+import { Forms }         from 'dom-helpers-js/form';
+import { Animation }     from 'dom-helpers-js/animation';
+import { AsyncHelpers }  from 'dom-helpers-js/async';
+import { Router }        from 'dom-helpers-js/spa';
+import 'dom-helpers-js/native-enhance';
+
+// CommonJS
+const { Elements }      = require('dom-helpers-js/core');
+const { ReactiveUtils } = require('dom-helpers-js/reactive');
 ```
 
-**Core + Reactive (~21.1 KB):**
-```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.6.0/dist/dom-helpers.core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.6.0/dist/dom-helpers.reactive.min.js"></script>
-<script>
-  const state = ReactiveUtils.state({ count: 0 });
-  Elements.btn.addEventListener('click', () => state.count++);
-</script>
-```
+---
 
-**Core + Enhancers (~18.0 KB):**
-```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.6.0/dist/dom-helpers.core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.6.0/dist/dom-helpers.enhancers.min.js"></script>
-<script>
-  Elements.textContent({ title: 'New Title', desc: 'New Description' });
-  Elements.style({ title: { color: 'blue' }, desc: { color: 'gray' } });
-</script>
-```
+## Quick Start
 
-**Full Bundle + Native Enhance (~46.7 KB):**
-```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.6.0/dist/dom-helpers.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.6.0/dist/dom-helpers.native-enhance.min.js"></script>
-<script>
-  const btn = document.getElementById('submit-btn');
-  btn.update({ textContent: 'Submit', disabled: false });
-
-  const cards = document.querySelectorAll('.card');
-  cards.update({ classList: { add: 'loaded' } });
-</script>
-```
-
-### CDN Usage (Browser Globals)
+### Browser (CDN)
 
 ```html
 <!DOCTYPE html>
 <html>
-<head>
-  <title>DOM Helpers Example</title>
-</head>
 <body>
   <h1 id="title">Hello</h1>
   <button id="counter">Count: 0</button>
-  <div class="items">Item 1</div>
-  <div class="items">Item 2</div>
+  <div class="card">Card 1</div>
+  <div class="card">Card 2</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.6.0/dist/dom-helpers.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.8.0/dist/dom-helpers.full-spa.min.js"></script>
   <script>
-    // Access elements by ID
-    Elements.title.update({
-      textContent: 'Welcome!',
-      style: { color: 'blue', fontSize: '32px' }
-    });
+    // Access by ID
+    Elements.title.update({ textContent: 'Welcome!', style: { color: 'blue' } });
 
-    // Update all elements with class
-    Collections.ClassName.items.update({
-      style: { padding: '10px', background: '#f0f0f0' }
-    });
+    // Access by class
+    Collections.ClassName.card.update({ style: { padding: '10px', background: '#f0f0f0' } });
 
     // Reactive counter
     const state = ReactiveUtils.state({ count: 0 });
@@ -153,38 +139,31 @@ npm install dom-helpers-js
 </html>
 ```
 
-### npm/Module Usage
+### SPA in 10 lines
 
-```javascript
-import { Elements, Selector, createElement, ReactiveUtils, Forms, Animation, AsyncHelpers } from 'dom-helpers-js';
+```html
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.8.0/dist/dom-helpers.full-spa.min.js"></script>
+<script>
+  Router.define([
+    { path: '/',      view: '#home',  title: 'Home' },
+    { path: '/about', view: '#about', title: 'About' },
+    { path: '*',      view: '#404',   title: 'Not Found' }
+  ]);
 
-// Update element by ID
-Elements.myButton.update({
-  textContent: 'Click Me',
-  style: { backgroundColor: '#007bff', color: 'white' },
-  addEventListener: ['click', () => alert('Clicked!')]
-});
-
-// Query selector
-const header = Selector.query('#header');
-header.update({ textContent: 'New Title' });
-
-// Reactive state
-const state = ReactiveUtils.state({ name: 'John', age: 30 });
-state.$watch('name', (newVal) => console.log('Name changed:', newVal));
-state.name = 'Jane';
+  Router.mount('#app').start({ mode: 'hash' });
+</script>
 ```
 
-## 📚 Core APIs
+---
 
-### Elements - ID-based Access
+## Module Reference
+
+### Module 01 — Core
+
+Foundation for all other modules. Provides `Elements`, `Collections`, `Selector`, `createElement`.
 
 ```javascript
-// Direct access by ID
-Elements.myButton.textContent = 'Click Me';
-Elements.myButton.style.color = 'red';
-
-// Chainable updates
+// Access by ID
 Elements.myButton.update({
   textContent: 'Submit',
   style: { color: 'white', backgroundColor: '#007bff' },
@@ -192,346 +171,293 @@ Elements.myButton.update({
   addEventListener: ['click', handleClick]
 });
 
-// Bulk updates
+// Bulk update multiple IDs at once
 Elements.update({
   title:    { textContent: 'New Title', style: { fontSize: '24px' } },
   subtitle: { textContent: 'New Subtitle' },
   button:   { disabled: false }
 });
-```
 
-### Collections - Class/Tag Access
-
-```javascript
 // Access by class name
-Collections.ClassName.items.forEach(el => console.log(el.textContent));
+Collections.ClassName.card.forEach(el => console.log(el.textContent));
+Collections.ClassName.card.update({ style: { border: '1px solid #ccc' } });
 
-// Access by tag name
-Collections.TagName.div.update({ style: { border: '1px solid #ccc' } });
+// Access by tag
+Collections.TagName.div.update({ style: { margin: '0' } });
 
 // Access by name attribute
 Collections.Name.username.update({ placeholder: 'Enter username' });
-```
 
-### Selector - Query Selector
+// querySelector / querySelectorAll
+const header = Selector.query('#header');
+header.update({ textContent: 'Updated' });
 
-```javascript
-// Single element
-const element = Selector.query('#myId .myClass');
-element.update({ textContent: 'Updated' });
+const inputs = Selector.queryAll('input[required]');
+inputs.update({ classList: { add: 'required-field' } });
 
-// Multiple elements
-const elements = Selector.queryAll('.items');
-elements.update({ style: { color: 'blue' }, classList: { add: 'highlight' } });
-
-// Scoped queries
-Selector.Scoped.within('#container', '.item').update({ textContent: 'Scoped Update' });
-```
-
-### createElement - Enhanced Element Creation
-
-```javascript
-const button = createElement('button', {
+// createElement
+const btn = createElement('button', {
   textContent: 'Click Me',
-  className: 'btn btn-primary',
-  style: { padding: '10px 20px' },
-  addEventListener: ['click', () => alert('Clicked!')]
-});
-
-// Bulk creation
-const elements = createElement.bulk({
-  DIV:      { className: 'container' },
-  H1:       { textContent: 'Title', style: { color: 'blue' } },
-  P:        { textContent: 'Description' },
-  BUTTON_1: { textContent: 'Button 1' },
-  BUTTON_2: { textContent: 'Button 2' }
+  className: 'btn',
+  addEventListener: ['click', () => alert('Hi')]
 });
 ```
 
-### Native Enhance — Patch Native DOM Methods
+---
+
+### Module 02 — Enhancers
+
+Bulk DOM updates, shortcuts, indexed operations. **Requires Core.**
 
 ```javascript
-// After loading dom-helpers.native-enhance.min.js:
-const btn = document.getElementById('submit-btn');
-btn.update({ textContent: 'Submit', disabled: false });
+// Bulk text update for multiple IDs
+Elements.textContent({ title: 'New Title', desc: 'New Description' });
 
-document.getElementById.update({
-  title:   { textContent: 'Welcome!', style: { color: '#333' } },
-  spinner: { hidden: true }
+// Bulk style update
+Elements.style({ title: { color: 'blue' }, desc: { color: 'gray' } });
+
+// Index-based updates
+Collections.ClassName.items[0].update({ style: { fontWeight: 'bold' } });
+Collections.ClassName.items[-1].update({ style: { opacity: '0.5' } }); // last item
+```
+
+---
+
+### Module 03 — Conditions
+
+Conditional rendering and state-based DOM visibility. **Requires Core.**
+
+```javascript
+ConditionalRendering.apply(element, {
+  condition: state.isLoggedIn,
+  true:  { style: { display: 'block' } },
+  false: { style: { display: 'none' } }
 });
+```
+
+---
+
+### Module 04 — Reactive
+
+Vue-like reactivity: state, computed properties, watchers, forms, stores. **Requires Core.**
+
+```javascript
+// Basic state
+const state = ReactiveUtils.state({ count: 0, name: 'John' });
+
+state.$watch('count', (newVal, oldVal) => {
+  Elements.counter.update({ textContent: `Count: ${newVal}` });
+});
+
+state.count++; // triggers watcher
+
+// Computed properties
+state.$computed('doubled', function() { return this.count * 2; });
+console.log(state.doubled); // auto-updated
+
+// Store pattern
+const store = ReactiveUtils.store(
+  { user: null, cart: [] },
+  {
+    getters:  { isLoggedIn() { return this.user !== null; } },
+    actions:  { login(state, user) { state.user = user; } }
+  }
+);
+store.login({ name: 'Alice' });
+console.log(store.isLoggedIn); // true
+```
+
+---
+
+### Module 05 — Storage
+
+`StorageUtils` — localStorage/sessionStorage with namespacing, watching, and auto-save. **Standalone.**
+
+```javascript
+StorageUtils.set('user', { name: 'Alice', role: 'admin' });
+const user = StorageUtils.get('user');
+StorageUtils.watch('theme', (newVal) => applyTheme(newVal));
+```
+
+---
+
+### Module 06 — Native Enhance
+
+Patches native DOM methods to return enhanced elements. **Requires Core + Enhancers.**
+
+```javascript
+// After loading native-enhance, native methods return enhanced elements:
+const btn = document.getElementById('submit-btn');
+btn.update({ textContent: 'Submit', disabled: false }); // .update() available
 
 const cards = document.getElementsByClassName('card');
-cards.update({ classList: { add: 'animated' } });
+cards.update({ classList: { add: 'loaded' } });
 
 const inputs = document.querySelectorAll('input[required]');
 inputs.update({ classList: { add: 'required-field' } });
 ```
 
-**📖 [Full Native Enhance documentation](./NATIVE-ENHANCE.md)**
-
 ---
 
-## 📋 Form Module *(v2.6.0)*
+### Module 07 — Form
 
-Access any form by ID and get values, validate, and submit — all in a few lines.
+`Forms` — proxy-based form access, values, validation, serialization, enhanced submission. **Requires Core.**
 
 ```javascript
-// Access a form by its id attribute
-const form = Forms.contactForm;
+const form = Forms.contactForm; // access by id="contactForm"
 
-// Read all field values as a plain object
-const data = form.values; // { name: 'Alice', email: 'alice@example.com', ... }
+// Read / write values
+const data = form.values; // { name: 'Alice', email: '...', ... }
+form.values = { name: 'Bob' };
 
-// Write values back
-form.values = { name: 'Bob', email: 'bob@example.com' };
-
-// Validate with custom rules
+// Validate
 const result = form.validate({
   email:   { required: true, email: true },
   message: { required: true, minLength: 10 }
 });
-
-if (!result.isValid) return; // errors are shown automatically on the form
+if (!result.isValid) return;
 
 // Submit via fetch
-const response = await form.submitData({
-  url:       '/api/contact',
-  onSuccess: (data) => console.log('Done:', data),
-  onError:   (err)  => console.log('Failed:', err.message)
-});
-```
-
-### Enhanced submission (with `02_dh-form-enhance.js`)
-
-When the enhancement layer is loaded, `form.submitData()` gains a full production pipeline:
-
-```javascript
 await form.submitData({
   url:            '/api/contact',
   successMessage: 'Message sent!',
   resetOnSuccess: true,
-  retryAttempts:  2,
-  timeout:        15000
+  retryAttempts:  2
 });
-// Automatically: disables buttons, shows spinner, retries on failure,
-// shows success/error message, re-enables buttons.
-```
 
-### Declarative forms — zero JavaScript required
-
-```html
-<form
-  id="contactForm"
-  data-enhanced
-  data-submit-url="/api/contact"
-  data-success-message="Message sent!"
-  data-reset-on-success
->
-  <input type="text"  name="name"  required>
-  <input type="email" name="email" required>
-  <button type="submit">Send</button>
-</form>
-```
-
-### Unified validators
-
-```javascript
-const v = Forms.validators; // also at FormEnhancements.validators
-
-form.validate({
-  username: v.combine(
-    v.required('Username is required'),
-    v.minLength(3),
-    v.pattern('^[a-zA-Z0-9_]+$', 'Letters, numbers, and _ only')
-  ),
-  email:    v.combine(v.required(), v.email()),
-  password: v.combine(v.required(), v.minLength(8)),
-  confirm:  v.match('password', 'Passwords do not match')
-});
+// Declarative — zero JS required
+// <form id="contactForm" data-enhanced data-submit-url="/api/contact" data-success-message="Done!">
 ```
 
 ---
 
-## 🎬 Animation Module *(v2.6.0)*
+### Module 08 — Animation
 
-CSS transition animations added automatically to every element and collection.
+CSS transition animations on every element and collection. **Requires Core.**
 
 ```javascript
-// Fade in/out
 await Elements.modal.fadeIn({ duration: 300, easing: 'ease-out-cubic' });
 await Elements.notification.fadeOut();
-
-// Slide
-await Elements.accordion.slideDown({ duration: 350 });
-await Elements.menu.slideUp();
-await Elements.panel.slideToggle(); // auto-detects direction
-
-// Transform
+await Elements.panel.slideToggle();
 await Elements.card.transform({ translateX: '100px', scale: 1.05 });
 
 // Animation chains
 await Elements.toast.animate()
-  .fadeIn({ duration: 250, easing: 'ease-out-back' })
+  .fadeIn({ duration: 250 })
   .delay(3000)
   .fadeOut({ duration: 200 })
-  .next(() => Elements.toast.remove())
   .play();
 
-// Stagger collections — each element starts 80ms after the previous
-await ClassName.card.fadeIn({ duration: 400, stagger: 80 });
-```
+// Stagger collections
+await Collections.ClassName.card.fadeIn({ duration: 400, stagger: 80 });
 
-### Inside `.update()`
+// Inside .update()
+Elements.card.update({ textContent: 'Updated!', fadeIn: { duration: 500 } });
 
-```javascript
-Elements.card.update({
-  textContent: 'Updated!',
-  fadeIn: { duration: 500, easing: 'ease-out-cubic' }
-});
-```
-
-### Standalone functions
-
-```javascript
+// Standalone
 await Animation.fadeIn(document.querySelector('.hero'), { duration: 600 });
-await Animation.chain(anyElement).slideDown().delay(500).fadeOut().play();
-Animation.enhance(rawElement); // add animation methods to any element
 ```
 
-**30 named easing curves** — `ease-out-back`, `ease-in-expo`, `ease-in-out-cubic`, and more.
+30 named easing curves — `ease-out-back`, `ease-in-expo`, `ease-in-out-cubic`, and more.
 
 ---
 
-## ⚡ Async Utilities *(v2.6.0)*
+### Module 09 — Async
+
+`AsyncHelpers` — debounce, throttle, fetch, sanitize, and more. **Requires Core.**
 
 ```javascript
-// Debounce — wait until the user stops typing
-const debouncedSearch = AsyncHelpers.debounce(async (query) => {
-  const results = await AsyncHelpers.fetchJSON(`/api/search?q=${query}`);
+// Debounce
+const search = AsyncHelpers.debounce(async (q) => {
+  const results = await AsyncHelpers.fetchJSON(`/api/search?q=${q}`);
   renderResults(results);
 }, 350);
 
-searchInput.addEventListener('input', (e) => debouncedSearch(e.target.value));
+// Throttle
+const onScroll = AsyncHelpers.throttle(() => updateProgress(), 16);
+window.addEventListener('scroll', onScroll, { passive: true });
 
-// Throttle — scroll events, at most once every 16ms
-const updateProgress = AsyncHelpers.throttle(() => {
-  const pct = (window.scrollY / document.body.scrollHeight) * 100;
-  Elements.progressBar.update({ style: { width: `${pct}%` } });
-}, 16);
-window.addEventListener('scroll', updateProgress, { passive: true });
-
-// Enhanced fetch — timeout, retry, response type, lifecycle hooks
+// Enhanced fetch — timeout, retry, exponential backoff
 const data = await AsyncHelpers.fetch('/api/data', {
-  retries:            3,
-  retryDelay:      1000,
-  exponentialBackoff: true,
-  timeout:         10000,
-  onError: (err) => console.error('All retries failed:', err.message)
+  retries: 3, retryDelay: 1000, exponentialBackoff: true, timeout: 10000
 });
 
-// Parallel requests with progress tracking
+// Parallel requests
 const [users, orders] = await AsyncHelpers.parallelAll([
   AsyncHelpers.fetchJSON('/api/users'),
   AsyncHelpers.fetchJSON('/api/orders')
-], {
-  failFast:   false,
-  onProgress: (done, total) => Elements.progress.update({ textContent: `${done}/${total}` })
-});
+]);
 
-// Async event handler with automatic loading state on the button
-button.addEventListener('click', AsyncHelpers.asyncHandler(async (e) => {
+// Async button handler with automatic loading state
+button.addEventListener('click', AsyncHelpers.asyncHandler(async () => {
   await saveData();
-}, {
-  errorHandler: (err) => alert('Save failed: ' + err.message)
-}));
+}, { errorHandler: (err) => alert(err.message) }));
 
-// Sanitize user input before rendering
+// Sanitize user input
 const safe = AsyncHelpers.sanitize(userInput, { removeScripts: true, removeEvents: true });
 ```
 
-### Form integration (when Form module is also loaded)
-
-```javascript
-// Debounced live search inside a form
-Forms.searchForm.debounceInput('[name="q"]', (e) => search(e.target.value), 400);
-
-// Throttled character counter
-Forms.longForm.throttleInput('textarea', (e) => {
-  Elements.charCount.update({ textContent: `${e.target.value.length} / 500` });
-}, 200);
-
-// Sanitize all text fields before submitting
-Forms.commentForm.sanitizeAll();
-```
-
 ---
 
-## 🔄 Reactive State
+### Module 10 — SPA Router
 
-### Basic Reactive State
-
-```javascript
-const state = ReactiveUtils.state({ count: 0, name: 'John' });
-
-state.$watch('count', (newValue, oldValue) => {
-  console.log(`Count changed from ${oldValue} to ${newValue}`);
-});
-
-state.count++; // Triggers watcher
-```
-
-### Computed Properties
+Client-side routing with hash/history mode, guards, transitions, and declarative components. **Standalone.**
 
 ```javascript
-const state = ReactiveUtils.state({ firstName: 'John', lastName: 'Doe' });
-
-state.$computed('fullName', function() {
-  return `${this.firstName} ${this.lastName}`;
-});
-
-console.log(state.fullName); // "John Doe"
-state.firstName = 'Jane';
-console.log(state.fullName); // "Jane Doe" (auto-updated)
-```
-
-### Reactive Forms
-
-```javascript
-const form = ReactiveUtils.form({ username: '', email: '', password: '' });
-
-Elements.username.addEventListener('input', (e) => {
-  form.$setValue('username', e.target.value);
-});
-
-console.log(form.isValid);
-console.log(form.isDirty);
-```
-
-### Store Pattern
-
-```javascript
-const store = ReactiveUtils.store(
-  { count: 0, user: null },
+Router.define([
   {
-    getters:  { isLoggedIn() { return this.user !== null; } },
-    actions:  {
-      increment(state) { state.count++; },
-      setUser(state, user) { state.user = user; }
+    path: '/',
+    view: '#view-home',
+    title: 'Home',
+  },
+  {
+    path: '/user/:id',
+    view: '#view-user',
+    title: 'Profile',
+    onEnter(params, query, onCleanup) {
+      Elements.userName.update({ textContent: params.id });
+      const timer = setInterval(tick, 1000);
+      onCleanup(() => clearInterval(timer)); // auto-cleanup on leave
     }
-  }
-);
+  },
+  {
+    path: '/admin',
+    view: '#view-admin',
+    guard: () => isLoggedIn() || Router.go('/login'),
+  },
+  { path: '*', view: '#view-404', title: '404' }
+]);
 
-store.increment();
-store.setUser({ name: 'John' });
+Router.beforeEach((to, from, next) => {
+  console.log('Navigating to', to.path);
+  next(); // must call next() to proceed
+});
+
+Router.afterEach((to) => {
+  analytics.track(to.path);
+});
+
+Router.mount('#app').start({ mode: 'hash', scrollToTop: true });
+
+// Navigate programmatically
+Router.go('/user/42');
+Router.back();
+Router.replace('/login');
+
+// Declarative links in HTML
+// <router-link to="/about">About</router-link>
+// <router-view></router-view>
 ```
 
 ---
 
-## 🔧 Update Method Reference
+## Universal `.update()` Method
+
+Every element and collection has `.update()` — a single method that handles any DOM property:
 
 ```javascript
 element.update({
-  // Text content
+  // Content
   textContent: 'Text',
   innerHTML: '<b>HTML</b>',
 
@@ -544,7 +470,7 @@ element.update({
   style: { color: 'red', backgroundColor: '#f0f0f0' },
 
   // Classes
-  classList: { add: ['class1', 'class2'], remove: 'oldClass', toggle: 'active' },
+  classList: { add: ['a', 'b'], remove: 'old', toggle: 'active' },
 
   // Attributes
   setAttribute: { 'data-id': '123', 'aria-label': 'Button' },
@@ -555,44 +481,50 @@ element.update({
   // Events
   addEventListener: ['click', handleClick],
 
-  // Animation keys (when Animation module is loaded)
-  fadeIn:      true,
-  fadeOut:     { duration: 200 },
+  // Animation keys (when Animation module loaded)
+  fadeIn:      { duration: 300 },
   slideDown:   { easing: 'ease-out-cubic' },
-  slideToggle: true,
-  transform:   { transformations: { scale: 1.1 }, options: { duration: 150 } }
+  transform:   { translateX: '100px', scale: 1.1 }
 });
 ```
 
-## 📊 Browser Support
+---
 
-- Chrome/Edge: Latest 2 versions
-- Firefox: Latest 2 versions
-- Safari: Latest 2 versions
-- Opera: Latest 2 versions
+## Size Reference
 
-## 🤝 Contributing
+| Bundle | Gzipped |
+|--------|---------|
+| **Full Bundle** (`full-spa`) | ~49.7 KB |
+| Core | ~9.6 KB |
+| Enhancers | ~8.4 KB |
+| Conditions | ~7.2 KB |
+| Reactive | ~11.5 KB |
+| Storage | ~1.3 KB |
+| Native Enhance | ~2.2 KB |
+| Form | ~6.5 KB |
+| Animation | ~4.8 KB |
+| Async | ~3.9 KB |
+| SPA Router | ~3.9 KB |
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+---
 
-## 📄 License
+## Browser Support
+
+- Chrome / Edge — latest 2 versions
+- Firefox — latest 2 versions
+- Safari — latest 2 versions
+- Opera — latest 2 versions
+
+---
+
+## License
 
 MIT © DOMHelpers-Js
 
-## 🔗 Links
+---
+
+## Links
 
 - [GitHub Repository](https://github.com/DOMHelpers-Js/dom-helpers)
 - [npm Package](https://www.npmjs.com/package/dom-helpers-js)
-- [Full Documentation](https://github.com/DOMHelpers-Js/dom-helpers#readme)
 - [All CDN Links](./ALL-CDN-LINKS.md)
-- [Native Enhance Guide](./NATIVE-ENHANCE.md)
-- [Publishing Guide](./PUBLISHING.md)
-
-## 💡 Why DOM Helpers JS?
-
-- **No Learning Curve** - Intuitive API that feels natural
-- **Performance First** - Intelligent caching and optimizations
-- **Framework-Free** - Use with any project or framework
-- **CDN-Ready** - Drop-in script tag for quick prototyping
-- **Production-Ready** - Battle-tested in real applications
-- **Modular** - Load only what you need

@@ -5,7 +5,7 @@ const isDev = process.env.BUILD === 'development';
 const isProd = process.env.BUILD === 'production';
 
 const banner = `/**
- * DOM Helpers JS v2.6.0
+ * DOM Helpers JS v2.8.0
  * High-performance vanilla JavaScript DOM utilities
  * @license MIT
  * @repository https://github.com/DOMHelpers-Js/dom-helpers
@@ -36,12 +36,6 @@ const terserConfig = {
 
 // Build configurations for different modules
 const modules = [
-  {
-    input: 'src/index.js',
-    name: 'DOMHelpers',
-    outputName: 'dom-helpers',
-    description: 'Full bundle'
-  },
   {
     input: 'src/core.js',
     name: 'DOMHelpers',
@@ -77,6 +71,36 @@ const modules = [
     name: 'DOMHelpers',
     outputName: 'dom-helpers.native-enhance',
     description: 'Native enhance only (requires core + enhancers)'
+  },
+  {
+    input: 'src/form-only.js',
+    name: 'Forms',
+    outputName: 'dom-helpers.form',
+    description: 'Form module only (requires core)'
+  },
+  {
+    input: 'src/animation-only.js',
+    name: 'Animation',
+    outputName: 'dom-helpers.animation',
+    description: 'Animation module only (requires core)'
+  },
+  {
+    input: 'src/async-only.js',
+    name: 'AsyncHelpers',
+    outputName: 'dom-helpers.async',
+    description: 'Async utilities only (requires core)'
+  },
+  {
+    input: 'src/spa-only.js',
+    name: 'Router',
+    outputName: 'dom-helpers.spa',
+    description: 'SPA Router (standalone — no other DOM Helpers modules required)'
+  },
+  {
+    input: 'src/spa.js',
+    name: 'DOMHelpers',
+    outputName: 'dom-helpers.full-spa',
+    description: 'Full DOM Helpers bundle + SPA Router'
   }
 ];
 
