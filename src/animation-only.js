@@ -2,7 +2,7 @@
  * DOM Helpers JS - Animation Module Only (No Core)
  * fadeIn, fadeOut, slideUp, slideDown, slideToggle, transform, animation chains.
  * Requires: Core module to be loaded first!
- * @version 2.7.0
+ * @version 2.9.0
  * @license MIT
  */
 

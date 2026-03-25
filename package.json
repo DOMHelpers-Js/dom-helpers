@@ -1,13 +1,14 @@
 {
   "name": "dom-helpers-js",
-  "version": "2.8.0",
+  "version": "2.9.0",
+  "type": "module",
   "description": "High-performance vanilla JavaScript DOM utilities with intelligent caching, reactive state management, and conditional rendering",
   "main": "dist/dom-helpers.full-spa.cjs.js",
   "module": "dist/dom-helpers.full-spa.esm.js",
   "browser": "dist/dom-helpers.full-spa.umd.js",
   "unpkg": "dist/dom-helpers.full-spa.min.js",
   "jsdelivr": "dist/dom-helpers.full-spa.min.js",
-  "types": "dist/index.d.ts",
+  "sideEffects": true,
   "exports": {
     ".": {
       "import": "./dist/dom-helpers.full-spa.esm.js",

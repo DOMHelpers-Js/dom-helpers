@@ -5,7 +5,7 @@ const isDev = process.env.BUILD === 'development';
 const isProd = process.env.BUILD === 'production';
 
 const banner = `/**
- * DOM Helpers JS v2.8.0
+ * DOM Helpers JS v2.9.0
  * High-performance vanilla JavaScript DOM utilities
  * @license MIT
  * @repository https://github.com/DOMHelpers-Js/dom-helpers
@@ -121,6 +121,7 @@ const configs = modules.map(module => {
       name: module.name,
       banner,
       sourcemap: true,
+      exports: 'named',
       globals: {}
     });
 
@@ -129,7 +130,8 @@ const configs = modules.map(module => {
       file: `dist/${module.outputName}.esm.js`,
       format: 'es',
       banner,
-      sourcemap: true
+      sourcemap: true,
+      exports: 'named'
     });
 
     // CommonJS build
@@ -151,6 +153,7 @@ const configs = modules.map(module => {
       name: module.name,
       banner,
       sourcemap: true,
+      exports: 'named',
       plugins: [terser(terserConfig)]
     });
 
@@ -160,6 +163,7 @@ const configs = modules.map(module => {
       format: 'es',
       banner,
       sourcemap: true,
+      exports: 'named',
       plugins: [terser(terserConfig)]
     });
   }

@@ -2,7 +2,7 @@
  * DOM Helpers JS - Storage Module Only (Standalone)
  * localStorage / sessionStorage utilities with auto-save, watching, and namespacing
  * Works independently - no other modules required
- * @version 2.4.0
+ * @version 2.9.0
  * @license MIT
  */
 

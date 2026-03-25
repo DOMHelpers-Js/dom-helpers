@@ -13,13 +13,13 @@
  *
  *  Reactive path (no need to load this file):
  *    <script src="01_dh-core.js"></script>
- *    <script src="04_reactive/01_dh-reactive.js"></script>
- *    <script src="04_reactive/04_dh-reactive-form.js"></script>
+ *    <script src="03_reactive/01_dh-reactive.js"></script>
+ *    <script src="03_reactive/04_dh-reactive-form.js"></script>
  *
  *  Bridge path (both worlds, reactive + enhanced DOM forms):
  *    <script src="01_dh-core.js"></script>
- *    <script src="04_reactive/01_dh-reactive.js"></script>
- *    <script src="04_reactive/04_dh-reactive-form.js"></script>
+ *    <script src="03_reactive/01_dh-reactive.js"></script>
+ *    <script src="03_reactive/04_dh-reactive-form.js"></script>
  *    <script src="Form/01_dh-form.js"></script>
  *    <script src="Form/02_dh-form-enhance.js"></script>   ← provides the bridge
  *

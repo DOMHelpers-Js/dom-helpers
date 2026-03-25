@@ -2,7 +2,7 @@
  * DOM Helpers JS - Enhancers Module
  * Bulk updates, shortcuts, indexed updates
  * Requires: Core module
- * @version 2.3.1
+ * @version 2.9.0
  * @license MIT
  */
 

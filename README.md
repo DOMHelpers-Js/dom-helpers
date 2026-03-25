@@ -21,7 +21,7 @@ High-performance vanilla JavaScript DOM utilities with intelligent caching, reac
 - **Form Module** — Non-reactive form handling: values, validation, serialization, enhanced submission
 - **Animation Module** — CSS transition animations: fadeIn/Out, slideUp/Down, transforms, chains, stagger
 - **Async Utilities** — debounce, throttle, enhanced fetch, parallelAll, raceWithTimeout, sanitize
-- **SPA Router** — Client-side routing with hash/history mode, guards, transitions, declarative links *(v2.7.0)*
+- **SPA Router** — Client-side routing with hash/history mode, guards, transitions, declarative links *(v2.9.0)*
 
 ---
 
@@ -38,10 +38,10 @@ One script tag, everything included:
 
 ```html
 <!-- jsDelivr -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.8.0/dist/dom-helpers.full-spa.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.full-spa.min.js"></script>
 
 <!-- unpkg -->
-<script src="https://unpkg.com/dom-helpers-js@2.8.0/dist/dom-helpers.full-spa.min.js"></script>
+<script src="https://unpkg.com/dom-helpers-js@2.9.0/dist/dom-helpers.full-spa.min.js"></script>
 ```
 
 **Globals exposed:** `Elements`, `Collections`, `Selector`, `createElement`, `ReactiveUtils`, `ReactiveState`, `StorageUtils`, `Forms`, `Animation`, `AsyncHelpers`, `Router`
@@ -52,34 +52,34 @@ Load only what you need. All modules have their own dist file:
 
 ```html
 <!-- 1. Core (required foundation) -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.8.0/dist/dom-helpers.core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
 
 <!-- 2. Enhancers (requires Core) -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.8.0/dist/dom-helpers.enhancers.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.enhancers.min.js"></script>
 
-<!-- 3. Conditions (requires Core) -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.8.0/dist/dom-helpers.conditions.min.js"></script>
+<!-- 3. Reactive (requires Core) -->
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.min.js"></script>
 
-<!-- 4. Reactive (requires Core) -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.8.0/dist/dom-helpers.reactive.min.js"></script>
+<!-- 4. Conditions (requires Core) -->
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.conditions.min.js"></script>
 
 <!-- 5. Storage (standalone) -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.8.0/dist/dom-helpers.storage.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.storage.min.js"></script>
 
 <!-- 6. Native Enhance (requires Core + Enhancers) -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.8.0/dist/dom-helpers.native-enhance.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.native-enhance.min.js"></script>
 
 <!-- 7. Form (requires Core) -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.8.0/dist/dom-helpers.form.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.form.min.js"></script>
 
 <!-- 8. Animation (requires Core) -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.8.0/dist/dom-helpers.animation.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.animation.min.js"></script>
 
 <!-- 9. Async (requires Core) -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.8.0/dist/dom-helpers.async.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.async.min.js"></script>
 
 <!-- 10. SPA Router (standalone) -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.8.0/dist/dom-helpers.spa.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.spa.min.js"></script>
 ```
 
 > **Load order matters.** Core must come before any module that requires it. See [ALL-CDN-LINKS.md](./ALL-CDN-LINKS.md) for the full reference and common combinations.
@@ -120,7 +120,7 @@ const { ReactiveUtils } = require('dom-helpers-js/reactive');
   <div class="card">Card 1</div>
   <div class="card">Card 2</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.8.0/dist/dom-helpers.full-spa.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.full-spa.min.js"></script>
   <script>
     // Access by ID
     Elements.title.update({ textContent: 'Welcome!', style: { color: 'blue' } });
@@ -142,7 +142,7 @@ const { ReactiveUtils } = require('dom-helpers-js/reactive');
 ### SPA in 10 lines
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.8.0/dist/dom-helpers.full-spa.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.full-spa.min.js"></script>
 <script>
   Router.define([
     { path: '/',      view: '#home',  title: 'Home' },
@@ -223,21 +223,7 @@ Collections.ClassName.items[-1].update({ style: { opacity: '0.5' } }); // last i
 
 ---
 
-### Module 03 — Conditions
-
-Conditional rendering and state-based DOM visibility. **Requires Core.**
-
-```javascript
-ConditionalRendering.apply(element, {
-  condition: state.isLoggedIn,
-  true:  { style: { display: 'block' } },
-  false: { style: { display: 'none' } }
-});
-```
-
----
-
-### Module 04 — Reactive
+### Module 03 — Reactive
 
 Vue-like reactivity: state, computed properties, watchers, forms, stores. **Requires Core.**
 
@@ -265,6 +251,20 @@ const store = ReactiveUtils.store(
 );
 store.login({ name: 'Alice' });
 console.log(store.isLoggedIn); // true
+```
+
+---
+
+### Module 04 — Conditions
+
+Conditional rendering and state-based DOM visibility. **Requires Core.**
+
+```javascript
+ConditionalRendering.apply(element, {
+  condition: state.isLoggedIn,
+  true:  { style: { display: 'block' } },
+  false: { style: { display: 'none' } }
+});
 ```
 
 ---
@@ -497,8 +497,8 @@ element.update({
 | **Full Bundle** (`full-spa`) | ~49.7 KB |
 | Core | ~9.6 KB |
 | Enhancers | ~8.4 KB |
-| Conditions | ~7.2 KB |
 | Reactive | ~11.5 KB |
+| Conditions | ~7.2 KB |
 | Storage | ~1.3 KB |
 | Native Enhance | ~2.2 KB |
 | Form | ~6.5 KB |

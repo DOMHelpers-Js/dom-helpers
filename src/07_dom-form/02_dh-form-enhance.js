@@ -13,8 +13,8 @@
  *
  *  Bridge (reactive forms + enhanced DOM forms side-by-side):
  *    <script src="01_dh-core.js"></script>
- *    <script src="04_reactive/01_dh-reactive.js"></script>
- *    <script src="04_reactive/04_dh-reactive-form.js"></script>
+ *    <script src="03_reactive/01_dh-reactive.js"></script>
+ *    <script src="03_reactive/04_dh-reactive-form.js"></script>
  *    <script src="Form/01_dh-form.js"></script>
  *    <script src="Form/02_dh-form-enhance.js"></script>
  *
