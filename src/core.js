@@ -1,7 +1,7 @@
 /**
  * DOM Helpers JS - Core Module Only
  * Elements, Collections, Selector, createElement
- * @version 2.9.0
+ * @version 2.9.1
  * @license MIT
  */
 

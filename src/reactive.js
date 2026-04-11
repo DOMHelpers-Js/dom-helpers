@@ -2,7 +2,7 @@
  * DOM Helpers JS - Reactive Module
  * Reactive state management, forms, async state
  * Requires: Core module
- * @version 2.9.0
+ * @version 2.9.1
  * @license MIT
  */
 

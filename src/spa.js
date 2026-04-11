@@ -1,7 +1,7 @@
 /**
  * DOM Helpers JS — Core + SPA Bundle
  * Full DOM Helpers library plus the SPA Router module.
- * @version 2.9.0
+ * @version 2.9.1
  * @license MIT
  */
 

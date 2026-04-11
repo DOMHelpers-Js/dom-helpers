@@ -2,7 +2,7 @@
  * DOM Helpers JS — SPA Module (Standalone)
  * Client-side router with hash/history mode, transitions, guards, and declarative links.
  * Works independently — no other DOM Helpers modules required.
- * @version 2.9.0
+ * @version 2.9.1
  * @license MIT
  */
 

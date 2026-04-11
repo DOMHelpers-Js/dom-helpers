@@ -4,7 +4,7 @@
  * document.querySelector and document.querySelectorAll to use the DOM Helpers
  * enhancement pipeline.
  * Requires: Core module (and Enhancers) to be loaded first!
- * @version 2.9.0
+ * @version 2.9.1
  * @license MIT
  */
 

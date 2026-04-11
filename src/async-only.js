@@ -3,7 +3,7 @@
  * debounce, throttle, sleep, enhancedFetch, fetchJSON, fetchText, fetchBlob,
  * asyncHandler, parallelAll, raceWithTimeout, sanitize.
  * Requires: Core module to be loaded first!
- * @version 2.9.0
+ * @version 2.9.1
  * @license MIT
  */
 

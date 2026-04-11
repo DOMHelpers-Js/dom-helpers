@@ -25,10 +25,10 @@ Globals on `window`, render-blocking.
 
 ```html
 <!-- jsDelivr -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.full-spa.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.full-spa.min.js"></script>
 
 <!-- unpkg -->
-<script src="https://unpkg.com/dom-helpers-js@2.9.0/dist/dom-helpers.full-spa.min.js"></script>
+<script src="https://unpkg.com/dom-helpers-js@2.9.1/dist/dom-helpers.full-spa.min.js"></script>
 ```
 
 ---
@@ -37,7 +37,7 @@ Globals on `window`, render-blocking.
 Globals on `window`, non-blocking — page renders before the library executes.
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.full-spa.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.full-spa.esm.min.js"></script>
 ```
 
 ---
@@ -50,7 +50,7 @@ Explicit named imports — ideal for modular multi-file projects.
   import { Elements, Collections, Selector, createElement,
            ReactiveUtils, ReactiveState, StorageUtils,
            Forms, Animation, AsyncHelpers, Router }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.full-spa.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.full-spa.esm.min.js';
 </script>
 ```
 
@@ -72,19 +72,19 @@ Load only the modules you need. Order matters — always respect the dependency 
 
 **Classic**
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.min.js"></script>
 ```
 
 **Deferred**
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js"></script>
 ```
 
 **Named Imports**
 ```html
 <script type="module">
   import { Elements, Collections, Selector, createElement }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
 </script>
 ```
 
@@ -96,19 +96,19 @@ Load only the modules you need. Order matters — always respect the dependency 
 
 **Classic**
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.storage.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.storage.min.js"></script>
 ```
 
 **Deferred**
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.storage.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.storage.esm.min.js"></script>
 ```
 
 **Named Imports**
 ```html
 <script type="module">
   import { StorageUtils }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.storage.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.storage.esm.min.js';
 </script>
 ```
 
@@ -120,19 +120,19 @@ Load only the modules you need. Order matters — always respect the dependency 
 
 **Classic**
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.spa.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.spa.min.js"></script>
 ```
 
 **Deferred**
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.spa.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.spa.esm.min.js"></script>
 ```
 
 **Named Imports**
 ```html
 <script type="module">
   import { Router }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.spa.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.spa.esm.min.js';
 </script>
 ```
 
@@ -144,22 +144,22 @@ Bulk DOM updates, shortcuts, indexed operations. **Requires Core.**
 
 **Classic**
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.enhancers.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.enhancers.min.js"></script>
 ```
 
 **Deferred**
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.enhancers.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.enhancers.esm.min.js"></script>
 ```
 
 **Named Imports**
 ```html
 <script type="module">
   import { Elements, Collections, Selector }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js';
-  import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.enhancers.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
+  import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.enhancers.esm.min.js';
 </script>
 ```
 
@@ -171,23 +171,23 @@ Reactive state, computed properties, watchers. **Requires Core.**
 
 **Classic**
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.reactive.min.js"></script>
 ```
 
 **Deferred**
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.reactive.esm.min.js"></script>
 ```
 
 **Named Imports**
 ```html
 <script type="module">
   import { Elements, Collections, Selector }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
   import { ReactiveUtils, ReactiveState }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.reactive.esm.min.js';
 </script>
 ```
 
@@ -199,26 +199,26 @@ Conditional rendering, state-based DOM visibility. **Requires Core. Load Reactiv
 
 **Classic**
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.conditions.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.reactive.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.conditions.min.js"></script>
 ```
 
 **Deferred**
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.esm.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.conditions.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.reactive.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.conditions.esm.min.js"></script>
 ```
 
 **Named Imports**
 ```html
 <script type="module">
   import { Elements, Collections, Selector }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
   import { ReactiveUtils }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.esm.min.js';
-  import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.conditions.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.reactive.esm.min.js';
+  import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.conditions.esm.min.js';
 </script>
 ```
 
@@ -230,25 +230,25 @@ Patches `getElementById`, `getElementsBy*`, `querySelector/All` to return enhanc
 
 **Classic**
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.enhancers.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.native-enhance.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.enhancers.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.native-enhance.min.js"></script>
 ```
 
 **Deferred**
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.enhancers.esm.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.native-enhance.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.enhancers.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.native-enhance.esm.min.js"></script>
 ```
 
 **Named Imports**
 ```html
 <script type="module">
   import { Elements, Collections, Selector }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js';
-  import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.enhancers.esm.min.js';
-  import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.native-enhance.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
+  import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.enhancers.esm.min.js';
+  import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.native-enhance.esm.min.js';
 </script>
 ```
 
@@ -260,23 +260,23 @@ Patches `getElementById`, `getElementsBy*`, `querySelector/All` to return enhanc
 
 **Classic**
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.form.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.form.min.js"></script>
 ```
 
 **Deferred**
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.form.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.form.esm.min.js"></script>
 ```
 
 **Named Imports**
 ```html
 <script type="module">
   import { Elements, Collections, Selector }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
   import { Forms }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.form.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.form.esm.min.js';
 </script>
 ```
 
@@ -288,23 +288,23 @@ Patches `getElementById`, `getElementsBy*`, `querySelector/All` to return enhanc
 
 **Classic**
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.animation.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.animation.min.js"></script>
 ```
 
 **Deferred**
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.animation.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.animation.esm.min.js"></script>
 ```
 
 **Named Imports**
 ```html
 <script type="module">
   import { Elements, Collections, Selector }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
   import { Animation }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.animation.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.animation.esm.min.js';
 </script>
 ```
 
@@ -316,23 +316,23 @@ Patches `getElementById`, `getElementsBy*`, `querySelector/All` to return enhanc
 
 **Classic**
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.async.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.async.min.js"></script>
 ```
 
 **Deferred**
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.async.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.async.esm.min.js"></script>
 ```
 
 **Named Imports**
 ```html
 <script type="module">
   import { Elements, Collections, Selector }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
   import { AsyncHelpers }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.async.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.async.esm.min.js';
 </script>
 ```
 
@@ -345,21 +345,21 @@ Lightweight DOM access with persistent storage.
 
 **Classic**
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.storage.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.storage.min.js"></script>
 ```
 **Deferred**
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.storage.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.storage.esm.min.js"></script>
 ```
 **Named Imports**
 ```html
 <script type="module">
   import { Elements, Collections, Selector }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
   import { StorageUtils }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.storage.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.storage.esm.min.js';
 </script>
 ```
 
@@ -370,21 +370,21 @@ DOM access with reactive state management.
 
 **Classic**
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.reactive.min.js"></script>
 ```
 **Deferred**
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.reactive.esm.min.js"></script>
 ```
 **Named Imports**
 ```html
 <script type="module">
   import { Elements, Collections, Selector }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
   import { ReactiveUtils, ReactiveState }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.reactive.esm.min.js';
 </script>
 ```
 
@@ -395,20 +395,20 @@ DOM access with bulk update helpers.
 
 **Classic**
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.enhancers.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.enhancers.min.js"></script>
 ```
 **Deferred**
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.enhancers.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.enhancers.esm.min.js"></script>
 ```
 **Named Imports**
 ```html
 <script type="module">
   import { Elements, Collections, Selector }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js';
-  import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.enhancers.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
+  import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.enhancers.esm.min.js';
 </script>
 ```
 
@@ -419,25 +419,25 @@ Reactive state with persistent storage.
 
 **Classic**
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.storage.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.reactive.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.storage.min.js"></script>
 ```
 **Deferred**
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.esm.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.storage.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.reactive.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.storage.esm.min.js"></script>
 ```
 **Named Imports**
 ```html
 <script type="module">
   import { Elements, Collections, Selector }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
   import { ReactiveUtils, ReactiveState }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.reactive.esm.min.js';
   import { StorageUtils }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.storage.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.storage.esm.min.js';
 </script>
 ```
 
@@ -448,21 +448,21 @@ Minimal SPA — just routing with basic DOM access.
 
 **Classic**
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.spa.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.spa.min.js"></script>
 ```
 **Deferred**
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.spa.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.spa.esm.min.js"></script>
 ```
 **Named Imports**
 ```html
 <script type="module">
   import { Elements, Collections, Selector }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
   import { Router }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.spa.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.spa.esm.min.js';
 </script>
 ```
 
@@ -473,25 +473,25 @@ Reactive SPA without form/animation/async overhead.
 
 **Classic**
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.spa.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.reactive.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.spa.min.js"></script>
 ```
 **Deferred**
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.esm.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.spa.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.reactive.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.spa.esm.min.js"></script>
 ```
 **Named Imports**
 ```html
 <script type="module">
   import { Elements, Collections, Selector }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
   import { ReactiveUtils, ReactiveState }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.reactive.esm.min.js';
   import { Router }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.spa.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.spa.esm.min.js';
 </script>
 ```
 
@@ -501,30 +501,30 @@ Reactive SPA without form/animation/async overhead.
 
 **Classic**
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.enhancers.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.conditions.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.storage.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.native-enhance.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.form.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.animation.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.async.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.spa.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.enhancers.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.reactive.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.conditions.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.storage.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.native-enhance.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.form.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.animation.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.async.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.spa.min.js"></script>
 ```
 
 **Deferred**
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.enhancers.esm.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.esm.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.conditions.esm.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.storage.esm.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.native-enhance.esm.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.form.esm.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.animation.esm.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.async.esm.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.spa.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.enhancers.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.reactive.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.conditions.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.storage.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.native-enhance.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.form.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.animation.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.async.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.spa.esm.min.js"></script>
 ```
 
 **Named Imports**
@@ -533,7 +533,7 @@ Reactive SPA without form/animation/async overhead.
   import { Elements, Collections, Selector, createElement,
            ReactiveUtils, ReactiveState, StorageUtils,
            Forms, Animation, AsyncHelpers, Router }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.full-spa.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.full-spa.esm.min.js';
 </script>
 ```
 

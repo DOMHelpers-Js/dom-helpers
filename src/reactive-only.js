@@ -2,7 +2,7 @@
  * DOM Helpers JS - Reactive Module Only (No Core)
  * Reactive state management, forms, async state
  * Requires: Core module to be loaded first!
- * @version 2.9.0
+ * @version 2.9.1
  * @license MIT
  */
 

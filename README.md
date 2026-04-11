@@ -37,10 +37,10 @@ One script tag, all globals available immediately on `window`:
 
 ```html
 <!-- jsDelivr -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.full-spa.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.full-spa.min.js"></script>
 
 <!-- unpkg -->
-<script src="https://unpkg.com/dom-helpers-js@2.9.0/dist/dom-helpers.full-spa.min.js"></script>
+<script src="https://unpkg.com/dom-helpers-js@2.9.1/dist/dom-helpers.full-spa.min.js"></script>
 ```
 
 ```html
@@ -61,11 +61,11 @@ Same globals as Classic, but the script is deferred — page renders before the 
 ```html
 <!-- inline import -->
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.full-spa.esm.min.js';
+  import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.full-spa.esm.min.js';
 </script>
 
 <!-- or shorter — src attribute, identical result -->
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.full-spa.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.full-spa.esm.min.js"></script>
 ```
 
 ```html
@@ -88,7 +88,7 @@ Build multi-file projects without a bundler. Load the library **once** in your e
 
 ```js
 // app.js — load library once as side-effect, then import your own modules
-import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.full-spa.esm.min.js';
+import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.full-spa.esm.min.js';
 
 import { initRouter } from './router.js';
 import { createStore } from './store.js';
@@ -149,7 +149,7 @@ export function mountHome(store, onCleanup) {
   <div class="card">Card 1</div>
   <div class="card">Card 2</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.full-spa.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.full-spa.min.js"></script>
   <script>
     // Access by ID
     Elements.title.update({ textContent: 'Welcome!', style: { color: 'blue' } });
@@ -172,7 +172,7 @@ export function mountHome(store, onCleanup) {
 
 ```html
 <!-- index.html — load library once, then your entry point -->
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.full-spa.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.full-spa.esm.min.js"></script>
 <script type="module" src="./app.js"></script>
 ```
 
@@ -204,7 +204,7 @@ export function initUI() {
 ### SPA in 10 lines
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.full-spa.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.full-spa.min.js"></script>
 <script>
   Router.define([
     { path: '/',      view: '#home',  title: 'Home' },
