@@ -18,9 +18,10 @@
 
 ---
 
-## 1. Full Bundle *(recommended)*
+## Loading the Full Bundle
 
-Everything included — all 10 modules in a single file.
+### 1. Classic
+Globals on `window`, render-blocking.
 
 ```html
 <!-- jsDelivr -->
@@ -30,116 +31,309 @@ Everything included — all 10 modules in a single file.
 <script src="https://unpkg.com/dom-helpers-js@2.9.0/dist/dom-helpers.full-spa.min.js"></script>
 ```
 
+---
+
+### 2. Deferred
+Globals on `window`, non-blocking — page renders before the library executes.
+
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.full-spa.esm.min.js"></script>
+```
+
+---
+
+### 3. Named Imports
+Explicit named imports — ideal for modular multi-file projects.
+
+```html
+<script type="module">
+  import { Elements, Collections, Selector, createElement,
+           ReactiveUtils, ReactiveState, StorageUtils,
+           Forms, Animation, AsyncHelpers, Router }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.full-spa.esm.min.js';
+</script>
+```
+
+> **Modular projects:** Load the library once in your entry point (`app.js`) using approach 2 or 3 — all globals are then available across every file without repeating the CDN URL.
+
 **Globals:** `Elements`, `Collections`, `Selector`, `createElement`, `ReactiveUtils`, `ReactiveState`, `StorageUtils`, `Forms`, `Animation`, `AsyncHelpers`, `Router`
 
 ---
 
-## 2. Core Only
+## Loading Individual Modules
+
+Load only the modules you need. Order matters — always respect the dependency chain.
+
+---
+
+### Core Only
 
 `Elements`, `Collections`, `Selector`, `createElement`. The foundation — all other modules require this.
 
+**Classic**
 ```html
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
 ```
 
+**Deferred**
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
+```
+
+**Named Imports**
+```html
+<script type="module">
+  import { Elements, Collections, Selector, createElement }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js';
+</script>
+```
+
 ---
 
-## 3. Storage Only
+### Storage Only
 
-`StorageUtils` — localStorage/sessionStorage with auto-save, watching, and namespacing.
-**Fully standalone**, no Core required.
+`StorageUtils` — localStorage/sessionStorage with auto-save, watching, and namespacing. **Fully standalone.**
 
+**Classic**
 ```html
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.storage.min.js"></script>
 ```
 
----
-
-## 4. SPA Router Only
-
-`Router` — hash/history routing, guards, transitions, `<router-view>`, `<router-link>`.
-**Fully standalone**, no Core required.
-
+**Deferred**
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.spa.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.storage.esm.min.js"></script>
+```
+
+**Named Imports**
+```html
+<script type="module">
+  import { StorageUtils }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.storage.esm.min.js';
+</script>
 ```
 
 ---
 
-## 5. Enhancers Only
+### SPA Router Only
+
+`Router` — hash/history routing, guards, transitions. **Fully standalone.**
+
+**Classic**
+```html
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.spa.min.js"></script>
+```
+
+**Deferred**
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.spa.esm.min.js"></script>
+```
+
+**Named Imports**
+```html
+<script type="module">
+  import { Router }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.spa.esm.min.js';
+</script>
+```
+
+---
+
+### Enhancers Only
 
 Bulk DOM updates, shortcuts, indexed operations. **Requires Core.**
 
+**Classic**
 ```html
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.enhancers.min.js"></script>
 ```
 
----
-
-## 6. Conditions Only
-
-Conditional rendering, state-based DOM visibility. **Requires Core.**
-
+**Deferred**
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.conditions.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.enhancers.esm.min.js"></script>
+```
+
+**Named Imports**
+```html
+<script type="module">
+  import { Elements, Collections, Selector }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js';
+  import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.enhancers.esm.min.js';
+</script>
 ```
 
 ---
 
-## 7. Reactive Only
+### Reactive Only
 
-Reactive state, computed properties, watchers, reactive forms and storage. **Requires Core.**
+Reactive state, computed properties, watchers. **Requires Core.**
 
+**Classic**
 ```html
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.min.js"></script>
 ```
 
+**Deferred**
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.esm.min.js"></script>
+```
+
+**Named Imports**
+```html
+<script type="module">
+  import { Elements, Collections, Selector }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js';
+  import { ReactiveUtils, ReactiveState }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.esm.min.js';
+</script>
+```
+
 ---
 
-## 8. Native Enhance Only
+### Conditions Only
 
-Patches `document.getElementById`, `getElementsByClassName/TagName/Name`, `querySelector`, `querySelectorAll` to return DOM Helpers enhanced elements. **Requires Core + Enhancers.**
+Conditional rendering, state-based DOM visibility. **Requires Core. Load Reactive first for reactive+static mode.**
 
+**Classic**
+```html
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.conditions.min.js"></script>
+```
+
+**Deferred**
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.conditions.esm.min.js"></script>
+```
+
+**Named Imports**
+```html
+<script type="module">
+  import { Elements, Collections, Selector }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js';
+  import { ReactiveUtils }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.esm.min.js';
+  import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.conditions.esm.min.js';
+</script>
+```
+
+---
+
+### Native Enhance Only
+
+Patches `getElementById`, `getElementsBy*`, `querySelector/All` to return enhanced elements. **Requires Core + Enhancers.**
+
+**Classic**
 ```html
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.enhancers.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.native-enhance.min.js"></script>
 ```
 
+**Deferred**
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.enhancers.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.native-enhance.esm.min.js"></script>
+```
+
+**Named Imports**
+```html
+<script type="module">
+  import { Elements, Collections, Selector }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js';
+  import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.enhancers.esm.min.js';
+  import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.native-enhance.esm.min.js';
+</script>
+```
+
 ---
 
-## 9. Form Only
+### Form Only
 
-`Forms` — proxy-based form access, values, validation, serialization, enhanced submission pipeline. **Requires Core.**
+`Forms` — form access, values, validation, serialization, enhanced submission. **Requires Core.**
 
+**Classic**
 ```html
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.form.min.js"></script>
 ```
 
+**Deferred**
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.form.esm.min.js"></script>
+```
+
+**Named Imports**
+```html
+<script type="module">
+  import { Elements, Collections, Selector }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js';
+  import { Forms }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.form.esm.min.js';
+</script>
+```
+
 ---
 
-## 10. Animation Only
+### Animation Only
 
-`Animation` — fadeIn/Out, slideUp/Down/Toggle, transform, animation chains, stagger support, 30 named easing curves. **Requires Core.**
+`Animation` — fadeIn/Out, slideUp/Down/Toggle, transform, chains, stagger, 30 easing curves. **Requires Core.**
 
+**Classic**
 ```html
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.animation.min.js"></script>
 ```
 
+**Deferred**
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.animation.esm.min.js"></script>
+```
+
+**Named Imports**
+```html
+<script type="module">
+  import { Elements, Collections, Selector }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js';
+  import { Animation }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.animation.esm.min.js';
+</script>
+```
+
 ---
 
-## 11. Async Only
+### Async Only
 
-`AsyncHelpers` — debounce, throttle, sanitize, sleep, enhanced fetch with retry/timeout, asyncHandler, parallelAll, raceWithTimeout. **Requires Core.**
+`AsyncHelpers` — debounce, throttle, sanitize, sleep, enhanced fetch, parallelAll, raceWithTimeout. **Requires Core.**
 
+**Classic**
 ```html
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.async.min.js"></script>
+```
+
+**Deferred**
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.async.esm.min.js"></script>
+```
+
+**Named Imports**
+```html
+<script type="module">
+  import { Elements, Collections, Selector }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js';
+  import { AsyncHelpers }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.async.esm.min.js';
+</script>
 ```
 
 ---
@@ -148,49 +342,164 @@ Patches `document.getElementById`, `getElementsByClassName/TagName/Name`, `query
 
 ### Core + Storage (~10.9 KB)
 Lightweight DOM access with persistent storage.
+
+**Classic**
 ```html
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.storage.min.js"></script>
 ```
+**Deferred**
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.storage.esm.min.js"></script>
+```
+**Named Imports**
+```html
+<script type="module">
+  import { Elements, Collections, Selector }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js';
+  import { StorageUtils }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.storage.esm.min.js';
+</script>
+```
+
+---
 
 ### Core + Reactive (~21.1 KB)
 DOM access with reactive state management.
+
+**Classic**
 ```html
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.min.js"></script>
 ```
+**Deferred**
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.esm.min.js"></script>
+```
+**Named Imports**
+```html
+<script type="module">
+  import { Elements, Collections, Selector }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js';
+  import { ReactiveUtils, ReactiveState }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.esm.min.js';
+</script>
+```
+
+---
 
 ### Core + Enhancers (~18.0 KB)
 DOM access with bulk update helpers.
+
+**Classic**
 ```html
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.enhancers.min.js"></script>
 ```
+**Deferred**
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.enhancers.esm.min.js"></script>
+```
+**Named Imports**
+```html
+<script type="module">
+  import { Elements, Collections, Selector }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js';
+  import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.enhancers.esm.min.js';
+</script>
+```
+
+---
 
 ### Core + Reactive + Storage (~22.4 KB)
 Reactive state with persistent storage.
+
+**Classic**
 ```html
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.storage.min.js"></script>
 ```
+**Deferred**
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.storage.esm.min.js"></script>
+```
+**Named Imports**
+```html
+<script type="module">
+  import { Elements, Collections, Selector }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js';
+  import { ReactiveUtils, ReactiveState }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.esm.min.js';
+  import { StorageUtils }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.storage.esm.min.js';
+</script>
+```
+
+---
 
 ### Core + SPA Router (~13.5 KB)
 Minimal SPA — just routing with basic DOM access.
+
+**Classic**
 ```html
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.spa.min.js"></script>
 ```
+**Deferred**
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.spa.esm.min.js"></script>
+```
+**Named Imports**
+```html
+<script type="module">
+  import { Elements, Collections, Selector }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js';
+  import { Router }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.spa.esm.min.js';
+</script>
+```
+
+---
 
 ### Core + Reactive + SPA (~25 KB)
 Reactive SPA without form/animation/async overhead.
+
+**Classic**
 ```html
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.spa.min.js"></script>
 ```
+**Deferred**
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.spa.esm.min.js"></script>
+```
+**Named Imports**
+```html
+<script type="module">
+  import { Elements, Collections, Selector }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js';
+  import { ReactiveUtils, ReactiveState }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.esm.min.js';
+  import { Router }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.spa.esm.min.js';
+</script>
+```
+
+---
 
 ### Everything à la carte (same as Full Bundle)
+
+**Classic**
 ```html
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.enhancers.min.js"></script>
@@ -204,34 +513,28 @@ Reactive SPA without form/animation/async overhead.
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.spa.min.js"></script>
 ```
 
----
-
-## npm / ESM (Bundlers)
-
-```bash
-npm install dom-helpers-js
+**Deferred**
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.enhancers.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.conditions.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.storage.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.native-enhance.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.form.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.animation.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.async.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.spa.esm.min.js"></script>
 ```
 
-```js
-// Full package (default — all modules)
-import { Elements, Collections, Selector, ReactiveUtils, StorageUtils, Forms, Animation, AsyncHelpers, Router } from 'dom-helpers-js';
-
-// Sub-path imports — load only what you need
-import { Elements }      from 'dom-helpers-js/core';
-import { Elements }      from 'dom-helpers-js/enhancers';
-import { Elements }      from 'dom-helpers-js/conditions';
-import { ReactiveUtils } from 'dom-helpers-js/reactive';
-import { StorageUtils }  from 'dom-helpers-js/storage';
-import { Forms }         from 'dom-helpers-js/form';
-import { Animation }     from 'dom-helpers-js/animation';
-import { AsyncHelpers }  from 'dom-helpers-js/async';
-import { Router }        from 'dom-helpers-js/spa';
-import 'dom-helpers-js/native-enhance';
-
-// CommonJS
-const { Elements }      = require('dom-helpers-js/core');
-const { ReactiveUtils } = require('dom-helpers-js/reactive');
-const { Router }        = require('dom-helpers-js/spa');
+**Named Imports**
+```html
+<script type="module">
+  import { Elements, Collections, Selector, createElement,
+           ReactiveUtils, ReactiveState, StorageUtils,
+           Forms, Animation, AsyncHelpers, Router }
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.full-spa.esm.min.js';
+</script>
 ```
 
 ---

@@ -27,14 +27,13 @@ High-performance vanilla JavaScript DOM utilities with intelligent caching, reac
 
 ## Installation
 
-### Via npm
-```bash
-npm install dom-helpers-js
-```
+No install, no build step. Three ways to load — pick what fits your project.
 
-### Via CDN — Full Bundle *(recommended)*
+---
 
-One script tag, everything included:
+### 1. Classic *(simplest)*
+
+One script tag, all globals available immediately on `window`:
 
 ```html
 <!-- jsDelivr -->
@@ -44,72 +43,102 @@ One script tag, everything included:
 <script src="https://unpkg.com/dom-helpers-js@2.9.0/dist/dom-helpers.full-spa.min.js"></script>
 ```
 
-**Globals exposed:** `Elements`, `Collections`, `Selector`, `createElement`, `ReactiveUtils`, `ReactiveState`, `StorageUtils`, `Forms`, `Animation`, `AsyncHelpers`, `Router`
+```html
+<script>
+  Elements.title.update({ textContent: 'Hello!' });
+  const state = ReactiveUtils.state({ count: 0 });
+</script>
+```
 
-### Via CDN — Individual Modules
+**Globals:** `Elements`, `Collections`, `Selector`, `createElement`, `ReactiveUtils`, `ReactiveState`, `StorageUtils`, `Forms`, `Animation`, `AsyncHelpers`, `Router`
 
-Load only what you need. All modules have their own dist file:
+---
+
+### 2. Deferred *(globals + non-blocking)*
+
+Same globals as Classic, but the script is deferred — page renders before the library executes. Two equivalent forms:
 
 ```html
-<!-- 1. Core (required foundation) -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.core.min.js"></script>
+<!-- inline import -->
+<script type="module">
+  import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.full-spa.esm.min.js';
+</script>
 
-<!-- 2. Enhancers (requires Core) -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.enhancers.min.js"></script>
-
-<!-- 3. Reactive (requires Core) -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.reactive.min.js"></script>
-
-<!-- 4. Conditions (requires Core) -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.conditions.min.js"></script>
-
-<!-- 5. Storage (standalone) -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.storage.min.js"></script>
-
-<!-- 6. Native Enhance (requires Core + Enhancers) -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.native-enhance.min.js"></script>
-
-<!-- 7. Form (requires Core) -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.form.min.js"></script>
-
-<!-- 8. Animation (requires Core) -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.animation.min.js"></script>
-
-<!-- 9. Async (requires Core) -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.async.min.js"></script>
-
-<!-- 10. SPA Router (standalone) -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.spa.min.js"></script>
+<!-- or shorter — src attribute, identical result -->
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.full-spa.esm.min.js"></script>
 ```
 
-> **Load order matters.** Core must come before any module that requires it. See [ALL-CDN-LINKS.md](./ALL-CDN-LINKS.md) for the full reference and common combinations.
+```html
+<script type="module">
+  Elements.title.update({ textContent: 'Hello!' });
+  const state = ReactiveUtils.state({ count: 0 });
+</script>
+```
 
-### Via npm / ESM Bundlers
+---
+
+### 3. Modular *(structured projects)*
+
+Build multi-file projects without a bundler. Load the library **once** in your entry point — all globals are available in every file with no repeated CDN URLs:
+
+```html
+<!-- index.html -->
+<script type="module" src="./app.js"></script>
+```
 
 ```js
-// Full package — all modules
-import { Elements, Collections, ReactiveUtils, StorageUtils, Forms, Animation, AsyncHelpers, Router } from 'dom-helpers-js';
+// app.js — load library once as side-effect, then import your own modules
+import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.full-spa.esm.min.js';
 
-// Sub-path imports — load only what you need
-import { Elements }      from 'dom-helpers-js/core';
-import { ReactiveUtils } from 'dom-helpers-js/reactive';
-import { StorageUtils }  from 'dom-helpers-js/storage';
-import { Forms }         from 'dom-helpers-js/form';
-import { Animation }     from 'dom-helpers-js/animation';
-import { AsyncHelpers }  from 'dom-helpers-js/async';
-import { Router }        from 'dom-helpers-js/spa';
-import 'dom-helpers-js/native-enhance';
+import { initRouter } from './router.js';
+import { createStore } from './store.js';
 
-// CommonJS
-const { Elements }      = require('dom-helpers-js/core');
-const { ReactiveUtils } = require('dom-helpers-js/reactive');
+const store = createStore();
+initRouter(store);
 ```
+
+```js
+// store.js — no CDN import needed, ReactiveUtils already on window
+export function createStore() {
+  return ReactiveUtils.store(
+    { user: null, cart: [] },
+    { actions: { login(state, user) { state.user = user; } } }
+  );
+}
+```
+
+```js
+// router.js — no CDN import needed, Router already on window
+export function initRouter(store) {
+  Router.define([
+    { path: '/',      view: '#home',  title: 'Home' },
+    { path: '/about', view: '#about', title: 'About' },
+    { path: '*',      view: '#404',   title: 'Not Found' }
+  ]);
+  Router.mount('#app').start({ mode: 'hash' });
+}
+```
+
+```js
+// pages/home.js — any file, any depth — just use globals directly
+export function mountHome(store, onCleanup) {
+  Elements.title.update({ textContent: 'Home' });
+  const unwatch = store.$watch('count', val => {
+    Elements.counter.update({ textContent: val });
+  });
+  onCleanup(() => unwatch?.());
+}
+```
+
+> One CDN import in the entire project. Every other file stays clean.
+
+> For individual module CDN links and partial loading options, see [ALL-CDN-LINKS.md](./ALL-CDN-LINKS.md).
 
 ---
 
 ## Quick Start
 
-### Browser (CDN)
+### Classic
 
 ```html
 <!DOCTYPE html>
@@ -137,6 +166,39 @@ const { ReactiveUtils } = require('dom-helpers-js/reactive');
   </script>
 </body>
 </html>
+```
+
+### Modular
+
+```html
+<!-- index.html — load library once, then your entry point -->
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.0/dist/dom-helpers.full-spa.esm.min.js"></script>
+<script type="module" src="./app.js"></script>
+```
+
+```js
+// app.js — all globals already available, just import your own modules
+import { initUI } from './ui.js';
+
+initUI();
+```
+
+```js
+// ui.js — no CDN import needed, globals are on window
+export function initUI() {
+  // Access by ID
+  Elements.title.update({ textContent: 'Welcome!', style: { color: 'blue' } });
+
+  // Access by class
+  Collections.ClassName.card.update({ style: { padding: '10px', background: '#f0f0f0' } });
+
+  // Reactive counter
+  const state = ReactiveUtils.state({ count: 0 });
+  Elements.counter.addEventListener('click', () => {
+    state.count++;
+    Elements.counter.textContent = `Count: ${state.count}`;
+  });
+}
 ```
 
 ### SPA in 10 lines
