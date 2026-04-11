@@ -1,4 +1,4 @@
-# All CDN Links — DOM Helpers JS v2.9.0
+# All CDN Links — DOM Helpers JS v2.9.1
 
 ## Available Modules
 
@@ -51,6 +51,7 @@ Explicit named imports — ideal for modular multi-file projects.
            ReactiveUtils, ReactiveState, StorageUtils,
            Forms, Animation, AsyncHelpers, Router }
     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.full-spa.esm.min.js';
+
 </script>
 ```
 
@@ -157,11 +158,13 @@ Bulk DOM updates, shortcuts, indexed operations. **Requires Core.**
 **Named Imports**
 ```html
 <script type="module">
-  import { Elements, Collections, Selector }
+  import { Elements, Collections, Selector , createElement }
     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
   import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.enhancers.esm.min.js';
 </script>
 ```
+
+> Enhancers extends `Elements`, `Collections`, and `Selector` in place — it adds no new named exports. Load it as a side-effect after Core; the same references gain the extra methods automatically.
 
 ---
 
@@ -184,7 +187,7 @@ Reactive state, computed properties, watchers. **Requires Core.**
 **Named Imports**
 ```html
 <script type="module">
-  import { Elements, Collections, Selector }
+  import { Elements, Collections, Selector , createElement }
     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
   import { ReactiveUtils, ReactiveState }
     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.reactive.esm.min.js';
@@ -214,13 +217,15 @@ Conditional rendering, state-based DOM visibility. **Requires Core. Load Reactiv
 **Named Imports**
 ```html
 <script type="module">
-  import { Elements, Collections, Selector }
+  import { Elements, Collections, Selector , createElement }
     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
-  import { ReactiveUtils }
+  import { ReactiveUtils, ReactiveState }
     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.reactive.esm.min.js';
   import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.conditions.esm.min.js';
 </script>
 ```
+
+> Conditions extends `Elements`, `Collections`, and `Selector` in place — it adds no new named exports. Load it as a side-effect; the same references gain conditional rendering methods automatically.
 
 ---
 
@@ -245,12 +250,14 @@ Patches `getElementById`, `getElementsBy*`, `querySelector/All` to return enhanc
 **Named Imports**
 ```html
 <script type="module">
-  import { Elements, Collections, Selector }
+  import { Elements, Collections, Selector , createElement }
     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
   import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.enhancers.esm.min.js';
   import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.native-enhance.esm.min.js';
 </script>
 ```
+
+> Native Enhance patches `getElementById`, `getElementsBy*`, and `querySelector/All` globally — it adds no new named exports. Load it as a side-effect; native DOM methods gain enhanced return values automatically.
 
 ---
 
@@ -273,7 +280,7 @@ Patches `getElementById`, `getElementsBy*`, `querySelector/All` to return enhanc
 **Named Imports**
 ```html
 <script type="module">
-  import { Elements, Collections, Selector }
+  import { Elements, Collections, Selector , createElement }
     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
   import { Forms }
     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.form.esm.min.js';
@@ -301,7 +308,7 @@ Patches `getElementById`, `getElementsBy*`, `querySelector/All` to return enhanc
 **Named Imports**
 ```html
 <script type="module">
-  import { Elements, Collections, Selector }
+  import { Elements, Collections, Selector , createElement }
     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
   import { Animation }
     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.animation.esm.min.js';
@@ -329,7 +336,7 @@ Patches `getElementById`, `getElementsBy*`, `querySelector/All` to return enhanc
 **Named Imports**
 ```html
 <script type="module">
-  import { Elements, Collections, Selector }
+  import { Elements, Collections, Selector , createElement }
     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
   import { AsyncHelpers }
     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.async.esm.min.js';
@@ -356,7 +363,7 @@ Lightweight DOM access with persistent storage.
 **Named Imports**
 ```html
 <script type="module">
-  import { Elements, Collections, Selector }
+  import { Elements, Collections, Selector , createElement }
     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
   import { StorageUtils }
     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.storage.esm.min.js';
@@ -381,7 +388,7 @@ DOM access with reactive state management.
 **Named Imports**
 ```html
 <script type="module">
-  import { Elements, Collections, Selector }
+  import { Elements, Collections, Selector , createElement }
     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
   import { ReactiveUtils, ReactiveState }
     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.reactive.esm.min.js';
@@ -406,11 +413,13 @@ DOM access with bulk update helpers.
 **Named Imports**
 ```html
 <script type="module">
-  import { Elements, Collections, Selector }
+  import { Elements, Collections, Selector , createElement }
     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
   import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.enhancers.esm.min.js';
 </script>
 ```
+
+> Enhancers adds no new named exports — it extends the Core objects in place, so a side-effect import is correct here.
 
 ---
 
@@ -432,7 +441,7 @@ Reactive state with persistent storage.
 **Named Imports**
 ```html
 <script type="module">
-  import { Elements, Collections, Selector }
+  import { Elements, Collections, Selector , createElement }
     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
   import { ReactiveUtils, ReactiveState }
     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.reactive.esm.min.js';
@@ -459,7 +468,7 @@ Minimal SPA — just routing with basic DOM access.
 **Named Imports**
 ```html
 <script type="module">
-  import { Elements, Collections, Selector }
+  import { Elements, Collections, Selector , createElement }
     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
   import { Router }
     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.spa.esm.min.js';
@@ -486,7 +495,7 @@ Reactive SPA without form/animation/async overhead.
 **Named Imports**
 ```html
 <script type="module">
-  import { Elements, Collections, Selector }
+  import { Elements, Collections, Selector , createElement }
     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
   import { ReactiveUtils, ReactiveState }
     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.reactive.esm.min.js';
@@ -528,14 +537,32 @@ Reactive SPA without form/animation/async overhead.
 ```
 
 **Named Imports**
-```html
-<script type="module">
-  import { Elements, Collections, Selector, createElement,
-           ReactiveUtils, ReactiveState, StorageUtils,
-           Forms, Animation, AsyncHelpers, Router }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.full-spa.esm.min.js';
-</script>
-```
+
+> When importing everything, use the full bundle — not 10 individual files. One request, same result.
+>
+> For **true partial loading** (download only what you need), use Named Imports from individual module files:
+> ```html
+> <script type="module">
+>   import { Elements, Collections, Selector, createElement }
+>     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
+>   import { ReactiveUtils, ReactiveState }
+>     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.reactive.esm.min.js';
+>   import { Router }
+>     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.spa.esm.min.js';
+>   import { StorageUtils }
+>     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.storage.esm.min.js';
+>   import { Forms }
+>     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.form.esm.min.js';
+>   import { Animation }
+>     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.animation.esm.min.js';
+>   import { AsyncHelpers }
+>     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.async.esm.min.js';
+>   import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.enhancers.esm.min.js';
+>   import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.conditions.esm.min.js';
+>   import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.native-enhance.esm.min.js';
+> </script>
+> ```
+> Each file is downloaded separately — only include the lines you actually need.
 
 ---
 
