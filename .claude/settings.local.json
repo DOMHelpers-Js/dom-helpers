@@ -29,7 +29,10 @@
       "Bash(do test:*)",
       "Bash(echo \"OK: $f\")",
       "Bash(echo \"MISSING: $f\")",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(npm version:*)",
+      "Bash(sed -i 's/@version 2\\\\.9\\\\.0/@version 2.9.1/g' src/*.js)",
+      "Bash(sed -i \"s/v2\\\\.9\\\\.0/v2.9.1/g\" rollup.config.js)"
     ]
   }
 }
