@@ -27,7 +27,7 @@ High-performance vanilla JavaScript DOM utilities with intelligent caching, reac
 
 ## Installation
 
-No install, no build step. Three ways to load — pick what fits your project.
+No install, no build step. Pick the approach that fits your project.
 
 ---
 
@@ -132,7 +132,62 @@ export function mountHome(store, onCleanup) {
 
 > One CDN import in the entire project. Every other file stays clean.
 
-> For individual module CDN links and partial loading options, see [ALL-CDN-LINKS.md](./ALL-CDN-LINKS.md).
+---
+
+### 4. Named Imports *(explicit dependencies)*
+
+Import only the names your file actually uses. Each import comes from its own individual module file — only those files are downloaded.
+
+```html
+<!-- index.html -->
+<script type="module" src="./app.js"></script>
+```
+
+```js
+// app.js — import exactly what you need from each module file
+import { Elements, Collections, Selector, createElement }
+  from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
+import { ReactiveUtils }
+  from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.reactive.esm.min.js';
+import { Router }
+  from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.spa.esm.min.js';
+import { StorageUtils }
+  from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.storage.esm.min.js';
+```
+
+Pass them explicitly to the modules that need them:
+
+```js
+// store.js — receives ReactiveUtils as a parameter
+export function createStore(ReactiveUtils) {
+  return ReactiveUtils.store(
+    { user: null, cart: [] },
+    { actions: { login(state, user) { state.user = user; } } }
+  );
+}
+```
+
+```js
+// router.js — receives Router as a parameter
+export function initRouter(store, Router) {
+  Router.define([
+    { path: '/',      view: '#home',  title: 'Home' },
+    { path: '/about', view: '#about', title: 'About' },
+    { path: '*',      view: '#404',   title: 'Not Found' }
+  ]);
+  Router.mount('#app').start({ mode: 'hash' });
+}
+```
+
+> **What gets downloaded:** only the module files you import — not the full bundle.
+>
+> **Note:** Enhancers, Conditions, and Native Enhance extend existing objects in place and have no new named exports. Load them as side-effects:
+> ```js
+> import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.enhancers.esm.min.js';
+> import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.conditions.esm.min.js';
+> ```
+
+> For the full list of per-module named exports and combination examples, see [ALL-CDN-LINKS.md](./ALL-CDN-LINKS.md).
 
 ---
 
@@ -199,6 +254,34 @@ export function initUI() {
     Elements.counter.textContent = `Count: ${state.count}`;
   });
 }
+```
+
+### Named Imports
+
+```html
+<!-- index.html -->
+<script type="module" src="./app.js"></script>
+```
+
+```js
+// app.js — import only what you need, from individual module files
+import { Elements, Collections }
+  from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
+import { ReactiveUtils }
+  from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.reactive.esm.min.js';
+
+// Access by ID
+Elements.title.update({ textContent: 'Welcome!', style: { color: 'blue' } });
+
+// Access by class
+Collections.ClassName.card.update({ style: { padding: '10px', background: '#f0f0f0' } });
+
+// Reactive counter
+const state = ReactiveUtils.state({ count: 0 });
+Elements.counter.addEventListener('click', () => {
+  state.count++;
+  Elements.counter.textContent = `Count: ${state.count}`;
+});
 ```
 
 ### SPA in 10 lines
