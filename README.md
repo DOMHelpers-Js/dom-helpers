@@ -37,10 +37,10 @@ One script tag, all globals available immediately on `window`:
 
 ```html
 <!-- jsDelivr -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.full-spa.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.full-spa.min.js"></script>
 
 <!-- unpkg -->
-<script src="https://unpkg.com/dom-helpers-js@2.9.1/dist/dom-helpers.full-spa.min.js"></script>
+<script src="https://unpkg.com/dom-helpers-js@2.9.2/dist/dom-helpers.full-spa.min.js"></script>
 ```
 
 ```html
@@ -61,11 +61,11 @@ Same globals as Classic, but the script is deferred — page renders before the 
 ```html
 <!-- inline import -->
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.full-spa.esm.min.js';
+  import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.full-spa.esm.min.js';
 </script>
 
 <!-- or shorter — src attribute, identical result -->
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.full-spa.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.full-spa.esm.min.js"></script>
 ```
 
 ```html
@@ -88,7 +88,7 @@ Build multi-file projects without a bundler. Load the library **once** in your e
 
 ```js
 // app.js — load library once as side-effect, then import your own modules
-import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.full-spa.esm.min.js';
+import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.full-spa.esm.min.js';
 
 import { initRouter } from './router.js';
 import { createStore } from './store.js';
@@ -146,13 +146,13 @@ Import only the names your file actually uses. Each import comes from its own in
 ```js
 // app.js — import exactly what you need from each module file
 import { Elements, Collections, Selector, createElement }
-  from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
+  from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.core.esm.min.js';
 import { ReactiveUtils }
-  from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.reactive.esm.min.js';
+  from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.reactive.esm.min.js';
 import { Router }
-  from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.spa.esm.min.js';
+  from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.spa.esm.min.js';
 import { StorageUtils }
-  from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.storage.esm.min.js';
+  from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.storage.esm.min.js';
 ```
 
 Pass them explicitly to the modules that need them:
@@ -183,8 +183,8 @@ export function initRouter(store, Router) {
 >
 > **Note:** Enhancers, Conditions, and Native Enhance extend existing objects in place and have no new named exports. Load them as side-effects:
 > ```js
-> import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.enhancers.esm.min.js';
-> import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.conditions.esm.min.js';
+> import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.enhancers.esm.min.js';
+> import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.conditions.esm.min.js';
 > ```
 
 > For the full list of per-module named exports and combination examples, see [ALL-CDN-LINKS.md](./ALL-CDN-LINKS.md).
@@ -204,7 +204,7 @@ export function initRouter(store, Router) {
   <div class="card">Card 1</div>
   <div class="card">Card 2</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.full-spa.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.full-spa.min.js"></script>
   <script>
     // Access by ID
     Elements.title.update({ textContent: 'Welcome!', style: { color: 'blue' } });
@@ -227,7 +227,7 @@ export function initRouter(store, Router) {
 
 ```html
 <!-- index.html — load library once, then your entry point -->
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.full-spa.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.full-spa.esm.min.js"></script>
 <script type="module" src="./app.js"></script>
 ```
 
@@ -266,9 +266,9 @@ export function initUI() {
 ```js
 // app.js — import only what you need, from individual module files
 import { Elements, Collections }
-  from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.core.esm.min.js';
+  from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.core.esm.min.js';
 import { ReactiveUtils }
-  from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.reactive.esm.min.js';
+  from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.reactive.esm.min.js';
 
 // Access by ID
 Elements.title.update({ textContent: 'Welcome!', style: { color: 'blue' } });
@@ -287,7 +287,7 @@ Elements.counter.addEventListener('click', () => {
 ### SPA in 10 lines
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.1/dist/dom-helpers.full-spa.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.full-spa.min.js"></script>
 <script>
   Router.define([
     { path: '/',      view: '#home',  title: 'Home' },

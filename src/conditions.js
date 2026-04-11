@@ -2,7 +2,7 @@
  * DOM Helpers JS - Conditions Module
  * Conditional rendering and state-based updates
  * Requires: Core module
- * @version 2.9.1
+ * @version 2.9.2
  * @license MIT
  */
 

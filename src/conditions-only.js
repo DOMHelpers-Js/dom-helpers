@@ -2,7 +2,7 @@
  * DOM Helpers JS - Conditions Module Only (No Core)
  * Conditional rendering and state-based updates
  * Requires: Core module to be loaded first!
- * @version 2.9.1
+ * @version 2.9.2
  * @license MIT
  */
 

@@ -3,7 +3,7 @@
  * Non-reactive form handling: Forms proxy, validation, serialize, submitData,
  * enhanced submission pipeline, ARIA states, button management.
  * Requires: Core module to be loaded first!
- * @version 2.9.1
+ * @version 2.9.2
  * @license MIT
  */
 
