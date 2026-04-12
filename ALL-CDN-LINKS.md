@@ -4,10 +4,10 @@
 
 | Module | Gzipped | Standalone? | Globals Exposed |
 |--------|---------|-------------|-----------------|
-| **Full Bundle** | ~49.7 KB | Yes | `Elements`, `Collections`, `Selector`, `createElement`, `ReactiveUtils`, `ReactiveState`, `StorageUtils`, `Forms`, `Animation`, `AsyncHelpers`, `Router` |
+| **Full Bundle** | ~49.7 KB | Yes | `Elements`, `Collections`, `Selector`, `createElement`, `ReactiveUtils`, `StorageUtils`, `Forms`, `Animation`, `AsyncHelpers`, `Router` |
 | **Core** | ~9.6 KB | Yes | `Elements`, `Collections`, `Selector`, `createElement` |
 | **Enhancers** | ~8.4 KB | Requires Core | Extends `Elements`, `Collections`, `Selector` |
-| **Reactive** | ~11.5 KB | Requires Core | `ReactiveUtils`, `ReactiveState` |
+| **Reactive** | ~11.5 KB | Requires Core | `ReactiveUtils` |
 | **Conditions** | ~7.2 KB | Requires Core + Reactive *(recommended)* | Extends `Elements`, `Collections`, `Selector` |
 | **Storage** | ~1.3 KB | Yes | `StorageUtils` |
 | **Native Enhance** | ~2.2 KB | Requires Core + Enhancers | Patches `getElementById`, `getElementsBy*`, `querySelector/All` |

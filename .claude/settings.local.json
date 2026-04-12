@@ -32,7 +32,10 @@
       "Bash(done)",
       "Bash(npm version:*)",
       "Bash(sed -i 's/@version 2\\\\.9\\\\.0/@version 2.9.1/g' src/*.js)",
-      "Bash(sed -i \"s/v2\\\\.9\\\\.0/v2.9.1/g\" rollup.config.js)"
+      "Bash(sed -i \"s/v2\\\\.9\\\\.0/v2.9.1/g\" rollup.config.js)",
+      "Bash(sed -i 's/@version 2\\\\.9\\\\.1/@version 2.9.2/g' src/*.js)",
+      "Bash(sed -i 's/v2\\\\.9\\\\.1/v2.9.2/g' rollup.config.js)",
+      "Bash(sed -i 's/dom-helpers-js@2\\\\.9\\\\.1/dom-helpers-js@2.9.2/g' README.md ALL-CDN-LINKS.md modular-app-test/app.js modular-app-test-v2/index.html modular-app-test-v3/app.js)"
     ]
   }
 }
