@@ -345,6 +345,31 @@ Patches `getElementById`, `getElementsBy*`, `querySelector/All` to return enhanc
 
 ---
 
+## Reactive Module & Async / Form / Storage — What You Need to Know
+
+### The Reactive module already includes Async, Form, and Storage
+
+The **Async**, **Form**, and **Storage** standalone modules are **non-reactive** — they work independently and have no awareness of reactive state. If your project uses the **Reactive** module, you do not need to load these three separately for async operations, form handling, or storage. The Reactive module ships with its own built-in reactive versions of all three that are more powerful: they are state-aware, automatically track changes, and integrate directly with `ReactiveUtils` and `ReactiveState`.
+
+| You need… | Use Reactive module? | Load Async / Form / Storage separately? |
+|-----------|---------------------|-----------------------------------------|
+| Async operations, non-reactive | ❌ | ✅ Async only |
+| Form handling, non-reactive | ❌ | ✅ Form only |
+| Storage, non-reactive | ❌ | ✅ Storage only |
+| Reactive async, reactive forms, reactive storage | ✅ | ❌ Not needed — already included |
+
+> **In short:** if you are loading the Reactive module because you want reactive behavior, skip the standalone Async, Form, and Storage modules — the reactive equivalents are already bundled in.
+
+---
+
+### No conflict if you load both
+
+If you are already using the Reactive module **and** have also included the standalone Async, Form, or Storage modules (for example, because an existing setup already loads them), there is **no conflict**. The library includes a smart module detection system that recognises when the Reactive module is present alongside the non-reactive versions. Both will load and initialize correctly — everything works fine. You do not need to remove the standalone modules for things to function; the reactive versions will simply take precedence for reactive-aware contexts.
+
+> **Bottom line:** loading Reactive + Async + Form + Storage together is perfectly safe. No double-registration, no override errors, no broken behavior — the detection system handles it automatically.
+
+---
+
 ## Common Combinations
 
 ### Core + Storage (~10.9 KB)
