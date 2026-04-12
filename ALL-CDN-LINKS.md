@@ -51,7 +51,9 @@ Explicit named imports — ideal for modular multi-file projects.
            ReactiveUtils, ReactiveState, StorageUtils,
            Forms, Animation, AsyncHelpers, Router }
     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.full-spa.esm.min.js';
-
+  import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.enhancers.esm.min.js';
+  import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.conditions.esm.min.js';
+  import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.native-enhance.esm.min.js';
 </script>
 ```
 
