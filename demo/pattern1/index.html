@@ -26,31 +26,8 @@
   <button id="btn-login">Login as Alice</button>
   <button id="btn-logout">Logout</button>
 
-  <script type="module">
-    // Pattern 1 — import load and store module in the same inline script block
-    import { load }        from '../../dist/dom-helpers.loader.esm.min.js';
-    import { createStore } from './store.js';
-
-    // Load only what this page needs — reactive module + its dependency (core)
-    // resolved automatically by the loader
-    await load('reactive');
-
-    // createStore() uses ReactiveUtils — safe to call after load() resolves
-    const store = createStore();
-
-    // ReactiveUtils.effect() re-runs automatically whenever store.count
-    // or store.user is read and later changes
-    ReactiveUtils.effect(() => {
-      document.getElementById('count').textContent = store.count;
-      document.getElementById('user').textContent  = store.user ?? '—';
-    });
-
-    document.getElementById('btn-inc').onclick    = () => store.increment();
-    document.getElementById('btn-dec').onclick    = () => store.decrement();
-    document.getElementById('btn-reset').onclick  = () => store.reset();
-    document.getElementById('btn-login').onclick  = () => store.login('Alice');
-    document.getElementById('btn-logout').onclick = () => store.logout();
-  </script>
+  <!-- app.js is the single entry point — it imports the loader, store and ui -->
+  <script type="module" src="./app.js"></script>
 
 </body>
 </html>
