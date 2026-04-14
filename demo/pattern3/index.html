@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pattern 3 — Classic Script</title>
+  <style>
+    body { font-family: sans-serif; max-width: 400px; margin: 40px auto; }
+    button { margin: 4px; padding: 6px 14px; cursor: pointer; }
+    hr { margin: 24px 0; }
+  </style>
+</head>
+<body>
+
+  <h2>Pattern 3 — Classic Script</h2>
+
+  <!-- Counter -->
+  <p>Count: <strong id="count">0</strong></p>
+  <button id="btn-inc">+1</button>
+  <button id="btn-dec">-1</button>
+  <button id="btn-reset">Reset</button>
+
+  <hr>
+
+  <!-- User session -->
+  <p>User: <strong id="user">—</strong></p>
+  <button id="btn-login">Login as Alice</button>
+  <button id="btn-logout">Logout</button>
+
+  <!-- Pattern 3 — all classic script tags, no type="module" needed -->
+
+  <!-- 1. Load the classic loader — exposes DOMHelpersLoader on window -->
+  <script src="../../dist/dom-helpers.loader.min.js"></script>
+
+  <!-- 2. Load store.js — defines window.createStore (safe before library loads,
+       ReactiveUtils is only called inside the function body not at parse time) -->
+  <script src="./store.js"></script>
+
+  <!-- 3. Load the library modules then start the app -->
+  <script>
+    DOMHelpersLoader.load('reactive').then(function() {
+
+      var store = createStore();
+
+      ReactiveUtils.effect(function() {
+        document.getElementById('count').textContent = store.count;
+        document.getElementById('user').textContent  = store.user || '—';
+      });
+
+      document.getElementById('btn-inc').onclick    = function() { store.increment(); };
+      document.getElementById('btn-dec').onclick    = function() { store.decrement(); };
+      document.getElementById('btn-reset').onclick  = function() { store.reset(); };
+      document.getElementById('btn-login').onclick  = function() { store.login('Alice'); };
+      document.getElementById('btn-logout').onclick = function() { store.logout(); };
+
+    });
+  </script>
+
+</body>
+</html>
