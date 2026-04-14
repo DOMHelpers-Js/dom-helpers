@@ -26,30 +26,11 @@
   <button id="btn-login">Login as Alice</button>
   <button id="btn-logout">Logout</button>
 
-  <!-- Pattern 2 — loader loaded as a src file, exposes DOMHelpersLoader on window -->
+  <!-- 1. Loader as a src tag — sets DOMHelpersLoader on window -->
   <script type="module" src="../../dist/dom-helpers.loader.esm.min.js"></script>
 
-  <script type="module">
-    // No import statement needed — DOMHelpersLoader is available on window
-    // Both module scripts are deferred and run in document order, so
-    // DOMHelpersLoader is guaranteed to be set by the time this runs
-    import { createStore } from './store.js';
-
-    await DOMHelpersLoader.load('reactive');
-
-    const store = createStore();
-
-    ReactiveUtils.effect(() => {
-      document.getElementById('count').textContent = store.count;
-      document.getElementById('user').textContent  = store.user ?? '—';
-    });
-
-    document.getElementById('btn-inc').onclick    = () => store.increment();
-    document.getElementById('btn-dec').onclick    = () => store.decrement();
-    document.getElementById('btn-reset').onclick  = () => store.reset();
-    document.getElementById('btn-login').onclick  = () => store.login('Alice');
-    document.getElementById('btn-logout').onclick = () => store.logout();
-  </script>
+  <!-- 2. App entry point — uses DOMHelpersLoader directly, no import of load needed -->
+  <script type="module" src="./app.js"></script>
 
 </body>
 </html>
