@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pattern 2 — Src Attribute (Deferred)</title>
+  <style>
+    body { font-family: sans-serif; max-width: 400px; margin: 40px auto; }
+    button { margin: 4px; padding: 6px 14px; cursor: pointer; }
+    hr { margin: 24px 0; }
+  </style>
+</head>
+<body>
+
+  <h2>Pattern 2 — Src Attribute (Deferred)</h2>
+
+  <!-- Counter -->
+  <p>Count: <strong id="count">0</strong></p>
+  <button id="btn-inc">+1</button>
+  <button id="btn-dec">-1</button>
+  <button id="btn-reset">Reset</button>
+
+  <hr>
+
+  <!-- User session -->
+  <p>User: <strong id="user">—</strong></p>
+  <button id="btn-login">Login as Alice</button>
+  <button id="btn-logout">Logout</button>
+
+  <!-- Pattern 2 — loader loaded as a src file, exposes DOMHelpersLoader on window -->
+  <script type="module" src="../../dist/dom-helpers.loader.esm.min.js"></script>
+
+  <script type="module">
+    // No import statement needed — DOMHelpersLoader is available on window
+    // Both module scripts are deferred and run in document order, so
+    // DOMHelpersLoader is guaranteed to be set by the time this runs
+    import { createStore } from './store.js';
+
+    await DOMHelpersLoader.load('reactive');
+
+    const store = createStore();
+
+    ReactiveUtils.effect(() => {
+      document.getElementById('count').textContent = store.count;
+      document.getElementById('user').textContent  = store.user ?? '—';
+    });
+
+    document.getElementById('btn-inc').onclick    = () => store.increment();
+    document.getElementById('btn-dec').onclick    = () => store.decrement();
+    document.getElementById('btn-reset').onclick  = () => store.reset();
+    document.getElementById('btn-login').onclick  = () => store.login('Alice');
+    document.getElementById('btn-logout').onclick = () => store.logout();
+  </script>
+
+</body>
+</html>
