@@ -3,6 +3,10 @@
  * Loads individual modules via <script> injection in the correct dependency order.
  * For use with classic <script> tags — no ES modules, no bundler required.
  *
+ * ⚠  IIFE / UMD build only — do NOT import this file as an ES module.
+ *    It uses document.currentScript (null in module context) for base URL resolution.
+ *    For ES module environments use loader.js instead.
+ *
  * Usage:
  *   <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@x.x.x/dist/dom-helpers.loader.min.js"></script>
  *   <script>
@@ -11,7 +15,7 @@
  *     });
  *   </script>
  *
- * @version 2.9.2
+ * @version 2.10.0
  * @license MIT
  */
 
@@ -20,9 +24,15 @@
 // available during initial script execution, not inside async callbacks.
 // Gives us the directory the loader was loaded from so all module URLs
 // are resolved relative to it, exactly like import.meta.url in the ESM loader.
+//
+// Fallback: if document.currentScript is null (e.g. the loader was injected
+// dynamically after initial parse), we fall back to the pinned CDN URL for
+// this version so module URLs are still resolvable rather than silently broken.
 const _currentScript = (typeof document !== 'undefined') ? document.currentScript : null;
 const _loaderSrc     = _currentScript ? _currentScript.src : '';
-const BASE_URL       = _loaderSrc ? _loaderSrc.replace(/[^/]+$/, '') : '';
+const BASE_URL       = _loaderSrc
+  ? _loaderSrc.replace(/[^/]+$/, '')
+  : 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/';
 
 // ─── DEPENDENCY GRAPH ─────────────────────────────────────────────────────────
 // Hard dependencies only.

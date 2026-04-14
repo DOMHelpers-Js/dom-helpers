@@ -108,7 +108,7 @@ my-app/
 ### app.js
 
 ```js
-import { load }        from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.loader.esm.min.js';
+import { load }        from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.loader.esm.min.js';
 import { createStore } from './store.js';
 import { initUI }      from './ui.js';
 
@@ -204,7 +204,7 @@ my-app/
   <button id="btn-reset">Reset</button>
 
   <!-- 1. Load the loader — sets DOMHelpersLoader on window -->
-  <script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.loader.esm.min.js"></script>
+  <script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.loader.esm.min.js"></script>
 
   <!-- 2. App entry point — DOMHelpersLoader is available -->
   <script type="module" src="./app.js"></script>
@@ -235,7 +235,7 @@ The loader tag can live in a shared HTML template. Every page gets it for free, 
 
 ```html
 <!-- _layout.html / base.html / header.html -->
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.loader.esm.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.loader.esm.min.js"></script>
 ```
 
 Each page then has its own `app.js` with its own `DOMHelpersLoader.load()` call, loading only what that specific page needs.
@@ -273,7 +273,7 @@ my-app/
   <button id="btn-reset">Reset</button>
 
   <!-- 1. Load the classic loader — sets DOMHelpersLoader on window -->
-  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.loader.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.loader.min.js"></script>
 
   <!-- 2. Load your module files — safe to load before the library,
        they only define functions, they do not call them yet -->
@@ -463,6 +463,8 @@ await load('reactive', 'form');
 ### Base URL is auto-detected
 
 The loader derives its base URL from its own file location (`import.meta.url` in the ESM build, `document.currentScript.src` in the classic build). All module files are loaded from the same directory as the loader. This means the loader works on any CDN, any version, any custom host — zero hardcoded URLs.
+
+**Classic loader fallback:** if `document.currentScript` is `null` (which can happen when the classic loader is injected dynamically rather than included in the original HTML), the loader falls back to the pinned jsDelivr CDN URL for the current version (`dom-helpers-js@2.10.0`). In practice this only affects dynamically injected script scenarios — the normal `<script src="...">` usage always resolves `document.currentScript` correctly.
 
 ---
 

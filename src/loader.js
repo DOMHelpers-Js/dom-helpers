@@ -7,7 +7,7 @@
  *   import { load } from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@x.x.x/dist/dom-helpers.loader.esm.js';
  *   await load('reactive', 'animation');
  *
- * @version 2.9.2
+ * @version 2.10.0
  * @license MIT
  */
 

@@ -1,8 +1,8 @@
-# How to Load DOM Helpers JS — The Three Approaches
+# How to Load DOM Helpers JS — The Four Approaches
 
-DOM Helpers JS gives you three ways to load the library into a page: **Classic**, **Deferred**, and **Named Imports**. Each one affects when the library is available, how it interacts with the rest of your scripts, and how much code the browser downloads.
+DOM Helpers JS gives you four ways to load the library into a page: **Classic**, **Deferred**, **Named Imports**, and the **Module Loader**. Each one affects when the library is available, how it interacts with the rest of your scripts, and how much code the browser downloads.
 
-This guide covers all three — what they do, when to use them, and the practical patterns you will actually write.
+This guide covers all four — what they do, when to use them, and the practical patterns you will actually write.
 
 ---
 
@@ -26,7 +26,7 @@ The most common mistake. The script blocks the page from rendering, and your DOM
 <head>
   <!-- Browser stops here. Downloads the library. Runs it.
        Your <body> content does not exist yet at this point. -->
-  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.full-spa.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.full-spa.min.js"></script>
 </head>
 <body>
   <button id="btn">Click me</button>
@@ -50,7 +50,7 @@ If you put the library in `<head>` and need to touch the DOM, wait for it to be 
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.full-spa.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.full-spa.min.js"></script>
   <script>
     // The library is loaded. Now wait for the DOM to be ready
     // before doing anything with it.
@@ -85,7 +85,7 @@ The classic fix for both problems. The HTML is already parsed before the browser
 
   <!-- Load the library last, just before </body>.
        The DOM is already built at this point. -->
-  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.full-spa.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.full-spa.min.js"></script>
   <script>
     // No DOMContentLoaded needed — the DOM already exists.
     const btn = Elements.get('#btn');
@@ -109,7 +109,7 @@ This is the standard Classic setup. Simple and reliable.
 <head>
   <!-- Downloads in the background. Runs after the DOM is parsed.
        Scripts execute in the order they appear, top to bottom. -->
-  <script defer src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.full-spa.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.full-spa.min.js"></script>
   <script defer src="app.js"></script>
 </head>
 <body>
@@ -140,7 +140,7 @@ This is the best Classic pattern when you need IE11 compatibility but still want
 
 ```html
 <!-- Do not do this for the library. -->
-<script async src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.full-spa.min.js"></script>
+<script async src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.full-spa.min.js"></script>
 <script async src="app.js"></script>
 ```
 
@@ -196,7 +196,7 @@ Adding `type="module"` to a script tag makes it deferred by default. The browser
 <head>
   <!-- Downloaded in the background. Does not block rendering.
        Runs automatically after the DOM is ready. -->
-  <script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.full-spa.esm.min.js"></script>
+  <script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.full-spa.esm.min.js"></script>
 </head>
 <body>
   <button id="btn">Click me</button>
@@ -223,7 +223,7 @@ Load the library once per page. Because the tools land on `window`, every inline
 
 ```html
 <head>
-  <script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.full-spa.esm.min.js"></script>
+  <script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.full-spa.esm.min.js"></script>
 </head>
 ```
 
@@ -269,7 +269,7 @@ When you need most of the library, import from the full bundle file. You only wr
 ```html
 <script type="module">
   import { Elements, Forms, Router }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.full-spa.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.full-spa.esm.min.js';
 
   // Only Elements, Forms, and Router are bound — but the full file was downloaded.
   const form = Forms.get('#signup');
@@ -287,10 +287,10 @@ When you want the browser to download only what you need, import from the indivi
 <script type="module">
   // Only Core and Forms are downloaded. Nothing else.
   import { Elements, Collections, Selector, createElement }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.core.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.core.esm.min.js';
 
   import { Forms }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.form.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.form.esm.min.js';
 
   const form = Forms.get('#signup');
   form.onSubmit(function (data) {
@@ -311,7 +311,7 @@ In a project split across multiple `.js` files, import the library once in your 
 **app.js** (your entry point)
 ```js
 import { Elements, Forms, Router }
-  from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.full-spa.esm.min.js';
+  from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.full-spa.esm.min.js';
 
 // Wire up your pages
 import './pages/home.js';
@@ -323,7 +323,7 @@ import './pages/contact.js';
 // Re-import from the same CDN URL.
 // The browser caches the module — it is NOT downloaded again.
 import { Forms }
-  from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.full-spa.esm.min.js';
+  from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.full-spa.esm.min.js';
 
 const form = Forms.get('#contact-form');
 form.onSubmit(function (data) {
@@ -340,11 +340,11 @@ Some modules extend existing tools without adding new named exports — they jus
 ```html
 <script type="module">
   import { Elements, Collections, Selector, createElement }
-    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.core.esm.min.js';
+    from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.core.esm.min.js';
 
   // Enhancers extends Elements, Collections, and Selector in place.
   // No named export — import it as a side effect.
-  import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.enhancers.esm.min.js';
+  import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.enhancers.esm.min.js';
 
   // Elements now has the extra methods that Enhancers adds.
   Elements.get('#list').addClasses('active', 'visible');
@@ -368,34 +368,101 @@ Some modules extend existing tools without adding new named exports — they jus
 
 ## Side-by-Side Comparison
 
-| | Classic | Classic + `defer` | Deferred (`type="module"`) | Named Imports |
-|---|---|---|---|---|
-| **Tag syntax** | `<script src="...">` | `<script defer src="...">` | `<script type="module" src="...">` | `<script type="module"> import { } </script>` |
-| **Blocks page rendering?** | Yes | No | No | No |
-| **Execution order guaranteed?** | Yes (blocks, so sequential) | Yes (order of appearance) | Yes (order of appearance) | Yes (order of appearance) |
-| **DOM ready when it runs?** | Not guaranteed | Always | Always | Always |
-| **Tools available globally?** | Yes — on `window` | Yes — on `window` | Yes — on `window` | No — only in the importing script |
-| **What gets downloaded?** | Full bundle | Full bundle | Full bundle | Only the modules you import |
-| **Works in IE11?** | Yes | Yes | No | No |
-| **Strict mode?** | No | No | Yes (automatic) | Yes (automatic) |
-| **Module system (`import`/`export`)?** | No | No | Yes | Yes |
-| **Best for** | Quick demos, simplest setup | Old-browser support + non-blocking | Most websites and apps | Multi-file projects, minimal payload |
+| | Classic | Classic + `defer` | Deferred (`type="module"`) | Named Imports | Loader |
+|---|---|---|---|---|---|
+| **Tag syntax** | `<script src="...">` | `<script defer src="...">` | `<script type="module" src="...">` | `<script type="module"> import { } </script>` | `load('reactive')` |
+| **Blocks page rendering?** | Yes | No | No | No | No |
+| **Execution order guaranteed?** | Yes (blocks) | Yes (order of appearance) | Yes (order of appearance) | Yes (order of appearance) | Yes (sequential) |
+| **DOM ready when it runs?** | Not guaranteed | Always | Always | Always | Always |
+| **Tools available globally?** | Yes — on `window` | Yes — on `window` | Yes — on `window` | No — only in the importing script | Yes — on `window` |
+| **What gets downloaded?** | Full bundle | Full bundle | Full bundle | Only the modules you import | Only the modules you request |
+| **Works in IE11?** | Yes | Yes | No | No | Classic loader: Yes |
+| **Strict mode?** | No | No | Yes (automatic) | Yes (automatic) | Depends on loader variant |
+| **Dependency resolution?** | Manual | Manual | Manual | Manual | Automatic |
+| **Module system (`import`/`export`)?** | No | No | Yes | Yes | Optional |
+| **Best for** | Quick demos, simplest setup | Old-browser support + non-blocking | Most websites and apps | Multi-file projects, minimal payload | Pick-and-mix modules, no bundler |
+
+---
+
+## Approach 4 — Module Loader
+
+### What it is
+
+A small utility (~867–973 B gzipped) that lets you request only the modules your page needs and resolves the correct load order automatically. You never write multiple `<script>` tags or think about which module must come before which.
+
+### How it works
+
+You call `load('reactive', 'animation')` and the loader walks the dependency graph, loads `core` first (automatically, because both need it), then loads the two modules you asked for. If anything is already on `window` it is silently skipped.
+
+### ESM variant — `<script type="module">`
+
+```html
+<head>
+  <script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.loader.esm.min.js"></script>
+</head>
+<body>
+  <!-- ... -->
+  <script type="module" src="./app.js"></script>
+</body>
+```
+
+```js
+// app.js — use the window global set by the loader src tag
+await DOMHelpersLoader.load('reactive', 'animation');
+
+// OR — import load directly
+import { load } from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.loader.esm.min.js';
+await load('reactive', 'animation');
+```
+
+### Classic script variant — plain `<script>`
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.loader.min.js"></script>
+<script>
+  DOMHelpersLoader.load('reactive', 'animation').then(function() {
+    var state = ReactiveUtils.state({ count: 0 });
+  });
+</script>
+```
+
+### Available module names
+
+`core`, `storage`, `spa`, `enhancers`, `reactive`, `conditions`, `form`, `animation`, `async`, `native-enhance`
+
+### When to use the Loader
+
+- You only need 2–3 modules and do not want the overhead of the full bundle
+- You want auto-resolved dependencies — no hand-managed script order
+- You are building a multi-page site where different pages need different modules
+- You want pick-and-mix module loading without setting up a bundler
+
+### Trade-offs
+
+- **Globals on `window`**, same as Classic and Deferred — not scoped like Named Imports
+- **Sequential loading** — modules load one after another (dependencies first). Independent modules that could be parallelised are not currently loaded in parallel
+- **Tiny extra file** — the loader itself adds ~867–973 B gzipped on top of the modules it loads
+
+> For the full loader API and advanced patterns (multi-file apps, classic script apps, FAQ), see [module-loader.md](./module-loader.md).
 
 ---
 
 ## Decision Guide
 
 **Do you need IE11 or old-browser support?**
-Use Classic. It is the only approach that works everywhere.
+Use Classic. It is the only approach that works everywhere. If you also want auto-resolved module loading, use the Classic Script Loader variant.
 
-**Do you have a project split across multiple `.js` files, or do you want to download only what you use?**
+**Do you have a project split across multiple `.js` files, or do you want to download only what you use, with explicit imports?**
 Use Named Imports. Import once per file, rely on the browser's module cache to avoid duplicate downloads.
 
-**Does neither of the above apply — you just want to get something working quickly?**
+**Do you want pick-and-mix modules without managing load order yourself and without a bundler?**
+Use the Module Loader. Call `load('reactive', 'animation')` — dependencies resolved automatically, only those modules downloaded.
+
+**Does none of the above apply — you just want to get something working quickly?**
 Use Deferred. One tag in `<head>`, everything available globally, no render-blocking.
 
 **Are you unsure?**
-Use Deferred and switch to Named Imports later if the project grows. The migration is straightforward — you replace the `src` attribute with an `import` block.
+Use Deferred and switch to Named Imports or the Loader later if the project grows.
 
 ---
 
@@ -405,7 +472,7 @@ Start with **Deferred**.
 
 ```html
 <head>
-  <script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.full-spa.esm.min.js"></script>
+  <script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.full-spa.esm.min.js"></script>
 </head>
 ```
 

@@ -39,7 +39,7 @@
   <script>
     DOMHelpersLoader.load('reactive').then(function() {
 
-      var store = createStore();
+      const store = createStore();
 
       ReactiveUtils.effect(function() {
         document.getElementById('count').textContent = store.count;

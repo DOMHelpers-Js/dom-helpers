@@ -5,7 +5,7 @@ const isDev = process.env.BUILD === 'development';
 const isProd = process.env.BUILD === 'production';
 
 const banner = `/**
- * DOM Helpers JS v2.9.2
+ * DOM Helpers JS v2.10.0
  * High-performance vanilla JavaScript DOM utilities
  * @license MIT
  * @repository https://github.com/DOMHelpers-Js/dom-helpers

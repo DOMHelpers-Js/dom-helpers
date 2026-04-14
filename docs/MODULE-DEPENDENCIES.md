@@ -19,7 +19,7 @@ In this library, some modules work on their own — they are their own bread. Ot
 
 ## The modules at a glance
 
-DOM Helpers JS is split into **11 modules** (plus a full bundle that includes them all).
+DOM Helpers JS is split into **11 modules** (plus a full bundle that includes them all, and a **Module Loader** that handles dependency resolution for you automatically).
 
 Each module does one focused job. You only load the ones you need. Smaller pages load faster — every kilobyte counts.
 
@@ -28,6 +28,7 @@ Here is a quick summary before we go deeper:
 | Module | What it does | Needs | Size (gzipped) |
 |---|---|---|---|
 | **Full Bundle** | Everything in one file | Nothing — standalone | ~49.7 KB |
+| **Loader** | Loads modules on demand, resolves deps automatically | Nothing — standalone | ~1 KB |
 | **Core** | The foundation — selects and works with page elements | Nothing — standalone | ~9.6 KB |
 | **Storage** | Saves and reads data in the browser | Nothing — standalone | ~1.3 KB |
 | **SPA Router** | Handles page navigation without full reloads | Nothing — standalone | ~3.9 KB |
@@ -202,7 +203,7 @@ As mentioned above, loading Reactive before Conditions gives Conditions access t
 
 ## Load order rule
 
-When loading multiple modules, follow this order:
+When loading multiple modules manually, follow this order:
 
 ```
 1. Core            (always first, if you are using it)
@@ -219,7 +220,42 @@ When loading multiple modules, follow this order:
 
 You do not need to load every module — only the ones your project actually uses. The order above applies to whichever subset you choose.
 
-**One shortcut:** if you need most features, load the **Full Bundle** instead of individual modules. It is a single file that includes everything, and you do not have to think about order at all.
+**Two shortcuts:**
+
+- If you need most features, load the **Full Bundle** — one file, everything included, no ordering to think about.
+- If you want a specific subset, use the **Module Loader** — it resolves the order automatically:
+  ```js
+  await load('reactive', 'native-enhance', 'animation');
+  // → loads: core → enhancers → reactive → animation → native-enhance
+  ```
+
+---
+
+## The Module Loader
+
+The loader (`dom-helpers.loader.esm.min.js` / `dom-helpers.loader.min.js`) is a tiny utility (~1 KB gzipped) that takes care of the dependency chain for you. Instead of writing multiple `<script>` tags in the right order, you call `load()` with the modules you want:
+
+```js
+// ESM — type="module" environments
+import { load } from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.loader.esm.min.js';
+await load('reactive', 'conditions', 'native-enhance');
+// loads: core → enhancers → reactive → conditions → native-enhance (correct order, automatically)
+
+// Classic — plain <script> tags
+DOMHelpersLoader.load('reactive', 'conditions', 'native-enhance').then(function() {
+  // all modules ready on window
+});
+```
+
+**Rules that the loader enforces for you:**
+
+- Core is always loaded before any module that needs it
+- Enhancers is loaded before Native Enhance
+- Reactive is loaded before Conditions when both are requested
+- Already-loaded modules (by any means) are silently skipped — never fetched twice
+- Argument order in `load()` does not matter — the correct sequence is resolved from the graph
+
+See [module-loader.md](./module-loader.md) for the full API and usage patterns.
 
 ---
 
@@ -246,4 +282,4 @@ SPA Router  (standalone — no connection to Core)
 
 ---
 
-*This page covers module loading and dependencies only. For usage examples and API details, see the main README.*
+*This page covers module loading and dependencies only. For usage examples and API details, see the main README. For loader patterns and API, see [module-loader.md](./module-loader.md). For all CDN URLs, see [ALL-CDN-LINKS.md](./ALL-CDN-LINKS.md).*
