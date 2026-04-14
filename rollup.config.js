@@ -104,6 +104,38 @@ const modules = [
   }
 ];
 
+// Loader — ESM only (uses import.meta.url and dynamic import, incompatible with UMD/CJS)
+const loaderConfigs = [];
+
+if (isDev || !isProd) {
+  loaderConfigs.push({
+    input: 'src/loader.js',
+    output: {
+      file: 'dist/dom-helpers.loader.esm.js',
+      format: 'es',
+      banner,
+      sourcemap: true,
+      exports: 'named'
+    },
+    plugins: [filesize()]
+  });
+}
+
+if (isProd || !isDev) {
+  loaderConfigs.push({
+    input: 'src/loader.js',
+    output: {
+      file: 'dist/dom-helpers.loader.esm.min.js',
+      format: 'es',
+      banner,
+      sourcemap: true,
+      exports: 'named',
+      plugins: [terser(terserConfig)]
+    },
+    plugins: [filesize()]
+  });
+}
+
 // Generate configurations for all modules
 const configs = modules.map(module => {
   const config = {
@@ -171,4 +203,4 @@ const configs = modules.map(module => {
   return config;
 });
 
-export default configs;
+export default [...configs, ...loaderConfigs];
