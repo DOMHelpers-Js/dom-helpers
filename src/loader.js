@@ -204,3 +204,9 @@ export async function load(...modules) {
     await loadOne(name);
   }
 }
+
+// Expose on window so the loader works when loaded via <script type="module" src="...">
+// without needing an inline import statement (Pattern 2 / deferred usage).
+if (typeof window !== 'undefined') {
+  window.DOMHelpersLoader = { load };
+}
