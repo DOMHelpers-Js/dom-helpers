@@ -104,6 +104,42 @@ const modules = [
   }
 ];
 
+// Loader (classic <script>) — IIFE only.
+// Uses document.currentScript for base URL and <script> injection for loading.
+// No import.meta.url or dynamic import() — works in any browser without type="module".
+const loaderUmdConfigs = [];
+
+if (isDev || !isProd) {
+  loaderUmdConfigs.push({
+    input: 'src/loader-umd.js',
+    output: {
+      file: 'dist/dom-helpers.loader.js',
+      format: 'iife',
+      name: 'DOMHelpersLoader',
+      banner,
+      sourcemap: true,
+      exports: 'named'
+    },
+    plugins: [filesize()]
+  });
+}
+
+if (isProd || !isDev) {
+  loaderUmdConfigs.push({
+    input: 'src/loader-umd.js',
+    output: {
+      file: 'dist/dom-helpers.loader.min.js',
+      format: 'iife',
+      name: 'DOMHelpersLoader',
+      banner,
+      sourcemap: true,
+      exports: 'named',
+      plugins: [terser(terserConfig)]
+    },
+    plugins: [filesize()]
+  });
+}
+
 // Loader — ESM only (uses import.meta.url and dynamic import, incompatible with UMD/CJS)
 const loaderConfigs = [];
 
@@ -203,4 +239,4 @@ const configs = modules.map(module => {
   return config;
 });
 
-export default [...configs, ...loaderConfigs];
+export default [...configs, ...loaderUmdConfigs, ...loaderConfigs];
