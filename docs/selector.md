@@ -539,6 +539,150 @@ document.getElementsByName.disabled({
 
 ---
 
+## Global Shorthand Functions
+
+When the **Enhancers** module is loaded, four functions are placed directly on `window` so you can call them without any `Selector.` prefix. They are also available as `queryWithin` and `queryAllWithin` for scoped lookups.
+
+| Global | Equivalent to | Description |
+|---|---|---|
+| `query(selector)` | `querySelector(selector)` | Single element — first match |
+| `queryAll(selector)` | `querySelectorAll(selector)` | All matches as enhanced collection |
+| `querySelector(selector)` | — | Same as `query` |
+| `querySelectorAll(selector)` | — | Same as `queryAll` |
+| `queryWithin(container, selector)` | — | Single element scoped to a container |
+| `queryAllWithin(container, selector)` | — | Collection scoped to a container |
+
+All six also live on `window.DOMHelpers.*` and on `window.GlobalQuery.*`.
+
+### `query` / `querySelector`
+
+Returns the first matching element enhanced with `.update()`, or `null`.
+
+```js
+const btn   = query('#saveBtn');
+const title = querySelector('h1.page-title');
+const input = query('form input[required]');
+
+// Use .update() immediately
+query('#modal').update({ hidden: false });
+```
+
+An optional second argument scopes the search to a container:
+
+```js
+const nested = query('.btn', document.getElementById('sidebar'));
+```
+
+### `queryAll` / `querySelectorAll`
+
+Returns an enhanced collection. Always returns an object — never `null`.
+
+```js
+const cards  = queryAll('.card');
+const inputs = querySelectorAll('input[type="text"]');
+
+console.log(cards.length);   // number of matches
+cards.update({ classList: { add: 'visible' } });
+```
+
+An optional second argument scopes the search:
+
+```js
+const items = queryAll('li', document.querySelector('#menu'));
+```
+
+### `queryWithin` / `queryAllWithin`
+
+Explicit scoped queries — container comes first, selector second. Accept either an `Element` reference or a CSS selector string for the container.
+
+```js
+// Single element within a scoped container
+const label = queryWithin('#checkout-form', 'label[for="email"]');
+label.update({ textContent: 'Email address' });
+
+// Collection within a scoped container
+const fields = queryAllWithin('#checkout-form', 'input, select, textarea');
+fields.update({ disabled: false });
+
+// Container as an element reference
+const sidebar = document.getElementById('sidebar');
+const links   = queryAllWithin(sidebar, 'a');
+```
+
+### Collection object
+
+The collection returned by `queryAll` / `querySelectorAll` / `queryAllWithin` supports:
+
+**Access and iteration:**
+
+```js
+collection.length          // number of elements
+collection[0]              // numeric index access — enhanced element
+collection.item(2)         // .item(n) — enhanced element
+collection.first()         // first element or null
+collection.last()          // last element or null
+collection.at(-1)          // last element (negative index works)
+collection.isEmpty()       // true if length === 0
+collection.toArray()       // convert to plain Array of enhanced elements
+
+for (const el of collection) { ... }  // for...of supported
+
+collection.forEach((el, index) => { ... })
+collection.map((el, index) => { ... })
+collection.filter((el, index) => { ... })
+collection.find((el, index) => { ... })
+collection.some((el, index) => { ... })
+collection.every((el, index) => { ... })
+collection.reduce((acc, el, index) => { ... }, initial)
+```
+
+**Bulk DOM operations:**
+
+```js
+collection.addClass('active')
+collection.removeClass('loading')
+collection.toggleClass('highlight')
+collection.setProperty('disabled', true)
+collection.setAttribute('aria-expanded', 'false')
+collection.setStyle({ opacity: '0', pointerEvents: 'none' })
+```
+
+**Event listeners:**
+
+```js
+collection.on('click', handler)   // attach to every element
+collection.off('click', handler)  // detach from every element
+```
+
+> **`query` / `queryAll` vs `Selector.query` / `Selector.queryAll`**
+>
+> The global shortcuts come from the Enhancers module and do **not** use the Selector caching system. Each call runs a live DOM lookup. Use `Selector.query` / `Selector.queryAll` when you want caching and MutationObserver invalidation. Use the global shortcuts when you need a quick one-off query or want to avoid the cache entirely.
+
+### Loading
+
+```html
+<!-- Deferred — globals are ready after this tag runs -->
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.enhancers.esm.min.js"></script>
+
+<!-- Classic -->
+<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.enhancers.min.js"></script>
+
+<!-- Named import (ESM) -->
+<script type="module">
+  import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.enhancers.esm.min.js';
+  // query, queryAll, querySelector, querySelectorAll are now on window
+</script>
+```
+
+Via the loader:
+
+```js
+await load('enhancers');
+// query, queryAll, querySelector, querySelectorAll now available globally
+```
+
+---
+
 ## The Caching System
 
 `Selector.query` and `Selector.queryAll` both cache results against their selector strings.
@@ -721,7 +865,8 @@ document.getElementsByName('role').update({ checked: false });
 |---|---|
 | Simple class/tag/name access | `Collections.ClassName`, `TagName`, `Name` — faster, cached |
 | Complex CSS selector | `Selector.query` / `Selector.queryAll` |
-| Scoped query within a container | `Selector.Scoped.within` / `withinAll` |
+| Same, without caching, shortest possible syntax | `query()` / `queryAll()` globals |
+| Scoped query within a container | `Selector.Scoped.within` / `withinAll` or `queryWithin` / `queryAllWithin` |
 | Native code you don't want to change | `document.querySelector` / `querySelectorAll` (enhanced) |
 | Pseudo-classes, combinators, attributes | `Selector.queryAll` or `document.querySelectorAll` |
 
@@ -738,6 +883,9 @@ document.getElementsByName('role').update({ checked: false });
 | Enhanced property syntax (`Selector.query.idMyEl`) | `core` |
 | Index-based updates on query results | `core` + `enhancers` |
 | Array distribution on query results | `core` + `enhancers` |
+| `query` / `queryAll` globals (no prefix) | `enhancers` |
+| `querySelector` / `querySelectorAll` globals (no prefix) | `enhancers` |
+| `queryWithin` / `queryAllWithin` globals | `enhancers` |
 | `document.querySelector` enhanced | `core` + `enhancers` + `native-enhance` |
 | `document.querySelectorAll` enhanced | `core` + `enhancers` + `native-enhance` |
 | `document.getElementsByClassName` enhanced | `core` + `enhancers` + `native-enhance` |
