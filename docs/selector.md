@@ -1,21 +1,20 @@
 # Working with Selector
 
-The Selector helper lets you query DOM elements using CSS selectors — single elements with `Selector.query()` and collections with `Selector.queryAll()`. It adds caching with smart MutationObserver invalidation, a scoped query API, enhanced property-name syntax, async waiting, and bulk update across multiple selectors. When the native-enhance module is loaded, the browser's own `document.querySelector`, `document.querySelectorAll`, `getElementsByClassName`, `getElementsByTagName` and `getElementsByName` are all enhanced to return the same enriched objects.
+The Selector helper lets you query DOM elements using CSS selectors — single elements with `Selector.query()` and collections with `Selector.queryAll()`. It adds caching with smart MutationObserver invalidation, a scoped query API, enhanced property-name syntax, async waiting, and bulk update across multiple selectors.
 
 ---
 
 ## Prerequisites
 
-The core `Selector` API is part of the **core** module. Extra features require additional modules.
+The `Selector` API is part of the **core** module. Index-based updates and array distribution require **enhancers** on top.
 
 **ESM:**
 ```html
 <script type="module">
   import { load } from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.loader.esm.min.js';
 
-  await load('core');           // Selector.query / queryAll / Scoped / waitFor
-  await load('enhancers');      // index-based access + array distribution on results
-  await load('native-enhance'); // enhanced document.querySelector / querySelectorAll / getElementsBy*
+  await load('core');       // Selector.query / queryAll / Scoped / waitFor
+  await load('enhancers');  // index-based access + array distribution on results
 </script>
 ```
 
@@ -23,8 +22,8 @@ The core `Selector` API is part of the **core** module. Extra features require a
 ```html
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.loader.min.js"></script>
 <script>
-  DOMHelpersLoader.load('native-enhance').then(function() { ... });
-  // native-enhance auto-loads core + enhancers
+  DOMHelpersLoader.load('enhancers').then(function() { ... });
+  // enhancers auto-loads core
 </script>
 ```
 
@@ -156,7 +155,7 @@ inputs.forEach(input => console.log(input.name, input.value));
 
 ## The Collection Object
 
-Every `queryAll`, `withinAll`, and `querySelectorAll` call returns the same enhanced collection with the full set of methods.
+Every `queryAll`, `withinAll`, and `queryAllWithin` call returns the same enhanced collection with the full set of methods.
 
 ### Length and element access
 
@@ -398,159 +397,18 @@ cards.update({ classList: { add: 'visible' } });
 
 ---
 
-## Enhanced Native Methods (native-enhance module)
-
-When **native-enhance** is loaded, the browser's standard DOM methods are enhanced to return objects with the full `.update()` and collection API. Existing code needs no changes — it just gains extra capabilities.
-
-### `document.querySelector(selector)` — enhanced
-
-```js
-const btn = document.querySelector('#saveBtn');
-btn.update({ textContent: 'Click me', disabled: false });
-
-const card = document.querySelector('.card.active');
-card.update({ classList: { add: 'highlighted' } });
-```
-
-**Returns:** `HTMLElement` with `.update()` — or `null`.
-
----
-
-### `document.querySelectorAll(selector)` — enhanced
-
-```js
-const btns = document.querySelectorAll('.btn');
-
-// Full collection API available
-btns.forEach(btn => console.log(btn.textContent));
-btns.update({ disabled: false });
-btns[0].update({ classList: { add: 'primary' } });
-btns.at(-1).update({ hidden: true });
-
-// Index-based
-btns.update({
-  [0]: { textContent: 'First' },
-  [1]: { textContent: 'Second' }
-});
-
-// Array distribution
-btns.update({
-  textContent: ['Save', 'Cancel', 'Reset']
-});
-```
-
----
-
-### `document.getElementsByClassName(name)` — enhanced
-
-```js
-const cards = document.getElementsByClassName('card');
-
-// All collection methods available
-cards.forEach(el => console.log(el.textContent));
-cards.update({ classList: { add: 'loaded' } });
-cards[0].update({ style: { border: '2px solid gold' } });
-```
-
-**Bulk methods on the function itself:**
-
-```js
-// Update multiple class groups in one call
-document.getElementsByClassName.update({
-  btn:    { disabled: false },
-  card:   { style: { opacity: '1' } },
-  badge:  { textContent: 'New' }
-});
-
-document.getElementsByClassName.textContent({
-  'user-name':  'Alice',
-  'user-email': 'alice@example.com'
-});
-
-document.getElementsByClassName.style({
-  btn:  { backgroundColor: '#007bff', color: '#fff' },
-  card: { borderRadius: '8px', padding: '16px' }
-});
-
-document.getElementsByClassName.classes({
-  btn:  { add: 'active', remove: 'disabled' },
-  card: { add: 'visible' }
-});
-
-document.getElementsByClassName.attrs({
-  btn:  { 'aria-pressed': 'true' },
-  link: { target: '_blank', rel: 'noopener' }
-});
-
-document.getElementsByClassName.dataset({
-  card: { loaded: 'true', version: '2' }
-});
-
-document.getElementsByClassName.disabled({ btn: false, input: true });
-document.getElementsByClassName.hidden({ overlay: false, spinner: true });
-document.getElementsByClassName.value({ 'form-input': '' });
-document.getElementsByClassName.placeholder({ 'form-input': 'Enter value' });
-document.getElementsByClassName.src({ avatar: '/images/default.png' });
-document.getElementsByClassName.href({ 'nav-link': '/dashboard' });
-```
-
----
-
-### `document.getElementsByTagName(name)` — enhanced
-
-```js
-const paragraphs = document.getElementsByTagName('p');
-paragraphs.update({ style: { lineHeight: '1.8' } });
-
-// Bulk on the function
-document.getElementsByTagName.update({
-  p:    { style: { lineHeight: '1.8' } },
-  h2:   { style: { color: '#333' } },
-  input: { disabled: false }
-});
-
-document.getElementsByTagName.style({
-  p:   { fontSize: '16px', color: '#444' },
-  li:  { marginBottom: '8px' }
-});
-```
-
----
-
-### `document.getElementsByName(name)` — enhanced
-
-Particularly useful for radio buttons and checkboxes.
-
-```js
-const radios = document.getElementsByName('paymentMethod');
-radios.forEach(radio => console.log(radio.value, radio.checked));
-
-// Bulk
-document.getElementsByName.update({
-  paymentMethod: { disabled: false },
-  newsletter:    { checked: false }
-});
-
-document.getElementsByName.disabled({
-  paymentMethod: true,
-  newsletter:    false
-});
-```
-
----
-
 ## Global Shorthand Functions
 
 When the **Enhancers** module is loaded, four functions are placed directly on `window` so you can call them without any `Selector.` prefix. They are also available as `queryWithin` and `queryAllWithin` for scoped lookups.
 
-| Global | Equivalent to | Description |
-|---|---|---|
-| `query(selector)` | `querySelector(selector)` | Single element — first match |
-| `queryAll(selector)` | `querySelectorAll(selector)` | All matches as enhanced collection |
-| `querySelector(selector)` | — | Same as `query` |
-| `querySelectorAll(selector)` | — | Same as `queryAll` |
-| `queryWithin(container, selector)` | — | Single element scoped to a container |
-| `queryAllWithin(container, selector)` | — | Collection scoped to a container |
+| Global | Description |
+|---|---|
+| `query(selector)` | Single element — first match, enhanced with `.update()` |
+| `querySelector(selector)` | Alias for `query` |
+| `queryAll(selector)` | All matches as enhanced collection |
+| `querySelectorAll(selector)` | Alias for `queryAll` |
+| `queryWithin(container, selector)` | Single element scoped to a container |
+| `queryAllWithin(container, selector)` | Collection scoped to a container |
 
 All six also live on `window.DOMHelpers.*` and on `window.GlobalQuery.*`.
 
@@ -581,7 +439,7 @@ Returns an enhanced collection. Always returns an object — never `null`.
 const cards  = queryAll('.card');
 const inputs = querySelectorAll('input[type="text"]');
 
-console.log(cards.length);   // number of matches
+console.log(cards.length);
 cards.update({ classList: { add: 'visible' } });
 ```
 
@@ -596,90 +454,18 @@ const items = queryAll('li', document.querySelector('#menu'));
 Explicit scoped queries — container comes first, selector second. Accept either an `Element` reference or a CSS selector string for the container.
 
 ```js
-// Single element within a scoped container
-const label = queryWithin('#checkout-form', 'label[for="email"]');
-label.update({ textContent: 'Email address' });
-
-// Collection within a scoped container
+const label  = queryWithin('#checkout-form', 'label[for="email"]');
 const fields = queryAllWithin('#checkout-form', 'input, select, textarea');
+
 fields.update({ disabled: false });
 
-// Container as an element reference
 const sidebar = document.getElementById('sidebar');
 const links   = queryAllWithin(sidebar, 'a');
-```
-
-### Collection object
-
-The collection returned by `queryAll` / `querySelectorAll` / `queryAllWithin` supports:
-
-**Access and iteration:**
-
-```js
-collection.length          // number of elements
-collection[0]              // numeric index access — enhanced element
-collection.item(2)         // .item(n) — enhanced element
-collection.first()         // first element or null
-collection.last()          // last element or null
-collection.at(-1)          // last element (negative index works)
-collection.isEmpty()       // true if length === 0
-collection.toArray()       // convert to plain Array of enhanced elements
-
-for (const el of collection) { ... }  // for...of supported
-
-collection.forEach((el, index) => { ... })
-collection.map((el, index) => { ... })
-collection.filter((el, index) => { ... })
-collection.find((el, index) => { ... })
-collection.some((el, index) => { ... })
-collection.every((el, index) => { ... })
-collection.reduce((acc, el, index) => { ... }, initial)
-```
-
-**Bulk DOM operations:**
-
-```js
-collection.addClass('active')
-collection.removeClass('loading')
-collection.toggleClass('highlight')
-collection.setProperty('disabled', true)
-collection.setAttribute('aria-expanded', 'false')
-collection.setStyle({ opacity: '0', pointerEvents: 'none' })
-```
-
-**Event listeners:**
-
-```js
-collection.on('click', handler)   // attach to every element
-collection.off('click', handler)  // detach from every element
 ```
 
 > **`query` / `queryAll` vs `Selector.query` / `Selector.queryAll`**
 >
 > The global shortcuts come from the Enhancers module and do **not** use the Selector caching system. Each call runs a live DOM lookup. Use `Selector.query` / `Selector.queryAll` when you want caching and MutationObserver invalidation. Use the global shortcuts when you need a quick one-off query or want to avoid the cache entirely.
-
-### Loading
-
-```html
-<!-- Deferred — globals are ready after this tag runs -->
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.enhancers.esm.min.js"></script>
-
-<!-- Classic -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.enhancers.min.js"></script>
-
-<!-- Named import (ESM) -->
-<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.enhancers.esm.min.js';
-  // query, queryAll, querySelector, querySelectorAll are now on window
-</script>
-```
-
-Via the loader:
-
-```js
-await load('enhancers');
-// query, queryAll, querySelector, querySelectorAll now available globally
-```
 
 ---
 
@@ -739,8 +525,8 @@ Selector.configure({
 ### Manual cache control
 
 ```js
-Selector.clear();             // clear all cached entries
-Selector.destroy();           // full teardown — disconnects MutationObserver and timers
+Selector.clear();    // clear all cached entries
+Selector.destroy();  // full teardown — disconnects MutationObserver and timers
 ```
 
 ---
@@ -767,10 +553,10 @@ Selector.queryAll('.card').update({
 function initModal(modalId) {
   const container = Elements[modalId];
 
-  const title   = Selector.Scoped.within(container, 'h2');
-  const body    = Selector.Scoped.within(container, '.modal-body');
+  const title    = Selector.Scoped.within(container, 'h2');
+  const body     = Selector.Scoped.within(container, '.modal-body');
   const closeBtn = Selector.Scoped.within(container, '.btn-close');
-  const inputs  = Selector.Scoped.withinAll(container, 'input');
+  const inputs   = Selector.Scoped.withinAll(container, 'input');
 
   title.update({ textContent: 'Confirm Action' });
   inputs.update({ disabled: false, value: '' });
@@ -781,7 +567,6 @@ function initModal(modalId) {
 ### Toggle all items with one call
 
 ```js
-// Show all, then mark only active one
 Selector.queryAll('.tab-panel').update({ hidden: true });
 Selector.query(`.tab-panel[data-tab="${activeId}"]`).update({ hidden: false });
 ```
@@ -801,11 +586,11 @@ items.update({
 
 ```js
 Selector.update({
-  'header':              { style: { backgroundColor: theme.primary } },
-  'footer':              { style: { backgroundColor: theme.dark } },
-  '.btn-primary':        { style: { backgroundColor: theme.accent } },
-  'a':                   { style: { color: theme.link } },
-  'input, textarea':     { style: { borderColor: theme.border } }
+  'header':          { style: { backgroundColor: theme.primary } },
+  'footer':          { style: { backgroundColor: theme.dark } },
+  '.btn-primary':    { style: { backgroundColor: theme.accent } },
+  'a':               { style: { color: theme.link } },
+  'input, textarea': { style: { borderColor: theme.border } }
 });
 ```
 
@@ -846,17 +631,6 @@ Selector.queryAll.navTab.update({ classList: { remove: 'active' } });
 Selector.query.h1.update({ style: { fontSize: '2rem' } });
 ```
 
-### Use native methods where familiar
-
-```js
-// All these are enhanced when native-enhance is loaded
-document.querySelector('.modal').update({ hidden: false });
-document.querySelectorAll('.card').update({ classList: { add: 'visible' } });
-document.getElementsByClassName('btn').update({ disabled: false });
-document.getElementsByTagName('input').update({ value: '' });
-document.getElementsByName('role').update({ checked: false });
-```
-
 ---
 
 ## Choosing Between Selector and Collections
@@ -867,8 +641,7 @@ document.getElementsByName('role').update({ checked: false });
 | Complex CSS selector | `Selector.query` / `Selector.queryAll` |
 | Same, without caching, shortest possible syntax | `query()` / `queryAll()` globals |
 | Scoped query within a container | `Selector.Scoped.within` / `withinAll` or `queryWithin` / `queryAllWithin` |
-| Native code you don't want to change | `document.querySelector` / `querySelectorAll` (enhanced) |
-| Pseudo-classes, combinators, attributes | `Selector.queryAll` or `document.querySelectorAll` |
+| Pseudo-classes, combinators, attributes | `Selector.queryAll` |
 
 ---
 
@@ -886,9 +659,3 @@ document.getElementsByName('role').update({ checked: false });
 | `query` / `queryAll` globals (no prefix) | `enhancers` |
 | `querySelector` / `querySelectorAll` globals (no prefix) | `enhancers` |
 | `queryWithin` / `queryAllWithin` globals | `enhancers` |
-| `document.querySelector` enhanced | `core` + `enhancers` + `native-enhance` |
-| `document.querySelectorAll` enhanced | `core` + `enhancers` + `native-enhance` |
-| `document.getElementsByClassName` enhanced | `core` + `enhancers` + `native-enhance` |
-| `document.getElementsByTagName` enhanced | `core` + `enhancers` + `native-enhance` |
-| `document.getElementsByName` enhanced | `core` + `enhancers` + `native-enhance` |
-| Function-level shorthands on `getElementsBy*` | `core` + `enhancers` + `native-enhance` |
