@@ -75,7 +75,7 @@ async            → needs core
 native-enhance   → needs core AND enhancers
 ```
 
-When you call `load('native-enhance', 'reactive')`, the loader runs a **topological sort** — a standard computer science algorithm that takes a list of things with dependencies and produces an ordered list where each item comes after everything it depends on.
+When you call `load('native-enhance', 'reactive')`, the loader runs a **topological sort** — a standard algorithm that takes a list of things with dependencies and produces an ordered list where each item comes after everything it depends on.
 
 For `load('native-enhance', 'reactive')` the sorted result is:
 
@@ -92,14 +92,14 @@ This is the entire mechanism. There is nothing magic about it — just a depende
 ## Dependency Graph at a Glance
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                         STANDALONE                           │
-│          core          storage          spa                  │
-└────────────────────────────┬────────────────────────────────┘
-                             │  (core is required by)
-          ┌──────────────────┼──────────────────────┐
-          │          │       │        │              │
-      enhancers  reactive  form  animation  conditions  async
+┌──────────────────────────────────────────────────────────────┐
+│                         STANDALONE                            │
+│          core           storage           spa                 │
+└─────────────────────────────┬────────────────────────────────┘
+                              │  (core is required by)
+          ┌───────────────────┼──────────────────────┐
+          │           │       │        │              │
+      enhancers  reactive   form  animation  conditions  async
           │
           │  (enhancers is also required by)
           │
@@ -110,10 +110,7 @@ This is the entire mechanism. There is nothing magic about it — just a depende
 
 **Core-dependent modules** — `reactive`, `form`, `animation`, `conditions`, `async`, and `enhancers` all need `core`. You do not need to list `core` yourself — it is added automatically.
 
-```js
-import { load }        from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.loader.esm.min.js';
-import { createStore } from './store.js';
-import { initUI }      from './ui.js';
+**Two-level dependency** — `native-enhance` needs both `core` and `enhancers`. Again, you do not need to list either — just request `native-enhance` and both are loaded first.
 
 **Optional enhancements** — `conditions` and `form` work with just `core`, but gain extra reactive features when `reactive` is also loaded. The loader does **not** add `reactive` automatically in this case — you must request it explicitly if you want those features.
 
@@ -172,12 +169,11 @@ await load('reactive', 'animation', 'native-enhance');
 await load('native-enhance', 'reactive', 'animation');
 ```
 
-  <!-- 1. Load the loader — sets DOMHelpersLoader on window -->
-  <script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.loader.esm.min.js"></script>
+All three calls above produce the same load sequence: `core → enhancers → native-enhance → reactive → animation`.
 
 ### Seeing automatic dependency injection
 
-This is the most important feature for beginners to understand. You never need to list `core` or `enhancers` manually — just ask for what your code actually uses:
+You never need to list `core` or `enhancers` manually — just ask for what your code actually uses:
 
 ```js
 // You write:
@@ -187,7 +183,7 @@ await load('form');
 //   1. core      ← added automatically (form depends on it)
 //   2. form      ← what you asked for
 
-// Result: Forms and Elements and Collections are all available
+// Result: Forms, Elements, and Collections are all available
 ```
 
 ```js
@@ -195,8 +191,8 @@ await load('form');
 await load('native-enhance');
 
 // Loader resolves and loads in this order:
-//   1. core          ← added automatically
-//   2. enhancers     ← added automatically (native-enhance depends on it)
+//   1. core           ← added automatically
+//   2. enhancers      ← added automatically (native-enhance depends on it)
 //   3. native-enhance ← what you asked for
 ```
 
@@ -204,10 +200,11 @@ await load('native-enhance');
 // You write:
 await load('reactive', 'form', 'conditions');
 
-```html
-<!-- _layout.html / base.html / header.html -->
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.loader.esm.min.js"></script>
-```
+// Loader resolves and loads in this order:
+//   1. core        ← added once (shared dep of all three)
+//   2. reactive
+//   3. form
+//   4. conditions
 
 // Note: core appears only once even though all three depend on it
 ```
@@ -233,43 +230,11 @@ Here is the same setup written both ways. Judge for yourself which you would rat
 
 Problems with this approach:
 - Five tags to write and keep in sync.
-- If you add `conditions` later, you have to know it goes after `core` but order relative to `reactive` is flexible — easy to get wrong.
+- If you add `conditions` later, you have to know it goes after `core` — easy to get wrong.
 - The full CDN URL appears on every line. Change the version number and you change five lines.
 - No feedback if something is missing or misordered — it just silently fails.
 
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>My App</title>
-</head>
-<body>
-  <p>Count: <strong id="count">0</strong></p>
-  <button id="btn-inc">+1</button>
-  <button id="btn-dec">-1</button>
-  <button id="btn-reset">Reset</button>
-
-  <!-- 1. Load the classic loader — sets DOMHelpersLoader on window -->
-  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.loader.min.js"></script>
-
-  <!-- 2. Load your module files — safe to load before the library,
-       they only define functions, they do not call them yet -->
-  <script src="./store.js"></script>
-  <script src="./ui.js"></script>
-
-  <!-- 3. Load library modules then start the app -->
-  <script>
-    DOMHelpersLoader.load('reactive').then(function() {
-      const store = createStore();
-      initUI(store);
-    });
-  </script>
-</body>
-</html>
-```
-
-### store.js
+### Module Loader approach
 
 ```html
 <script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.loader.esm.min.js"></script>
@@ -302,78 +267,222 @@ There are two loader files — one for modern ES module projects and one for cla
 | `dom-helpers.loader.esm.min.js` | `<script type="module">` | `await load()` |
 | `dom-helpers.loader.min.js` | `<script src="...">` (classic) | `.then(function() {})` |
 
-### ESM loader — Pattern A: inline import
+---
+
+### Pattern A — ESM inline import
 
 The loader is imported directly inside your own script file. The `load` function is a named export.
 
+**index.html**
 ```html
-<!-- index.html — single script tag pointing to your app file -->
-<script type="module" src="./app.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My App</title>
+</head>
+<body>
+  <p>Count: <strong id="count">0</strong></p>
+  <button id="btn-inc">+1</button>
+  <button id="btn-dec">-1</button>
+  <button id="btn-reset">Reset</button>
+
+  <!-- Single entry point — app.js handles everything -->
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
 ```
 
+**app.js**
 ```js
-// app.js
-import { load } from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.loader.esm.min.js';
+import { load }        from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.loader.esm.min.js';
+import { createStore } from './store.js';
+import { initUI }      from './ui.js';
 
-await load('reactive', 'animation');
+// Load only what this page needs — core resolved automatically
+await load('reactive');
 
-// Library is ready — write your app code here
-const state = ReactiveUtils.state({ theme: 'light' });
+// Library is ready — start the app
+const store = createStore();
+initUI(store);
+```
+
+**store.js**
+```js
+export function createStore() {
+  return ReactiveUtils.store(
+    { count: 0 },
+    {
+      actions: {
+        increment(state) { state.count++; },
+        decrement(state) { state.count--; },
+        reset(state)     { state.count = 0; }
+      }
+    }
+  );
+}
+```
+
+**ui.js**
+```js
+export function initUI(store) {
+  ReactiveUtils.effect(() => {
+    document.getElementById('count').textContent = store.count;
+  });
+
+  document.getElementById('btn-inc').onclick   = () => store.increment();
+  document.getElementById('btn-dec').onclick   = () => store.decrement();
+  document.getElementById('btn-reset').onclick = () => store.reset();
+}
 ```
 
 Best for: projects where your app is split across multiple `.js` files and you have a clear entry point.
 
 ---
 
-### ESM loader — Pattern B: script tag in HTML
+### Pattern B — ESM script tag in HTML
 
 The loader is loaded as its own `<script type="module" src="...">` tag. It sets `window.DOMHelpersLoader` automatically, so your app script uses it without an import statement.
 
+**index.html**
 ```html
-<!-- index.html -->
-<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.loader.esm.min.js"></script>
-<script type="module" src="./app.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My App</title>
+</head>
+<body>
+  <p>Count: <strong id="count">0</strong></p>
+  <button id="btn-inc">+1</button>
+  <button id="btn-dec">-1</button>
+  <button id="btn-reset">Reset</button>
+
+  <!-- 1. Load the loader — sets DOMHelpersLoader on window -->
+  <script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.loader.esm.min.js"></script>
+
+  <!-- 2. App entry point — DOMHelpersLoader is already available -->
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
 ```
 
+**app.js**
 ```js
-// app.js — no import needed
-await DOMHelpersLoader.load('reactive', 'animation');
+// No import needed — DOMHelpersLoader is already on window
+import { createStore } from './store.js';
+import { initUI }      from './ui.js';
 
-const state = ReactiveUtils.state({ theme: 'light' });
+await DOMHelpersLoader.load('reactive');
+
+const store = createStore();
+initUI(store);
 ```
+
+`store.js` and `ui.js` are identical to Pattern A.
+
+> Both script tags use `type="module"`, which means the browser runs them in the order they appear. The loader tag runs first and sets `DOMHelpersLoader` on `window`. Your `app.js` runs second and finds it already there. This ordering is guaranteed by the HTML spec.
 
 Best for: multi-page sites where the loader tag lives in a shared HTML template. Every page includes the same loader tag and the browser caches it — after the first page load it costs nothing.
 
-> Both module scripts use `type="module"`, which means the browser runs them in the order they appear. The loader tag runs first and sets `DOMHelpersLoader` on `window`. Your `app.js` runs second and finds it already there. This ordering is guaranteed by the HTML spec.
+```html
+<!-- _layout.html — included on every page -->
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.loader.esm.min.js"></script>
+```
 
 ---
 
-### Classic script loader
+### Pattern C — Classic script (no `type="module"`)
 
-No `type="module"` anywhere. Everything runs in classic global scope.
+No `type="module"` anywhere. Everything runs in classic global scope. Use `.then()` instead of `await`.
 
+**index.html**
 ```html
-<!-- index.html -->
-<script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.loader.min.js"></script>
-<script src="./app.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My App</title>
+</head>
+<body>
+  <p>Count: <strong id="count">0</strong></p>
+  <button id="btn-inc">+1</button>
+  <button id="btn-dec">-1</button>
+  <button id="btn-reset">Reset</button>
+
+  <!-- 1. Load the classic loader — sets DOMHelpersLoader on window -->
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.loader.min.js"></script>
+
+  <!-- 2. Load your module files — safe to load before the library,
+       they only define functions, they do not call them yet -->
+  <script src="./store.js"></script>
+  <script src="./ui.js"></script>
+
+  <!-- 3. Load library modules then start the app -->
+  <script>
+    DOMHelpersLoader.load('reactive').then(function() {
+      var store = createStore();
+      initUI(store);
+    });
+  </script>
+</body>
+</html>
 ```
 
+**store.js**
 ```js
-// app.js — use .then() instead of await
-DOMHelpersLoader.load('reactive', 'animation').then(function() {
-
-  const state = ReactiveUtils.state({ theme: 'light' });
-
-});
+// Classic script — expose via window instead of export
+window.createStore = function() {
+  return ReactiveUtils.store(
+    { count: 0 },
+    {
+      actions: {
+        increment: function(state) { state.count++; },
+        decrement: function(state) { state.count--; },
+        reset:     function(state) { state.count = 0; }
+      }
+    }
+  );
+};
 ```
+
+**ui.js**
+```js
+// Classic script — expose via window instead of export
+window.initUI = function(store) {
+  ReactiveUtils.effect(function() {
+    document.getElementById('count').textContent = store.count;
+  });
+
+  document.getElementById('btn-inc').onclick   = function() { store.increment(); };
+  document.getElementById('btn-dec').onclick   = function() { store.decrement(); };
+  document.getElementById('btn-reset').onclick = function() { store.reset(); };
+};
+```
+
+> **Why is it safe to load `store.js` and `ui.js` before calling `load()`?**
+> Because `ReactiveUtils` is referenced inside function bodies — not at the top level of the file. The files only define functions. `ReactiveUtils` is only accessed when those functions are actually called, which happens inside `.then()` after the library has fully loaded.
 
 Best for: projects that need to support older browsers, existing codebases that do not use ES modules, or any situation where `type="module"` is not available.
 
 ---
 
+## Pattern Comparison
+
+| | Pattern A | Pattern B | Pattern C |
+|---|---|---|---|
+| Loader access | `import { load }` | `window.DOMHelpersLoader` | `window.DOMHelpersLoader` |
+| `type="module"` required | Yes | Yes | No |
+| Code shared via | `export` / `import` | `export` / `import` | `window` |
+| Async syntax | `await` | `await` | `.then()` |
+| Loader file | `loader.esm.min.js` | `loader.esm.min.js` | `loader.min.js` |
+| IE11 support | No | No | Yes |
+
+---
+
 ## Loading Modules for Different Pages
 
-In a multi-page website, each page typically needs different modules. With the Module Loader this is simple — each page's script requests only what it needs:
+In a multi-page website, each page typically needs different modules. Each page's script requests only what it needs:
 
 ```js
 // home/app.js — landing page: animated hero, reactive counter
@@ -395,7 +504,7 @@ await DOMHelpersLoader.load('reactive', 'conditions', 'storage');
 await DOMHelpersLoader.load('form', 'storage', 'native-enhance');
 ```
 
-Each page downloads only the modules it actually uses. The browser cache means any module shared between pages — like `core`, which nearly all pages use — is only downloaded once across the whole site visit.
+Each page downloads only the modules it actually uses. The browser cache means any module shared between pages — like `core` — is only downloaded once across the whole site visit.
 
 ---
 
@@ -407,7 +516,7 @@ Two modules behave differently depending on whether `reactive` is also loaded:
 
 **`form`** — works with core alone (standard form handling). Gains reactive form fields and automatic DOM updates when `reactive` is also loaded.
 
-The loader does **not** add `reactive` automatically for these — you decide whether you want the enhanced behaviour:
+The loader does **not** add `reactive` automatically for these — you decide:
 
 ```js
 // conditions — static mode only
@@ -426,8 +535,6 @@ await load('reactive', 'form');
 ```
 
 If you are unsure, load `reactive` alongside them. The overhead is small and you gain the full feature set.
-
-**Classic loader fallback:** if `document.currentScript` is `null` (which can happen when the classic loader is injected dynamically rather than included in the original HTML), the loader falls back to the pinned jsDelivr CDN URL for the current version (`dom-helpers-js@2.10.0`). In practice this only affects dynamically injected script scenarios — the normal `<script src="...">` usage always resolves `document.currentScript` correctly.
 
 ---
 
@@ -456,7 +563,7 @@ createElement('div', { className: 'container' })
 
 ## Structuring Your App Files
 
-A common question when using the loader: how do I split my code across multiple files when `ReactiveUtils`, `Elements` etc. are not available until `load()` resolves?
+A common question: how do I split my code across multiple files when `ReactiveUtils`, `Elements` etc. are not available until `load()` resolves?
 
 The answer is simple: **use globals inside function bodies, not at the top level of your files.**
 
@@ -473,27 +580,18 @@ export function createStore() {
     }
   });
 }
-```
 
-```js
-// ui.js
-export function initUI(store) {
-  ReactiveUtils.effect(() => {
-    Elements.countDisplay.textContent = store.count;
-  });
-
-  Elements.btnInc.on('click', () => store.increment());
-  Elements.btnDec.on('click', () => store.decrement());
-}
+// ✗ Wrong — ReactiveUtils does not exist yet when this file is first parsed
+const store = ReactiveUtils.store({ count: 0 }, { ... }); // ReferenceError
 ```
 
 ```js
 // app.js — the only file that calls load()
-import { load }        from '...dom-helpers.loader.esm.min.js';
+import { load }        from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.loader.esm.min.js';
 import { createStore } from './store.js';
 import { initUI }      from './ui.js';
 
-// Imports above are safe — they only define functions, not call them
+// Imports above are safe — they only define functions, they do not call them
 await load('reactive');
 
 // load() has resolved — ReactiveUtils is on window — now call the functions
@@ -501,7 +599,7 @@ const store = createStore();
 initUI(store);
 ```
 
-Your `store.js` and `ui.js` files do not need to know anything about the loader. They just use the globals. `app.js` is the only file responsible for loading the library — this is a clean separation of concerns.
+Your `store.js` and `ui.js` files do not need to know anything about the loader. They just use the globals. `app.js` is the only file responsible for loading the library.
 
 ---
 
@@ -510,14 +608,14 @@ Your `store.js` and `ui.js` files do not need to know anything about the loader.
 ### `load(...modules)`
 
 ```js
-// ESM — named import
+// Pattern A — named import
 import { load } from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.loader.esm.min.js';
 await load('reactive');
 
-// ESM — via window (Pattern B)
+// Pattern B — via window
 await DOMHelpersLoader.load('reactive');
 
-// Classic script
+// Pattern C — classic script
 DOMHelpersLoader.load('reactive').then(function() { ... });
 ```
 
@@ -615,8 +713,7 @@ No. Any module that depends on `core` adds it automatically. The only time you w
 
 ```js
 await load('core');
-// Elements, Collections, Selector, createElement available
-// Nothing else
+// Elements, Collections, Selector, createElement available — nothing else
 ```
 
 **Can I still use manual `<script>` tags alongside the loader?**
@@ -633,23 +730,26 @@ Yes. The loader checks `window` before every load. If a module is already there 
 </script>
 ```
 
-**What if I call `load()` on multiple pages with overlapping modules?**
+**What if I call `load()` twice with overlapping modules?**
 
-Each page loads independently. Across pages, the browser's HTTP cache means any module the user has already fetched (on a previous page) loads from the cache instantly with no network cost.
+Safe. Already-loaded modules are always skipped:
+
+```js
+await load('reactive', 'animation');
+await load('animation', 'form'); // animation skipped — only form is loaded
+```
 
 **Can I use the loader without a CDN?**
 
-Yes. Copy the loader file and the module files you need into your project's `dist/` folder. The loader auto-detects its base URL from its own path, so it will look for module files in the same directory — no configuration needed.
+Yes. Copy the loader file and the module files you need into your project's `dist/` folder. The loader auto-detects its base URL from its own file path, so it will look for module files in the same directory — no configuration needed.
 
-**Can I use the loader without a local server?**
+**Can I use the ESM loader without a local server?**
 
-The ESM loader (Patterns A and B) requires a server because browsers block ES module imports from `file://` URLs. Use a local dev server such as `npx serve` or the VS Code Live Server extension.
-
-The classic script loader (Pattern C) works without a server because it injects `<script>` tags rather than using `import()`.
+No. Browsers block ES module imports from `file://` URLs. Use a local dev server such as `npx serve` or the VS Code Live Server extension. The classic script loader (Pattern C) works without a server.
 
 **Does the loader work with `import { X } from '...'` named imports?**
 
-The loader and named imports serve different purposes. The loader puts everything on `window` — you do not use `import { Elements } from '...'` with it. Named imports are a separate pattern where you import directly from module CDN URLs and get the tools as local variables. See the [loading approaches guide](./loading-approaches.md) for a full comparison.
+The loader and named imports serve different purposes. The loader puts everything on `window` — you do not use `import { Elements } from '...'` alongside it. Named imports are a separate pattern where you import directly from module CDN URLs and get the tools as local variables. See the [loading approaches guide](./loading-approaches.md) for a full comparison.
 
 ---
 
