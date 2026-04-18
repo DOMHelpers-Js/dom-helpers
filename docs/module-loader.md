@@ -110,7 +110,10 @@ This is the entire mechanism. There is nothing magic about it — just a depende
 
 **Core-dependent modules** — `reactive`, `form`, `animation`, `conditions`, `async`, and `enhancers` all need `core`. You do not need to list `core` yourself — it is added automatically.
 
-**Two-level dependency** — `native-enhance` needs both `core` and `enhancers`. Again, you do not need to list either — just request `native-enhance` and both are loaded first.
+```js
+import { load }        from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.loader.esm.min.js';
+import { createStore } from './store.js';
+import { initUI }      from './ui.js';
 
 **Optional enhancements** — `conditions` and `form` work with just `core`, but gain extra reactive features when `reactive` is also loaded. The loader does **not** add `reactive` automatically in this case — you must request it explicitly if you want those features.
 
@@ -169,7 +172,8 @@ await load('reactive', 'animation', 'native-enhance');
 await load('native-enhance', 'reactive', 'animation');
 ```
 
-All three calls above produce the same load sequence: `core → enhancers → native-enhance → reactive → animation`.
+  <!-- 1. Load the loader — sets DOMHelpersLoader on window -->
+  <script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.loader.esm.min.js"></script>
 
 ### Seeing automatic dependency injection
 
@@ -200,11 +204,10 @@ await load('native-enhance');
 // You write:
 await load('reactive', 'form', 'conditions');
 
-// Loader resolves and loads in this order:
-//   1. core        ← added once (shared dep of all three)
-//   2. reactive
-//   3. form
-//   4. conditions
+```html
+<!-- _layout.html / base.html / header.html -->
+<script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.loader.esm.min.js"></script>
+```
 
 // Note: core appears only once even though all three depend on it
 ```
@@ -234,7 +237,39 @@ Problems with this approach:
 - The full CDN URL appears on every line. Change the version number and you change five lines.
 - No feedback if something is missing or misordered — it just silently fails.
 
-### Module Loader approach
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My App</title>
+</head>
+<body>
+  <p>Count: <strong id="count">0</strong></p>
+  <button id="btn-inc">+1</button>
+  <button id="btn-dec">-1</button>
+  <button id="btn-reset">Reset</button>
+
+  <!-- 1. Load the classic loader — sets DOMHelpersLoader on window -->
+  <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.loader.min.js"></script>
+
+  <!-- 2. Load your module files — safe to load before the library,
+       they only define functions, they do not call them yet -->
+  <script src="./store.js"></script>
+  <script src="./ui.js"></script>
+
+  <!-- 3. Load library modules then start the app -->
+  <script>
+    DOMHelpersLoader.load('reactive').then(function() {
+      var store = createStore();
+      initUI(store);
+    });
+  </script>
+</body>
+</html>
+```
+
+### store.js
 
 ```html
 <script type="module" src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.9.2/dist/dom-helpers.loader.esm.min.js"></script>
@@ -391,6 +426,8 @@ await load('reactive', 'form');
 ```
 
 If you are unsure, load `reactive` alongside them. The overhead is small and you gain the full feature set.
+
+**Classic loader fallback:** if `document.currentScript` is `null` (which can happen when the classic loader is injected dynamically rather than included in the original HTML), the loader falls back to the pinned jsDelivr CDN URL for the current version (`dom-helpers-js@2.10.0`). In practice this only affects dynamically injected script scenarios — the normal `<script src="...">` usage always resolves `document.currentScript` correctly.
 
 ---
 
