@@ -1,3 +1,7 @@
+[![Sponsor](https://img.shields.io/badge/Sponsor-💖-pink)](https://github.com/sponsors/giovanni1707)
+
+[![Sponsor](https://img.shields.io/badge/Sponsor-PayPal-blue?logo=paypal)](https://paypal.me/GiovanniSylvain)
+
 # Working with Selector
 
 The Selector helper lets you query DOM elements using CSS selectors — single elements with `Selector.query()` and collections with `Selector.queryAll()`. It adds caching with smart MutationObserver invalidation, a scoped query API, enhanced property-name syntax, async waiting, and bulk update across multiple selectors.

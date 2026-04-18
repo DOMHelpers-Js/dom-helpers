@@ -1,3 +1,7 @@
+[![Sponsor](https://img.shields.io/badge/Sponsor-💖-pink)](https://github.com/sponsors/giovanni1707)
+
+[![Sponsor](https://img.shields.io/badge/Sponsor-PayPal-blue?logo=paypal)](https://paypal.me/GiovanniSylvain)
+
 # Accessing Elements by ID
 
 DOM Helpers provides five ways to get a DOM element by its ID. All five return the same enhanced element — the difference is in syntax preference, safety guarantees, and the extra utilities each one bundles.

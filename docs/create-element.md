@@ -1,3 +1,7 @@
+[![Sponsor](https://img.shields.io/badge/Sponsor-💖-pink)](https://github.com/sponsors/giovanni1707)
+
+[![Sponsor](https://img.shields.io/badge/Sponsor-PayPal-blue?logo=paypal)](https://paypal.me/GiovanniSylvain)
+
 # createElement — Building and Configuring DOM Elements
 
 `createElement` is an enhanced version of the browser's native `document.createElement`. It does everything the native function does, and adds two things on top: a configuration object you can pass at creation time to set up the element in one call, and a `.update()` method on every element it returns so you can change anything about it later without re-querying the DOM.

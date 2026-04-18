@@ -1,3 +1,7 @@
+[![Sponsor](https://img.shields.io/badge/Sponsor-💖-pink)](https://github.com/sponsors/giovanni1707)
+
+[![Sponsor](https://img.shields.io/badge/Sponsor-PayPal-blue?logo=paypal)](https://paypal.me/GiovanniSylvain)
+
 # Working with Collections
 
 Collections let you access and manipulate groups of DOM elements — by class name, tag name, name attribute, or CSS selector. Every collection the library returns comes with array-style iteration, bulk DOM manipulation, index-based updates, and array value distribution built in.

@@ -1,3 +1,7 @@
+[![Sponsor](https://img.shields.io/badge/Sponsor-💖-pink)](https://github.com/sponsors/giovanni1707)
+
+[![Sponsor](https://img.shields.io/badge/Sponsor-PayPal-blue?logo=paypal)](https://paypal.me/GiovanniSylvain)
+
 # Native Enhance — Enhanced Native DOM Methods
 
 The native-enhance module patches six of the browser's built-in DOM methods so they return enhanced objects instead of plain elements and NodeLists. Existing code that already calls `document.getElementById`, `document.querySelector`, and so on gains `.update()` and all collection capabilities without any changes.

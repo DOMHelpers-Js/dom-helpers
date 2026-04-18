@@ -1,3 +1,7 @@
+[![Sponsor](https://img.shields.io/badge/Sponsor-💖-pink)](https://github.com/sponsors/giovanni1707)
+
+[![Sponsor](https://img.shields.io/badge/Sponsor-PayPal-blue?logo=paypal)](https://paypal.me/GiovanniSylvain)
+
 # The Module Loader — The Recommended Way to Load DOM Helpers
 
 If you are new to DOM Helpers JS, start here. The Module Loader is a small built-in utility that takes care of loading the library's modules for you — in the right order, without duplicates, and without you having to think about which module depends on which. It is the recommended approach for the vast majority of projects.
@@ -548,7 +552,7 @@ await load('reactive', 'form', 'animation', 'storage');
 // All of these are now available:
 ReactiveUtils.state({ ... })
 ReactiveUtils.effect(() => { ... })
-Forms.get('#signup')
+Forms.get('signup')
 Animation.fade(element, 'in')
 StorageUtils.set('key', value)
 

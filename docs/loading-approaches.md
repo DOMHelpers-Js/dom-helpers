@@ -1,3 +1,7 @@
+[![Sponsor](https://img.shields.io/badge/Sponsor-💖-pink)](https://github.com/sponsors/giovanni1707)
+
+[![Sponsor](https://img.shields.io/badge/Sponsor-PayPal-blue?logo=paypal)](https://paypal.me/GiovanniSylvain)
+
 # How to Load DOM Helpers JS — The Four Approaches
 
 DOM Helpers JS gives you four ways to load the library into a page: **Classic**, **Deferred**, **Named Imports**, and the **Module Loader**. Each one affects when the library is available, how it interacts with the rest of your scripts, and how much code the browser downloads.
@@ -36,7 +40,7 @@ The most common mistake. The script blocks the page from rendering, and your DOM
     // Elements, Collections etc. are available — that part is fine.
     // But document.getElementById('btn') returns null here
     // because the <body> has not been parsed yet.
-    const btn = Elements.get('#btn'); // null — too early
+    const btn = Elements.get('btn'); // null — too early
   </script>
 </body>
 </html>
@@ -56,7 +60,7 @@ If you put the library in `<head>` and need to touch the DOM, wait for it to be 
     // before doing anything with it.
     document.addEventListener('DOMContentLoaded', function () {
       const btn = Elements.get('#btn');
-      btn.on('click', function () {
+      btn.addEventListener('click', function () {
         console.log('clicked');
       });
     });
@@ -88,8 +92,8 @@ The classic fix for both problems. The HTML is already parsed before the browser
   <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.full-spa.min.js"></script>
   <script>
     // No DOMContentLoaded needed — the DOM already exists.
-    const btn = Elements.get('#btn');
-    btn.on('click', function () {
+    const btn = Elements.get('btn');
+    btn.addEventListener('click', function () {
       console.log('clicked');
     });
   </script>
@@ -122,8 +126,8 @@ This is the standard Classic setup. Simple and reliable.
 ```js
 // Runs after the DOM is ready and after the library script has executed.
 // No DOMContentLoaded needed.
-const btn = Elements.get('#btn');
-btn.on('click', function () {
+const btn = Elements.get('btn');
+btn.addEventListener('click', function () {
   console.log('clicked');
 });
 ```
@@ -206,8 +210,8 @@ Adding `type="module"` to a script tag makes it deferred by default. The browser
   <script type="module">
     // No DOMContentLoaded needed.
     // The library has run and the DOM is ready.
-    const btn = Elements.get('#btn');
-    btn.on('click', function () {
+    const btn = Elements.get('btn');
+    btn.addEventListener('click', function () {
       console.log('clicked');
     });
   </script>
@@ -232,7 +236,7 @@ Then in any `<script type="module">` block on the page:
 ```js
 // Elements, Collections, Selector etc. are already on window.
 // No import needed — just use them.
-const form = Forms.get('#contact-form');
+const form = Forms.get('contact-form');
 ```
 
 ### When to use Deferred
@@ -272,7 +276,7 @@ When you need most of the library, import from the full bundle file. You only wr
     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.full-spa.esm.min.js';
 
   // Only Elements, Forms, and Router are bound — but the full file was downloaded.
-  const form = Forms.get('#signup');
+  const form = Forms.get('signup');
   form.onSubmit(function (data) {
     console.log(data);
   });
@@ -292,7 +296,7 @@ When you want the browser to download only what you need, import from the indivi
   import { Forms }
     from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.form.esm.min.js';
 
-  const form = Forms.get('#signup');
+  const form = Forms.get('signup');
   form.onSubmit(function (data) {
     console.log(data);
   });
@@ -325,7 +329,7 @@ import './pages/contact.js';
 import { Forms }
   from 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.full-spa.esm.min.js';
 
-const form = Forms.get('#contact-form');
+const form = Forms.get('contact-form');
 form.onSubmit(function (data) {
   console.log(data);
 });
@@ -347,7 +351,7 @@ Some modules extend existing tools without adding new named exports — they jus
   import 'https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.enhancers.esm.min.js';
 
   // Elements now has the extra methods that Enhancers adds.
-  Elements.get('#list').addClasses('active', 'visible');
+  Elements.get('list').addClasses('active', 'visible');
 </script>
 ```
 
@@ -421,7 +425,7 @@ await load('reactive', 'animation');
 <script src="https://cdn.jsdelivr.net/npm/dom-helpers-js@2.10.0/dist/dom-helpers.loader.min.js"></script>
 <script>
   DOMHelpersLoader.load('reactive', 'animation').then(function() {
-    var state = ReactiveUtils.state({ count: 0 });
+    const state = ReactiveUtils.state({ count: 0 });
   });
 </script>
 ```
@@ -481,8 +485,8 @@ Then write your own code in a `<script type="module">` block anywhere in the pag
 ```html
 <script type="module">
   // The DOM is ready. The library is loaded. Start here.
-  const btn = Elements.get('#btn');
-  btn.on('click', function () {
+  const btn = Elements.get('btn');
+  btn.addEventListener('click', function () {
     console.log('clicked');
   });
 </script>
