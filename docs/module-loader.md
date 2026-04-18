@@ -261,7 +261,7 @@ Problems with this approach:
   <!-- 3. Load library modules then start the app -->
   <script>
     DOMHelpersLoader.load('reactive').then(function() {
-      var store = createStore();
+      const store = createStore();
       initUI(store);
     });
   </script>
@@ -362,7 +362,7 @@ No `type="module"` anywhere. Everything runs in classic global scope.
 // app.js — use .then() instead of await
 DOMHelpersLoader.load('reactive', 'animation').then(function() {
 
-  var state = ReactiveUtils.state({ theme: 'light' });
+  const state = ReactiveUtils.state({ theme: 'light' });
 
 });
 ```
