@@ -1,0 +1,153 @@
+{
+  "name": "dom-helpers-js",
+  "version": "2.10.0",
+  "type": "module",
+  "description": "High-performance vanilla JavaScript DOM utilities with intelligent caching, reactive state management, and conditional rendering",
+  "main": "dist/dom-helpers.full-spa.cjs.js",
+  "module": "dist/dom-helpers.full-spa.esm.js",
+  "browser": "dist/dom-helpers.full-spa.umd.js",
+  "unpkg": "dist/dom-helpers.full-spa.min.js",
+  "jsdelivr": "dist/dom-helpers.full-spa.min.js",
+  "sideEffects": true,
+  "exports": {
+    ".": {
+      "import": "./dist/dom-helpers.full-spa.esm.js",
+      "require": "./dist/dom-helpers.full-spa.cjs.js",
+      "browser": "./dist/dom-helpers.full-spa.umd.js",
+      "default": "./dist/dom-helpers.full-spa.cjs.js"
+    },
+    "./storage": {
+      "import": "./dist/dom-helpers.storage.esm.js",
+      "require": "./dist/dom-helpers.storage.cjs.js",
+      "browser": "./dist/dom-helpers.storage.umd.js",
+      "default": "./dist/dom-helpers.storage.cjs.js"
+    },
+    "./core": {
+      "import": "./dist/dom-helpers.core.esm.js",
+      "require": "./dist/dom-helpers.core.cjs.js",
+      "browser": "./dist/dom-helpers.core.umd.js",
+      "default": "./dist/dom-helpers.core.cjs.js"
+    },
+    "./reactive": {
+      "import": "./dist/dom-helpers.reactive.esm.js",
+      "require": "./dist/dom-helpers.reactive.cjs.js",
+      "browser": "./dist/dom-helpers.reactive.umd.js",
+      "default": "./dist/dom-helpers.reactive.cjs.js"
+    },
+    "./conditions": {
+      "import": "./dist/dom-helpers.conditions.esm.js",
+      "require": "./dist/dom-helpers.conditions.cjs.js",
+      "browser": "./dist/dom-helpers.conditions.umd.js",
+      "default": "./dist/dom-helpers.conditions.cjs.js"
+    },
+    "./enhancers": {
+      "import": "./dist/dom-helpers.enhancers.esm.js",
+      "require": "./dist/dom-helpers.enhancers.cjs.js",
+      "browser": "./dist/dom-helpers.enhancers.umd.js",
+      "default": "./dist/dom-helpers.enhancers.cjs.js"
+    },
+    "./native-enhance": {
+      "import": "./dist/dom-helpers.native-enhance.esm.js",
+      "require": "./dist/dom-helpers.native-enhance.cjs.js",
+      "browser": "./dist/dom-helpers.native-enhance.umd.js",
+      "default": "./dist/dom-helpers.native-enhance.cjs.js"
+    },
+    "./form": {
+      "import": "./dist/dom-helpers.form.esm.js",
+      "require": "./dist/dom-helpers.form.cjs.js",
+      "browser": "./dist/dom-helpers.form.umd.js",
+      "default": "./dist/dom-helpers.form.cjs.js"
+    },
+    "./animation": {
+      "import": "./dist/dom-helpers.animation.esm.js",
+      "require": "./dist/dom-helpers.animation.cjs.js",
+      "browser": "./dist/dom-helpers.animation.umd.js",
+      "default": "./dist/dom-helpers.animation.cjs.js"
+    },
+    "./async": {
+      "import": "./dist/dom-helpers.async.esm.js",
+      "require": "./dist/dom-helpers.async.cjs.js",
+      "browser": "./dist/dom-helpers.async.umd.js",
+      "default": "./dist/dom-helpers.async.cjs.js"
+    },
+    "./spa": {
+      "import": "./dist/dom-helpers.spa.esm.js",
+      "require": "./dist/dom-helpers.spa.cjs.js",
+      "browser": "./dist/dom-helpers.spa.umd.js",
+      "default": "./dist/dom-helpers.spa.cjs.js"
+    },
+    "./full-spa": {
+      "import": "./dist/dom-helpers.full-spa.esm.js",
+      "require": "./dist/dom-helpers.full-spa.cjs.js",
+      "browser": "./dist/dom-helpers.full-spa.umd.js",
+      "default": "./dist/dom-helpers.full-spa.cjs.js"
+    },
+    "./loader": {
+      "import": "./dist/dom-helpers.loader.esm.js",
+      "browser": "./dist/dom-helpers.loader.esm.min.js",
+      "default": "./dist/dom-helpers.loader.esm.min.js"
+    },
+    "./loader/classic": {
+      "browser": "./dist/dom-helpers.loader.min.js",
+      "default": "./dist/dom-helpers.loader.min.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "build:dev": "rollup -c --environment BUILD:development",
+    "build:prod": "rollup -c --environment BUILD:production",
+    "watch": "rollup -c -w",
+    "prepublishOnly": "npm run build:prod",
+    "test": "echo \"No tests specified yet\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DOMHelpers-Js/dom-helpers.git"
+  },
+  "keywords": [
+    "dom",
+    "dom-helpers",
+    "dom-manipulation",
+    "vanilla-js",
+    "javascript",
+    "reactive",
+    "reactive-state",
+    "ui",
+    "browser",
+    "frontend",
+    "elements",
+    "collections",
+    "selector",
+    "query",
+    "performance",
+    "caching",
+    "lightweight",
+    "storage",
+    "localstorage",
+    "sessionstorage",
+    "auto-save",
+    "spa",
+    "router",
+    "single-page-application",
+    "client-side-routing",
+    "hash-routing",
+    "history-api"
+  ],
+  "author": "DOMHelpers-Js",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DOMHelpers-Js/dom-helpers/issues"
+  },
+  "homepage": "https://github.com/DOMHelpers-Js/dom-helpers#readme",
+  "devDependencies": {
+    "@rollup/plugin-terser": "^0.4.4",
+    "rollup": "^4.57.1",
+    "rollup-plugin-filesize": "^10.0.0"
+  }
+}
